@@ -1,0 +1,5 @@
+{
+  "name": "HackSpain X-Ray analysis",
+  "user": "ubuntu",
+  "install": "bash .cursor/install.sh"
+}
