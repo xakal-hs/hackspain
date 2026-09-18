@@ -1,0 +1,5 @@
+{
+  "name": "HackSpain X-Ray analysis",
+  "user": "ubuntu",
+  "install": "if [ -f requirements.txt ]; then pip install --break-system-packages -r requirements.txt; else pip install --break-system-packages duckdb==1.5.5 plotly==7.1.0 narwhals==2.26.0; fi && git lfs pull"
+}
