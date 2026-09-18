@@ -249,6 +249,41 @@ def company(company_id: str) -> dict:
     return {k: v for k, v in c.items() if not k.startswith("_")}
 
 
+@app.get("/api/company/{company_id}/treasury")
+def treasury(company_id: str) -> dict:
+    c = DB.get(company_id)
+    if c is None:
+        raise HTTPException(404, f"Empresa {company_id} no encontrada")
+    rng = random.Random(company_id)
+    erp = c["company"]["has_erp"]
+    lim = rng.choice([0.0, 0.0, 2.0e5, 5.0e5])
+    months = []
+    for h in c["history"]:
+        d = h["drivers"]
+        drawn = round(lim * rng.uniform(0, 0.8), 2) if lim else None
+        avail = round(lim - drawn, 2) if lim else None
+        months.append({
+            "month": h["month"], "inflow": d["inflow"], "outflow": d["outflow"], "net": round(d["inflow"] - d["outflow"], 2),
+            "oper_in": round(d["inflow"] * 0.85, 2), "payroll": d["payroll"], "tax": round(d["outflow"] * 0.1, 2),
+            "debt_service": d["debt_service"], "cash_end": d["cash_end"], "lc_drawn": drawn, "lc_limit": lim or None,
+            "credit_available": avail, "liquidity": round(d["cash_end"] + (avail or 0), 2),
+            "ar_issued": round(d["inflow"] * rng.uniform(0.8, 1.1), 2) if erp else None,
+            "ap_issued": round(d["outflow"] * rng.uniform(0.5, 0.8), 2) if erp else None,
+            "overdue_ar": d["overdue_ar"], "overdue_ap": d["overdue_ap"],
+            "overdue_90_ar": round(d["overdue_ar"] * 0.3, 2) if erp else None,
+            "overdue_90_ap": round(d["overdue_ap"] * 0.3, 2) if erp else None,
+        })
+    owed = round(rng.uniform(0, 8e5), 2)
+    items = [{"type": "loan", "label": "Préstamos", "owed": owed, "granted": round(owed * 1.6, 2), "n_products": 2, "contingent": False}]
+    if lim:
+        items.append({"type": "lineofcredit", "label": "Pólizas de crédito", "owed": months[-1]["lc_drawn"], "granted": lim,
+                      "n_products": 1, "contingent": False})
+    return {"company": {"company_id": company_id, "group_id": c["company"]["group_id"], "currency": c["company"]["currency"],
+                        "has_erp": erp, "last_month": months[-1]["month"]},
+            "months": months,
+            "debt": {"as_of": "2026-09-01", "items": items, "total_owed": round(sum(i["owed"] or 0 for i in items), 2)}}
+
+
 @app.get("/api/scenario/drivers")
 def scenario_drivers() -> dict:
     return {"drivers": DRIVERS, "months": {"min": 1, "max": 12, "default": 3}}

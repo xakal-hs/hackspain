@@ -55,6 +55,28 @@ El backend sirve la SPA en `/` (`app/static/index.html`) y la API JSON en `/api/
 }
 ```
 
+## GET /api/company/{company_id}/treasury
+Series mensuales para la pestaña «Tesorería». Importes en la moneda de la empresa; `null` = sin dato (p. ej. facturas sin ERP).
+```jsonc
+{
+  "company": {"company_id": "COMP_0004", "group_id": "GROUP_0058", "currency": "EUR", "has_erp": true, "last_month": "2026-08"},
+  "months": [{
+    "month": "2026-08",
+    "inflow": 2.9e5, "outflow": 4.1e5, "net": -1.2e5,               // flujo de caja sin internas ni intragrupo
+    "oper_in": 2.5e5, "payroll": 4.5e4, "tax": 1.8e4, "debt_service": 2.6e4,
+    "cash_end": 1.2e5,                                              // caja a fin de mes (reconstruida hacia atrás)
+    "lc_drawn": 0, "lc_limit": 1.0e6, "credit_available": 1.0e6,     // póliza de crédito (null si no tiene)
+    "liquidity": 1.1e6,                                             // cash_end + credit_available
+    "ar_issued": 3.5e5, "ap_issued": 1.3e5,                         // facturado a clientes / por proveedores en el mes
+    "overdue_ar": 1.2e4, "overdue_ap": 2.6e4, "overdue_90_ar": 0, "overdue_90_ap": 1.1e3
+  }],
+  "debt": {                                                         // solo la foto final; no se proyecta hacia atrás (D11)
+    "as_of": "2026-09-01", "total_owed": 9.6e5,                     // suma sin los avales (contingentes)
+    "items": [{"type": "loan", "label": "Préstamos", "owed": 5.8e5, "granted": 1.1e6, "n_products": 5, "contingent": false}]
+  }
+}
+```
+
 ## GET /api/scenario/drivers
 ```jsonc
 {"drivers": [{"key": "inflow", "label": "Cobros / entradas", "kind": "mult" | "add",

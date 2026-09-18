@@ -59,6 +59,14 @@ def company(cid: str):
         raise HTTPException(404, f"Empresa {cid} no encontrada")
 
 
+@app.get("/api/company/{cid}/treasury")
+def treasury(cid: str):
+    try:
+        return service().treasury(cid)
+    except KeyError:
+        raise HTTPException(404, f"Empresa {cid} no encontrada")
+
+
 @app.get("/api/scenario/drivers")
 def drivers():
     return {"drivers": SCENARIO_DRIVERS, "months": {"min": 1, "max": 12, "default": 3}}
