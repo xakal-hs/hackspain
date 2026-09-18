@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import html
 import json
+import sys
 from pathlib import Path
 
 import duckdb
@@ -17,6 +18,11 @@ from plotly.subplots import make_subplots
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
 OUTPUT = ROOT / "analysis" / "report.html"
+_SRC = ROOT / "src"
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
+
+from mapping.load import attach  # noqa: E402
 AS_OF = "2026-09-01"
 COLORS = {
     "navy": "#102a43",
@@ -196,21 +202,7 @@ def table(headers: list[str], rows: list[list], classes: str = "") -> str:
 
 
 def setup(connection: duckdb.DuckDBPyConnection) -> None:
-    for name in (
-        "groups",
-        "companies",
-        "banking_products",
-        "debt_products",
-        "debt_schedule_config",
-        "balances",
-        "invoices",
-        "transactions",
-    ):
-        path = (DATA / f"{name}.csv").as_posix().replace("'", "''")
-        connection.execute(
-            f"CREATE VIEW {name} AS SELECT * FROM read_csv_auto('{path}', sample_size=-1)"
-        )
-
+    attach(connection, DATA)
     connection.execute(
         """
         CREATE TEMP TABLE company_features AS
