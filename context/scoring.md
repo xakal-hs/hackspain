@@ -52,9 +52,30 @@ Para cada empresa y mes, el sistema debería poder devolver, además del score:
 
 Eso encaja con el enunciado: explicación obligatoria, producto encima del score, y la preferencia de Embat por un modelo sencillo que **sirva para decidir** frente a uno sofisticado que se queda en el número.
 
+## El dato que el banco no tiene
+
+Hay que **contactar mucho a bancos**. El valor diferencial de Embat es que ve el rastro de tesorería que el banco no tiene para valorar el crédito: movimientos día a día, facturas del ERP, conciliación, deuda conectada y cómo se mueve la caja **ahora**, no el balance del año pasado.
+
+El banco pregunta lo mismo (¿se le acaba el dinero? ¿paga? ¿cobra?). Embat puede responderlo antes y con otra resolución. El producto no compite con el rating anual: lo adelanta con datos que el prestamista no ve. Por eso el comprador obvio no es solo la pyme: es también el banco (o Embat vendiéndole esa señal al banco).
+
+## La métrica cambia con la oferta y con quien mira
+
+No hay un score único que sirva para todo. **La métrica tiene que cambiar según lo que se ofrece** (línea de circulante, póliza, marketplace, agente) y **según la persona que lo ve**, porque los objetivos son distintos. El rastro es el mismo; cambian pesos, umbrales y la decisión que se espera.
+
+| Quién lo ve | Qué ofrece o qué quiere | Qué tiene que mandar en el score |
+|---|---|---|
+| Banco / tesorería | Prestar o recortar exposición | Caja que se evapora, impago, líneas agotadas |
+| Aseguradora | Prima sobre impago de clientes | DSO, overdue persistente, concentración de contraparte |
+| CFO de la empresa | Tesorería y negociar con el banco | Runway, bache frente a caída, qué cobro o pago mover |
+| Embat | Retener y vender el producto | Anticipación, cobertura de datos, quién mejora de verdad |
+
+El leaderboard puede pedir un número. El producto no: hay que dejar claro **para quién es ese número** y **para qué oferta**. Un 72 para un banco no es el mismo 72 para un CFO.
+
 ## Cómo usarlo al construir
 
 - Pesar primero la **velocidad de quema de caja disponible**; después cobros, pagos y deuda.
 - Explicar cada movimiento con la analogía consumidor → empresa.
 - No imputar salud a partir de huecos de observabilidad.
 - Diseñar la demo para que alguien con 100.000 € que prestar sepa, en un vistazo, a quién se los daría y por qué no al otro.
+- Llevar el pitch a bancos: Embat tiene el rastro que ellos no ven.
+- No fijar una sola métrica. Condicionarla a la oferta y al rol de quien mira.

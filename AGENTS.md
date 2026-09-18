@@ -1,11 +1,15 @@
 ## Learned User Preferences
 - For data-analysis deliverables, produce the complete end-to-end result as a self-contained HTML artifact that opens directly without a server.
 - Interpret fields according to their domain meaning and include substantive exploratory coverage such as distributions, temporal patterns, correlations, and outliers.
+- Do not rewrite the raw CSVs in `data/`; correct known dirt through a mapping layer instead.
+- After completing a deliverable, open a pull request and merge it into `main`.
 
 ## Learned Workspace Facts
 - The repository remote is `https://github.com/xakal-hs/hackspain`, with `main` as the default branch.
 - Hackathon datasets and their data dictionary live under `data/`; `data/invoices.csv` and `data/transactions.csv` are tracked with Git LFS.
 - The reproducible exploratory report consists of `analysis/generate_report.py` and the generated self-contained artifact `analysis/report.html`.
+- Categorical and referential dirt is inventoried in `src/mapping/ISSUES.md` and corrected at read time by DuckDB views in `src/mapping/` (`attach` / `connect`); raw rows stay in `*_raw` views.
+- Score-model experiments, the research API, and the demo SPA live under `research/`.
 
 ## Project Context
 
@@ -32,6 +36,8 @@ Operational frame: [`context/scoring.md`](context/scoring.md) (readable page: [`
 - Translate jargon into consumer language in every explanation: available cash is “the money left in the account”; DSO is “how long they take to get paid”; DPO is “how long they take to pay”.
 - The deliverable is not only a number for ranking A against B. For each company and month, expose level, trajectory, signal criticality, a plain-language why, dip vs structural drop, and a lender action (lend / watch / do not lend).
 - Observability gaps (missing ERP, truncated month, uncategorized flows) are coverage, not health.
+- Embat’s wedge versus banks is treasury data banks do not have (live cash, ERP invoices, reconciliation, connected debt). Pitch banks hard; do not treat the annual rating as the competitor.
+- Do not ship one universal metric. The score, weights and decision change with the product being sold (working-capital line, policy, marketplace, agent) and with the viewer (bank, insurer, CFO, Embat), because their objectives differ.
 
 ## Delivery Requirements
 

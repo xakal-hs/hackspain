@@ -172,6 +172,8 @@ El enunciado pide un número y un producto. Cómo pesar las señales y qué devo
 - Una caja que se evapora en poco tiempo es mucho más grave que un DSO o DPO que se mueve un poco.
 - El scoring de un consumidor y el de una empresa preguntan lo mismo; cambia el dato, no la naturaleza del riesgo. La prueba: *si tuvieras 100.000 € para prestar, ¿qué te preocuparía?*
 - El output no puede acabarse en un número. Hace falta criticidad, explicación en lenguaje llano y una decisión (prestar / vigilar / no prestar).
+- El valor diferencial de Embat es el rastro de tesorería que el banco no tiene para valorar el crédito. Hay que contactar mucho a bancos.
+- La métrica cambia según la oferta (circulante, póliza, marketplace…) y según quién mira el score, porque los objetivos no son los mismos.
 
 ---
 
