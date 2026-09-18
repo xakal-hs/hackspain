@@ -16,6 +16,8 @@
 
 This repository contains the HackSpain 2026 **X Ray** challenge from Embat. The canonical challenge brief is available in `context/challenge.md` and `context/challenge.html`.
 
+**Objectives (source of truth).** The goals, the six questions and the delivery requirements live in [`context/challenge.html`](context/challenge.html) (readable version: [`context/challenge.md`](context/challenge.md)). `context/scoring.md` is the team's operational interpretation of that brief. A feature is only relevant if it serves one of those six questions; the challenge-aligned computation and its AUC evidence are in `analysis/challenge_features.py` → `analysis/features_challenge.html`.
+
 The system must:
 
 1. Produce a financial-health score for every company and month.

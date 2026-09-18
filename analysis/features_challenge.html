@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>X-Ray · Features calculadas y alineadas con el reto</title>
+<style>
+:root{--navy:#102a43;--blue:#1463ff;--cyan:#27b3c2;--green:#22a06b;--amber:#f59e0b;--red:#e5484d;--slate:#64748b;--line:#e2e8f0;--bg:#f6f8fc}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--navy);font:15px/1.55 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85em;background:#eef3fb;padding:1px 5px;border-radius:4px}
+a{color:var(--blue)}
+.hero{background:linear-gradient(135deg,#0b1f36,#102a43 55%,#12406b);color:#fff;padding:48px clamp(20px,5vw,72px) 40px}
+.eyebrow{letter-spacing:.18em;font-size:12px;font-weight:700;color:#7fb0ff}
+.hero h1{font-size:clamp(28px,4.2vw,46px);line-height:1.1;margin:14px 0;font-weight:800}
+.hero p{max-width:860px;color:#c7d6ea;font-size:16px}
+.hero-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.hero-meta span{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);padding:5px 12px;border-radius:999px;font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:26px}
+.kpi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:14px 16px}
+.kpi small{display:block;color:#9db4d0;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.kpi strong{font-size:25px;font-weight:800}
+.caps{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.cap{background:rgba(52,195,207,.14);border:1px solid rgba(52,195,207,.35);border-radius:10px;padding:8px 12px;display:flex;flex-direction:column}
+.cap small{color:#a9d7dc;font-size:11px}
+main{max-width:1180px;margin:0 auto;padding:8px clamp(16px,4vw,40px) 60px}
+.block{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px clamp(16px,3vw,32px);margin-top:26px;box-shadow:0 10px 30px -24px rgba(16,42,67,.5)}
+.block h2{margin:0 0 6px;font-size:22px}
+.lead{color:#486581;max-width:940px;margin:0 0 18px}
+.readgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+.readgrid h3{margin:0 0 6px;font-size:15px;color:#164f86}
+.readgrid p{margin:0;color:#486581;font-size:13.5px}
+.c-sig{color:var(--green)}.c-mild{color:var(--amber)}.c-rev{color:var(--red)}.c-flat{color:var(--slate)}
+.qgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.qcard{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fbfdff}
+.qcard header{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.qcard h3{margin:0;font-size:15px;flex:1;min-width:120px}
+.qid{font-weight:800;color:var(--blue);font-size:12px;letter-spacing:.08em}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.chip{background:#eef3fb;color:#234e70;border-radius:999px;font-size:11.5px;padding:3px 9px}
+.muted{color:#8a97a8;font-size:13px}
+.qcard footer{margin-top:6px;color:#6b7c93;font-size:12px}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:940px}
+thead th{background:#f1f5fb;text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#486581;border-bottom:1px solid var(--line)}
+td{padding:11px 12px;border-bottom:1px solid #eef2f7;vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#fafcff}
+td small{display:block;color:#6b7c93;font-size:11.5px;margin-top:2px}
+td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
+td.dir{white-space:nowrap;color:#486581}
+td.na{color:#9aa7b6;text-align:center}
+td.auc{text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+td.auc.sig{color:var(--green)}
+td.auc.mild{color:var(--amber)}
+td.auc.rev{color:var(--red)}
+td.auc.flat{color:var(--slate)}
+td.auc.sig,td.auc.mild,td.auc.rev,td.auc.flat{background:#fbfdff}
+.crit{display:inline-block;background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--c);border:1px solid color-mix(in srgb,var(--c) 40%,#fff);font-weight:700;font-size:12px;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.caveat{background:linear-gradient(180deg,#fff,#fff8ef);border-color:#f6dfbe}
+.caveat ul{margin:0;padding-left:20px;color:#486581}
+.caveat li{margin:8px 0}
+footer{padding:24px 6px 0;color:#6b7c93;font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="eyebrow">EMBAT X-RAY · FEATURES VS OBJETIVOS DEL RETO</div>
+  <h1>Las features, calculadas<br>y atadas a las seis preguntas.</h1>
+  <p>Cada señal sale del panel canónico de tesorería y se evalúa contra los eventos ancla (apagado, tensión de caja, declive y crecimiento). La columna <b>AUC</b> dice si la señal anticipa de verdad: valores ≥ 0,58 son señal útil; cerca de 0,50 no separan.</p>
+  <div class="hero-meta"><span>Generado el 2026-09-18 23:52</span><span>Horizonte 6 meses</span><span>Objetivos: context/challenge.html</span></div>
+  <div class="kpis"><div class="kpi"><small>Features calculadas</small><strong>17</strong></div><div class="kpi"><small>Cobertura media</small><strong>70 %</strong></div><div class="kpi"><small>Preguntas cubiertas</small><strong>6 / 6</strong></div><div class="kpi"><small>Empresas × mes</small><strong>21.538</strong></div></div>
+  <div class="caps"><span class="cap"><b>Leer el rastro</b><small>0 features</small></span><span class="cap"><b>Construir el score</b><small>17 features</small></span><span class="cap"><b>Explicarse</b><small>10 features</small></span><span class="cap"><b>Construir algo encima</b><small>3 features</small></span></div>
+</header>
+
+<main>
+  <section class="block">
+    <h2>Cómo leer esta tabla</h2>
+    <div class="readgrid">
+      <div><h3>Cobertura</h3><p>Porcentaje de filas empresa-mes con dato. Una cobertura baja es un hueco de observabilidad: no imputa salud, baja la confianza (D16, D17).</p></div>
+      <div><h3>AUC</h3><p>Capacidad de ordenar el evento a 6 meses, en la dirección sana esperada. <b class="c-sig">Verde</b> ≥ 0,58 (señal), <b class="c-mild">ámbar</b> ≥ 0,52 (débil), <b class="c-rev">rojo</b> ≤ 0,42 (apunta al revés), <b class="c-flat">gris</b> el resto (no separa).</p></div>
+      <div><h3>Criticidad</h3><p>Del marco de scoring: la caja que se evapora pesa más que un DSO que se mueve unos días, y la observabilidad no es salud.</p></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2>Las seis preguntas del reto</h2>
+    <p class="lead">Qué señales calculadas responden a cada pregunta y con qué criticidad dominante.</p>
+    <div class="qgrid"><article class="qcard">
+              <header><span class="qid">Q1</span><h3>¿Quién está sano?</h3><span class="crit" style="--c:#e5484d">Crítica</span></header>
+              <div class="chips"><span class="chip">El dinero que le queda expresado en meses de gasto</span><span class="chip">Si cobra más de lo que gasta</span></div>
+              <footer>2 features · cobertura media 100 %</footer>
+            </article><article class="qcard">
+              <header><span class="qid">Q2</span><h3>¿Quién está mejorando?</h3><span class="crit" style="--c:#f59e0b">Alta</span></header>
+              <div class="chips"><span class="chip">Si factura más que su media anual</span><span class="chip">Si factura a más o menos clientes</span></div>
+              <footer>2 features · cobertura media 69 %</footer>
+            </article><article class="qcard">
+              <header><span class="qid">Q3</span><h3>¿Quién empieza a torcerse?</h3><span class="crit" style="--c:#f59e0b">Alta</span></header>
+              <div class="chips"><span class="chip">Cuánto tiene dispuesto de su póliza</span><span class="chip">Cuánto de lo que ingresa va a pagar deuda</span><span class="chip">Cuánto de lo que ingresa se va en nóminas</span><span class="chip">Cuánto tarda en cobrar de clientes (DSO)</span><span class="chip">Lo que debe a proveedores y ya venció</span><span class="chip">Lo que le deben y llevan más de 90 días</span><span class="chip">Si se mueve menos dinero que antes</span><span class="chip">Si depende de pocos clientes</span><span class="chip">La facturación de clientes que ya no le compran</span></div>
+              <footer>9 features · cobertura media 56 %</footer>
+            </article><article class="qcard">
+              <header><span class="qid">Q4</span><h3>¿Es un bache o una caída?</h3><span class="crit" style="--c:#1463ff">Media</span></header>
+              <div class="chips"><span class="chip">Devoluciones de cobros sobre cobros</span><span class="chip">Cuánto se le hunde la caja en meses malos</span></div>
+              <footer>2 features · cobertura media 94 %</footer>
+            </article><article class="qcard">
+              <header><span class="qid">Q5</span><h3>¿Por qué ha cambiado?</h3><span class="crit" style="--c:#1463ff">Media</span></header>
+              <div class="chips"><span class="chip">Cuánto tarda en pagar a proveedores (DPO)</span><span class="chip">Si vive de que le transfieran dinero</span></div>
+              <footer>2 features · cobertura media 78 %</footer>
+            </article><article class="qcard">
+              <header><span class="qid">Q6</span><h3>¿Cuándo se vio venir?</h3></header>
+              <div class="chips"><span class="muted">Se responde con la previsión y el monitor, no con una feature de nivel.</span></div>
+              <footer>0 features · cobertura media 0 %</footer>
+            </article></div>
+  </section>
+
+  <section class="block">
+              <h2>Q1 · ¿Quién está sano?</h2>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Feature</th><th>Criticidad</th><th>Cobertura</th><th>p50 [p10–p90]</th>
+                <th>AUC adverso</th><th>AUC caja</th><th>AUC declive</th><th>AUC positivo</th><th>Dirección</th></tr></thead>
+                <tbody><tr><td><b>runway</b><small>El dinero que le queda expresado en meses de gasto</small></td><td><span class="crit" style="--c:#e5484d">Crítica</span></td><td class="num">99 %</td><td class="num">0,480<small>[0,002 – 2,43]</small></td><td class="auc mild">0.45</td><td class="auc sig">0.23</td><td class="auc flat">0.49</td><td class="auc flat">0.48</td><td class="dir">↑ sano</td></tr><tr><td><b>net_margin_6m</b><small>Si cobra más de lo que gasta</small></td><td><span class="crit" style="--c:#1463ff">Media</span></td><td class="num">100 %</td><td class="num">-0,004<small>[-0,729 – 0,267]</small></td><td class="auc flat">0.51</td><td class="auc flat">0.48</td><td class="auc flat">0.53</td><td class="auc sig">0.39</td><td class="dir">↑ sano</td></tr></tbody>
+              </table></div>
+            </section><section class="block">
+              <h2>Q2 · ¿Quién está mejorando?</h2>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Feature</th><th>Criticidad</th><th>Cobertura</th><th>p50 [p10–p90]</th>
+                <th>AUC adverso</th><th>AUC caja</th><th>AUC declive</th><th>AUC positivo</th><th>Dirección</th></tr></thead>
+                <tbody><tr><td><b>growth_vs_12m</b><small>Si factura más que su media anual</small></td><td><span class="crit" style="--c:#1463ff">Media</span></td><td class="num">88 %</td><td class="num">0,000<small>[-1,79 – 0,485]</small></td><td class="auc mild">0.46</td><td class="auc flat">0.52</td><td class="auc mild">0.43</td><td class="auc flat">0.55</td><td class="dir">↑ sano</td></tr><tr><td><b>cust_trend</b><small>Si factura a más o menos clientes</small></td><td><span class="crit" style="--c:#f59e0b">Alta</span></td><td class="num">51 %</td><td class="num">-0,294<small>[-1,16 – 0,000]</small></td><td class="auc mild">0.45</td><td class="auc mild">0.43</td><td class="auc mild">0.45</td><td class="auc flat">0.53</td><td class="dir">↑ sano</td></tr></tbody>
+              </table></div>
+            </section><section class="block">
+              <h2>Q3 · ¿Quién empieza a torcerse?</h2>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Feature</th><th>Criticidad</th><th>Cobertura</th><th>p50 [p10–p90]</th>
+                <th>AUC adverso</th><th>AUC caja</th><th>AUC declive</th><th>AUC positivo</th><th>Dirección</th></tr></thead>
+                <tbody><tr><td><b>lc_util</b><small>Cuánto tiene dispuesto de su póliza</small></td><td><span class="crit" style="--c:#f59e0b">Alta</span></td><td class="num">14 %</td><td class="num">0,153<small>[-0,000 – 1,00]</small></td><td class="auc flat">0.47</td><td class="auc sig">0.59</td><td class="auc flat">0.44</td><td class="auc flat">0.50</td><td class="dir">↓ sano</td></tr><tr><td><b>debt_burden</b><small>Cuánto de lo que ingresa va a pagar deuda</small></td><td><span class="crit" style="--c:#f59e0b">Alta</span></td><td class="num">100 %</td><td class="num">0,000<small>[0,000 – 0,125]</small></td><td class="auc flat">0.49</td><td class="auc flat">0.50</td><td class="auc flat">0.49</td><td class="auc flat">0.46</td><td class="dir">↓ sano</td></tr><tr><td><b>payroll_burden</b><small>Cuánto de lo que ingresa se va en nóminas</small></td><td><span class="crit" style="--c:#f59e0b">Alta</span></td><td class="num">57 %</td><td class="num">0,105<small>[0,005 – 0,735]</small></td><td class="auc flat">0.47</td><td class="auc mild">0.54</td><td class="auc flat">0.45</td><td class="auc mild">0.55</td><td class="dir">↓ sano</td></tr><tr><td><b>ar_late_share</b><small>Cuánto tarda en cobrar de clientes (DSO)</small></td><td><span class="crit" style="--c:#1463ff">Media</span></td><td class="num">47 %</td><td class="num">0,418<small>[0,000 – 1,00]</small></td><td class="auc mild">0.55</td><td class="auc mild">0.55</td><td class="auc mild">0.54</td><td class="auc flat">0.48</td><td class="dir">↓ sano</td></tr><tr><td><b>ap_overdue_ratio</b><small>Lo que debe a proveedores y ya venció</small></td><td><span class="crit" style="--c:#1463ff">Media</span></td><td class="num">58 %</td><td class="num">0,283<small>[0,000 – 7,55]</small></td><td class="auc mild">0.52</td><td class="auc mild">0.56</td><td class="auc flat">0.52</td><td class="auc flat">0.50</td><td class="dir">↓ sano</td></tr><tr><td><b>ar_overdue_90_ratio</b><small>Lo que le deben y llevan más de 90 días</small></td><td><span class="crit" style="--c:#f59e0b">Alta</span></td><td class="num">57 %</td><td class="num">0,015<small>[0,000 – 5,63]</small></td><td class="auc flat">0.49</td><td class="auc flat">0.50</td><td class="auc flat">0.50</td><td class="auc flat">0.47</td><td class="dir">↓ sano</td></tr><tr><td><b>activity_trend</b><small>Si se mueve menos dinero que antes</small></td><td><span class="crit" style="--c:#f59e0b">Alta</span></td><td class="num">88 %</td><td class="num">0,000<small>[-0,331 – 0,253]</small></td><td class="auc sig">0.40</td><td class="auc flat">0.52</td><td class="auc sig">0.37</td><td class="auc flat">0.56</td><td class="dir">↑ sano</td></tr><tr><td><b>hhi_ar_6m</b><small>Si depende de pocos clientes</small></td><td><span class="crit" style="--c:#f59e0b">Alta</span></td><td class="num">50 %</td><td class="num">0,486<small>[0,068 – 1,00]</small></td><td class="auc mild">0.54</td><td class="auc flat">0.48</td><td class="auc mild">0.54</td><td class="auc flat">0.51</td><td class="dir">↓ sano</td></tr><tr><td><b>lost_share</b><small>La facturación de clientes que ya no le compran</small></td><td><span class="crit" style="--c:#f59e0b">Alta</span></td><td class="num">32 %</td><td class="num">0,230<small>[0,001 – 1,000]</small></td><td class="auc mild">0.58</td><td class="auc flat">0.50</td><td class="auc sig">0.60</td><td class="auc flat">0.50</td><td class="dir">↓ sano</td></tr></tbody>
+              </table></div>
+            </section><section class="block">
+              <h2>Q4 · ¿Es un bache o una caída?</h2>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Feature</th><th>Criticidad</th><th>Cobertura</th><th>p50 [p10–p90]</th>
+                <th>AUC adverso</th><th>AUC caja</th><th>AUC declive</th><th>AUC positivo</th><th>Dirección</th></tr></thead>
+                <tbody><tr><td><b>refund_rate</b><small>Devoluciones de cobros sobre cobros</small></td><td><span class="crit" style="--c:#27b3c2">Bache</span></td><td class="num">100 %</td><td class="num">0,000<small>[0,000 – 0,000]</small></td><td class="auc flat">0.49</td><td class="auc flat">0.50</td><td class="auc flat">0.49</td><td class="auc flat">0.49</td><td class="dir">↓ sano</td></tr><tr><td><b>net_vol_6m</b><small>Cuánto se le hunde la caja en meses malos</small></td><td><span class="crit" style="--c:#1463ff">Media</span></td><td class="num">88 %</td><td class="num">0,270<small>[0,004 – 1,01]</small></td><td class="auc flat">0.52</td><td class="auc flat">0.46</td><td class="auc mild">0.53</td><td class="auc mild">0.57</td><td class="dir">↓ sano</td></tr></tbody>
+              </table></div>
+            </section><section class="block">
+              <h2>Q5 · ¿Por qué ha cambiado?</h2>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Feature</th><th>Criticidad</th><th>Cobertura</th><th>p50 [p10–p90]</th>
+                <th>AUC adverso</th><th>AUC caja</th><th>AUC declive</th><th>AUC positivo</th><th>Dirección</th></tr></thead>
+                <tbody><tr><td><b>ap_late_share</b><small>Cuánto tarda en pagar a proveedores (DPO)</small></td><td><span class="crit" style="--c:#1463ff">Media</span></td><td class="num">56 %</td><td class="num">0,324<small>[0,000 – 1,00]</small></td><td class="auc mild">0.54</td><td class="auc mild">0.54</td><td class="auc mild">0.53</td><td class="auc flat">0.49</td><td class="dir">↓ sano</td></tr><tr><td><b>transfer_dep</b><small>Si vive de que le transfieran dinero</small></td><td><span class="crit" style="--c:#27b3c2">Bache</span></td><td class="num">100 %</td><td class="num">0,000<small>[0,000 – 0,284]</small></td><td class="auc flat">0.48</td><td class="auc flat">0.51</td><td class="auc flat">0.48</td><td class="auc flat">0.48</td><td class="dir">↓ sano</td></tr></tbody>
+              </table></div>
+            </section>
+
+  <section class="block">
+    <h2>Contexto y observabilidad (no puntúan)</h2>
+    <p class="lead">Alimentan la confianza, la detección fuera de distribución y la explicación. Nunca se usan como nivel de salud.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Variable</th><th>Pregunta</th><th>Papel</th><th>Cobertura</th><th>p50</th></tr></thead>
+      <tbody><tr><td><b>log_scale</b><small>Tamaño de la empresa en EUR</small></td><td>Q5</td><td><span class="crit" style="--c:#64748b">No es salud</span></td><td class="num">100 %</td><td class="num">5,46</td></tr><tr><td><b>fx_share</b><small>Peso de los movimientos en divisa</small></td><td>Q5</td><td><span class="crit" style="--c:#64748b">No es salud</span></td><td class="num">100 %</td><td class="num">0,000</td></tr><tr><td><b>uncat_share</b><small>Movimientos que no se dejan etiquetar</small></td><td>Q5</td><td><span class="crit" style="--c:#64748b">No es salud</span></td><td class="num">100 %</td><td class="num">0,012</td></tr><tr><td><b>activity_log</b><small>Número de movimientos al mes</small></td><td>Q5</td><td><span class="crit" style="--c:#64748b">No es salud</span></td><td class="num">100 %</td><td class="num">4,85</td></tr><tr><td><b>dormant</b><small>Si está inactiva</small></td><td>Q3</td><td><span class="crit" style="--c:#f59e0b">Alta</span></td><td class="num">100 %</td><td class="num">0,000</td></tr><tr><td><b>months_since_last_tx</b><small>Meses seguidos sin movimientos (causal)</small></td><td>Q3</td><td><span class="crit" style="--c:#f59e0b">Alta</span></td><td class="num">100 %</td><td class="num">0,000</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="block caveat">
+    <h2>Lo que aún no resuelven</h2>
+    <ul>
+      <li><b>Q4 · bache o caída:</b> ninguna feature de nivel separa bien un mal mes que rebota de un deterioro estructural (AUC ≈ 0,50 en el sistema). Hacen falta señales de recuperación (cobros post-bache, caja mínima intramensual).</li>
+      <li><b>Q6 · cuándo se vio venir:</b> la antelación no vive en una feature, sino en el forecaster de trayectoria. El sistema mide una antelación mediana de 3 meses en las caídas estructurales (ver <code>research/reports/anticipation_v5.json</code>).</li>
+      <li><b>Q2 · mejora:</b> las señales positivas existen (crecimiento, tendencia de clientes) pero su AUC es más débil que la cara de deterioro; la mejora se detecta simétrica vía previsión.</li>
+      <li><b>Datos finales:</b> deuda y saldos vienen como foto a 1-sep-2026. Proyectar esa foto hacia atrás filtraría información; las features de deuda mensual salen de los flujos de <code>transactions</code>.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>Reproducible con <code>cd research &amp;&amp; uv run python ../analysis/challenge_features.py</code>. Panel y features: <code>research/src/panel.py</code>, <code>research/src/features.py</code>. Eventos: <code>research/src/targets.py</code>. Objetivos: <a href="../context/challenge.html">context/challenge.html</a>. Criticidad: <a href="../context/scoring.md">context/scoring.md</a>.</p>
+  </footer>
+</main>
+</body>
+</html>
