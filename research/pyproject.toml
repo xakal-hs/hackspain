@@ -1,0 +1,22 @@
+[project]
+name = "xray-research"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.141.1",
+    "lightgbm>=4.7.0",
+    "matplotlib>=3.11.2",
+    "mlforecast>=1.1.0",
+    "pandas>=2.3.3",
+    "polars>=1.44.2",
+    "pyarrow>=25.0.1",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
+    "utilsforecast>=0.2.16",
+    "uvicorn>=0.53.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

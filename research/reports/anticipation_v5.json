@@ -1,0 +1,32 @@
+{
+  "alert_deterioro_n": 1322,
+  "alert_deterioro_precision": 0.3381240544629349,
+  "alert_deterioro_recall": 0.3236784938450398,
+  "alert_mejora_n": 270,
+  "alert_mejora_precision": 0.36666666666666664,
+  "alert_mejora_recall": 0.07894736842105263,
+  "base_rate_caida10_3m": 0.13866854101817452,
+  "base_rate_subida10_3m": 0.12591625665227432,
+  "n_caidas_estructurales": 229,
+  "share_alertadas_antes": 0.4847161572052402,
+  "lead_time_mediana_meses": 3.0,
+  "lead_time_hist": {
+    "0": 15,
+    "1": 18,
+    "2": 9,
+    "3": 19,
+    "4": 10,
+    "5": 9,
+    "6": 13,
+    "7": 7,
+    "8": 3,
+    "9": 2,
+    "10": 3,
+    "11": 3
+  },
+  "n_eventos_bajada": 659,
+  "share_caida_real": 0.8391502276176024,
+  "bache_vs_caida_accuracy": 0.7405159332321699,
+  "bache_vs_caida_auc": 0.5320891193831246,
+  "alert_flicker_rate": 0.2291981845688351
+}

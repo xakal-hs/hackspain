@@ -1,0 +1,6 @@
+data/
+.venv/
+reports/*.parquet
+__pycache__/
+reports/log_*.txt
+artifacts/

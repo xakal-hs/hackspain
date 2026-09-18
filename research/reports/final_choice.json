@@ -1,0 +1,7 @@
+{
+ "tag": "v6",
+ "desc": "mlforecast + LightGBM cuantílico (q10/q50/q90, CQR) con 6 exógenas por horizonte",
+ "decision": "Exógenas: score_raw, score_raw_d3 (cambio a 3 meses), runway, activity_trend, months_since_last_tx (causal) y month_idx. Hiperparámetros por defecto (250 árboles, 15 hojas) y calibración conformal por horizonte. Score v6: sin dato = neutro, escala lineal publicada, pesos calibrados con 3 eventos adversos y 1 positivo.",
+ "why": "Con 21 exógenas el modelo sobreajusta a patrones que no generalizan entre grupos (skill a h3 −14,6 % incluso regularizado). Sin exógenas se pierde la señal fresca del mes. 6 exógenas con sentido económico dan el mejor equilibrio. La ganancia frente al AR(1) está en la cola, que es donde se actúa, y en las empresas que aún parecen sanas.",
+ "evidence": "v6: AUC deterioro ≥15 0.742 (AR1 0.703); en el quintil alto 0.574 (AR1 0.493); AUC mejora 0.715 (AR1 0.683); en el quintil bajo 0.635 (AR1 0.542); precisión en el 5 % de cola: caídas 47% (AR1 30%), subidas 41% (AR1 25%); MAE h3 11.2 (AR1 11.7); cobertura 80 % h3 82%. A h1 solo mejora un 2 % sobre el arrastre mecánico del EWMA (4.52 frente a 4.60)."
+}

@@ -1,0 +1,112 @@
+{
+  "tag": "v5f",
+  "n_series": 3449,
+  "mae_h1": 4.6097053952260625,
+  "mae_naive_h1": 5.306091419169805,
+  "mae_ar1_h1": 5.329771341580277,
+  "mae_h2": 8.066168359428882,
+  "mae_naive_h2": 8.829569556919743,
+  "mae_ar1_h2": 8.718742226994868,
+  "mae_h3": 10.859574896482933,
+  "mae_naive_h3": 11.577149828958184,
+  "mae_ar1_h3": 11.205134766388433,
+  "skill_vs_naive_h3": 0.06198200274478316,
+  "skill_vs_ar1_h3": 0.030839421132359934,
+  "coverage80_h1": 0.8248767758770659,
+  "width80_h1": 16.17555369437778,
+  "coverage80_h2": 0.8126993331400406,
+  "width80_h2": 27.73994101840198,
+  "coverage80_h3": 0.8124093940272543,
+  "width80_h3": 37.60460690402673,
+  "pinball_h3": 3.446393434986699,
+  "share_big_moves": 0.28124093940272543,
+  "dir_acc_big_moves": 0.7690721649484537,
+  "auc_deterioro": 0.7016248533807908,
+  "auc_deterioro_ar1": 0.680342546596412,
+  "auc_mejora": 0.7175380838576468,
+  "auc_mejora_ar1": 0.7075801915166887,
+  "auc_deterioro_top_quintil": 0.5604520817935452,
+  "auc_deterioro_top_quintil_ar1": 0.522450110864745,
+  "auc_mejora_bottom_quintil": 0.6227148375582665,
+  "auc_mejora_bottom_quintil_ar1": 0.5932675034343482,
+  "alert_down_precision": 0.36674259681093396,
+  "alert_down_recall": 0.284452296819788,
+  "alert_up_precision": 0.3983739837398374,
+  "alert_up_recall": 0.12128712871287128,
+  "mae_h3_by_segment": {
+    "historia<6m": {
+      "n": 752,
+      "mae": 10.131548477133096,
+      "mae_ar1": 10.134187364040589,
+      "coverage80": 0.8683510638297872
+    },
+    "historia>=12m": {
+      "n": 1984,
+      "mae": 11.038446265117988,
+      "mae_ar1": 11.518000198896898,
+      "coverage80": 0.7963709677419355
+    },
+    "ood_share>0": {
+      "n": 392,
+      "mae": 12.429167517967397,
+      "mae_ar1": 13.338065308150878,
+      "coverage80": 0.75
+    },
+    "fallback": {
+      "n": 260,
+      "mae": 10.508962006872228,
+      "mae_ar1": 10.629644991720568,
+      "coverage80": 0.9692307692307692
+    },
+    "cobertura<0.6": {
+      "n": 25,
+      "mae": 8.109713314012772,
+      "mae_ar1": 8.744637314908047,
+      "coverage80": 0.8
+    }
+  },
+  "mae_h3_by_cutoff": {
+    "2025-11-01": 12.588268030356556,
+    "2026-02-01": 10.319551993464732,
+    "2026-05-01": 10.063090029998069
+  },
+  "auc_level_vs_adverse_6m": 0.6097663501628169,
+  "auc_level_vs_churn_6m": 0.5793803418803419,
+  "auc_level_vs_cash_stress_6m": 0.5521093925128895,
+  "auc_level_vs_decline_6m": 0.632396449704142,
+  "auc_level_vs_positive_6m": 0.5315501737175556,
+  "weights_mean": {
+    "runway": 0.1472,
+    "lc_util": 0.0464,
+    "net_margin_6m": 0.0038,
+    "growth_vs_12m": 0.0704,
+    "debt_burden": 0.0066,
+    "payroll_burden": 0.0081,
+    "ap_late_share": 0.0825,
+    "ar_late_share": 0.0277,
+    "ap_overdue_ratio": 0.0534,
+    "ar_overdue_90_ratio": 0.0183,
+    "refund_rate": 0.0613,
+    "activity_trend": 0.1666,
+    "transfer_dep": 0.1207,
+    "hhi_ar_6m": 0.049,
+    "net_vol_6m": 0.138
+  },
+  "weights_std": {
+    "runway": 0.0173,
+    "lc_util": 0.0177,
+    "net_margin_6m": 0.0075,
+    "growth_vs_12m": 0.0094,
+    "debt_burden": 0.0103,
+    "payroll_burden": 0.0065,
+    "ap_late_share": 0.0333,
+    "ar_late_share": 0.0173,
+    "ap_overdue_ratio": 0.0248,
+    "ar_overdue_90_ratio": 0.0172,
+    "refund_rate": 0.025,
+    "activity_trend": 0.0305,
+    "transfer_dep": 0.0285,
+    "hhi_ar_6m": 0.0243,
+    "net_vol_6m": 0.0269
+  }
+}

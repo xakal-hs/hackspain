@@ -1,0 +1,1192 @@
+{
+ "decisions": [
+  {
+   "id": "D01",
+   "category": "producto",
+   "title": "El score se calcula por empresa, no por grupo",
+   "question": "¿Score por company_id o por grupo empresarial? El enunciado habla de 250 empresas y hay 1286 en 250 grupos.",
+   "decision": "Score, trayectoria y alertas por company_id. La validación separa por group_id para que ningún grupo esté a la vez en train y test.",
+   "why": "Todos los ficheros se cruzan por company_id y cada empresa tiene su propia caja y sus propias facturas. Un grupo mezcla negocios distintos (holdings de hasta 24 empresas). Separar por grupo en la validación evita la fuga que avisa el enunciado.",
+   "alternatives": "Agregar por grupo (ponderando por volumen). Se puede hacer después sobre los scores de empresa si el leaderboard lo pide.",
+   "evidence": "1286 empresas en 250 grupos; mediana de 3 empresas por grupo.",
+   "status": "a confirmar con la organización",
+   "chart": {
+    "type": "bar",
+    "title": "Tamaño de los grupos empresariales",
+    "x_label": "empresas por grupo",
+    "y_label": "nº de grupos",
+    "datasets": [
+     {
+      "label": "grupos",
+      "data": [
+       71.0,
+       34.0,
+       27.0,
+       22.0,
+       15.0,
+       15.0,
+       9.0,
+       7.0,
+       6.0,
+       4.0,
+       6.0,
+       7.0,
+       7.0,
+       1.0,
+       3.0,
+       3.0,
+       2.0,
+       4.0,
+       2.0,
+       2.0,
+       3.0
+      ]
+     }
+    ],
+    "labels": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5",
+     "6",
+     "7",
+     "8",
+     "9",
+     "10",
+     "11",
+     "12",
+     "13",
+     "14",
+     "15",
+     "16",
+     "17",
+     "18",
+     "19",
+     "21",
+     "22"
+    ]
+   }
+  },
+  {
+   "id": "D02",
+   "category": "modelo",
+   "title": "Sin etiquetas: score anclado a hechos observables",
+   "question": "¿Hay variable objetivo? El dataset no trae etiquetas de impago ni de salud.",
+   "decision": "El nivel es un score interpretable (percentiles ponderados). Sus pesos se calibran con eventos futuros observables: apagado (la empresa deja de operar), tensión de caja (saldo negativo) y declive (cobros <50 % de su media anual). La trayectoria es una previsión supervisada del propio score.",
+   "why": "Un score sin ancla externa puede estar al revés sin que ninguna métrica lo detecte. Eso nos pasó en la v1: AUC de 0,37 frente al apagado. Con eventos observables, el nivel del score significa algo y se puede medir.",
+   "alternatives": "Score totalmente no supervisado (clustering, PCA): no es interpretable ni verificable. Predecir directamente el evento: sería una caja negra y solo daría una cara del problema.",
+   "evidence": "Tasas de evento a 6 meses: apagado 3,0 %, tensión de caja 5,4 %, declive 17,0 %. AUC del score final frente a evento adverso: 0.59.",
+   "status": "a confirmar con la organización",
+   "chart": null
+  },
+  {
+   "id": "D03",
+   "category": "datos",
+   "title": "Tipos de cambio: los del dataset, validados contra BCE y currency-api",
+   "question": "¿Qué tipo de cambio usar para las cuentas en otra moneda?",
+   "decision": "Se descargan tipos reales mensuales: BCE (oficial, 30 monedas) y fawazahmed0/currency-api (13 monedas que el BCE no publica: ARS, CLP, COP, AOA, MZN...). En transacciones y en facturas se usa el tipo del fichero si está a ±10 % del real y, si no, el real del mes. El tamaño de la empresa (log_scale) se pasa a EUR con el tipo real.",
+   "why": "El 4 % de los movimientos está en productos con una moneda distinta de la de la empresa. Sin convertir, un movimiento en CLP pesa unas mil veces más. Los tipos del dataset son correctos casi siempre, pero hay filas con fx=1 (MZN, parte de GBP) o 0 (VND redondeado), que darían importes absurdos o una división por cero.",
+   "alternatives": "Usar siempre el tipo real: perdería el tipo efectivo del banco. Usar siempre el del dataset: rompe con fx=1 o fx=0.",
+   "evidence": "92,3 % de las 105310 transacciones en otra moneda tienen un tipo a ±10 % del real. El resto se corrige con el tipo real del mes (fx=1 no informado, fx=0 por redondeo en VND).",
+   "chart": {
+    "type": "bar",
+    "title": "Transacciones con el tipo del dataset a ±10 % del real (top pares)",
+    "x_label": "par de monedas",
+    "y_label": "% de filas",
+    "datasets": [
+     {
+      "label": "tipo dentro de ±10 % del real",
+      "data": [
+       92.914,
+       73.6036,
+       99.9734,
+       99.6394,
+       99.8777,
+       95.2466,
+       99.7059,
+       98.8873,
+       96.8625,
+       100.0
+      ]
+     },
+     {
+      "label": "tipo = 1 (no informado)",
+      "data": [
+       5.408,
+       26.3964,
+       0.0133,
+       0.0,
+       0.1048,
+       3.3184,
+       0.0,
+       1.0083,
+       0.0,
+       0.0
+      ]
+     }
+    ],
+    "labels": [
+     "USD→EUR",
+     "GBP→EUR",
+     "USD→GBP",
+     "BRL→EUR",
+     "GBP→USD",
+     "EUR→GBP",
+     "CLP→EUR",
+     "EUR→USD",
+     "ARS→EUR",
+     "USD→DKK"
+    ]
+   },
+   "status": "decidido"
+  },
+  {
+   "id": "D04",
+   "category": "datos",
+   "title": "Transferencias internas fuera de los flujos",
+   "question": "¿Cuentan como cobros o pagos los traspasos entre cuentas de la misma empresa?",
+   "decision": "Un par del mismo día, con el mismo importe y signo opuesto entre dos productos de la empresa se marca como interno. Lo mismo con los pares entre dos empresas del mismo grupo (intragrupo, >100). Ambos se excluyen de entradas y salidas, igual que investment_deployment/return.",
+   "why": "Inflan los denominadores (entradas, salidas) sin actividad económica real y diluyen ratios como el margen o la carga de deuda. Los intragrupo además hacían pasar por 'dependencia de transferencias' lo que es tesorería del grupo.",
+   "evidence": "El 26,8 % del volumen bruto son traspasos internos o intragrupo.",
+   "chart": {
+    "type": "bar",
+    "title": "Composición del volumen bruto",
+    "x_label": "tipo de flujo",
+    "y_label": "% del volumen",
+    "datasets": [
+     {
+      "label": "volumen",
+      "data": [
+       73.2173,
+       26.7827
+      ]
+     }
+    ],
+    "labels": [
+     "externo",
+     "interno"
+    ]
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D05",
+   "category": "datos",
+   "title": "Facturas: impagadas según pending_amount, no según payment_date",
+   "question": "¿Cómo saber si una factura estaba impagada a fin de cada mes?",
+   "decision": "Impagada = pending_amount ≠ 0 y status ≠ paid. En ese caso se ignora payment_date. Si hoy está impagada, estuvo impagada en todos los cierres anteriores (sin fuga). Los pagos tardíos se miden a fecha de cierre, sin mirar pagos posteriores. Se descartan las fechas imposibles (año 7025).",
+   "why": "En las facturas vencidas, payment_date es igual a due_date en el 96 % de los casos. Usar payment_date las daba por pagadas en plazo y la morosidad real (unas 170 000 facturas) no se veía.",
+   "evidence": "overdue: payment_date = due_date en el 96 %, con pendiente > 0 en el 100 %; paid: payment_date = due_date en el 52 %, con pendiente > 0 en el 0 %; pending: payment_date = due_date en el 98 %, con pendiente > 0 en el 100 %",
+   "chart": {
+    "type": "bar",
+    "title": "payment_date = due_date según estado de la factura",
+    "x_label": "estado",
+    "y_label": "% de facturas",
+    "datasets": [
+     {
+      "label": "payment_date = due_date",
+      "data": [
+       96.3101,
+       51.8823,
+       98.3107
+      ]
+     },
+     {
+      "label": "pending_amount > 0",
+      "data": [
+       99.9777,
+       0.0454,
+       99.926
+      ]
+     }
+    ],
+    "labels": [
+     "overdue",
+     "paid",
+     "pending"
+    ]
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D06",
+   "category": "datos",
+   "title": "Primer mes parcial fuera y ventanas escaladas: sin artefacto de arranque",
+   "question": "¿Por qué las empresas recién incorporadas parecían más sanas?",
+   "decision": "Se descarta el primer mes si la primera transacción cae después del día 5 (mes parcial). Las sumas móviles se escalan a w meses (media × w) en vez de sumar lo que haya.",
+   "why": "Con rolling_sum(min_samples=1) el gasto de 3 meses con solo 1 mes de historia se infraestimaba y el runway salía inflado. Todas las empresas nuevas parecían líquidas y 'se deterioraban' al madurar.",
+   "evidence": "Mediana del runway en el mes 0: 1,30 con el método antiguo y 0,64 con el nuevo; en el mes 6: 0,49 y 0.43.",
+   "chart": {
+    "type": "line",
+    "title": "Mediana del runway según los meses de historia",
+    "x_label": "meses desde el alta",
+    "y_label": "runway (log)",
+    "datasets": [
+     {
+      "label": "método antiguo (rolling_sum min_samples=1)",
+      "data": [
+       1.3048,
+       0.7491,
+       0.5521,
+       0.5403,
+       0.4893,
+       0.5192,
+       0.4918,
+       0.5496,
+       0.6007,
+       0.6001
+      ]
+     },
+     {
+      "label": "método actual",
+      "data": [
+       0.6385,
+       0.555,
+       0.5514,
+       0.5137,
+       0.429,
+       0.4603,
+       0.4281,
+       0.424,
+       0.488,
+       0.4815
+      ]
+     }
+    ],
+    "labels": [
+     "0",
+     "1",
+     "2",
+     "3",
+     "4",
+     "5",
+     "6",
+     "7",
+     "8",
+     "9"
+    ]
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D07",
+   "category": "datos",
+   "title": "Las empresas que dejan de operar siguen en el panel",
+   "question": "¿Qué hacer con las empresas cuyas transacciones terminan antes de agosto de 2026?",
+   "decision": "La rejilla llega siempre hasta el último mes completo. Los meses sin movimientos tienen flujos a 0 y un contador CAUSAL de meses consecutivos sin movimientos (months_since_last_tx), que se reinicia al volver a operar. Regla de negocio: sin movimientos, el score no puede pasar de 30. El apagado definitivo (months_since_final_tx, que mira el futuro) se usa solo como etiqueta, nunca como feature.",
+   "why": "Dejar de operar es la señal de deterioro más fuerte y antes desaparecía del panel (sesgo de supervivencia). Sus entradas caen mucho antes del final, así que es anticipable.",
+   "evidence": "121 empresas se apagan antes de 2026-08. El review de la v5 detectó que el contador anterior (meses desde la última transacción del dataset) no era causal: 429 meses sin movimientos en mitad de la serie figuraban como activos. Con el contador causal hay 991 meses de inactividad frente a 498. Queda por confirmar con la organización si el apagado es cierre o baja de Embat.",
+   "status": "a confirmar con la organización",
+   "chart": {
+    "type": "line",
+    "title": "Entradas relativas a la media propia antes del último mes",
+    "x_label": "meses hasta el final",
+    "y_label": "entradas / media",
+    "datasets": [
+     {
+      "label": "empresas que se apagan",
+      "data": [
+       0.2165,
+       1.0878,
+       1.0542,
+       0.5665,
+       0.2756,
+       0.5842,
+       0.2327,
+       0.2366,
+       0.1604
+      ]
+     },
+     {
+      "label": "empresas activas",
+      "data": [
+       0.8994,
+       0.773,
+       0.7097,
+       0.7769,
+       0.8534,
+       0.7693,
+       0.8725,
+       0.9547,
+       0.6785
+      ]
+     }
+    ],
+    "labels": [
+     "8",
+     "7",
+     "6",
+     "5",
+     "4",
+     "3",
+     "2",
+     "1",
+     "0"
+    ]
+   },
+   "alternatives": ""
+  },
+  {
+   "id": "D08",
+   "category": "score",
+   "title": "Ventanas de 6 y 12 meses en vez de 3 (estacionalidad y ruido)",
+   "question": "¿Qué ventana usar para el margen y el crecimiento?",
+   "decision": "Margen de caja a 6 meses y tendencia de cobros como media de 3 meses frente a media de 12 meses. Los impuestos trimestrales (enero, abril, julio y octubre) quedan absorbidos.",
+   "why": "Con ventanas de 3 meses el margen y el crecimiento revertían a la media: eran ruido que movía más de la mitad del score. Comparar trimestres distintos mezclaba estacionalidad.",
+   "evidence": "Persistencia mes a mes (Spearman): margen 3m 0,68 frente a 6m 0,80; crecimiento trimestral 0,55 frente a 3m/12m 0.69.",
+   "chart": {
+    "type": "bar",
+    "title": "Peso de los impuestos en las salidas por mes del año",
+    "x_label": "mes",
+    "y_label": "impuestos / salidas",
+    "datasets": [
+     {
+      "label": "media",
+      "data": [
+       0.1531,
+       0.0333,
+       -3.3107,
+       0.1426,
+       0.0436,
+       0.0441,
+       0.0877,
+       -0.0193,
+       -0.1145,
+       0.1764,
+       0.0412,
+       0.0567
+      ]
+     }
+    ],
+    "labels": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5",
+     "6",
+     "7",
+     "8",
+     "9",
+     "10",
+     "11",
+     "12"
+    ],
+    "note": "Picos trimestrales: por eso se usan ventanas de 6 y 12 meses"
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D09",
+   "category": "score",
+   "title": "Runway con base de gasto robusta: encogerse no mejora la liquidez",
+   "question": "¿Por qué las empresas que se apagaban tenían más 'meses de caja'?",
+   "decision": "Runway = signo(caja) × log(1 + |caja| / gasto), con gasto = máx(media de 3 meses, media de 12 meses). La caja negativa da un runway negativo, así que la feature binaria sobra.",
+   "why": "Si el gasto se desploma, caja/gasto sube aunque la empresa se esté apagando. Con la base anual el denominador no cae y se premia la caja real.",
+   "evidence": "AUC del runway frente a tensión de caja a 6 meses: 0,23 (menos de 0,5 = protege).",
+   "chart": {
+    "type": "bar",
+    "title": "AUC de cada feature frente a eventos a 6 meses (0,5 = sin señal)",
+    "x_label": "feature",
+    "y_label": "AUC",
+    "datasets": [
+     {
+      "label": "apagado",
+      "data": [
+       0.509,
+       0.2967,
+       0.4756,
+       0.4783,
+       0.4515,
+       0.4424,
+       0.6963,
+       0.6173,
+       0.5343,
+       0.4956,
+       0.4978,
+       0.4137,
+       0.4344,
+       0.538,
+       0.4778,
+       0.3913,
+       0.7226
+      ]
+     },
+     {
+      "label": "tensión de caja",
+      "data": [
+       0.2315,
+       0.5945,
+       0.4804,
+       0.5242,
+       0.5014,
+       0.5406,
+       0.5447,
+       0.545,
+       0.5646,
+       0.504,
+       0.5038,
+       0.5195,
+       0.51,
+       0.4811,
+       0.4572,
+       0.4345,
+       0.4971
+      ]
+     },
+     {
+      "label": "declive",
+      "data": [
+       0.4931,
+       0.4376,
+       0.5274,
+       0.4301,
+       0.4935,
+       0.448,
+       0.5292,
+       0.5447,
+       0.5178,
+       0.4974,
+       0.4924,
+       0.3661,
+       0.4799,
+       0.5445,
+       0.5282,
+       0.4506,
+       0.6039
+      ]
+     }
+    ],
+    "labels": [
+     "Meses de caja",
+     "Uso de líneas de crédito",
+     "Margen de caja 6m",
+     "Tendencia de cobros",
+     "Carga de deuda",
+     "Peso de nóminas",
+     "Pagos tardíos a proveedores",
+     "Cobros tardíos de clientes",
+     "Deuda vencida con proveedores",
+     "Clientes morosos >60 días",
+     "Devoluciones de cobros",
+     "Tendencia de actividad",
+     "Dependencia de transferencias",
+     "Concentración de clientes",
+     "Volatilidad a la baja",
+     "Amplitud de clientes",
+     "Facturación de clientes perdidos"
+    ],
+    "note": "AUC < 0,5 significa que valores altos protegen"
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D10",
+   "category": "score",
+   "title": "Masa en cero: el cero es 'lo mejor' o 'no aplica', nunca un empate en el percentil 0",
+   "question": "¿Cómo puntuar features donde la mayoría de filas vale exactamente 0?",
+   "decision": "Deuda, devoluciones, vencidos, retrasos, uso de póliza y transferencias: el 0 vale 100 y los positivos se ordenan entre sí (continuo en 0+). Nóminas = 0 se trata como 'no aplica' (NaN). En el resto, los empates van al rango medio.",
+   "why": "Con el primer índice del cuantil, el 88 % de filas con refund_rate = 0 caía al percentil 0 y un reembolso de 0,1 % hundía el score 90 puntos. Una empresa sin nóminas no está 'más sana' por eso, simplemente la feature no aplica.",
+   "evidence": "Proporción de ceros entre las filas con dato: debt_burden 60 %, refund_rate 88 %, lc_util 38 %, ap_overdue_ratio 11 %, ar_overdue_90_ratio 42 %, ap_late_share 14 %, transfer_dep 68 %",
+   "chart": {
+    "type": "bar",
+    "title": "Filas con valor exactamente 0 (entre las que tienen dato)",
+    "x_label": "feature",
+    "y_label": "% de ceros",
+    "datasets": [
+     {
+      "label": "% ceros",
+      "data": [
+       59.597,
+       87.8494,
+       37.9027,
+       11.4157,
+       42.1947,
+       14.1776,
+       68.1725
+      ]
+     }
+    ],
+    "labels": [
+     "debt_burden",
+     "refund_rate",
+     "lc_util",
+     "ap_overdue_ratio",
+     "ar_overdue_90_ratio",
+     "ap_late_share",
+     "transfer_dep"
+    ]
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D11",
+   "category": "score",
+   "title": "Nuevas señales: póliza de crédito, clientes perdidos, amplitud de cartera y volatilidad a la baja",
+   "question": "¿Qué variables añadir tras el review?",
+   "decision": "Se añaden estas señales: lc_util (dispuesto/límite de pólizas, reconstruido hacia atrás), lost_share (% de la facturación de hace 3-12 meses de clientes a los que ya no se factura), cust_trend (clientes facturados en 3 meses frente a 12) y hhi_ar_6m (concentración). net_vol_6m pasa a medir solo la volatilidad a la baja (semidesviación de los meses con flujo negativo, sobre el gasto). transfer_dep se queda solo con las transferencias reales: la categoría '-' (sin categorizar) pasa a contexto. No se usan debt_products ni debt_schedule_config como features mensuales porque son una foto final y proyectarlos hacia atrás filtraría información.",
+   "why": "Perder clientes es la señal más temprana de apagado y de declive. El review de la v5 mostró que transfer_dep medía sobre todo cobros sin categorizar, y que la volatilidad total penalizaba a las empresas con mucha caja: lo que daña es la volatilidad a la baja.",
+   "evidence": "AUC frente a apagado: lost_share 0,72, cust_trend 0.39. Frente a tensión de caja: lc_util 0.59. transfer_dep sin '-' frente a apagado: 0,43, casi sin señal.",
+   "chart": null,
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D12",
+   "category": "score",
+   "title": "Pesos calibrados por evento con signo económico restringido",
+   "question": "¿Cómo fijar los pesos del score sin etiquetas y sin perder interpretabilidad?",
+   "decision": "Para cada evento (apagado, tensión de caja, declive) se ajusta una logística P(evento) = σ(b − Σ w·s) con w ≥ 0, sobre filas cuyo evento ya era observable. Los pesos normalizados se promedian para que cada tipo de deterioro cuente igual. Si los datos contradicen la dirección económica de una feature, su peso queda en 0.",
+   "why": "Calibrar contra el evento compuesto dejaba que el declive (20 % de las filas) dominara, y la disciplina de pagos, que predice los apagados, quedaba en 0. Restringir el signo mantiene la monotonía: mejorar una señal nunca baja el score.",
+   "alternatives": "Pesos a priori (v4a): funcionan peor frente a eventos. Logística sin restricción: pesos negativos e inexplicables.",
+   "evidence": "Pesos por debajo del 1 %: ninguno. Los datos no respaldan su dirección. Mayores pesos: Tendencia de actividad 21 %, Meses de caja 16 %, Facturación de clientes perdidos 10 %, Pagos tardíos a proveedores 10 %.",
+   "chart": {
+    "type": "bar",
+    "title": "Pesos por feature: a priori frente a calibrados",
+    "x_label": "feature",
+    "y_label": "peso",
+    "datasets": [
+     {
+      "label": "a priori",
+      "data": [
+       0.1667,
+       0.0556,
+       0.0833,
+       0.0833,
+       0.0556,
+       0.0278,
+       0.0833,
+       0.0556,
+       0.0556,
+       0.0278,
+       0.0278,
+       0.0833,
+       0.0278,
+       0.0278,
+       0.0278,
+       0.0556,
+       0.0556
+      ]
+     },
+     {
+      "label": "calibrado (modelo final)",
+      "data": [
+       0.1591,
+       0.0133,
+       0.0129,
+       0.0449,
+       0.0304,
+       0.0145,
+       0.1021,
+       0.0755,
+       0.0309,
+       0.0197,
+       0.0355,
+       0.2063,
+       0.0246,
+       0.0376,
+       0.0179,
+       0.0723,
+       0.1025
+      ]
+     }
+    ],
+    "labels": [
+     "Meses de caja",
+     "Uso de líneas de crédito",
+     "Margen de caja 6m",
+     "Tendencia de cobros",
+     "Carga de deuda",
+     "Peso de nóminas",
+     "Pagos tardíos a proveedores",
+     "Cobros tardíos de clientes",
+     "Deuda vencida con proveedores",
+     "Clientes morosos >60 días",
+     "Devoluciones de cobros",
+     "Tendencia de actividad",
+     "Dependencia de transferencias",
+     "Concentración de clientes",
+     "Volatilidad a la baja",
+     "Amplitud de clientes",
+     "Facturación de clientes perdidos"
+    ]
+   },
+   "status": "decidido"
+  },
+  {
+   "id": "D13",
+   "category": "modelo",
+   "title": "Exógenas por horizonte retardadas h meses (horizon_feature_templates)",
+   "question": "¿Cómo pasar señales actuales al forecaster directo de mlforecast sin fuga de información?",
+   "decision": "Por cada exógena c se crea c_h{h} = c retardada h meses y se usa horizon_feature_templates. El modelo del horizonte h lee en la fila de la fecha objetivo T+h el valor de T, que es conocido.",
+   "why": "En la estrategia directa, cada modelo h usa la exógena en la fecha objetivo. Pasar c sin retardar sería una fuga y retardarla 3 meses para todos los horizontes da información vieja a h1 y h2. Lo verificamos con datos sintéticos (y_t = 5·x_{t−1}): con desplazamiento 1 el error es casi 0 en todos los horizontes.",
+   "evidence": "MAE en el experimento sintético según el desplazamiento de la exógena: 0: 3,99, 1: 0,26, 2: 4,00, 3: 4,01",
+   "chart": {
+    "type": "bar",
+    "title": "Experimento de alineación temporal (y_t = 5·x_{t−1})",
+    "x_label": "desplazamiento de x en la fila objetivo",
+    "y_label": "MAE",
+    "datasets": [
+     {
+      "label": "MAE",
+      "data": [
+       3.9873,
+       0.2643,
+       3.9968,
+       4.0057
+      ]
+     }
+    ],
+    "labels": [
+     "0",
+     "1",
+     "2",
+     "3"
+    ]
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D14",
+   "category": "score",
+   "title": "Suavizado EWMA α = 0,5 con explicación exacta",
+   "question": "¿Cuánto suavizar el score publicado?",
+   "decision": "Score publicado = EWMA(α = 0,5) del score bruto. Como el EWMA es lineal, se suaviza cada contribución por separado y el score sigue siendo la suma exacta de contribuciones: explain() cuadra al céntimo.",
+   "why": "Con α = 0,5 un bache de un mes pesa la mitad y una caída estructural se refleja al 87,5 % en 3 meses. Es el equilibrio entre estabilidad ante baches (lo pide el enunciado) y retraso en la detección.",
+   "evidence": "Cambio medio mensual |Δ| y proporción de movimientos ≥10 a 3 meses según α: α=0,3: 3,23 / 24 %; α=0,4: 4,02 / 31 %; α=0,5: 4,77 / 35 %; α=0,6: 5,47 / 38 %; α=0,8: 6,86 / 43 %; α=1,0: 8,38 / 46 %",
+   "chart": {
+    "type": "line",
+    "title": "Estabilidad del score según α",
+    "x_label": "α",
+    "y_label": "valor",
+    "datasets": [
+     {
+      "label": "|Δ| medio mensual",
+      "data": [
+       3.2259,
+       4.0245,
+       4.7652,
+       5.4724,
+       6.8623,
+       8.3801
+      ]
+     },
+     {
+      "label": "% movimientos ≥10 en 3m",
+      "data": [
+       24.2037,
+       31.0103,
+       35.4025,
+       38.4948,
+       42.8498,
+       45.7006
+      ]
+     }
+    ],
+    "labels": [
+     "0.3",
+     "0.4",
+     "0.5",
+     "0.6",
+     "0.8",
+     "1.0"
+    ]
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D15",
+   "category": "score",
+   "title": "Features de facturas: se arrastra el último dato hasta 3 meses",
+   "question": "¿Por qué el score saltaba cuando no vencían facturas en un trimestre?",
+   "decision": "late_share_ap, late_share_ar y hhi_ar_6m arrastran el último valor conocido durante un máximo de 3 meses. Las tendencias se calculan desde el tercer mes de historia.",
+   "why": "Cuando una feature aparecía o desaparecía, los pesos se renormalizaban y el score bruto saltaba 8,9 puntos de media, frente a 4,7 sin cambio de disponibilidad.",
+   "evidence": "Medido antes del cambio: |Δ score bruto| de 8,9 con cambio de disponibilidad frente a 4,7 sin él (19 % de las filas).",
+   "chart": null,
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D16",
+   "category": "ood",
+   "title": "Robustez para empresas nunca vistas: ratios, percentiles congelados, OOD sobre valores crudos y confianza",
+   "question": "¿Cómo se comporta el sistema con empresas del test oculto, quizá muy fuera de distribución?",
+   "decision": "Features adimensionales (independientes de moneda y tamaño), con un suelo EPS relativo a la escala de la empresa (0,1 % de su volumen mensual) en lugar de 1 unidad fija: el score no varía más de 1 punto al multiplicar los importes por 1e-6..1e6 (test). Los percentiles se congelan en train y saturan en 0 o 100, sin extrapolar. El OOD se mide sobre valores crudos antes de recortar, más el contexto (tamaño en EUR, actividad, % en divisa). Se publica una confianza = cobertura × (1 − OOD) × historia. Con menos de 3 meses, respaldo AR(1) con intervalo ×1,5. Columnas ausentes = NaN (baja la cobertura, no falla).",
+   "why": "El test son 60-80 empresas nuevas, con historia corta, sin ERP o con escalas nunca vistas. Mejor un score con confianza baja y explícita que uno que extrapola.",
+   "evidence": "MAE h3 por segmento (modelo / AR(1)): historia<6m: 10,4 / 10,5 (n=752); historia>=12m: 11,3 / 12,0 (n=1984); ood_share>0: 12,6 / 13,1 (n=395); fallback: 9,6 / 9,5 (n=260); cobertura<0,6: 9,4 / 9,9 (n=1106)",
+   "chart": {
+    "type": "bar",
+    "title": "Error a 3 meses por segmento (validación out-of-group)",
+    "x_label": "segmento",
+    "y_label": "MAE h3",
+    "datasets": [
+     {
+      "label": "modelo",
+      "data": [
+       10.3503,
+       11.3179,
+       12.5544,
+       9.6204,
+       9.413
+      ]
+     },
+     {
+      "label": "AR(1)",
+      "data": [
+       10.4552,
+       12.0177,
+       13.0848,
+       9.5373,
+       9.8679
+      ]
+     }
+    ],
+    "labels": [
+     "historia<6m",
+     "historia>=12m",
+     "ood_share>0",
+     "fallback",
+     "cobertura<0.6"
+    ]
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D17",
+   "category": "score",
+   "title": "Sin dato = valor neutro (50), no renormalizar",
+   "question": "¿Cómo puntuar una feature sin dato (sin ERP, historia corta)?",
+   "decision": "Una feature sin dato contribuye con su peso × 50, el valor neutro. No se redistribuye su peso entre las demás. La cobertura (peso con dato) reduce la confianza publicada.",
+   "why": "Al renormalizar, una empresa con 2 meses de historia se puntuaba casi solo por su caja y salía más sana que la media (sesgo de arranque, grave para el test oculto de empresas nuevas). Además, el score saltaba cuando aparecía una feature. Con el neutro, lo que no sabemos tira al centro y la confianza lo refleja.",
+   "alternatives": "Renormalizar (v5b): +9,4 % frente a AR(1) pero con sesgo de arranque y un 24 % de movimientos grandes. Neutro (v5e): +5,2 % frente a AR(1), sin sesgo y con un 15 % de movimientos grandes. Se prioriza la estabilidad y la justicia con las empresas nuevas.",
+   "evidence": "Mediana del score bruto en el mes 0 frente al mes 11: renormalizando 71,5 → 51,1; con neutro 51,8 → 47.9.",
+   "chart": {
+    "type": "line",
+    "title": "Mediana del score bruto según los meses de historia",
+    "x_label": "meses desde el alta",
+    "y_label": "score bruto",
+    "datasets": [
+     {
+      "label": "renormalizando pesos",
+      "data": [
+       71.5036,
+       68.9997,
+       57.0735,
+       60.1477,
+       57.1437,
+       55.6717,
+       54.9593,
+       50.8958,
+       52.8606,
+       53.3984,
+       53.6538,
+       51.1086
+      ]
+     },
+     {
+      "label": "sin dato = neutro (final)",
+      "data": [
+       51.7871,
+       50.5415,
+       50.8368,
+       53.3374,
+       51.6407,
+       51.025,
+       49.7668,
+       47.4015,
+       48.7301,
+       50.2057,
+       49.7737,
+       47.9033
+      ]
+     }
+    ],
+    "labels": [
+     "0",
+     "1",
+     "2",
+     "3",
+     "4",
+     "5",
+     "6",
+     "7",
+     "8",
+     "9",
+     "10",
+     "11"
+    ]
+   },
+   "status": "decidido"
+  },
+  {
+   "id": "D18",
+   "category": "score",
+   "title": "Escala publicada: transformación lineal P5→15, P95→85",
+   "question": "¿Cómo hacer legible el score (del estilo '82 → 68') sin perder la explicación exacta?",
+   "decision": "Score publicado = a + b × compuesto, con a = -71,6 y b = 2,21, calibrados en train para llevar el P5 del compuesto a 15 y el P95 a 85. Se recorta a [0, 100] y el recorte aparece como término explícito en la explicación.",
+   "why": "La media ponderada de percentiles, con neutro para lo desconocido, concentra el score entre 38 y 68. Una transformación lineal abre el rango y mantiene la suma exacta de contribuciones, porque la constante se reparte según los pesos. Una transformación no lineal (percentil del compuesto) rompería la explicación.",
+   "evidence": "Cuantiles del compuesto → publicado: P5: 39,2 → 15,0, P25: 48,1 → 34,5, P50: 54,8 → 49,4, P75: 61,5 → 64,2, P95: 70,9 → 85,0",
+   "chart": {
+    "type": "bar",
+    "title": "Cuantiles del compuesto y del score publicado",
+    "x_label": "cuantil",
+    "y_label": "valor",
+    "datasets": [
+     {
+      "label": "compuesto (media de percentiles)",
+      "data": [
+       39.2234,
+       48.0634,
+       54.8062,
+       61.492,
+       70.927
+      ]
+     },
+     {
+      "label": "publicado",
+      "data": [
+       15.0,
+       34.5182,
+       49.4061,
+       64.1679,
+       85.0
+      ]
+     }
+    ],
+    "labels": [
+     "P5",
+     "P25",
+     "P50",
+     "P75",
+     "P95"
+    ]
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D19",
+   "category": "producto",
+   "title": "Bandas sano/vigilar/riesgo (65/35) y reglas del monitor",
+   "question": "¿Cuándo sale una alerta?",
+   "decision": "Bandas: riesgo < 35 ≤ vigilar < 65 ≤ sano, aproximadamente los cuartiles de la escala publicada. Alerta de deterioro si la mediana prevista a 3 meses cae ≥ 10 puntos y el percentil 90 también está por debajo del nivel actual (el intervalo no cruza 0). Severidad alta si todavía parece sana (≥ 55). La mejora es simétrica. Bache frente a caída: tras una caída bruta ≥ 10 en el mes, es bache si la mediana prevista recupera al menos la mitad. Inactividad: alerta inmediata.",
+   "why": "Usar el intervalo y no solo la mediana reduce las falsas alarmas: solo se alerta cuando el modelo está seguro de la dirección. Los umbrales de banda dejan unos tercios aproximados de la cartera y se pueden ajustar al apetito de riesgo del comprador.",
+   "evidence": "Distribución del último mes: riesgo 32 %, vigilar 48 %, sano 20 %.",
+   "chart": {
+    "type": "bar",
+    "title": "Distribución del score en el último mes",
+    "x_label": "score",
+    "y_label": "empresas",
+    "datasets": [
+     {
+      "label": "empresas",
+      "data": [
+       26.0,
+       16.0,
+       34.0,
+       39.0,
+       73.0,
+       109.0,
+       109.0,
+       111.0,
+       122.0,
+       120.0,
+       86.0,
+       97.0,
+       85.0,
+       81.0,
+       69.0,
+       42.0,
+       27.0,
+       17.0,
+       15.0,
+       8.0
+      ]
+     }
+    ],
+    "labels": [
+     "0",
+     "5",
+     "10",
+     "15",
+     "20",
+     "25",
+     "30",
+     "35",
+     "40",
+     "45",
+     "50",
+     "55",
+     "60",
+     "65",
+     "70",
+     "75",
+     "80",
+     "85",
+     "90",
+     "95"
+    ],
+    "note": "Cortes en 35 y 65"
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D20",
+   "category": "modelo",
+   "title": "Regresión cuantílica (q10/q50/q90) con calibración conformal (CQR)",
+   "question": "¿Cómo dar confianza a la previsión?",
+   "decision": "LightGBM con objective = quantile para q10, q50 y q90 dentro de mlforecast. Después, CQR: se reentrena con train cortado H meses, se miden las puntuaciones de no-conformidad y se ensancha el intervalo por horizonte. q50 es la previsión puntual y los cuantiles se ordenan para que no se crucen.",
+   "why": "Sin calibrar, el intervalo nominal del 80 % solo cubría alrededor del 60 %: LightGBM cuantílico es demasiado confiado. CQR da cobertura garantizada sin cambiar el modelo.",
+   "evidence": "Cobertura del intervalo 80 % por horizonte (sin CQR → con CQR): h1: 73 % → 80 %, h2: 74 % → 83 %, h3: 73 % → 79 %",
+   "chart": {
+    "type": "bar",
+    "title": "Cobertura del intervalo 80 % (objetivo 80 %)",
+    "x_label": "horizonte",
+    "y_label": "% de cobertura",
+    "datasets": [
+     {
+      "label": "sin calibrar",
+      "data": [
+       73.0435,
+       74.3478,
+       73.0435
+      ]
+     },
+     {
+      "label": "con CQR",
+      "data": [
+       80.0,
+       83.0435,
+       79.1304
+      ]
+     }
+    ],
+    "labels": [
+     "h1",
+     "h2",
+     "h3"
+    ]
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D21",
+   "category": "validación",
+   "title": "Eventos definidos contra la base anual, no contra el trimestre actual",
+   "question": "¿Por qué un margen alto 'predecía' deterioro?",
+   "decision": "Declive = MEDIANA de los cobros de los 6 meses siguientes < 50 % de la mediana de los 12 anteriores: robusto a meses pico, no relativo al trimestre actual. Crecimiento = cobros medios > 130 % y caja al alza. Los pesos se calibran con 3 eventos adversos y 1 positivo, así el score también distingue a las empresas sólidas (dos caras).",
+   "why": "Comparar con el trimestre actual convierte cualquier pico en una 'caída' futura: es regresión a la media disfrazada de evento y premiaba a las empresas mediocres.",
+   "evidence": "AUC del margen 6m frente a caída (definición inicial → actual): 0,53 → 0,53; tendencia de cobros: 0,63 → 0,43",
+   "chart": {
+    "type": "bar",
+    "title": "AUC frente a 'caída' según la definición del evento",
+    "x_label": "feature",
+    "y_label": "AUC",
+    "datasets": [
+     {
+      "label": "relativo al trimestre actual",
+      "data": [
+       0.5315,
+       0.6285
+      ]
+     },
+     {
+      "label": "relativo a la media anual",
+      "data": [
+       0.5274,
+       0.4301
+      ]
+     }
+    ],
+    "labels": [
+     "Margen 6m",
+     "Tendencia de cobros"
+    ]
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D22",
+   "category": "validación",
+   "title": "Validación: GroupKFold por grupo × 3 cortes, frente a AR(1)",
+   "question": "¿Cómo sabemos que generaliza y que no es regresión a la media?",
+   "decision": "5 folds por group_id × cortes nov-25, feb-26 y may-26. El scorer se ajusta sin la empresa y el forecaster predice con new_df. La referencia principal es un AR(1) agrupado por horizonte, no el naive.",
+   "why": "El review mostró que la ventaja de la v1 frente al naive era regresión a la media: un AR(1) la igualaba. Por eso toda mejora se mide contra el AR(1).",
+   "evidence": "Skill frente a AR(1) a h3 por versión: v3a: +1,3 %, v3b: +4,7 %, v4a: +3,0 %, v4b: +5,5 %, v4c: -9,1 %, v5a: +7,4 %, v5b: +9,4 %, v5c: -14,6 %, v5d: +8,4 %, v5e: +5,2 %, v5f: +3,1 %, v6: +3,8 %",
+   "chart": {
+    "type": "bar",
+    "title": "Skill a 3 meses frente a AR(1) por iteración",
+    "x_label": "versión",
+    "y_label": "skill (1 − MAE/MAE_AR1)",
+    "datasets": [
+     {
+      "label": "skill vs AR(1)",
+      "data": [
+       1.318,
+       4.7245,
+       3.0315,
+       5.4858,
+       -9.1,
+       7.4116,
+       9.3829,
+       -14.5562,
+       8.4314,
+       5.1584,
+       3.0839,
+       3.8166
+      ]
+     }
+    ],
+    "labels": [
+     "v3a",
+     "v3b",
+     "v4a",
+     "v4b",
+     "v4c",
+     "v5a",
+     "v5b",
+     "v5c",
+     "v5d",
+     "v5e",
+     "v5f",
+     "v6"
+    ]
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D23",
+   "category": "modelo",
+   "title": "Forecaster final: mlforecast + LightGBM cuantílico (q10/q50/q90, CQR) con 6 exógenas por horizonte",
+   "question": "¿Cuántas exógenas y cuánta regularización?",
+   "decision": "Exógenas: score_raw, score_raw_d3 (cambio a 3 meses), runway, activity_trend, months_since_last_tx (causal) y month_idx. Hiperparámetros por defecto (250 árboles, 15 hojas) y calibración conformal por horizonte. Score v6: sin dato = neutro, escala lineal publicada, pesos calibrados con 3 eventos adversos y 1 positivo.",
+   "why": "Con 21 exógenas el modelo sobreajusta a patrones que no generalizan entre grupos (skill a h3 −14,6 % incluso regularizado). Sin exógenas se pierde la señal fresca del mes. 6 exógenas con sentido económico dan el mejor equilibrio. La ganancia frente al AR(1) está en la cola, que es donde se actúa, y en las empresas que aún parecen sanas.",
+   "evidence": "v6: AUC deterioro ≥15 0,742 (AR1 0,703); en el quintil alto 0,574 (AR1 0,493); AUC mejora 0,715 (AR1 0,683); en el quintil bajo 0,635 (AR1 0,542); precisión en el 5 % de cola: caídas 47 % (AR1 30 %), subidas 41 % (AR1 25 %); MAE h3 11,2 (AR1 11,7); cobertura 80 % h3 82 %. A h1 solo mejora un 2 % sobre el arrastre mecánico del EWMA (4,52 frente a 4,60).",
+   "chart": {
+    "type": "bar",
+    "title": "Variantes del forecaster (MAE h1 / h3)",
+    "x_label": "variante",
+    "y_label": "MAE",
+    "datasets": [
+     {
+      "label": "MAE h1",
+      "data": [
+       3.342,
+       3.0566,
+       2.9794,
+       2.6401,
+       2.5545,
+       2.629,
+       2.6311,
+       2.0677,
+       4.6097
+      ]
+     },
+     {
+      "label": "MAE h3",
+      "data": [
+       6.5733,
+       6.4885,
+       7.4898,
+       5.9859,
+       5.8585,
+       7.4062,
+       5.92,
+       5.0208,
+       10.8596
+      ]
+     },
+     {
+      "label": "AR(1) h3",
+      "data": [
+       6.7788,
+       6.8651,
+       6.8651,
+       6.4651,
+       6.4651,
+       6.4651,
+       6.4651,
+       5.2939,
+       11.2051
+      ]
+     }
+    ],
+    "labels": [
+     "v4a",
+     "v4b",
+     "v4c",
+     "v5a",
+     "v5b",
+     "v5c",
+     "v5d",
+     "v5e",
+     "v5f"
+    ]
+   },
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D24",
+   "category": "modelo",
+   "title": "¿Por qué una logística para los pesos del score y no un modelo generativo (p.ej. TimeGPT-2)?",
+   "question": "¿Por qué la regresión logística decide el score? ¿Podríamos usar un modelo generativo o fundacional?",
+   "decision": "La logística NO es el score: solo calibra los pesos w_f de una suma lineal de percentiles, con w_f ≥ 0. El score sigue siendo aditivo, monótono y con explicación exacta. La previsión de trayectoria es donde un modelo fundacional de series temporales (TimeGPT-2 de Nixtla) sí encaja: como alternativa (challenger) del TrajectoryForecaster, en particular para empresas con historia corta (zero-shot). Queda pendiente de la API key y del permiso para enviar datos a un servicio externo (o de desplegarlo on-prem).",
+   "why": "El enunciado exige que no sea una caja negra: 'para cualquier empresa hay que poder decir por qué saca ese número'. Un modelo generativo o una red dan mejor ajuste potencial, pero sus pesos no son explicables al jurado ni monótonos. La logística con signo restringido es la forma más simple de anclar los pesos a hechos observables sin perder la interpretabilidad. Si se quiere no linealidad manteniendo la explicación exacta, la alternativa natural es un GAM aditivo (Explainable Boosting Machine) con restricciones monótonas, no un modelo generativo.",
+   "alternatives": "GAM/EBM monótono (no lineal y aditivo): candidato razonable para el siguiente paso. LightGBM + SHAP: explicación aproximada y no monótona. TimeGPT-2 como scorer: es un modelo de previsión, no de clasificación de salud; sirve para la trayectoria, no para los pesos.",
+   "status": "a confirmar con la organización",
+   "chart": null,
+   "evidence": ""
+  },
+  {
+   "id": "D25",
+   "category": "producto",
+   "title": "Formato de salida para el leaderboard",
+   "question": "¿Qué formato pide el leaderboard?",
+   "decision": "predict_submission.py genera un CSV por company_id y mes con: score, banda, confianza, q10/q50/q90 a 1-3 meses, tendencia y alerta. Todo sale de la API sklearn (fit sobre train, transform/predict sobre las empresas nuevas).",
+   "why": "No sabemos el formato exacto. Un CSV largo por empresa y mes cubre nivel, trayectoria y anticipación, y es fácil de adaptar.",
+   "status": "a confirmar con la organización",
+   "chart": null,
+   "alternatives": "",
+   "evidence": ""
+  },
+  {
+   "id": "D26",
+   "category": "producto",
+   "title": "Frontend: SPA + FastAPI en vez de Streamlit o Gradio",
+   "question": "¿Streamlit, Gradio o SPA?",
+   "decision": "Backend FastAPI con el modelo cargado en memoria (service.py) y una SPA de un solo HTML (Chart.js) con un contrato JSON explícito (app/API_CONTRACT.md).",
+   "why": "El simulador de escenarios necesita recalcular al mover cada slider (con debounce) y superponer base frente a escenario. Una SPA con API es más fluida, se despliega en cualquier sitio y separa el modelo (reutilizable como producto: la API es lo que compraría Embat) de la demo.",
+   "alternatives": "Streamlit: más rápido de montar, pero se re-ejecuta entero en cada interacción y queda acoplado a Python.",
+   "chart": null,
+   "status": "decidido",
+   "evidence": ""
+  },
+  {
+   "id": "D27",
+   "category": "producto",
+   "title": "Producto y comprador: monitor y simulador para Embat y sus socios financieros",
+   "question": "¿Quién paga y por qué?",
+   "decision": "Comprador: Embat. Integra X-Ray en su plataforma como (1) un monitor de alertas proactivas sobre sus clientes y (2) un simulador de escenarios para tesorería. Con el score y la confianza puede derivar operaciones a financiadores (circulante, factoring o pólizas) con un riesgo medido, y cobrar por origen o por suscripción.",
+   "why": "Embat ya tiene los datos y la relación con la pyme. El score la convierte en un canal de crédito con información que el banco no tiene: caja diaria, disciplina de facturas y anticipación de 1 a 3 meses.",
+   "status": "a confirmar con la organización",
+   "chart": null,
+   "alternatives": "",
+   "evidence": ""
+  }
+ ]
+}
