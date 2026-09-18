@@ -35,7 +35,7 @@ uv run python src/predict_submission.py --csv-dir <carpeta_test> --out submissio
 | Eventos ancla | `src/targets.py` | Apagado, tensión de caja, declive (con medianas) y crecimiento a 6 meses. Solo se usan para calibrar y validar |
 | **API sklearn** | `src/xray.py` | `HealthScorer.fit(X, y)/transform/score_panel` y `TrajectoryForecaster.fit/predict` (mlforecast + LightGBM cuantílico q10/q50/q90 + CQR), más `explain`, `alerts_for` y `fmt_feature` |
 | Servicio | `src/service.py`, `app/server.py` | Modelo en memoria, simulador de escenarios (`apply_scenario`) y API FastAPI según `app/API_CONTRACT.md` |
-| SPA | `app/static/index.html` | Cartera, ficha de empresa con abanico de previsión, «por qué cambió», simulador de escenarios, monitor, métricas y decisiones |
+| SPA | `app/static/index.html` | Cartera, ficha de empresa con abanico de previsión, «por qué cambió», simulador de escenarios, monitor, métricas y decisiones. Lenguaje visual (tokens, superficies, elevación): `app/DESIGN.md` |
 | Validación | `src/evaluate.py`, `src/anticipation.py` | GroupKFold(5) por `group_id` × cortes nov-25, feb-26 y may-26. Referencias: naive, AR(1) agrupado y arrastre del EWMA |
 
 ## Cómo funciona (en una frase por pieza)
