@@ -165,6 +165,14 @@ Pricing dinámico, scoring de proveedores, un sello financiero para negociar mej
 
 La demo cuenta tanto como el producto. Aunque la señal sea buena, si en cinco minutos no queda claro quién compra el producto y por qué, la propuesta estará incompleta. Hay que reservar tiempo para ensayar el pitch.
 
+## Interpretación del equipo
+
+El enunciado pide un número y un producto. Cómo pesar las señales y qué devolver además del ranking está en [Cómo pensar el score](scoring.md):
+
+- Una caja que se evapora en poco tiempo es mucho más grave que un DSO o DPO que se mueve un poco.
+- El scoring de un consumidor y el de una empresa preguntan lo mismo; cambia el dato, no la naturaleza del riesgo. La prueba: *si tuvieras 100.000 € para prestar, ¿qué te preocuparía?*
+- El output no puede acabarse en un número. Hace falta criticidad, explicación en lenguaje llano y una decisión (prestar / vigilar / no prestar).
+
 ---
 
-Fuente: artefacto compartido **“X Ray”**, reto de Embat para HackSpain 2026.
+Fuente: artefacto compartido **“X Ray”**, reto de Embat para HackSpain 2026. La sección *Interpretación del equipo* no forma parte de ese artefacto.

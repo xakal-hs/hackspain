@@ -23,6 +23,16 @@ The system must:
 
 The most obvious buyer is Embat or the company contributing its own treasury data. A simple, interpretable score with a convincing product is preferable to a sophisticated model without a useful product.
 
+## Scoring Philosophy
+
+Operational frame: [`context/scoring.md`](context/scoring.md) (readable page: [`context/scoring.html`](context/scoring.html)).
+
+- Design the score as a lender with €100,000 to place. Start from consumer credit questions, then map them onto company cash, invoices and debt. The nature of the risk is the same; the data type is not.
+- **Criticality is not uniform.** Cash available that evaporates quickly must move the score far more than a mild shift in collection days (DSO) or payment days (DPO). Do not give every feature the same weight.
+- Translate jargon into consumer language in every explanation: available cash is “the money left in the account”; DSO is “how long they take to get paid”; DPO is “how long they take to pay”.
+- The deliverable is not only a number for ranking A against B. For each company and month, expose level, trajectory, signal criticality, a plain-language why, dip vs structural drop, and a lender action (lend / watch / do not lend).
+- Observability gaps (missing ERP, truncated month, uncategorized flows) are coverage, not health.
+
 ## Delivery Requirements
 
 - Score the hidden test set of 60–80 unseen companies.
