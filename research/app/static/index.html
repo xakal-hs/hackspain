@@ -315,6 +315,7 @@ table.companies tbody tr:hover td { background: var(--surface-2); }
 .key.line::after { content: ""; position: absolute; left: 0; right: 0; top: 4px; height: 2px; border-radius: 1px; background: var(--c); }
 .key.dash::after { content: ""; position: absolute; left: 0; right: 0; top: 4px; height: 0; border-top: 2px dashed var(--c); }
 .key.band { background: color-mix(in srgb, var(--c) 18%, transparent); border-radius: 2px; }
+.key.bar::after { content: ""; position: absolute; left: 4px; top: 0; width: 10px; height: 10px; border-radius: 2px; background: var(--c); }
 .key.dot::after { content: ""; position: absolute; left: 5px; top: 1px; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
 .toggles { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
 .toggle {
@@ -432,13 +433,30 @@ figure.gchart figcaption { font-size: 12.5px; color: var(--muted); margin-top: 8
 .dec .gchart { border-top: 1px solid var(--line); padding-top: 12px; }
 .filterbar { display: flex; gap: 10px 16px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
 
+/* Tesorería */
+.tes-picker { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.tes-picker .search { flex: none; width: 200px; }
+.tes-picker .btn { min-height: 36px; }
+.tes-kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.tes-kpis .mtile .v { font-size: 22px; }
+.tes-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.debt-list { display: grid; gap: 0; margin-bottom: 12px; border: 1px solid var(--line); border-radius: 8px; }
+.debt-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: baseline; padding: 7px 12px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.debt-row:last-child { border-bottom: none; }
+.debt-row .num { text-align: right; font-weight: 600; }
+.debt-row small { color: var(--muted); font-size: 11.5px; text-align: right; min-width: 110px; }
+.debt-row.total { background: var(--surface-2); border-radius: 0 0 8px 8px; }
+.debt-row.contingent { color: var(--muted); }
+
 /* ───────────── Responsive ───────────── */
 @media (max-width: 1100px) {
   .workbench { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "traj" "scn" "why"; }
   .scn { position: static; }
 }
+@media (max-width: 1100px) { .tes-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 900px) {
-  .grid-2 { grid-template-columns: minmax(0, 1fr); }
+  .grid-2, .tes-grid { grid-template-columns: minmax(0, 1fr); }
+  .tes-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .hero { grid-template-columns: minmax(0, 1fr); }
 }
@@ -503,6 +521,7 @@ figure.gchart figcaption { font-size: 12.5px; color: var(--muted); margin-top: 8
     </a>
     <nav class="nav" aria-label="Secciones">
       <a href="#/cartera" data-route="cartera">Cartera</a>
+      <a href="#/tesoreria" data-route="tesoreria">Tesorería</a>
       <a href="#/monitor" data-route="monitor">Monitor <span class="count" id="nav-alerts" hidden></span></a>
       <a href="#/metricas" data-route="metricas">Métricas</a>
       <a href="#/decisiones" data-route="decisiones">Decisiones</a>
@@ -681,6 +700,7 @@ function cached(key, fn) {
 }
 const getCompanies = () => cached('companies', () => api('/api/companies'));
 const getCompany = (id) => cached('company:' + id, () => api('/api/company/' + encodeURIComponent(id)));
+const getTreasury = (id) => cached('treasury:' + id, () => api('/api/company/' + encodeURIComponent(id) + '/treasury'));
 const getDrivers = () => cached('drivers', () => api('/api/scenario/drivers'));
 const getMonitor = () => cached('monitor', () => api('/api/monitor'));
 const getMetrics = () => cached('metrics', () => api('/api/metrics'));
@@ -801,9 +821,9 @@ async function route() {
   main.replaceChildren(loading());
   const view = parts[0] || 'cartera';
   setActiveNav(view === 'empresa' ? 'cartera' : view);
-  const titles = { cartera: 'Cartera', empresa: parts[1] || 'Empresa', monitor: 'Monitor', metricas: 'Métricas', decisiones: 'Decisiones' };
+  const titles = { cartera: 'Cartera', empresa: parts[1] || 'Empresa', tesoreria: 'Tesorería', monitor: 'Monitor', metricas: 'Métricas', decisiones: 'Decisiones' };
   document.title = `${titles[view] || 'X-Ray'} · X-Ray`;
-  const views = { cartera: viewCartera, empresa: () => viewEmpresa(parts[1]), monitor: viewMonitor, metricas: viewMetricas, decisiones: viewDecisiones };
+  const views = { cartera: viewCartera, empresa: () => viewEmpresa(parts[1]), tesoreria: (t) => viewTesoreria(parts[1], t), monitor: viewMonitor, metricas: viewMetricas, decisiones: viewDecisiones };
   const fn = views[view];
   if (!fn) { main.replaceChildren(errorBox({ message: `No existe la sección «${view}».` })); return; }
   try {
@@ -954,7 +974,10 @@ async function viewEmpresa(id, token) {
 
   // ── Cabecera
   const deltaPrev = last && prev && isNum(last.score) && isNum(prev.score) ? last.score - prev.score : null;
-  root.append(h('a', { class: 'back', href: '#/cartera' }, icon('back'), 'Cartera'));
+  state.tesCid = c.company_id || id;
+  root.append(h('div', { style: { display: 'flex', 'justify-content': 'space-between', 'align-items': 'baseline', gap: '12px' } },
+    h('a', { class: 'back', href: '#/cartera' }, icon('back'), 'Cartera'),
+    h('a', { class: 'btn btn-sm', href: '#/tesoreria/' + encodeURIComponent(c.company_id || id) }, 'Ver tesorería')));
   const header = h('section', { class: 'card card-pad', 'aria-labelledby': 'company-title' },
     h('div', { class: 'hero' },
       h('div', null,
@@ -1375,6 +1398,197 @@ function scenarioPanel(panel, detailHost, d, drv, traj) {
   }
   syncOutputs(); markPresets();
   if (Object.keys(defaults).some(isMoved)) run(); else renderIdle();
+}
+
+/* ═════════════ Vista: Tesorería ═════════════ */
+function fmtMoneyFull(x, cur = 'EUR') {
+  if (!isNum(x)) return '—';
+  try { return new Intl.NumberFormat('es-ES', { style: 'currency', currency: cur || 'EUR', maximumFractionDigits: 0 }).format(x).replace('-', '−'); }
+  catch { return fmt(x, 0) + ' ' + (cur || ''); }
+}
+const tBar = (label, data, color, fillColor = color) => ({
+  type: 'bar', label, data, backgroundColor: fillColor, hoverBackgroundColor: alpha(color, 0.8), borderRadius: 3, borderWidth: 0,
+  maxBarThickness: 18, categoryPercentage: 0.75, barPercentage: 0.9, _color: color, order: 2,
+});
+const tLine = (label, data, color, { dash = false, fill = false } = {}) => ({
+  type: 'line', label, data, borderColor: color, backgroundColor: fill ? alpha(color, 0.12) : color, fill: fill ? 'origin' : false,
+  borderWidth: 2, borderDash: dash ? [5, 4] : [], pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: color,
+  pointHoverBorderColor: cssVar('--surface'), pointHoverBorderWidth: 2, tension: 0, spanGaps: false, _color: color, order: 1,
+});
+function moneyChart(canvas, labels, datasets, cur, { stacked = false } = {}) {
+  const s = baseScales();
+  s.x.ticks.callback = function (v) { return fmtMonth(this.getLabelForValue(v)); };
+  s.y.ticks.callback = (v) => fmtMoney(v, cur);
+  if (stacked) { s.x.stacked = true; s.y.stacked = true; }
+  const chart = new Chart(canvas, {
+    type: 'bar', data: { labels, datasets },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      layout: { padding: { top: 4, right: 8 } },
+      scales: s,
+      plugins: { legend: { display: false }, tooltip: {
+        filter: (it) => isNum(it.raw),
+        callbacks: {
+          title: (items) => items.length ? fmtMonth(items[0].label, true) : '',
+          label: (it) => `${fmtMoneyFull(it.raw, cur)}  ${it.dataset.label}`,
+          labelColor: (it) => ({ borderColor: it.dataset._color, backgroundColor: it.dataset._color }),
+        } } },
+    },
+  });
+  state.charts.push(chart);
+  return chart;
+}
+function tesCard(id, title, desc) {
+  const legend = h('div', { class: 'legend', 'aria-hidden': 'true' });
+  const canvas = h('canvas', { role: 'img', 'aria-label': title });
+  const top = h('div');
+  const bottom = h('div');
+  const box = h('div', { class: 'chart-box sm' }, canvas);
+  const card = h('section', { class: 'card card-pad', 'aria-labelledby': id },
+    h('div', { class: 'card-head' }, h('div', null, h('h2', { id }, title), h('p', null, desc))), top, legend, box, bottom);
+  return { card, canvas, legend, top, bottom, box };
+}
+function setLegend(el, items) {
+  el.replaceChildren(...items.map(([t, k, col]) => h('span', { class: 'legend-item' }, h('span', { class: `key ${k}`, style: { '--c': col } }), t)));
+}
+
+async function viewTesoreria(id, token) {
+  const list = await getCompanies();
+  if (!isCurrent(token)) return null;
+  const ids = (list.companies || []).map((x) => x.company_id).sort();
+  if (!ids.length) throw new Error('No hay empresas en la cartera.');
+  if (!id) {
+    id = state.tesCid && ids.includes(state.tesCid) ? state.tesCid : ids[0];
+    history.replaceState(null, '', '#/tesoreria/' + encodeURIComponent(id));
+  }
+  const t = await getTreasury(id);
+  if (!isCurrent(token)) return null;
+  state.tesCid = id;
+  const c = t.company || {};
+  const cur = c.currency || 'EUR';
+  const ms = t.months || [];
+  const L = ms[ms.length - 1] || {}, P = ms[ms.length - 2] || {};
+  const summ = (list.companies || []).find((x) => x.company_id === id) || {};
+  const debt = t.debt || { items: [] };
+  const labels = ms.map((m) => m.month);
+  const col = (k, f = (v) => v) => ms.map((m) => (isNum(m[k]) ? f(m[k]) : null));
+  const root = h('div');
+
+  // ── Cabecera: selector de empresa
+  const go = (cid) => { if (cid && cid !== id) location.hash = '#/tesoreria/' + encodeURIComponent(cid); };
+  const dl = h('datalist', { id: 'tes-ids' }, ids.map((x) => h('option', { value: x })));
+  const pick = h('input', { class: 'input', type: 'search', list: 'tes-ids', placeholder: 'COMP_0001', value: id, 'aria-label': 'Empresa',
+    onchange: (e) => { const v = e.target.value.trim().toUpperCase(); if (ids.includes(v)) go(v); },
+    onkeydown: (e) => { if (e.key === 'Enter') { const v = e.target.value.trim().toUpperCase(); const hit = ids.find((x) => x.includes(v)); if (hit) go(hit); } } });
+  const i = ids.indexOf(id);
+  root.append(h('div', { class: 'page-head' },
+    h('div', null,
+      h('div', { style: { display: 'flex', gap: '12px', 'align-items': 'center', 'flex-wrap': 'wrap' } }, h('h1', null, 'Tesorería'), h('span', { class: 'cid', style: { 'font-size': '16px' } }, id), summ.band ? bandChip(summ.band) : null),
+      h('p', null, `Cómo se mueve el dinero de la empresa, mes a mes hasta ${fmtMonth(c.last_month, true)}. Importes en ${cur}.`)),
+    h('div', { class: 'tes-picker' },
+      h('label', { class: 'field' }, h('span', null, 'Empresa'), h('div', { class: 'search' }, icon('search'), pick), dl),
+      h('button', { class: 'btn', type: 'button', disabled: i <= 0, 'aria-label': 'Empresa anterior', onclick: () => go(ids[i - 1]) }, icon('back')),
+      h('button', { class: 'btn', type: 'button', disabled: i >= ids.length - 1, 'aria-label': 'Empresa siguiente', onclick: () => go(ids[i + 1]) },
+        h('span', { style: { display: 'inline-flex', transform: 'scaleX(-1)' } }, icon('back'))),
+      h('a', { class: 'btn', href: '#/empresa/' + encodeURIComponent(id) }, 'Ver score'))));
+
+  // ── KPIs del último mes
+  const net6 = ms.slice(-6).map((m) => m.net).filter(isNum);
+  const chg = (a, b) => (isNum(a) && isNum(b) && b !== 0 ? (a / b - 1) * 100 : null);
+  const cashChg = chg(L.cash_end, P.cash_end);
+  const kpi = (k, v, d, cls = '') => h('div', { class: 'mtile' }, h('span', { class: 'k' }, k), h('span', { class: `v ${cls}` }, v), h('span', { class: 'd muted' }, d));
+  root.append(h('div', { class: 'tes-kpis' },
+    kpi('Dinero en cuenta', fmtMoney(L.cash_end, cur), isNum(cashChg) ? `${fmtSigned(cashChg, 1)} % frente a ${fmtMonth(P.month)}` : `a fin de ${fmtMonth(L.month)}`),
+    kpi('Liquidez disponible', fmtMoney(L.liquidity, cur), isNum(L.credit_available) ? `incluye ${fmtMoney(L.credit_available, cur)} de póliza sin usar` : 'sin póliza de crédito'),
+    kpi('Flujo neto del mes', fmtMoney(L.net, cur), net6.length ? `media de 6 meses: ${fmtMoney(net6.reduce((a, b) => a + b, 0) / net6.length, cur)}` : '', deltaClass(L.net, 0.5)),
+    kpi('Deuda viva', fmtMoney(debt.total_owed, cur), `foto del ${new Date(debt.as_of || '2026-09-01').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })} · cuotas del mes ${fmtMoney(L.debt_service, cur)}`),
+    c.has_erp
+      ? kpi('Vencido sin cobrar', fmtMoney(L.overdue_ar, cur), `vencido sin pagar a proveedores: ${fmtMoney(L.overdue_ap, cur)}`)
+      : kpi('Vencido sin cobrar', '—', 'Sin ERP conectado: sin facturas')));
+
+  const [c1, c2, c3, c4] = SERIES();
+  const ink = cssVar('--ink-2'), muted = cssVar('--viz-muted');
+  const fm = (v) => fmtMoneyFull(v, cur);
+  const grid = h('div', { class: 'tes-grid' });
+  root.append(grid);
+
+  // 1 · Flujo de caja
+  const f = tesCard('tes-flow', 'Flujo de caja', 'Lo que entra y sale de las cuentas cada mes, sin traspasos entre cuentas propias ni con el grupo. La línea es la diferencia: por encima de cero, el mes deja dinero.');
+  setLegend(f.legend, [['Entradas', 'bar', c1], ['Salidas', 'bar', c2], ['Flujo neto', 'line', ink]]);
+  f.bottom.append(tableView('Ver datos en tabla', ['Mes', 'Entradas', 'Salidas', 'Neto', 'Cobros de clientes', 'Nóminas', 'Impuestos'],
+    ms.map((m) => [fmtMonth(m.month, true), fm(m.inflow), fm(m.outflow), fm(m.net), fm(m.oper_in), fm(m.payroll), fm(m.tax)]), [1, 2, 3, 4, 5, 6]));
+
+  // 2 · Liquidez
+  const hasLc = ms.some((m) => isNum(m.lc_limit) && m.lc_limit > 0);
+  const l = tesCard('tes-liq', 'Liquidez', hasLc
+    ? 'El dinero que queda en las cuentas a fin de mes y, sumando la póliza de crédito sin usar, todo lo que podría gastar mañana.'
+    : 'El dinero que queda en las cuentas a fin de mes. No tiene póliza de crédito conectada.');
+  setLegend(l.legend, [['Dinero en cuenta', 'line', c1], ...(hasLc ? [['Con la póliza sin usar', 'dash', c3]] : [])]);
+  l.bottom.append(tableView('Ver datos en tabla', ['Mes', 'Dinero en cuenta', 'Póliza sin usar', 'Liquidez total'],
+    ms.map((m) => [fmtMonth(m.month, true), fm(m.cash_end), fm(m.credit_available), fm(m.liquidity)]), [1, 2, 3]));
+
+  // 3 · Deuda
+  const hasDs = ms.some((m) => isNum(m.debt_service) && m.debt_service > 0);
+  // la póliza solo se dibuja si se ha usado alguna vez: un límite sin tocar aplastaría la escala de las cuotas
+  const lcUsed = hasLc && ms.some((m) => isNum(m.lc_drawn) && m.lc_drawn > 0);
+  const dcard = tesCard('tes-debt', 'Deuda', 'Lo que debe a bancos y financiadores: la foto actual por producto y, mes a mes, lo pagado en cuotas e intereses y lo usado de la póliza.');
+  const items = debt.items || [];
+  if (items.length) {
+    dcard.top.append(h('div', { class: 'debt-list', role: 'list', 'aria-label': 'Deuda viva por producto' },
+      items.map((x) => h('div', { class: `debt-row${x.contingent ? ' contingent' : ''}`, role: 'listitem' },
+        h('span', null, x.label, x.contingent ? h('small', { style: { 'margin-left': '6px' } }, 'contingente, no suma') : null),
+        h('span', { class: 'num' }, fmtMoney(x.owed, cur)),
+        h('small', null, isNum(x.granted) && x.granted > 0 ? `de ${fmtMoney(x.granted, cur)} concedido` : `${x.n_products} producto${x.n_products === 1 ? '' : 's'}`))),
+      h('div', { class: 'debt-row total' }, h('b', null, 'Deuda viva total'), h('span', { class: 'num' }, fmtMoney(debt.total_owed, cur)), h('small', null, 'foto final de balances'))));
+  } else dcard.top.append(h('p', { class: 'muted', style: { 'margin-bottom': '10px' } }, 'Sin productos de deuda conectados.'));
+  if (hasDs || lcUsed) {
+    setLegend(dcard.legend, [...(hasDs ? [['Cuotas e intereses pagados', 'bar', c4]] : []),
+      ...(lcUsed ? [['Póliza dispuesta', 'line', c2], ['Límite de la póliza', 'dash', muted]] : [])]);
+    dcard.bottom.append(h('p', { class: 'muted', style: { 'font-size': '12px', 'margin-top': '8px' } },
+      'El saldo de los préstamos solo se conoce en la foto final; no se reconstruye hacia atrás.' +
+        (hasLc && !lcUsed ? ' La póliza de crédito no se ha usado en todo el periodo.' : '')),
+    tableView('Ver datos en tabla', ['Mes', 'Cuotas e intereses', 'Póliza dispuesta', 'Límite'],
+      ms.map((m) => [fmtMonth(m.month, true), fm(m.debt_service), fm(m.lc_drawn), fm(m.lc_limit)]), [1, 2, 3]));
+  } else {
+    dcard.box.replaceWith(h('p', { class: 'muted' }, 'No hay pagos de deuda ni pólizas de crédito en el histórico bancario.'));
+  }
+
+  // 4 · Facturas
+  const inv = tesCard('tes-inv', 'Facturas', 'Barras: lo facturado cada mes a clientes y por proveedores. Líneas: lo vencido que sigue pendiente a fin de mes (clientes que no le pagan y proveedores a los que no paga).');
+  if (c.has_erp) {
+    setLegend(inv.legend, [['Facturado a clientes', 'bar', alpha(c1, 0.5)], ['Facturado por proveedores', 'bar', alpha(c2, 0.5)],
+      ['Vencido sin cobrar', 'line', c1], ['Vencido sin pagar', 'line', c2]]);
+    inv.bottom.append(tableView('Ver datos en tabla', ['Mes', 'A clientes', 'Por proveedores', 'Vencido sin cobrar', 'Vencido sin pagar', 'Sin cobrar >60 días'],
+      ms.map((m) => [fmtMonth(m.month, true), fm(m.ar_issued), fm(m.ap_issued), fm(m.overdue_ar), fm(m.overdue_ap), fm(m.overdue_90_ar)]), [1, 2, 3, 4, 5]));
+  } else {
+    inv.box.replaceWith(h('div', { class: 'state', style: { padding: '32px 16px' } },
+      'Esta empresa no tiene ERP conectado, así que no hay facturas. Es un hueco de cobertura, no una señal de salud.'));
+  }
+  grid.append(f.card, l.card, dcard.card, inv.card);
+
+  root._after = () => {
+    moneyChart(f.canvas, labels, [
+      tBar('Entradas', col('inflow'), c1), tBar('Salidas', col('outflow', (v) => -v), c2),
+      { ...tLine('Flujo neto', col('net'), ink), stack: 'net', pointRadius: 2, pointBackgroundColor: ink }], cur, { stacked: true });
+    f.canvas.setAttribute('aria-label', `Flujo de caja de ${id}: en ${fmtMonth(L.month, true)} entraron ${fm(L.inflow)} y salieron ${fm(L.outflow)}`);
+    moneyChart(l.canvas, labels, [
+      tLine('Dinero en cuenta', col('cash_end'), c1, { fill: true }),
+      ...(hasLc ? [tLine('Con la póliza sin usar', col('liquidity'), c3, { dash: true })] : [])], cur);
+    l.canvas.setAttribute('aria-label', `Liquidez de ${id}: ${fm(L.cash_end)} en cuenta a fin de ${fmtMonth(L.month, true)}`);
+    if (hasDs || lcUsed) {
+      moneyChart(dcard.canvas, labels, [
+        ...(hasDs ? [tBar('Cuotas e intereses pagados', col('debt_service'), c4)] : []),
+        ...(lcUsed ? [tLine('Póliza dispuesta', col('lc_drawn'), c2, { fill: true }), { ...tLine('Límite de la póliza', col('lc_limit'), muted, { dash: true }), stepped: true }] : [])], cur);
+      dcard.canvas.setAttribute('aria-label', `Deuda de ${id}: deuda viva total ${fm(debt.total_owed)}`);
+    }
+    if (c.has_erp) {
+      moneyChart(inv.canvas, labels, [
+        tBar('Facturado a clientes', col('ar_issued'), c1, alpha(c1, 0.5)), tBar('Facturado por proveedores', col('ap_issued'), c2, alpha(c2, 0.5)),
+        tLine('Vencido sin cobrar', col('overdue_ar'), c1), tLine('Vencido sin pagar', col('overdue_ap'), c2)], cur);
+      inv.canvas.setAttribute('aria-label', `Facturas de ${id}: vencido sin cobrar ${fm(L.overdue_ar)}, vencido sin pagar ${fm(L.overdue_ap)}`);
+    }
+  };
+  return root;
 }
 
 /* ═════════════ Vista: Monitor ═════════════ */

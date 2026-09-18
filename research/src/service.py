@@ -46,6 +46,15 @@ SCENARIO_DRIVERS = [
      "description": "Escala las devoluciones de recibos/cobros"},
 ]
 
+# Pestaña de tesorería: magnitudes mensuales del panel, en moneda de la empresa (D03)
+TREASURY_COLS = ["inflow", "outflow", "oper_in", "payroll", "tax", "debt_service", "cash_end", "lc_drawn", "lc_limit",
+                 "ar_issued", "ap_issued", "overdue_ar", "overdue_ap", "overdue_90_ar", "overdue_90_ap"]
+# deuda en la foto final de balances; los avales son riesgo contingente y no suman a la deuda viva
+DEBT_LABELS = {"loan": "Préstamos", "mortgage": "Hipotecas", "leasing": "Leasing", "renting": "Renting",
+               "lineofcredit": "Pólizas de crédito", "confirming": "Confirming", "factoring": "Factoring",
+               "guarantee": "Avales"}
+CONTINGENT = {"guarantee"}
+
 
 def _panel() -> pl.DataFrame:
     return pl.read_parquet(ROOT / "data/panel.parquet")
@@ -79,6 +88,7 @@ class XRayService:
         self.forecast = self.fc.predict(self.series[["unique_id", "ds", "y", *EXOG]])
         self._alert_history = self._compute_alert_history()
         self.summary = self._summary()
+        self.debt = _debt_snapshot(self.comp)
 
     # ------------------------------------------------------------ helpers
     def _fc_for(self, ser: pd.DataFrame) -> pd.DataFrame:
@@ -172,6 +182,32 @@ class XRayService:
                                  "weight": round(float(self.scorer.weights_.get(f, 0.0)), 4)} for f, m in SPEC.items()},
         }
 
+    def treasury(self, cid: str) -> dict:
+        """Series mensuales de caja, liquidez, deuda y facturas de una empresa (para las gráficas de la SPA)."""
+        if cid not in self.comp.index:
+            raise KeyError(cid)
+        r = self.raw.filter(pl.col("company_id") == cid).sort("month").to_pandas()
+        has_erp = bool(r.has_erp.iloc[-1]) if len(r) else False
+        months = []
+        for x in r.itertuples():
+            row = {"month": str(x.month)[:7], **{k: _num(getattr(x, k)) for k in TREASURY_COLS}}
+            row["net"] = _num((row["inflow"] or 0) - (row["outflow"] or 0))
+            lim = row["lc_limit"] or 0
+            # póliza sin usar: límite concedido menos lo dispuesto a fin de mes
+            row["credit_available"] = _num(max(lim - (row["lc_drawn"] or 0), 0)) if lim > 0 else None
+            row["liquidity"] = _num((row["cash_end"] or 0) + (row["credit_available"] or 0)) if row["cash_end"] is not None else None
+            months.append(row)
+        d = self.debt[self.debt.company_id == cid]
+        items = [{"type": t.type, "label": DEBT_LABELS.get(t.type, t.type), "owed": _num(t.owed), "granted": _num(t.granted),
+                  "n_products": int(t.n), "contingent": t.type in CONTINGENT}
+                 for t in d.sort_values("owed", ascending=False).itertuples()]
+        c = self.comp.loc[cid]
+        return {"company": {"company_id": cid, "group_id": _str(c.group_id), "currency": _str(c.currency), "has_erp": has_erp,
+                            "last_month": months[-1]["month"] if months else None},
+                "months": months,
+                "debt": {"as_of": "2026-09-01", "items": items,
+                         "total_owed": _num(sum(i["owed"] or 0 for i in items if not i["contingent"]))}}
+
     def monitor(self) -> dict:
         al = self._alert_history
         cur = al[al.month == self.last_month] if len(al) else al
@@ -262,12 +298,30 @@ def apply_scenario(raw: pd.DataFrame, months: int, drivers: dict) -> pd.DataFram
     return df
 
 
+def _debt_snapshot(comp: pd.DataFrame) -> pd.DataFrame:
+    """Deuda viva por empresa y tipo de producto en la foto final, convertida a la moneda de la empresa (D03).
+
+    Solo la foto: no se proyecta hacia atrás (D11); la historia mensual de deuda en la SPA es la póliza dispuesta."""
+    import fx as FX
+    dp = pd.read_parquet(ROOT / "data/debt_products.parquet")[["product_id", "company_id", "type", "currency", "granted"]]
+    bal = pd.read_parquet(ROOT / "data/balances.parquet")[["product_id", "balance"]]
+    d = dp.merge(bal, on="product_id", how="left").merge(comp[["currency"]].rename(columns={"currency": "ccur"}),
+                                                        left_on="company_id", right_index=True)
+    fx = FX.load()
+    fx = fx[fx.month == fx.month.max()].set_index("currency").per_eur
+    # unidades de la moneda del producto por unidad de la de la empresa (misma convención que panel.py)
+    rate = (d.currency.map(fx) / d.ccur.map(fx)).where(d.currency != d.ccur, 1.0).fillna(1.0)
+    d = d.assign(owed=(-d.balance.fillna(0)).clip(lower=0) / rate, granted=d.granted.abs().fillna(0) / rate)
+    return (d.groupby(["company_id", "type"], as_index=False)
+             .agg(owed=("owed", "sum"), granted=("granted", "sum"), n=("product_id", "size")))
+
+
 def _num(v):
     try:
         v = float(v)
     except (TypeError, ValueError):
         return None
-    return None if np.isnan(v) or np.isinf(v) else round(v, 4)
+    return None if np.isnan(v) or np.isinf(v) else round(v, 4) + 0.0  # + 0.0: sin −0
 
 
 def _str(v):
