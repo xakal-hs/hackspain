@@ -8,6 +8,7 @@
 - The repository remote is `https://github.com/xakal-hs/hackspain`, with `main` as the default branch.
 - Hackathon datasets and their data dictionary live under `data/`; `data/invoices.csv` and `data/transactions.csv` are tracked with Git LFS.
 - The reproducible exploratory report consists of `analysis/generate_report.py` and the generated self-contained artifact `analysis/report.html`.
+- Historical cash is reconstructed in `analysis/cash_history.py` (formula, sentinel handling, cent rounding, drift flags) and explored in `analysis/app.py`. Persist with `scripts/build_cash_db.py`; do not commit `analysis/cash.duckdb`.
 - Categorical and referential dirt is inventoried in `src/mapping/ISSUES.md` and corrected at read time by DuckDB views in `src/mapping/` (`attach` / `connect`); raw rows stay in `*_raw` views.
 - Score-model experiments, the research API, and the demo SPA live under `research/`.
 - The visual language of the demo SPA is defined in `research/app/DESIGN.md`; follow it when touching `research/app/static/index.html`.
@@ -60,7 +61,10 @@ The jury evaluates three equally weighted dimensions:
 The synthetic dataset contains 1,286 companies in 250 business groups and covers September 2024 through September 2026.
 
 - `company_id` joins company-level files; `group_id` captures related legal entities.
-- `balances.csv` is only the final snapshot. Reconstruct historical balances backward from transactions, by product and currency.
+- `balances.csv` is only the final snapshot. Reconstruct historical balances backward from transactions, by product and currency. Round reconstructed amounts to cents: otherwise accounts that return to zero land at ±1e-13 and flip the sign of `caja negativa` between runs.
+- Cash means liquid accounts (`checking`, `saving`, `wallet`). Sentinel balances/transactions above €100M are generator artifacts, not SME cash.
+- Series whose back-cast requires more than one month of payments in overdraft are incomplete (`has_drift`); exclude them from cohort and group aggregates.
+- Country free-text is already canonized to ISO-2 by `src/mapping/`; 82% of companies still have no country.
 - Amounts are multi-currency. Do not aggregate them globally without a justified conversion.
 - IDs are categorical keys, never continuous numerical features.
 - Consult `data/data_dictionary.md` before assigning meaning to a field.
