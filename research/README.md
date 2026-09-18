@@ -70,6 +70,8 @@ uv run python src/predict_submission.py --csv-dir <carpeta_test> --out submissio
 
 ## Lo que no está resuelto (honestamente)
 
+Las reflexiones y mejoras abiertas (nota relativa o absoluta, tamaño, eventos, caja que no cuadra…) se van registrando en [`REFLEXIONES.md`](REFLEXIONES.md).
+
 - **La mejora frente al AR(1) es modesta en el promedio** (+3,8 % de MAE a h3; a h1 solo un 2 % sobre el arrastre mecánico del EWMA). La ganancia real está en la cola y en las empresas que aún parecen sanas. Es la clase de señal que el enunciado pide, pero no es espectacular.
 - **El nivel del score discrimina de forma moderada** (AUC ~0,6). Sin etiquetas, el ancla son eventos observables que son proxies. Hay que confirmar con la organización qué significa «apagarse» (¿cierre o baja de Embat?) y si existen etiquetas.
 - **Agosto de 2026 tiene el doble de caídas** que la media, con un 25 % menos de facturas sincronizadas: puede ser un efecto de borde del dataset.

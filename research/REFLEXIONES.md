@@ -1,0 +1,279 @@
+# Reflexiones y mejoras abiertas
+
+Documento vivo con lo que hemos ido pensando sobre el score: dudas de fondo, mejoras posibles y lo que ya sabemos gracias a mediciones. Las decisiones ya tomadas están en `DECISIONS.md`. Aquí van las preguntas que siguen abiertas y las propuestas pendientes de probar.
+
+**Cómo añadir una.** Usa el siguiente número libre y la misma plantilla: estado, pregunta, lo medido (con la fuente), opciones, recomendación y siguiente paso. Cuando una reflexión se resuelva, cámbiale el estado y enlaza la decisión (`Dxx`) o el commit.
+
+Estados: **abierta** (sin propuesta), **propuesta** (hay recomendación y falta probarla), **en curso**, **decidida** o **descartada**.
+
+## Índice
+
+| # | Tema | Estado | Prioridad |
+|---|---|---|---|
+| R01 | La nota es relativa a la población de train ("con curva") | propuesta | alta |
+| R02 | Anclar la nota a una probabilidad de evento (escala absoluta) | propuesta | alta |
+| R03 | Sesgo de tamaño en meses de caja, peso de nóminas y volatilidad | propuesta | media |
+| R04 | Desequilibrio de clases: qué afecta y qué no | decidida (no afecta al orden) | baja |
+| R05 | ¿Qué eventos son la "verdad"? (panel multi-modelo) | en curso | alta |
+| R06 | El apagado fuera del score, como producto de retención | propuesta | alta |
+| R07 | Features del brainstorming: ¿salud o desconexión? | en curso | media |
+| R08 | La caja reconstruida no cuadra con los flujos en el 16 % de los meses | abierta | alta |
+| R09 | La forma del modelo no es el límite: la información sí | decidida | — |
+| R10 | Cómo combinar varios eventos en una nota | abierta | media |
+| R11 | Bache frente a caída sigue sin resolverse | abierta | media |
+| R12 | Alertas que se encienden y se apagan | propuesta | baja |
+| R13 | Modelos generativos (TimeGPT, VAE, DeepAR) | abierta | baja |
+| R14 | Empresas del test fuera de distribución | decidida en parte | media |
+| R15 | Efecto de borde en agosto de 2026 | abierta | baja |
+
+---
+
+## R01 · La nota es relativa a la población de train ("con curva")
+
+**Estado:** propuesta.
+
+**Pregunta.** Si todas las empresas tienen caja positiva, ¿no deberían salir todas con nota alta en lugar de repartirse entre 0 y 100?
+
+**Cómo funciona hoy.** Cada feature se pasa a percentil frente al train: 3 meses de caja valen 80 si el 80 % del train tiene menos. Después la escala se estira para que el 5 % peor del train saque 15 y el 5 % mejor saque 85 (D22). Por tanto, la nota mide "mejor o peor que nuestras empresas de train", no "sana en términos absolutos".
+
+**Lo medido** (`reports/escala.md` §1, con 220 empresas que nunca tienen caja negativa y suelen cubrir 3 meses o más de gastos):
+
+| Regla | Mediana | En riesgo | Sanas |
+|---|---|---|---|
+| Regla fija del train (lo que hacemos) | 63 | 4 % | 43 % |
+| Regla reajustada solo con esas empresas | 46 | 23 % | 16 % |
+
+- **Si se recalculara la regla sobre una población sana, las repartiría de todas formas.** Por eso la regla se ajusta una vez con el train y se congela; nunca se recalcula con el test.
+- **Aun así, "sano" depende de cómo sea nuestro train.** Si el train fuera todo de empresas buenas, la regla sería más exigente de la cuenta.
+- **Caja positiva no significa sano.** El 93 % de los meses tienen caja positiva y su reparto de notas es casi igual al del total. Lo que distingue es cuántos meses de gasto cubre esa caja.
+
+**Opciones.**
+1. Dejarlo como está y documentar que la nota es relativa al train.
+2. Anclar la escala publicada a una probabilidad de evento (R02).
+3. Umbrales absolutos por feature fijados con criterio experto (por ejemplo, 6 meses de caja o más = 100), en lugar de percentiles.
+
+**Recomendación.** Opción 2. Los percentiles se quedan como pieza interna (pesos y explicaciones), pero la escala publicada pasa a ser absoluta.
+
+**Siguiente paso.** Implementarlo en la v7 junto con los eventos nuevos (R05).
+
+## R02 · Anclar la nota a una probabilidad de evento (escala absoluta)
+
+**Estado:** propuesta.
+
+**Idea.** Hacerlo como un scorecard bancario: la nota se traduce en una probabilidad de evento adverso en 6 meses y las bandas se fijan con probabilidades, no con percentiles (por ejemplo, sano = menos de un 10 %). Si todas las empresas son sanas, todas tienen probabilidad baja y todas salen altas, sin estirar la escala.
+
+**Lo medido** (`reports/escala.md` §3, evento adverso = saldo negativo o caída de cobros, tasa base 21,8 %):
+
+| Nota actual | 10 | 30 | 50 | 70 | 90 |
+|---|---|---|---|---|---|
+| Probabilidad de evento adverso | 37 % | 28 % | 21 % | 15 % | 10 % |
+
+**Lectura.** La escala 0-100 exagera cuánto sabemos: de 10 a 90 la probabilidad solo pasa del 37 % al 10 %. Una escala absoluta sería más estrecha, pero honesta.
+
+**Riesgos.**
+- Solo tiene sentido si los eventos son buenos (R05).
+- Si el test tiene otra tasa de problemas, hay que reajustar la constante de la probabilidad.
+- La explicación aditiva exacta se mantiene si la escala es lineal en el logit. Si es lineal en la probabilidad, deja de ser exacta.
+
+**Opciones de escala.**
+- **Puntos para doblar la odds**, al estilo de los scorecards: nota = A − B·log(odds). Es lineal en el logit, así que la explicación sigue siendo exacta.
+- **100·(1 − probabilidad)**: más fácil de leer, pero pierde la aditividad.
+
+**Siguiente paso.** Calibrar contra E1-E4 (R05) y comparar las bandas nuevas con las actuales empresa por empresa.
+
+## R03 · Sesgo de tamaño en meses de caja, peso de nóminas y volatilidad
+
+**Estado:** propuesta.
+
+**Lo medido** (`reports/escala.md` §2). La correlación entre nota y tamaño es casi nula (−0,07), pero por dentro hay diferencias:
+
+| Quintil de tamaño | Meses de caja (mediana) | Nota (mediana) | Saldo negativo en 6 meses | Caída de cobros en 6 meses |
+|---|---|---|---|---|
+| Pequeñas | 2,2 | 52 | 3,6 % | 20 % |
+| Grandes | 0,2 | 46 | 5,7 % | 17 % |
+
+- **Las grandes tienen diez veces menos meses de caja, pero sus eventos apenas aumentan.** Es probable que trabajen con menos colchón (pólizas, cobros más regulares) sin estar peor.
+- **Features que dependen del tamaño:** `runway` (−0,35), `payroll_burden` (−0,46), `net_vol_6m` (−0,37), `transfer_dep` (+0,34) y `growth_vs_12m` (+0,20).
+
+**Opciones.**
+1. Calcular el percentil de esas features dentro de cada banda de tamaño.
+2. Añadir el tamaño a la calibración de los pesos.
+3. No tocar nada: el efecto sobre la nota final es pequeño.
+
+**Recomendación.** Probar la opción 1 y quedarse con ella solo si mejora el AUC frente a E1-E4 fuera de grupo. Hay que vigilar que en el test haya empresas de tamaños que no vimos en el train (R14).
+
+## R04 · Desequilibrio de clases: qué afecta y qué no
+
+**Estado:** decidida (no afecta al orden).
+
+- **Los eventos son raros (3-17 %), pero eso no sesga el orden de la nota ni el AUC.** El AUC no depende de la tasa de eventos.
+- **Los pesos no dependen de la tasa.** Se normalizan por evento antes de promediar, así que un evento frecuente no pesa más que uno raro (D12).
+- **Sí importa en dos casos:**
+  - Si se publica una probabilidad (R02), la constante depende de la tasa base.
+  - La precisión de las alertas depende de cuántos eventos haya en el test.
+
+## R05 · ¿Qué eventos son la "verdad"? (panel multi-modelo)
+
+**Estado:** en curso. La implementación experimental está en `src/events_v2.py` y la medición en `reports/eventos_v2.md`.
+
+**Fuentes.** Hubo 17 respuestas de 4 familias de modelos no-Claude (GLM 5.3, DeepSeek V4, Qwen 3.6 y un agente de Cursor con acceso a los datos). La síntesis la hizo GLM 5.3 y está en `brainstorm/eventos/SINTESIS_glm5.3.md`. Se usaron modelos de otras familias para evitar el sesgo de familia de modelo.
+
+**Consenso.**
+- El apagado no es salud (R06).
+- El saldo negativo tiene que medirse como transición, no como estado.
+- La caída de cobros está contaminada por apagados y baches.
+- El incumplimiento solo sirve en versión estricta.
+- La unión de todos los eventos adversos (`adverse_6m`) no debe usarse para calibrar.
+
+**Eventos propuestos y lo que se ha medido:**
+
+| Evento | Papel | Tasa (empresa-mes) | Observación |
+|---|---|---|---|
+| E1 · Entrada en tensión de caja persistente | ancla adversa principal | 2,7 % | Solo el 38 % de los arranques se confirma en los meses siguientes. Ver R08. |
+| E2 · Incumplimiento estricto | co-ancla de crédito | 29,6 % | **Demasiado amplio.** La deuda >90 días con proveedores sola suma un 17 %, y el 39 % de las nóminas o cuotas "impagadas" reaparecen al mes siguiente. |
+| E3 · Caída estructural de cobros sin apagado ni rebote | co-ancla de trayectoria | 10,2 % | El filtro de "sin rebote" quita el 36 % de las caídas brutas. |
+| E4 · Expansión sostenida autofinanciada | ancla positiva | 5,9 % | Los filtros quitan el 67 % de los crecimientos brutos. |
+| E5 bache, E6 sano sostenido, E7 recuperación | clasificación y validación | — | E6: 7,9 % de las empresas. |
+
+**Pendiente.**
+1. **Estrechar E2.** Exigir dos meses seguidos sin la nómina o la cuota, y separar la deuda con proveedores como otro evento.
+2. **Tratar E1 como riesgo condicionado.** El 0,68 de la tabla y el 0,32 del §6 son el mismo número con el signo cambiado: cuantos más meses de caja tiene hoy la empresa, más probable es E1, porque el evento exige partir de una situación sana y las empresas ya en tensión no pueden tenerlo. Si se calibra así, `runway` recibiría peso 0. E1 hay que evaluarlo y calibrarlo solo sobre las empresas que pueden tenerlo (≥ 3 meses sanos), o combinarlo con el estado actual.
+3. **Recalibrar los pesos contra E1-E4 y medir la matriz completa de AUC.**
+4. **Hacer las preguntas a la organización** (lista priorizada en §6 de la síntesis). Las más importantes: qué es el apagado en el generador y contra qué puntúa el leaderboard.
+
+## R06 · El apagado fuera del score, como producto de retención
+
+**Estado:** propuesta.
+
+**Lo medido.**
+- **Parece desconexión, no cierre.** Las empresas que se apagan tienen de mediana 0,59 meses de caja, frente a 0,48 de las que siguen activas, y solo el 9 % se va con caja ≤ 0.
+- **Clasificación del auditor de datos (Cursor):** 52 % desconexiones, 36 % casos ambiguos y 12 % cierres plausibles.
+- **Borde del dataset:** el 36 % se apaga en julio de 2026.
+
+**Propuesta.**
+- Sacar el apagado de la calibración de pesos.
+- Usarlo como censura: no contar los demás eventos cuando la empresa se apaga dentro de la ventana.
+- Ofrecerlo como producto aparte para Embat, un riesgo de baja con su propio comprador (equipo de éxito de cliente).
+
+## R07 · Features del brainstorming: ¿salud o desconexión?
+
+**Estado:** en curso.
+
+**Duda.** Las mejores features del brainstorming (`payee_concentration`, con AUC 0,76 frente al apagado, y `lost_accel`, con 0,74) destacaban frente al apagado, que es sobre todo desconexión (R06).
+
+**Lo medido** (`reports/eventos_v2.md` §5):
+- La mayoría conserva señal frente a E1-E4, aunque bastante menor. `lost_accel` es la mejor, con distancia 0,16 frente a E1.
+- `tax_miss` y `billing_to_cash` se quedan débiles.
+
+**Siguiente paso.** Validarlas de forma incremental, añadiendo una cada vez al score, con AUC fuera de grupo frente a E1-E4. Solo entra la que mejore.
+
+## R08 · La caja reconstruida no cuadra con los flujos en el 16 % de los meses
+
+**Estado:** abierta. Hallazgo nuevo, encontrado al revisar a mano casos de E1.
+
+**Lo medido** (`reports/escala.md` §4). Para cada mes se compara la variación de caja con cobros menos pagos:
+- En la mitad de los meses cuadran casi exactamente (descuadre mediano del 1 %).
+- En el 15,6 % de los meses el descuadre supera el 50 % del flujo.
+- El 10,8 % de las empresas descuadran en más de la mitad de sus meses.
+
+**Ejemplo.** COMP_1155 mueve millones al mes y su caja se queda clavada en 13.756 durante siete meses. Todos esos movimientos son internos e intragrupo.
+
+**Hipótesis.**
+- Los flujos pasan por productos que no entran en la reconstrucción de la caja (tarjetas, pólizas, cuentas sin saldo final).
+- Las cuentas de grupo o de cash pooling no están en `balances`.
+
+**Impacto.**
+- **Meses de caja**, la feature con más peso, está mal para esas empresas.
+- **E1 y el saldo negativo** pueden dispararse, o dejar de dispararse, por un artefacto.
+
+**Siguiente paso.**
+1. Diagnosticar el descuadre por tipo de producto.
+2. Marcar las empresas con caja no fiable y tratar su `runway` como dato ausente (vale 50, neutro).
+3. Excluir esos meses de E1.
+4. Preguntar a la organización qué productos suma `cash_end` (pregunta 8 de la síntesis).
+
+## R09 · La forma del modelo no es el límite: la información sí
+
+**Estado:** decidida.
+
+- **Una logística lineal y un LightGBM** sobre las 17 features dan el mismo AUC frente a cada evento.
+- **Versiones no lineales de cada feature** (por tramos) aportan poco.
+- **Conclusión:** para mejorar hacen falta mejores eventos (R05) y mejores features (R07, R08), no un modelo más complejo.
+
+## R10 · Cómo combinar varios eventos en una nota
+
+**Estado:** abierta.
+
+**Hoy.** Se ajusta una logística por evento, con pesos no negativos, y se promedian los pesos normalizados. Es sencillo y explicable, pero una empresa con riesgo de caja y otra con caída de cobros acaban en la misma escala sin que sepamos si son comparables.
+
+**Opciones.**
+1. Varias notas (riesgo de caja, riesgo de impago, momentum) y la nota global como su media.
+2. Un índice latente con etiquetas blandas (Dawid-Skene o Snorkel). La síntesis propone dos factores, tensión y momentum.
+3. Un modelo multitarea.
+
+**Recomendación.** Empezar por la opción 1, porque encaja con las preguntas del reto y con el producto. La 2 solo si hay tiempo.
+
+## R11 · Bache frente a caída sigue sin resolverse
+
+**Estado:** abierta. AUC 0,53; la regla actual acierta el 74 % solo porque casi todo son caídas.
+
+**Ideas.**
+- Caja mínima dentro del mes (medida: AUC 0,79 frente a saldo negativo).
+- Cobros que entran después del mes malo.
+- Migración entre tramos de mora (30/60/90 días) y tasas de cura.
+- Definir el bache con E5 del panel.
+
+## R12 · Alertas que se encienden y se apagan
+
+**Estado:** propuesta.
+
+- **El 23 % de las alertas parpadea** (se enciende y se apaga).
+- **Histéresis:** exigir dos meses seguidos para encender una alerta y otros dos para apagarla. Cuesta un mes de antelación.
+- **Siguiente paso:** medirlo con `src/anticipation.py`.
+
+## R13 · Modelos generativos (TimeGPT, VAE, DeepAR)
+
+**Estado:** abierta.
+
+**Ideas.**
+- Clasificador generativo por evento.
+- Un VAE sobre las trayectorias.
+- DeepAR o TimeGPT para simular trayectorias futuras y leer la nota como probabilidad de acabar por debajo de un umbral.
+
+**Límite.** R09 indica que la información disponible pone el techo. Un modelo más potente difícilmente sube el AUC. Donde sí podría aportar es en los intervalos y en simular escenarios.
+
+**Requisitos.** TimeGPT necesita una clave de Nixtla y aceptar que los datos salgan a un servicio externo.
+
+## R14 · Empresas del test fuera de distribución
+
+**Estado:** decidida en parte.
+
+**Lo que ya hacemos.**
+- Regla congelada del train.
+- Los percentiles ya acotan cualquier valor extremo entre 0 y 100. Los valores fuera del rango 0,5-99,5 % del train se marcan en `ood_features` (D16).
+- Un dato ausente cuenta como 50 (neutro).
+- `coverage` y `ood_share` bajan la confianza de la nota.
+- Con menos de 3 meses de historia, la trayectoria usa AR(1) como respaldo.
+
+**Pendiente.** Comprobar qué pasa con empresas grandes fuera del rango del train (R03) y con historia muy corta. Preguntar si el test se parece al train (pregunta 3 de la síntesis).
+
+## R15 · Efecto de borde en agosto de 2026
+
+**Estado:** abierta.
+
+**Lo medido.** Agosto de 2026 tiene el doble de caídas que la media y un 25 % menos de facturas sincronizadas. Además, el 36 % de los apagados cae en julio de 2026.
+
+**Opciones.**
+- Excluir los dos últimos meses de las etiquetas.
+- Marcarlos como de baja confianza.
+
+---
+
+## Hoja de ruta propuesta (v7)
+
+1. **Eventos.** Sacar el apagado de la calibración, implementar E1 y E3-E4 y rehacer E2 más estrecho (R05, R06).
+2. **Caja fiable.** Diagnosticar el descuadre y marcar las empresas cuya caja no es fiable (R08).
+3. **Recalibrar pesos** contra los eventos nuevos y rehacer la validación fuera de grupo.
+4. **Escala absoluta** anclada a probabilidad, con bandas fijas (R01, R02).
+5. **Features:** probar los percentiles por tamaño (R03) y añadir las del brainstorming de una en una (R07).
+6. **Alertas:** histéresis (R12) y bache frente a caída (R11).
