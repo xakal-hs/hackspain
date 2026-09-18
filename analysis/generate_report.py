@@ -534,7 +534,7 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
         SELECT * FROM (VALUES
           ('Empresas sin país', (SELECT count(*) FROM companies WHERE country IS NULL OR trim(country) = ''), {counts['companies']}),
           ('Empresas sin ERP', (SELECT count(*) FROM companies WHERE erp IS NULL OR trim(erp) = ''), {counts['companies']}),
-          ('Transacciones sin categoría', (SELECT count(*) FROM transactions WHERE category IS NULL OR category = '-'), {counts['transactions']}),
+          ('Transacciones sin categoría', (SELECT count(*) FROM transactions WHERE category = 'uncategorized'), {counts['transactions']}),
           ('Transacciones sin contraparte', (SELECT count(*) FROM transactions WHERE counterparty_id IS NULL), {counts['transactions']}),
           ('Facturas sin fecha de pago', (SELECT count(*) FROM invoices WHERE payment_date IS NULL), {counts['invoices']}),
           ('Facturas sin contraparte', (SELECT count(*) FROM invoices WHERE counterparty_id IS NULL), {counts['invoices']}),
@@ -1129,7 +1129,7 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
       <div class="grid two"><div class="panel">{chart_html(category_fig, 440)}</div><div class="panel narrative">
         <h3>Interpretación</h3><ul>
           <li>Los signos sí tienen semántica: positivo es entrada y negativo salida. Para el score conviene separar entradas, salidas y flujo neto; usar importe absoluto perdería dirección.</li>
-          <li>La categoría <code>-</code> concentra {next(row['n'] for row in tx_categories if row['label'] == '-') / counts['transactions']:.1%} de los movimientos. La ausencia de categoría debe convertirse en indicador de calidad, no en categoría económica.</li>
+          <li>La categoría <code>uncategorized</code> concentra {next((row['n'] for row in tx_categories if row['label'] == 'uncategorized'), 0) / counts['transactions']:.1%} de los movimientos. La ausencia de categoría debe convertirse en indicador de calidad, no en categoría económica.</li>
           <li><code>transfer</code> puede inflar entradas y salidas sin representar actividad operativa. Debe distinguirse de <code>collection</code>/<code>payment</code>.</li>
           <li>El último mes termina el día de corte y puede estar incompleto. No debe interpretarse como deterioro sin corregir exposición temporal.</li>
         </ul></div></div>
