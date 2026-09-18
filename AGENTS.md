@@ -10,6 +10,7 @@
 - The reproducible exploratory report consists of `analysis/generate_report.py` and the generated self-contained artifact `analysis/report.html`.
 - Categorical and referential dirt is inventoried in `src/mapping/ISSUES.md` and corrected at read time by DuckDB views in `src/mapping/` (`attach` / `connect`); raw rows stay in `*_raw` views.
 - Score-model experiments, the research API, and the demo SPA live under `research/`.
+- The visual language of the demo SPA is defined in `research/app/DESIGN.md`; follow it when touching `research/app/static/index.html`.
 
 ## Project Context
 
