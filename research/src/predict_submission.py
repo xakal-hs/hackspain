@@ -4,7 +4,7 @@
     # sin argumentos: usa los datos de train (sanity check)
 
 Genera:
-- scores_monthly.csv: company_id, month, score, band, confidence, coverage, ood_share, pilares
+- scores_monthly.csv: company_id, month, score, band, confidence, coverage, ood_share, pilares, prob_<evento> a 6 meses
 - forecast_latest.csv: company_id, last_month, score, h1..h3 × (q10, q50, q90), trend, alerts
 """
 from __future__ import annotations
@@ -42,7 +42,8 @@ def main():
     feats = add_features(raw).to_pandas()
     scored = scorer.score_panel(feats)  # transform con cuantiles y pesos congelados en train
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
-    cols = ["company_id", "month", "score", "confidence", "coverage", "ood_share", *[f"p_{p}" for p in PILLARS]]
+    cols = ["company_id", "month", "score", "confidence", "coverage", "ood_share", *[f"p_{p}" for p in PILLARS],
+            *[c for c in scored.columns if c.startswith("prob_")]]  # probabilidad de cada evento a 6 meses (R02)
     m = scored[cols].copy()
     m["band"] = m.score.map(band_of)
     m["month"] = m.month.dt.strftime("%Y-%m")

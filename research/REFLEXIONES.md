@@ -11,13 +11,13 @@ Estados: **abierta** (sin propuesta), **propuesta** (hay recomendación y falta 
 | # | Tema | Estado | Prioridad |
 |---|---|---|---|
 | R01 | La nota es relativa a la población de train ("con curva") | propuesta | alta |
-| R02 | Anclar la nota a una probabilidad de evento (escala absoluta) | propuesta | alta |
+| R02 | Anclar la nota a una probabilidad de evento (escala absoluta) | en curso (probabilidades publicadas junto a la nota) | alta |
 | R03 | Sesgo de tamaño en meses de caja, peso de nóminas y volatilidad | propuesta | media |
 | R04 | Desequilibrio de clases: qué afecta y qué no | decidida (no afecta al orden) | baja |
-| R05 | ¿Qué eventos son la "verdad"? (panel multi-modelo) | en curso | alta |
-| R06 | El apagado fuera del score, como producto de retención | propuesta | alta |
+| R05 | ¿Qué eventos son la "verdad"? (panel multi-modelo) | decidida (eventos v2 en `targets.py`) | alta |
+| R06 | El apagado fuera del score, como producto de retención | decidida (fuera de la calibración; producto pendiente) | alta |
 | R07 | Features del brainstorming: ¿salud o desconexión? | en curso | media |
-| R08 | La caja reconstruida no cuadra con los flujos en el 16 % de los meses | abierta | alta |
+| R08 | La caja reconstruida no cuadra con los flujos en el 16 % de los meses | diagnosticada: es financiación intragrupo | alta |
 | R09 | La forma del modelo no es el límite: la información sí | decidida | — |
 | R10 | Cómo combinar varios eventos en una nota | abierta | media |
 | R11 | Bache frente a caída sigue sin resolverse | abierta | media |
@@ -81,6 +81,16 @@ Estados: **abierta** (sin propuesta), **propuesta** (hay recomendación y falta 
 
 **Siguiente paso.** Calibrar contra E1-E4 (R05) y comparar las bandas nuevas con las actuales empresa por empresa.
 
+**Actualización (v7).** `HealthScorer` calibra en train una logística de una sola variable (evento ~ nota) por evento y publica, junto a la nota, `prob_tension_6m`, `prob_incumplimiento_6m`, `prob_caida_6m`, `prob_expansion_6m` y `prob_adverso` (alguno de los tres adversos). La nota 0-100 y su explicación no cambian. Con los eventos v2, la probabilidad separa mucho más:
+
+| Nota | 10 | 30 | 50 | 70 | 90 |
+|---|---|---|---|---|---|
+| Algún evento adverso a 6 meses | 59 % | 45 % | 31 % | 20 % | 12 % |
+| Tensión de liquidez | 56 % | 40 % | 26 % | 16 % | 9 % |
+| Crecimiento autofinanciado | 4 % | 5 % | 6 % | 7 % | 9 % |
+
+Pendiente: decidir si la nota publicada pasa a ser absoluta (puntos para doblar la odds) y fijar las bandas por probabilidad.
+
 ## R03 · Sesgo de tamaño en meses de caja, peso de nóminas y volatilidad
 
 **Estado:** propuesta.
@@ -141,6 +151,37 @@ Estados: **abierta** (sin propuesta), **propuesta** (hay recomendación y falta 
 3. **Recalibrar los pesos contra E1-E4 y medir la matriz completa de AUC.**
 4. **Hacer las preguntas a la organización** (lista priorizada en §6 de la síntesis). Las más importantes: qué es el apagado en el generador y contra qué puntúa el leaderboard.
 
+**Actualización (v7): implementado en `src/targets.py`.** Los pesos se calibran ahora con cuatro eventos, y los v1 se conservan para comparar:
+
+| Evento | Definición final | Tasa | Empresas |
+|---|---|---|---|
+| `tension_6m` | Estará en tensión de liquidez persistente (≥2 de 3 meses con <0,25 meses de liquidez o liquidez negativa), contando la póliza disponible y excluyendo los meses con financiación del grupo | 27,4 % | 37,8 % |
+| `incumplimiento_6m` | Nómina o cuota regulares ausentes 2 meses seguidos con el feed activo, o IVA ausente 2 trimestres seguidos. Solo para empresas con alguna obligación regular | 12,3 % | 22,8 % |
+| `caida_6m` | E3: caída estructural de cobros, censurada por apagado y sin rebote | 10,2 % | 26,6 % |
+| `expansion_6m` | E4: expansión autofinanciada (cara positiva) | 5,9 % | 21,9 % |
+| `tension_entrada_6m` | E1 como **transición** en el conjunto en riesgo (hoy sanas). Solo mide la antelación; no calibra | 2,3 % | 5,1 % |
+
+Decisiones tomadas al implementarlo, con la evidencia que las motivó:
+1. **La tensión calibra como estado persistente y no como entrada.** Calibrada como entrada, la caja recibía peso 0,03, porque dentro del conjunto en riesgo el nivel de caja no predice la entrada. Pero a un prestamista una empresa que ya está en tensión y va a seguir en ella le importa. La entrada se reserva para medir la antelación.
+2. **El incumplimiento se restringe a empresas con obligaciones.** Sin la restricción, la "carga de deuda" subía de 0,03 a 0,14 por elegibilidad: solo puede dejar de pagar una cuota quien tiene cuotas.
+3. **La tensión excluye la financiación intragrupo** (ver R08) **y cuenta la póliza disponible.**
+
+Resultado en los pesos: la caja pesa 0,18 (0,16 en v6), la tendencia de actividad 0,20 y el uso de póliza 0,09. Los pagos tardíos a proveedores bajan a 0: su peso venía del apagado.
+
+**Validación fuera de muestra** (GroupKFold por grupo × 3 cortes; `metrics_v6b.json` es la v6 medida contra los eventos nuevos y `metrics_v7.json` la versión nueva). AUC del nivel del score frente a cada evento a 6 meses:
+
+| Evento | v6 (calibra con v1) | v7 (calibra con v2) |
+|---|---|---|
+| Tensión de liquidez | 0,604 | **0,657** |
+| Incumplimiento | 0,607 | 0,603 |
+| Caída estructural de cobros | **0,613** | 0,587 |
+| Expansión autofinanciada | 0,607 | 0,607 |
+| Apagado (ya no calibra) | 0,586 | 0,565 |
+
+La trayectoria cambia poco: el AUC de deterioro baja de 0,742 a 0,725, el de mejora sube de 0,715 a 0,730 y la ventaja frente a AR(1) pasa del 3,8 % al 2,0 % de MAE.
+
+**Lectura.** La v7 gana donde más importa a un prestamista (la liquidez, +0,05) y pierde algo en la caída de cobros (−0,03). Promediar los pesos de cuatro eventos sigue diluyendo cada uno (R10). Como ahora la probabilidad de cada evento se publica por separado (R02), cada comprador puede mirar el riesgo que le importa.
+
 ## R06 · El apagado fuera del score, como producto de retención
 
 **Estado:** propuesta.
@@ -154,6 +195,8 @@ Estados: **abierta** (sin propuesta), **propuesta** (hay recomendación y falta 
 - Sacar el apagado de la calibración de pesos.
 - Usarlo como censura: no contar los demás eventos cuando la empresa se apaga dentro de la ventana.
 - Ofrecerlo como producto aparte para Embat, un riesgo de baja con su propio comprador (equipo de éxito de cliente).
+
+**Actualización (v7):** fuera de la calibración (`evaluate.EVENTS`) y usado como censura en todos los eventos v2. El producto de retención sigue pendiente.
 
 ## R07 · Features del brainstorming: ¿salud o desconexión?
 
@@ -191,6 +234,13 @@ Estados: **abierta** (sin propuesta), **propuesta** (hay recomendación y falta 
 2. Marcar las empresas con caja no fiable y tratar su `runway` como dato ausente (vale 50, neutro).
 3. Excluir esos meses de E1.
 4. Preguntar a la organización qué productos suma `cash_end` (pregunta 8 de la síntesis).
+
+**Actualización: diagnosticado.** No es un error de reconstrucción, es financiación intragrupo (cash pooling).
+- **La caja es correcta.** En los meses con descuadre superior al 50 % del flujo externo (11,2 %), la caja cuadra al céntimo con **todos** los movimientos de sus cuentas en el 97 % de los casos (residuo mediano del 0,00 %).
+- **El hueco lo explican los traspasos intragrupo** en el 87 % de esos meses, y los intragrupo junto con los movimientos de inversión en el 92 %. El panel excluye los intragrupo de cobros y pagos, pero la caja sí los incluye.
+- **Hipótesis descartada:** que hubiera flujos en productos sin saldo reconstruido. El 99 % del volumen pasa por cuentas corrientes con saldo final.
+- **Consecuencia.** Estas filiales operan con la caja justa porque su grupo cubre los huecos, y su riesgo de liquidez es del grupo. `tension_6m` y `tension_entrada_6m` excluyen los meses con más del 20 % del flujo intragrupo.
+- **Pendiente:** una feature de "financiación neta del grupo" y la liquidez a nivel de grupo.
 
 ## R09 · La forma del modelo no es el límite: la información sí
 

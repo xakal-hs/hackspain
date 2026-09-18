@@ -17,6 +17,7 @@ import lightgbm as lgb
 from scipy.optimize import minimize
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
+from sklearn.linear_model import LogisticRegression
 from mlforecast import MLForecast
 from mlforecast.lag_transforms import RollingMean, RollingStd, ExpandingMean, ExponentiallyWeightedMean
 
@@ -92,7 +93,7 @@ class HealthScorer(BaseEstimator, TransformerMixin):
             Y = Y.set_axis(X.index)
             ws, self.calibration_ = [], {}
             for col in Y.columns:
-                wc, info = self._calibrate(X, Y[col], w, positive=col.startswith("positive"))
+                wc, info = self._calibrate(X, Y[col], w, positive=col.startswith(("positive", "expansion")))
                 self.calibration_[col] = info
                 if wc.sum() > 0:
                     ws.append(wc / wc.sum())
@@ -109,7 +110,29 @@ class HealthScorer(BaseEstimator, TransformerMixin):
         p5, p95 = np.percentile(comp[act], [5, 95])
         b = 70.0 / max(p95 - p5, 1e-6)
         self.scale_ = (15.0 - b * p5, b)
+        # escala absoluta (R02): probabilidad de cada evento a 6 meses en función del score, calibrada en train.
+        # No cambia la nota ni su explicación; se publica al lado (prob_*).
+        self.proba_ = {}
+        if y is not None:
+            Y = (y.to_frame() if isinstance(y, pd.Series) else pd.DataFrame(y)).set_axis(X.index)
+            score = np.clip(self.scale_[0] + self.scale_[1] * comp, 0, 100)
+            labels = {c: Y[c] for c in Y.columns}
+            adv = [c for c in Y.columns if not c.startswith(("positive", "expansion"))]
+            if len(adv) > 1:  # "algún evento adverso": 1 si alguno ocurre, 0 si todos los observables son 0
+                A = Y[adv]
+                labels["adverso"] = A.max(axis=1).where(A.notna().any(axis=1))
+            for name, lab in labels.items():
+                m = lab.notna().to_numpy()
+                yy = lab[m].to_numpy().astype(int)
+                if m.sum() >= 200 and 0 < yy.sum() < len(yy):
+                    lr = LogisticRegression(C=1e6, max_iter=1000).fit(score[m].reshape(-1, 1) / 100, yy)
+                    self.proba_[name] = (float(lr.intercept_[0]), float(lr.coef_[0, 0]), float(yy.mean()))
         return self
+
+    def event_proba(self, score) -> pd.DataFrame:
+        """Probabilidad de cada evento a 6 meses para un score dado (escala absoluta, R02)."""
+        s = np.asarray(score, float) / 100
+        return pd.DataFrame({f"prob_{k}": 1 / (1 + np.exp(-(a + b * s))) for k, (a, b, _) in getattr(self, "proba_", {}).items()})
 
     def _composite(self, X: pd.DataFrame) -> np.ndarray:
         W = np.array([self.weights_[f] for f in self.features_])
@@ -209,6 +232,8 @@ class HealthScorer(BaseEstimator, TransformerMixin):
         s["score"] = e.sum(1)
         n = s.groupby("company_id").cumcount() + 1
         s["confidence"] = (s["coverage"] * (1 - s["ood_share"]) * np.minimum(1, n / 6)).clip(0, 1)
+        if getattr(self, "proba_", None):
+            s = pd.concat([s, self.event_proba(s["score"]).set_axis(s.index)], axis=1)
         return s
 
 

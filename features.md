@@ -97,14 +97,17 @@ Contexto (no puntúan; sirven para la confianza y la detección OOD): tamaño en
 
 ### Eventos que usamos como ancla (sin etiquetas oficiales)
 
-Se miden en los 6 meses siguientes y sirven para calibrar y validar:
+Se miden en los 6 meses siguientes y sirven para calibrar los pesos y para validar. Son la versión v2, que salió del panel multi-modelo y se midió en `research/reports/eventos_v2.md`. Las razones están en `research/REFLEXIONES.md` (R05, R06 y R08).
 
 | Evento | Definición | Tasa |
 |---|---|---|
-| Apagado | La empresa deja de tener movimientos definitivamente | 3 % |
-| Saldo negativo | La caja pasa a negativa | 5 % |
-| Caída de cobros | La mediana de cobros de los 6 meses siguientes cae por debajo del 50 % de la mediana de los 12 anteriores | 17 % |
-| Crecimiento | Cobros >130 % de la media anual y caja al alza | 16 % |
+| Tensión de liquidez (`tension_6m`) | Estará en tensión persistente: ≥2 de 3 meses con menos de 0,25 meses de liquidez o liquidez negativa. Cuenta la póliza disponible y excluye los meses financiados por el grupo | 27 % |
+| Incumplimiento (`incumplimiento_6m`) | Nómina o cuota regulares ausentes 2 meses seguidos, o IVA ausente 2 trimestres seguidos. Solo para empresas con obligaciones regulares | 12 % |
+| Caída estructural de cobros (`caida_6m`) | La mediana de cobros de los 6 meses siguientes cae por debajo del 50 % de la de los 12 anteriores, sin rebote y sin que la empresa se apague | 10 % |
+| Expansión autofinanciada (`expansion_6m`) | Cobros operativos >130 % de su media, caja al alza, sin financiarse con póliza y sin un cobro puntual | 6 % |
+
+- **Antelación.** Se mide con `tension_entrada_6m`: entrar en tensión desde una situación sana (2 %, solo empresas hoy sanas).
+- **Apagado.** La empresa deja de tener movimientos. **Ya no calibra**: sobre todo son desconexiones de la plataforma. Se usa como censura.
 
 Código de referencia: `research/src/features.py`, `research/src/targets.py`, `research/src/panel.py`.
 

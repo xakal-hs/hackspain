@@ -17,7 +17,9 @@ from xray import HealthScorer, TrajectoryForecaster
 
 ROOT = Path(__file__).resolve().parents[1]
 H, EVENT = 3, 15.0  # movimiento real = 15 pts en la escala publicada (ejemplos del enunciado: 45→65, 82→68)
-EVENTS = ["churn_6m", "cash_stress_6m", "decline_6m", "positive_6m"]  # tres adversos + uno positivo (dos caras)
+# v2: tres adversos + uno positivo (dos caras). El apagado ya no calibra: sobre todo son desconexiones (targets.py)
+EVENTS = ["tension_6m", "incumplimiento_6m", "caida_6m", "expansion_6m"]
+EVENTS_V1 = ["churn_6m", "cash_stress_6m", "decline_6m", "positive_6m"]
 CUTOFFS = [pd.Timestamp("2025-11-01"), pd.Timestamp("2026-02-01"), pd.Timestamp("2026-05-01")]
 EXOG_SMALL = ["score_raw", "score_raw_d3", "runway", "activity_trend", "months_since_last_tx", "month_idx"]
 STRONG = dict(n_estimators=150, learning_rate=0.04, num_leaves=7, min_child_samples=200, colsample_bytree=0.5, reg_lambda=5.0)
@@ -43,11 +45,11 @@ def build_series(scored: pd.DataFrame, feats: pd.DataFrame) -> pd.DataFrame:
     return s.rename(columns={"company_id": "unique_id", "month": "ds", "score": "y"})
 
 
-def fit_scorer(train_rows: pd.DataFrame, cut: pd.Timestamp, calibrate: bool) -> HealthScorer:
+def fit_scorer(train_rows: pd.DataFrame, cut: pd.Timestamp, calibrate: bool, events: list | None = None) -> HealthScorer:
     sc = HealthScorer(calibrate=calibrate)
     if calibrate:
         obs = train_rows.month <= cut - pd.DateOffset(months=6)  # evento ya observado en el corte (sin fuga)
-        lab = train_rows[EVENTS].where(obs, axis=0)
+        lab = train_rows[events or EVENTS].where(obs, axis=0)
         return sc.fit(train_rows, lab)
     return sc.fit(train_rows)
 
@@ -58,7 +60,8 @@ def _auc(y, s):
     return float(roc_auc_score(y, s)) if len(np.unique(y)) > 1 else None
 
 
-def run(tag: str, calibrate: bool = True, use_exog: bool = True, exog: list | None = None, lgb_params: dict | None = None) -> dict:
+def run(tag: str, calibrate: bool = True, use_exog: bool = True, exog: list | None = None, lgb_params: dict | None = None,
+        events: list | None = None) -> dict:
     EXOG = exog if exog is not None else globals()["EXOG"]
     panel = load()
     cg = panel.drop_duplicates("company_id").set_index("company_id")["group_id"]
@@ -68,7 +71,7 @@ def run(tag: str, calibrate: bool = True, use_exog: bool = True, exog: list | No
         tr_ids, va_ids = set(ids[tr]), set(ids[va])
         for cut in CUTOFFS:
             hist = panel[panel.month <= cut]
-            scorer = fit_scorer(hist[hist.company_id.isin(tr_ids)], cut, calibrate)
+            scorer = fit_scorer(hist[hist.company_id.isin(tr_ids)], cut, calibrate, events)
             weights.append(scorer.weights_)
             sc = scorer.score_panel(panel)
             s = build_series(sc, panel)
@@ -90,16 +93,16 @@ def run(tag: str, calibrate: bool = True, use_exog: bool = True, exog: list | No
             rows.append(pr)
             # validez externa del NIVEL: score en el corte vs eventos en los 6 meses siguientes
             at = sc[(sc.month == cut) & sc.company_id.isin(va_ids)][["company_id", "score", "score_raw"]]
-            ev = panel[panel.month == cut][["company_id", "adverse_6m", "churn_6m", "cash_stress_6m", "decline_6m",
-                                             "positive_6m", "has_erp", "month_idx"]]
+            ev = panel[panel.month == cut][["company_id", "adverse_6m", *EVENTS_V1, *EVENTS, "has_erp", "month_idx"]]
             ext_rows.append(at.merge(ev, on="company_id").assign(cutoff=cut))
     res = pd.concat(rows, ignore_index=True)
     ext = pd.concat(ext_rows, ignore_index=True)
     res.to_parquet(ROOT / f"reports/preds_{tag}.parquet")
     out = summarize(res, tag)
-    for e in ["adverse_6m", "churn_6m", "cash_stress_6m", "decline_6m"]:
+    for e in ["adverse_6m", "churn_6m", "cash_stress_6m", "decline_6m", "tension_6m", "incumplimiento_6m", "caida_6m"]:
         out[f"auc_level_vs_{e}"] = _auc(ext[e], -ext.score)
     out["auc_level_vs_positive_6m"] = _auc(ext["positive_6m"], ext.score)
+    out["auc_level_vs_expansion_6m"] = _auc(ext["expansion_6m"], ext.score)
     w = pd.DataFrame(weights)
     out["weights_mean"] = w.mean().round(4).to_dict()
     out["weights_std"] = w.std().round(4).to_dict()
@@ -169,6 +172,7 @@ if __name__ == "__main__":
     tag = sys.argv[1] if len(sys.argv) > 1 else "v4"
     ex = EXOG_SMALL if "--small" in sys.argv else (EXOG_FULL if "--full" in sys.argv else None)
     res = run(tag, calibrate="--prior" not in sys.argv, use_exog="--no-exog" not in sys.argv, exog=ex,
-              lgb_params=STRONG if "--strong" in sys.argv else None)
+              lgb_params=STRONG if "--strong" in sys.argv else None,
+              events=EVENTS_V1 if "--events-v1" in sys.argv else None)
     print(json.dumps(res, indent=2, ensure_ascii=False))
     (ROOT / f"reports/metrics_{tag}.json").write_text(json.dumps(res, indent=2, ensure_ascii=False))
