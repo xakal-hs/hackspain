@@ -7,11 +7,15 @@ import html
 import json
 from pathlib import Path
 
+from types import SimpleNamespace
+
 import duckdb
 import plotly.graph_objects as go
 from plotly.io import to_html
 from plotly.offline.offline import get_plotlyjs
 from plotly.subplots import make_subplots
+
+from cash_history import build_cash_sections, setup_cash_panel
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -272,6 +276,8 @@ def setup(connection: duckdb.DuckDBPyConnection) -> None:
         """
     )
 
+    setup_cash_panel(connection)
+
 
 def build_report(connection: duckdb.DuckDBPyConnection) -> str:
     counts = {
@@ -316,7 +322,7 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
     country = records(
         connection,
         """
-        SELECT coalesce(nullif(trim(country), ''), 'Sin informar') AS "label", count(*) AS n
+        SELECT coalesce(country_norm(country), 'Sin informar') AS "label", count(*) AS n
         FROM companies GROUP BY 1 ORDER BY n DESC LIMIT 10
         """
     )
@@ -541,7 +547,7 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
           ('Facturas sin fecha de pago', (SELECT count(*) FROM invoices WHERE payment_date IS NULL), {counts['invoices']}),
           ('Facturas sin contraparte', (SELECT count(*) FROM invoices WHERE counterparty_id IS NULL), {counts['invoices']}),
           ('Saldos sin available', (SELECT count(*) FROM balances WHERE available IS NULL OR available = ''), {counts['balances']}),
-          ('Tipos de país no normalizados', (SELECT count(*) FROM companies WHERE lower(trim(country)) IN ('españa','espanya','spain','espanya ')), {counts['companies']})
+          ('País escrito en texto libre', (SELECT count(*) FROM companies WHERE country_norm(country) IS NOT NULL AND country_norm(country) <> trim(country)), {counts['companies']})
         ) AS t(issue, affected, total)
         """,
     )
@@ -833,8 +839,20 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
         for row in top_outliers
     ]
 
-    total_records = counts["transactions"] + counts["invoices"] + counts["balances"]
     date_range = f"{tx_dates[0]:%b %Y} — {tx_dates[1]:%b %Y}"
+
+    cash_sections = build_cash_sections(
+        connection,
+        SimpleNamespace(
+            records=records,
+            scalar=scalar,
+            fmt=fmt,
+            compact=compact,
+            table=table,
+            chart_html=chart_html,
+            colors=COLORS,
+        ),
+    )
 
     return f"""<!doctype html>
 <html lang="es">
@@ -851,9 +869,12 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
     <nav>
       <a href="#resumen">01 · Resumen</a><a href="#variables">02 · Variables</a>
       <a href="#universo">03 · Universo</a><a href="#tesoreria">04 · Tesorería</a>
-      <a href="#facturas">05 · Facturas</a><a href="#deuda">06 · Deuda y saldos</a>
-      <a href="#relaciones">07 · Relaciones</a><a href="#outliers">08 · Outliers</a>
-      <a href="#calidad">09 · Calidad</a><a href="#conclusiones">10 · Conclusiones</a>
+      <a href="#caja-metodo">05 · Caja: método</a><a href="#caja-evolucion">06 · Caja: evolución</a>
+      <a href="#caja-temporalidad">07 · Temporalidad</a><a href="#caja-grupos">08 · Grupos</a>
+      <a href="#caja-problemas">09 · Problemas de caja</a>
+      <a href="#facturas">10 · Facturas</a><a href="#deuda">11 · Deuda y saldos</a>
+      <a href="#relaciones">12 · Relaciones</a><a href="#outliers">13 · Outliers</a>
+      <a href="#calidad">14 · Calidad</a><a href="#conclusiones">15 · Conclusiones</a>
     </nav>
     <div class="side-note">Artefacto autónomo<br>Generado sobre los 8 CSV<br>Fecha de corte: {AS_OF}</div>
   </aside>
@@ -922,8 +943,10 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
         </ul></div></div>
     </section>
 
+    {cash_sections}
+
     <section class="section" id="facturas">
-      <div class="section-head"><span>05</span><div><h2>Facturas y ciclo de cobro/pago</h2><p>Estado documental, puntualidad y presión de circulante.</p></div></div>
+      <div class="section-head"><span>10</span><div><h2>Facturas y ciclo de cobro/pago</h2><p>Estado documental, puntualidad y presión de circulante.</p></div></div>
       <div class="grid two"><div class="panel">{chart_html(invoice_fig, 430)}</div><div class="panel">{chart_html(invoice_time_fig, 430)}</div></div>
       <div class="callout warning"><b>No confundir estado con dirección.</b> El fichero no marca explícitamente factura emitida vs recibida. El signo, tipo documental y contexto de contraparte requieren validación antes de llamar “cuentas a cobrar” a todo pendiente.</div>
       <div class="insight-grid">
@@ -935,7 +958,7 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
     </section>
 
     <section class="section" id="deuda">
-      <div class="section-head"><span>06</span><div><h2>Productos, deuda y saldo final</h2><p>Capacidad financiera y foto de liquidez al cierre.</p></div></div>
+      <div class="section-head"><span>11</span><div><h2>Productos, deuda y saldo final</h2><p>Capacidad financiera y foto de liquidez al cierre.</p></div></div>
       <div class="grid two"><div class="panel">{chart_html(products_fig, 420)}</div><div class="panel">{chart_html(balance_fig, 420)}</div></div>
       <div class="grid two">
         <div class="panel"><h3>Deuda por tipo</h3>{table(["Tipo", "N", "Concedido*", "Pendiente*", "Uso mediano"], debt_rows)}<p class="caption">* Importes reportados mezclan monedas; comparar dentro de moneda/empresa.</p></div>
@@ -949,19 +972,19 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
     </section>
 
     <section class="section" id="relaciones">
-      <div class="section-head"><span>07</span><div><h2>Relaciones entre señales</h2><p>Correlaciones de Pearson sobre agregados por empresa, limitadas a compañías cuya moneda declarada es EUR.</p></div></div>
+      <div class="section-head"><span>12</span><div><h2>Relaciones entre señales</h2><p>Correlaciones de Pearson sobre agregados por empresa, limitadas a compañías cuya moneda declarada es EUR.</p></div></div>
       <div class="panel">{chart_html(corr_fig, 620)}</div>
       <div class="callout"><b>Cómo leerla.</b> Entradas y salidas elevadas suelen medir tamaño, no salud. La correlación no demuestra causalidad y queda dominada por colas largas. Para el score conviene usar ratios, tendencias y cambios intraempresa, además de transformaciones logarítmicas robustas.</div>
     </section>
 
     <section class="section" id="outliers">
-      <div class="section-head"><span>08</span><div><h2>Outliers con significado financiero</h2><p>Detección IQR sobre señales agregadas por empresa en la cohorte EUR; no sobre IDs ni tipos categóricos.</p></div></div>
+      <div class="section-head"><span>13</span><div><h2>Outliers con significado financiero</h2><p>Detección IQR sobre señales agregadas por empresa en la cohorte EUR; no sobre IDs ni tipos categóricos.</p></div></div>
       <div class="grid two"><div class="panel"><h3>Extremos por métrica</h3>{table(["Métrica", "Mediana", "Banda IQR", "Fuera", "% empresas"], outlier_table)}</div><div class="panel">{chart_html(outlier_fig, 390)}</div></div>
       <div class="panel"><h3>Empresas más extremas · puntuación robusta multiseñal</h3>{table(["Empresa", "Saldo final", "Flujo neto", "Vencido", "Deuda", "Score robusto"], top_outlier_table)}<p class="caption">Un outlier no es un error ni una empresa enferma. Puede ser una empresa grande, un evento real, una moneda/producto mal interpretado o un problema de calidad. Debe revisarse su trayectoria mensual y su grupo.</p></div>
     </section>
 
     <section class="section" id="calidad">
-      <div class="section-head"><span>09</span><div><h2>Calidad, cobertura y límites</h2><p>Qué puede sesgar el análisis y el futuro score.</p></div></div>
+      <div class="section-head"><span>14</span><div><h2>Calidad, cobertura y límites</h2><p>Qué puede sesgar el análisis y el futuro score.</p></div></div>
       <div class="grid two"><div class="panel"><h3>Campos incompletos o no normalizados</h3>{table(["Incidencia", "Filas", "%"], quality_rows)}</div><div class="panel"><h3>Integridad referencial y unicidad</h3>{table(["Comprobación", "Fallos"], integrity_rows)}</div></div>
       <div class="limitations">
         <article><b>Multimoneda</b><p><code>exchange_rate</code> existe, pero el diccionario no define de forma inequívoca la dirección de conversión. No se presenta un total “EUR” falso.</p></article>
@@ -972,7 +995,7 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
     </section>
 
     <section class="section conclusions" id="conclusiones">
-      <div class="section-head"><span>10</span><div><h2>Conclusiones y siguiente diseño</h2><p>Qué debería salir de este EDA hacia el motor X-Ray.</p></div></div>
+      <div class="section-head"><span>15</span><div><h2>Conclusiones y siguiente diseño</h2><p>Qué debería salir de este EDA hacia el motor X-Ray.</p></div></div>
       <div class="conclusion-list">
         <article><span>01</span><div><h3>Construir panel empresa × mes</h3><p>Reconstruir saldo, entradas/salidas operativas, concentración de contraparte, puntualidad, pendiente y utilización de deuda. Conservar cobertura y calidad como features separadas.</p></div></article>
         <article><span>02</span><div><h3>Separar nivel, tendencia y estabilidad</h3><p>Para cada señal: nivel robusto, pendiente 3/6 meses, variación intermensual, volatilidad y persistencia. Así se distingue un bache de un deterioro estructural.</p></div></article>
