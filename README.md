@@ -34,7 +34,8 @@ acción (prestar / vigilar / no prestar).
 | [`context/`](context) | Enunciado del reto (`challenge.md`) y el marco de scoring del equipo (`scoring.md`), cada uno con su versión HTML |
 | [`data/`](data) | Los CSV originales del reto y su diccionario. **No se modifican nunca.** `invoices.csv` y `transactions.csv` van por Git LFS |
 | [`src/mapping/`](src/mapping) | Capa de mapeo: vistas DuckDB que corrigen la suciedad al leer (países no ISO, ERP en dos vocabularios, deuda con signo invertido, saldos absurdos…). El inventario de fallos y su regla está en [`ISSUES.md`](src/mapping/ISSUES.md) |
-| [`analysis/`](analysis) | Informes exploratorios autocontenidos que se abren sin servidor: `report.html` (EDA del dataset), `features_analisis_automatico.html` (catálogo de features usables y su criticidad) y `features_challenge.html` (features alineadas con las seis preguntas, con su AUC) |
+| [`analysis/`](analysis) | Exploración del dataset. Informes autocontenidos que se abren sin servidor (`report.html`, `features_analisis_automatico.html`, `features_challenge.html`), la reconstrucción del histórico de caja (`cash_history.py`) y un explorador interactivo de esa caja en Streamlit (`app.py`) |
+| [`scripts/`](scripts) | Utilidades del panel de caja: materializarlo en `analysis/cash.duckdb` (`build_cash_db.py`), validarlo contra el saldo ancla (`validate_cash.py`) y comprobar que sale idéntico en tres construcciones (`check_determinism.py`) |
 | [`research/`](research) | **El sistema.** Panel mensual, score, previsión, monitor, simulador, API y demo. Tiene su propio [README](research/README.md) |
 | [`features.md`](features.md) | Brief de brainstorming de features: el reto, las trampas del dataset y las 17 features actuales con su peso |
 | [`AGENTS.md`](AGENTS.md) | Contexto permanente para agentes de código, más `.agents/skills/` y `skills-lock.json` |
@@ -77,21 +78,33 @@ uv run uvicorn app.server:app --port 8080   # abrir http://localhost:8080
 Los comandos de validación, tests y scoring del test oculto están en el
 [README de `research/`](research/README.md).
 
-Los informes de `analysis/` ya están generados y se abren con doble clic. Para regenerarlos hacen
-falta `duckdb` (todos) y `plotly` (el EDA), que no forman parte del proyecto de `research/`:
+Los informes de `analysis/` ya están generados y se abren con doble clic. `analysis/` y `scripts/`
+son la parte exploratoria y tienen sus propias dependencias en [`requirements.txt`](requirements.txt),
+independientes de `research/` (en Windows, `.venv\Scripts\python.exe`):
 
 ```bash
-uv run --with duckdb --with plotly python analysis/generate_report.py   # -> analysis/report.html
-uv run --with duckdb python analysis/feature_criticality.py             # -> analysis/features_analisis_automatico.html
-cd research && uv run python ../analysis/challenge_features.py          # -> analysis/features_challenge.html (necesita el panel)
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+
+.venv/bin/python analysis/generate_report.py        # -> analysis/report.html
+.venv/bin/python analysis/feature_criticality.py    # -> analysis/features_analisis_automatico.html
+.venv/bin/python scripts/build_cash_db.py           # panel de caja -> analysis/cash.duckdb (~30 s, no se commitea)
+.venv/bin/python scripts/validate_cash.py           # cuadre del histórico contra el saldo de 2026-09-01
+.venv/bin/python -m streamlit run analysis/app.py   # explorador interactivo de la caja (requiere streamlit)
 ```
 
-La capa de mapeo se comprueba con sus propios tests y con una auditoría de la suciedad que queda sin
-corregir:
+`analysis/challenge_features.py` es la excepción: usa el mismo panel y las mismas features que el
+score, así que se ejecuta desde el entorno de `research/`:
 
 ```bash
-uv run --with duckdb --with pytest pytest src/mapping/tests -q
-PYTHONPATH=src uv run --with duckdb python -m mapping.audit
+cd research && uv run python ../analysis/challenge_features.py   # -> analysis/features_challenge.html
+```
+
+La capa de mapeo se comprueba con sus propios tests (con fixtures, no necesitan el dataset) y con una
+auditoría de la suciedad que queda sin corregir:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest discover -s src/mapping/tests -t src
+PYTHONPATH=src .venv/bin/python -m mapping.audit
 ```
 
 ## Dónde está el resultado
