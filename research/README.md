@@ -2,7 +2,7 @@
 
 Sistema completo para el reto X Ray: un score interpretable por empresa y mes, una previsión de trayectoria con intervalos de confianza, un monitor de alertas y un simulador de escenarios servidos por una API y una SPA. Cada decisión está registrada con su porqué en [`DECISIONS.md`](DECISIONS.md) y en la pestaña «Decisiones» de la SPA, con gráficas calculadas sobre los datos.
 
-Marco de decisión (consumidor → empresa, criticidad de la caja, output que no es solo un número): [`../context/scoring.md`](../context/scoring.md). Una empresa que vacía la caja disponible en poco tiempo debe mover el score mucho más que un deterioro leve de cobros o pagos. La SPA tiene que poder decirlo en lenguaje llano y sugerir prestar / vigilar / no prestar.
+Marco de decisión (consumidor → empresa, criticidad de la caja, output que no es solo un número): [`../context/scoring.md`](../context/scoring.md). Una empresa que vacía la caja disponible en poco tiempo debe mover el score mucho más que un deterioro leve de cobros o pagos. La SPA tiene que poder decirlo en lenguaje llano y sugerir prestar / vigilar / no prestar. El valor frente al banco es el rastro de tesorería que ellos no ven; la métrica no es única: cambia con la oferta y con el rol de quien mira.
 
 ## Arranque rápido
 

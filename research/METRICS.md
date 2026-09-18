@@ -2,7 +2,7 @@
 
 ## Planteamiento (skill data-science, paso 1)
 
-- **Objetivo de negocio**: que Embat (y sus socios financieros) sepa cada mes qué empresas están sanas, cuáles mejoran, cuáles se tuercen, si es un bache o una caída, por qué, y con cuánta antelación. Marco: [`../context/scoring.md`](../context/scoring.md) — la caja que se evapora en poco tiempo tiene que pesar más que un DSO/DPO que se mueve un poco, y el output no puede ser solo el número.
+- **Objetivo de negocio**: que Embat (y sus socios financieros) sepa cada mes qué empresas están sanas, cuáles mejoran, cuáles se tuercen, si es un bache o una caída, por qué, y con cuánta antelación. Marco: [`../context/scoring.md`](../context/scoring.md) — la caja que se evapora en poco tiempo tiene que pesar más que un DSO/DPO que se mueve un poco; el output no puede ser solo el número; la métrica cambia con la oferta y con quien la mira; el valor frente a bancos es el dato de tesorería que ellos no tienen.
 - **Tarea de ML**: no hay etiquetas, así que el problema se divide en dos piezas:
   1. **Nivel**: `HealthScorer`, un score de 0 a 100 interpretable y aditivo. Sus pesos se calibran contra eventos futuros observables (apagado, tensión de caja, declive y crecimiento), que funcionan como ancla externa.
   2. **Trayectoria**: `TrajectoryForecaster`, que prevé el score publicado a 1-3 meses con cuantiles q10/q50/q90.
