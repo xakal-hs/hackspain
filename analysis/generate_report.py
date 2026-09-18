@@ -849,11 +849,12 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
   <aside class="sidebar">
     <div class="brand"><span class="brand-mark">X</span><div><b>HackSpain</b><small>X-Ray · EDA</small></div></div>
     <nav>
-      <a href="#resumen">01 · Resumen</a><a href="#variables">02 · Variables</a>
-      <a href="#universo">03 · Universo</a><a href="#tesoreria">04 · Tesorería</a>
-      <a href="#facturas">05 · Facturas</a><a href="#deuda">06 · Deuda y saldos</a>
-      <a href="#relaciones">07 · Relaciones</a><a href="#outliers">08 · Outliers</a>
-      <a href="#calidad">09 · Calidad</a><a href="#conclusiones">10 · Conclusiones</a>
+      <a href="#resumen">01 · Resumen</a><a href="#relaciones-datos">02 · Relaciones</a>
+      <a href="#variables">03 · Variables</a><a href="#universo">04 · Universo</a>
+      <a href="#tesoreria">05 · Tesorería</a><a href="#facturas">06 · Facturas</a>
+      <a href="#deuda">07 · Deuda y saldos</a><a href="#relaciones">08 · Correlaciones</a>
+      <a href="#outliers">09 · Outliers</a><a href="#calidad">10 · Calidad</a>
+      <a href="#conclusiones">11 · Conclusiones</a>
     </nav>
     <div class="side-note">Artefacto autónomo<br>Generado sobre los 8 CSV<br>Fecha de corte: {AS_OF}</div>
   </aside>
@@ -875,15 +876,214 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
       </div>
       <div class="callout insight"><b>Lectura clave.</b> Hay suficiente profundidad longitudinal para construir trayectorias mensuales, pero <code>balances.csv</code> solo aporta una foto final. El histórico de caja deberá reconstruirse hacia atrás con transacciones y validarse contra el saldo del {AS_OF}.</div>
       <div class="grid two"><div class="panel">{chart_html(coverage_fig)}</div><div class="panel model">
-        <h3>Modelo relacional</h3>
+        <h3>Modelo relacional sintético</h3>
         <div class="model-flow"><span>Grupo</span><i>1 → N</i><span>Empresa</span><i>1 → N</i><span>Producto</span></div>
         <div class="model-branches"><div>Transacciones<br><b>{compact(counts['transactions'])}</b></div><div>Facturas<br><b>{compact(counts['invoices'])}</b></div><div>Saldos finales<br><b>{compact(counts['balances'])}</b></div><div>Deuda<br><b>{compact(counts['debt_products'])}</b></div></div>
-        <p class="caption">Las contrapartes conectan transacciones y facturas. Los IDs son claves, no variables numéricas ni magnitudes ordenables.</p>
+        <p class="caption">Estructura jerárquica canónica. Ver desglose exhaustivo y grafo ERD en la Sección 02 a continuación.</p>
       </div></div>
     </section>
 
+    <section class="section" id="relaciones-datos">
+      <div class="section-head"><span>02</span><div><h2>Modelo relacional y diagrama entidad-relación (ERD)</h2><p>Mapa topológico de entidades, claves primarias y foráneas, cardinalidades y flujos de conciliación entre fuentes bancarias y ERP.</p></div></div>
+      <div class="erd-wrapper">
+        <svg class="erd-svg" viewBox="0 0 1120 720" width="1120" height="720" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-flow">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+            </marker>
+            <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-flow">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#34d399" />
+            </marker>
+            <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-flow">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#fbbf24" />
+            </marker>
+            <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+              <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="0.4"/>
+            </filter>
+          </defs>
+
+          <!-- Groups -->
+          <g filter="url(#shadow)">
+            <rect x="50" y="30" width="220" height="110" rx="10" fill="#1e293b" stroke="#3b82f6" stroke-width="2"/>
+            <rect x="50" y="30" width="220" height="32" rx="10" fill="#1d4ed8"/>
+            <text x="65" y="52" fill="#ffffff" font-weight="bold" font-size="13" font-family="Inter, sans-serif">GROUPS</text>
+            <text x="245" y="52" fill="#93c5fd" font-size="11" text-anchor="end" font-family="monospace">250 rows</text>
+            <text x="65" y="80" fill="#f59e0b" font-weight="bold" font-family="monospace" font-size="11">PK  group_id</text>
+            <text x="65" y="100" fill="#cbd5e1" font-family="monospace" font-size="11">    erp, n_companies</text>
+          </g>
+
+          <!-- Companies -->
+          <g filter="url(#shadow)">
+            <rect x="420" y="30" width="250" height="150" rx="10" fill="#1e293b" stroke="#3b82f6" stroke-width="2.5"/>
+            <rect x="420" y="30" width="250" height="32" rx="10" fill="#2563eb"/>
+            <text x="435" y="52" fill="#ffffff" font-weight="bold" font-size="13" font-family="Inter, sans-serif">COMPANIES (Núcleo)</text>
+            <text x="655" y="52" fill="#bfdbfe" font-size="11" text-anchor="end" font-family="monospace">1.286 rows</text>
+            <text x="435" y="80" fill="#f59e0b" font-weight="bold" font-family="monospace" font-size="11">PK  company_id</text>
+            <text x="435" y="100" fill="#38bdf8" font-family="monospace" font-size="11">FK  group_id</text>
+            <text x="435" y="120" fill="#cbd5e1" font-family="monospace" font-size="11">    country, currency, erp</text>
+            <text x="435" y="140" fill="#cbd5e1" font-family="monospace" font-size="11">    created_at</text>
+          </g>
+
+          <!-- Banking & Debt Products Header Area -->
+          <!-- Banking Products -->
+          <g filter="url(#shadow)">
+            <rect x="50" y="240" width="230" height="130" rx="10" fill="#1e293b" stroke="#0ea5e9" stroke-width="1.8"/>
+            <rect x="50" y="240" width="230" height="30" rx="10" fill="#0284c7"/>
+            <text x="65" y="260" fill="#ffffff" font-weight="bold" font-size="12" font-family="Inter, sans-serif">BANKING_PRODUCTS</text>
+            <text x="265" y="260" fill="#bae6fd" font-size="11" text-anchor="end" font-family="monospace">5.987 rows</text>
+            <text x="65" y="288" fill="#f59e0b" font-weight="bold" font-family="monospace" font-size="11">PK  product_id</text>
+            <text x="65" y="308" fill="#38bdf8" font-family="monospace" font-size="11">FK  company_id</text>
+            <text x="65" y="328" fill="#cbd5e1" font-family="monospace" font-size="11">    type, currency, created_at</text>
+          </g>
+
+          <!-- Debt Products -->
+          <g filter="url(#shadow)">
+            <rect x="50" y="420" width="230" height="150" rx="10" fill="#1e293b" stroke="#0ea5e9" stroke-width="1.8"/>
+            <rect x="50" y="420" width="230" height="30" rx="10" fill="#0369a1"/>
+            <text x="65" y="440" fill="#ffffff" font-weight="bold" font-size="12" font-family="Inter, sans-serif">DEBT_PRODUCTS</text>
+            <text x="265" y="440" fill="#bae6fd" font-size="11" text-anchor="end" font-family="monospace">2.239 rows</text>
+            <text x="65" y="468" fill="#f59e0b" font-weight="bold" font-family="monospace" font-size="11">PK  product_id</text>
+            <text x="65" y="488" fill="#38bdf8" font-family="monospace" font-size="11">FK  company_id</text>
+            <text x="65" y="508" fill="#cbd5e1" font-family="monospace" font-size="11">    type, currency, granted</text>
+            <text x="65" y="528" fill="#cbd5e1" font-family="monospace" font-size="11">    outstanding, liquidity</text>
+          </g>
+
+          <!-- Debt Schedule Config -->
+          <g filter="url(#shadow)">
+            <rect x="50" y="605" width="230" height="100" rx="10" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+            <rect x="50" y="605" width="230" height="26" rx="10" fill="#475569"/>
+            <text x="65" y="622" fill="#ffffff" font-weight="bold" font-size="11" font-family="Inter, sans-serif">DEBT_SCHEDULE_CONFIG</text>
+            <text x="265" y="622" fill="#cbd5e1" font-size="10" text-anchor="end" font-family="monospace">87 rows</text>
+            <text x="65" y="648" fill="#38bdf8" font-weight="bold" font-family="monospace" font-size="10">FK product_id, company_id</text>
+            <text x="65" y="666" fill="#cbd5e1" font-family="monospace" font-size="10">FK settlement_product_id</text>
+            <text x="65" y="684" fill="#94a3b8" font-family="monospace" font-size="10">   amortization terms &amp; rate</text>
+          </g>
+
+          <!-- Transactions -->
+          <g filter="url(#shadow)">
+            <rect x="420" y="270" width="260" height="210" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+            <rect x="420" y="270" width="260" height="32" rx="10" fill="#059669"/>
+            <text x="435" y="292" fill="#ffffff" font-weight="bold" font-size="13" font-family="Inter, sans-serif">TRANSACTIONS (Banco)</text>
+            <text x="665" y="292" fill="#a7f3d0" font-size="11" text-anchor="end" font-family="monospace">2.556.437 rows</text>
+            <text x="435" y="320" fill="#f59e0b" font-weight="bold" font-family="monospace" font-size="11">PK  transaction_id</text>
+            <text x="435" y="340" fill="#38bdf8" font-family="monospace" font-size="11">FK  company_id, product_id</text>
+            <text x="435" y="360" fill="#cbd5e1" font-family="monospace" font-size="11">    date, value_date, amount</text>
+            <text x="435" y="380" fill="#cbd5e1" font-family="monospace" font-size="11">    status, accounting_status</text>
+            <text x="435" y="400" fill="#cbd5e1" font-family="monospace" font-size="11">    category, description</text>
+            <text x="435" y="420" fill="#34d399" font-weight="bold" font-family="monospace" font-size="11">FK  counterparty_id (opt)</text>
+            <text x="435" y="440" fill="#94a3b8" font-family="monospace" font-size="10">    exchange_rate</text>
+          </g>
+
+          <!-- Invoices -->
+          <g filter="url(#shadow)">
+            <rect x="800" y="270" width="270" height="210" rx="10" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+            <rect x="800" y="270" width="270" height="32" rx="10" fill="#d97706"/>
+            <text x="815" y="292" fill="#ffffff" font-weight="bold" font-size="13" font-family="Inter, sans-serif">INVOICES (ERP)</text>
+            <text x="1055" y="292" fill="#fde68a" font-size="11" text-anchor="end" font-family="monospace">897.894 rows</text>
+            <text x="815" y="320" fill="#f59e0b" font-weight="bold" font-family="monospace" font-size="11">PK  operation_id</text>
+            <text x="815" y="340" fill="#38bdf8" font-family="monospace" font-size="11">FK  company_id</text>
+            <text x="815" y="360" fill="#cbd5e1" font-family="monospace" font-size="11">    document_type, issuance_date</text>
+            <text x="815" y="380" fill="#cbd5e1" font-family="monospace" font-size="11">    due_date, payment_date</text>
+            <text x="815" y="400" fill="#cbd5e1" font-family="monospace" font-size="11">    amount, pending_amount, status</text>
+            <text x="815" y="420" fill="#34d399" font-weight="bold" font-family="monospace" font-size="11">FK  counterparty_id (opt)</text>
+            <text x="815" y="440" fill="#94a3b8" font-family="monospace" font-size="10">    currency, exchange_rate, concept</text>
+          </g>
+
+          <!-- Balances -->
+          <g filter="url(#shadow)">
+            <rect x="420" y="540" width="260" height="120" rx="10" fill="#1e293b" stroke="#64748b" stroke-width="1.8"/>
+            <rect x="420" y="540" width="260" height="30" rx="10" fill="#475569"/>
+            <text x="435" y="560" fill="#ffffff" font-weight="bold" font-size="12" font-family="Inter, sans-serif">BALANCES (Foto Corte)</text>
+            <text x="665" y="560" fill="#cbd5e1" font-size="11" text-anchor="end" font-family="monospace">7.996 rows</text>
+            <text x="435" y="588" fill="#38bdf8" font-weight="bold" font-family="monospace" font-size="11">FK  product_id, company_id</text>
+            <text x="435" y="608" fill="#cbd5e1" font-family="monospace" font-size="11">    date (corte: 2026-09-01)</text>
+            <text x="435" y="628" fill="#cbd5e1" font-family="monospace" font-size="11">    balance (saldo contable)</text>
+          </g>
+
+          <!-- Counterparty Dimension (Virtual / Cross-cutting) -->
+          <g filter="url(#shadow)">
+            <rect x="800" y="90" width="270" height="90" rx="10" fill="#1e293b" stroke="#10b981" stroke-dasharray="6,4" stroke-width="2"/>
+            <rect x="800" y="90" width="270" height="28" rx="10" fill="#065f46"/>
+            <text x="815" y="109" fill="#ffffff" font-weight="bold" font-size="12" font-family="Inter, sans-serif">COUNTERPARTIES (Espacio común)</text>
+            <text x="815" y="136" fill="#34d399" font-weight="bold" font-family="monospace" font-size="11">KEY counterparty_id</text>
+            <text x="815" y="156" fill="#94a3b8" font-size="11" font-family="sans-serif">Conexión Banco ↔ Facturas ERP</text>
+          </g>
+
+          <!-- Connectors & Cardinalities -->
+          <!-- GROUPS to COMPANIES -->
+          <path d="M 270 85 L 420 85" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+          <text x="345" y="75" fill="#38bdf8" font-size="11" text-anchor="middle" font-weight="bold">1 : N</text>
+
+          <!-- COMPANIES to PRODUCTS -->
+          <path d="M 420 120 C 330 120 330 290 280 290" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+          <text x="330" y="200" fill="#38bdf8" font-size="11" font-weight="bold">1 : N</text>
+
+          <path d="M 420 140 C 310 140 310 480 280 480" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+
+          <!-- DEBT_PRODUCTS to DEBT_SCHEDULE_CONFIG -->
+          <path d="M 165 570 L 165 605" stroke="#38bdf8" stroke-width="1.8" marker-end="url(#arrow)" />
+          <text x="175" y="590" fill="#38bdf8" font-size="10" font-weight="bold">1 : 0..1</text>
+
+          <!-- COMPANIES to TRANSACTIONS -->
+          <path d="M 520 180 L 520 270" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+          <text x="530" y="225" fill="#38bdf8" font-size="11" font-weight="bold">1 : N</text>
+
+          <!-- BANKING_PRODUCTS to TRANSACTIONS -->
+          <path d="M 280 320 L 420 320" stroke="#0ea5e9" stroke-width="1.8" stroke-dasharray="4,3" marker-end="url(#arrow)" />
+          <text x="350" y="312" fill="#0ea5e9" font-size="10">product_id</text>
+
+          <!-- COMPANIES to INVOICES -->
+          <path d="M 670 120 C 740 120 750 320 800 320" fill="none" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)" />
+          <text x="740" y="210" fill="#38bdf8" font-size="11" font-weight="bold">1 : N</text>
+
+          <!-- TRANSACTIONS & INVOICES to COUNTERPARTIES -->
+          <path d="M 600 270 C 600 210 800 150 800 150" fill="none" stroke="#34d399" stroke-width="1.8" stroke-dasharray="4,4" />
+          <path d="M 880 270 L 880 180" stroke="#34d399" stroke-width="1.8" stroke-dasharray="4,4" marker-end="url(#arrow-green)" />
+          <text x="710" y="180" fill="#34d399" font-size="11" font-weight="bold">Conciliación Cruzada</text>
+
+          <!-- PRODUCTS to BALANCES -->
+          <path d="M 165 370 C 165 400 360 480 360 570 L 420 570" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)" />
+          <text x="370" y="550" fill="#94a3b8" font-size="10">product_id</text>
+
+          <!-- TRANSACTIONS to BALANCES (Ledger roll-forward) -->
+          <path d="M 550 480 L 550 540" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="3,3" marker-end="url(#arrow)" />
+          <text x="560" y="515" fill="#94a3b8" font-size="10">Reconstrucción caja</text>
+        </svg>
+      </div>
+
+      <div class="grid three">
+        <div class="erd-card">
+          <h4><span class="erd-tag-primary">Eje Central</span> Jerarquía Corporativa</h4>
+          <p>Unidad de score vs unidad de aislamiento en modelado:</p>
+          <ul>
+            <li><b>1 Grupo → N Empresas:</b> Una matriz puede integrar de 1 a 24 filiales. El split train/test debe ser por <code>group_id</code> para evitar <i>data leakage</i>.</li>
+            <li><b>1 Empresa → N Productos:</b> Cuentas corrientes bancarias y facilidades crediticias. Todo flujo financiero se asocia a un producto.</li>
+            <li><b>Monedas heterogéneas:</b> Cada empresa y producto declara su divisa, por lo que las agregaciones deben agrupar por divisa o normalizar.</li>
+          </ul>
+        </div>
+        <div class="erd-card">
+          <h4><span class="erd-tag-sec">Flujos Cruzados</span> Conciliación y Contrapartes</h4>
+          <p>El puente semántico entre la visión bancaria y la contable:</p>
+          <ul>
+            <li><b><code>counterparty_id</code> unificado:</b> Comparte espacio de nombres global en transacciones (bancos) y facturas (ERP).</li>
+            <li><b>Ciclo de cobro/pago:</b> Permite contrastar si los pagos a proveedores o cobros de clientes en el ERP coinciden con los movimientos de tesorería reales.</li>
+            <li><b>Concentración de riesgo:</b> Permite calcular dependencias de clientes clave o suministradores críticos a nivel empresa y grupo.</li>
+          </ul>
+        </div>
+        <div class="erd-card">
+          <h4><span class="erd-tag-accent">Temporalidad</span> Reconstrucción de Saldos</h4>
+          <p>Resolución de asimetrías temporales y de foto fija:</p>
+          <ul>
+            <li><b><code>balances.csv</code> es estático:</b> Aporta la foto del saldo al corte (2026-09-01) por cada <code>product_id</code>.</li>
+            <li><b>Roll-forward / Roll-back:</b> La trayectoria histórica de caja mensual se calcula iterando transacciones hacia atrás desde el balance final.</li>
+            <li><b><code>debt_schedule_config</code>:</b> Define el calendario formal y la cuenta de liquidación (<code>settlement_product_id</code>) para préstamos y leasing.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <section class="section" id="variables">
-      <div class="section-head"><span>02</span><div><h2>Inventario y significado de variables</h2><p>Todos los campos disponibles, clasificados por función analítica. Los identificadores se excluyen de estadísticas, correlaciones y outliers.</p></div></div>
+      <div class="section-head"><span>03</span><div><h2>Inventario y significado de variables</h2><p>Todos los campos disponibles, clasificados por función analítica. Los identificadores se excluyen de estadísticas, correlaciones y outliers.</p></div></div>
       <div class="panel variable-panel">
         {table(["Dataset", "Variable", "Rol", "Significado"], variable_rows, "variable-table")}
       </div>
@@ -891,7 +1091,7 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
     </section>
 
     <section class="section" id="universo">
-      <div class="section-head"><span>03</span><div><h2>Universo empresarial</h2><p>Composición, cobertura y heterogeneidad operativa.</p></div></div>
+      <div class="section-head"><span>04</span><div><h2>Universo empresarial</h2><p>Composición, cobertura y heterogeneidad operativa.</p></div></div>
       <div class="panel">{chart_html(profile_fig, 410)}</div>
       <div class="grid two">
         <div class="panel">{chart_html(group_fig)}</div>
@@ -905,7 +1105,7 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
     </section>
 
     <section class="section" id="tesoreria">
-      <div class="section-head"><span>04</span><div><h2>Tesorería y comportamiento transaccional</h2><p>Flujos, volumen operativo, estacionalidad y calidad de clasificación.</p></div></div>
+      <div class="section-head"><span>05</span><div><h2>Tesorería y comportamiento transaccional</h2><p>Flujos, volumen operativo, estacionalidad y calidad de clasificación.</p></div></div>
       <div class="kpis compact-kpis">
         <div class="kpi"><small>Booked</small><strong>{tx_status[0]['n'] / counts['transactions']:.1%}</strong><span>del total</span></div>
         <div class="kpi"><small>Conciliación completa</small><strong>{reconciled:.1%}</strong><span>de movimientos</span></div>
@@ -923,7 +1123,7 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
     </section>
 
     <section class="section" id="facturas">
-      <div class="section-head"><span>05</span><div><h2>Facturas y ciclo de cobro/pago</h2><p>Estado documental, puntualidad y presión de circulante.</p></div></div>
+      <div class="section-head"><span>06</span><div><h2>Facturas y ciclo de cobro/pago</h2><p>Estado documental, puntualidad y presión de circulante.</p></div></div>
       <div class="grid two"><div class="panel">{chart_html(invoice_fig, 430)}</div><div class="panel">{chart_html(invoice_time_fig, 430)}</div></div>
       <div class="callout warning"><b>No confundir estado con dirección.</b> El fichero no marca explícitamente factura emitida vs recibida. El signo, tipo documental y contexto de contraparte requieren validación antes de llamar “cuentas a cobrar” a todo pendiente.</div>
       <div class="insight-grid">
@@ -935,7 +1135,7 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
     </section>
 
     <section class="section" id="deuda">
-      <div class="section-head"><span>06</span><div><h2>Productos, deuda y saldo final</h2><p>Capacidad financiera y foto de liquidez al cierre.</p></div></div>
+      <div class="section-head"><span>07</span><div><h2>Productos, deuda y saldo final</h2><p>Capacidad financiera y foto de liquidez al cierre.</p></div></div>
       <div class="grid two"><div class="panel">{chart_html(products_fig, 420)}</div><div class="panel">{chart_html(balance_fig, 420)}</div></div>
       <div class="grid two">
         <div class="panel"><h3>Deuda por tipo</h3>{table(["Tipo", "N", "Concedido*", "Pendiente*", "Uso mediano"], debt_rows)}<p class="caption">* Importes reportados mezclan monedas; comparar dentro de moneda/empresa.</p></div>
@@ -949,19 +1149,19 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
     </section>
 
     <section class="section" id="relaciones">
-      <div class="section-head"><span>07</span><div><h2>Relaciones entre señales</h2><p>Correlaciones de Pearson sobre agregados por empresa, limitadas a compañías cuya moneda declarada es EUR.</p></div></div>
+      <div class="section-head"><span>08</span><div><h2>Relaciones entre señales (Correlaciones)</h2><p>Correlaciones de Pearson sobre agregados por empresa, limitadas a compañías cuya moneda declarada es EUR.</p></div></div>
       <div class="panel">{chart_html(corr_fig, 620)}</div>
       <div class="callout"><b>Cómo leerla.</b> Entradas y salidas elevadas suelen medir tamaño, no salud. La correlación no demuestra causalidad y queda dominada por colas largas. Para el score conviene usar ratios, tendencias y cambios intraempresa, además de transformaciones logarítmicas robustas.</div>
     </section>
 
     <section class="section" id="outliers">
-      <div class="section-head"><span>08</span><div><h2>Outliers con significado financiero</h2><p>Detección IQR sobre señales agregadas por empresa en la cohorte EUR; no sobre IDs ni tipos categóricos.</p></div></div>
+      <div class="section-head"><span>09</span><div><h2>Outliers con significado financiero</h2><p>Detección IQR sobre señales agregadas por empresa en la cohorte EUR; no sobre IDs ni tipos categóricos.</p></div></div>
       <div class="grid two"><div class="panel"><h3>Extremos por métrica</h3>{table(["Métrica", "Mediana", "Banda IQR", "Fuera", "% empresas"], outlier_table)}</div><div class="panel">{chart_html(outlier_fig, 390)}</div></div>
       <div class="panel"><h3>Empresas más extremas · puntuación robusta multiseñal</h3>{table(["Empresa", "Saldo final", "Flujo neto", "Vencido", "Deuda", "Score robusto"], top_outlier_table)}<p class="caption">Un outlier no es un error ni una empresa enferma. Puede ser una empresa grande, un evento real, una moneda/producto mal interpretado o un problema de calidad. Debe revisarse su trayectoria mensual y su grupo.</p></div>
     </section>
 
     <section class="section" id="calidad">
-      <div class="section-head"><span>09</span><div><h2>Calidad, cobertura y límites</h2><p>Qué puede sesgar el análisis y el futuro score.</p></div></div>
+      <div class="section-head"><span>10</span><div><h2>Calidad, cobertura y límites</h2><p>Qué puede sesgar el análisis y el futuro score.</p></div></div>
       <div class="grid two"><div class="panel"><h3>Campos incompletos o no normalizados</h3>{table(["Incidencia", "Filas", "%"], quality_rows)}</div><div class="panel"><h3>Integridad referencial y unicidad</h3>{table(["Comprobación", "Fallos"], integrity_rows)}</div></div>
       <div class="limitations">
         <article><b>Multimoneda</b><p><code>exchange_rate</code> existe, pero el diccionario no define de forma inequívoca la dirección de conversión. No se presenta un total “EUR” falso.</p></article>
@@ -972,7 +1172,7 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
     </section>
 
     <section class="section conclusions" id="conclusiones">
-      <div class="section-head"><span>10</span><div><h2>Conclusiones y siguiente diseño</h2><p>Qué debería salir de este EDA hacia el motor X-Ray.</p></div></div>
+      <div class="section-head"><span>11</span><div><h2>Conclusiones y siguiente diseño</h2><p>Qué debería salir de este EDA hacia el motor X-Ray.</p></div></div>
       <div class="conclusion-list">
         <article><span>01</span><div><h3>Construir panel empresa × mes</h3><p>Reconstruir saldo, entradas/salidas operativas, concentración de contraparte, puntualidad, pendiente y utilización de deuda. Conservar cobertura y calidad como features separadas.</p></div></article>
         <article><span>02</span><div><h3>Separar nivel, tendencia y estabilidad</h3><p>Para cada señal: nivel robusto, pendiente 3/6 meses, variación intermensual, volatilidad y persistencia. Así se distingue un bache de un deterioro estructural.</p></div></article>
@@ -988,7 +1188,7 @@ def build_report(connection: duckdb.DuckDBPyConnection) -> str:
 
 
 CSS = """
-@font-face{font-family:Inter;src:local("Arial")}*{box-sizing:border-box}:root{--navy:#102a43;--ink:#243b53;--muted:#627d98;--line:#d9e2ec;--paper:#fff;--bg:#f5f7fa;--blue:#1463ff;--cyan:#27b3c2;--green:#22a06b;--amber:#f59e0b;--red:#e5484d}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.sidebar{position:fixed;inset:0 auto 0 0;width:232px;padding:28px 22px;background:#0b1f33;color:#fff;display:flex;flex-direction:column;z-index:5}.brand{display:flex;align-items:center;gap:12px;margin-bottom:42px}.brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--blue);font-size:20px;font-weight:900}.brand b,.brand small{display:block}.brand small{color:#9fb3c8;font-size:11px;text-transform:uppercase;letter-spacing:.12em}.sidebar nav{display:grid;gap:3px}.sidebar nav a{padding:8px 10px;border-radius:7px;color:#bcccdc;text-decoration:none;font-size:12px}.sidebar nav a:hover{background:#173b5f;color:#fff}.side-note{margin-top:auto;color:#829ab1;font-size:11px;line-height:1.7}main{margin-left:232px}.hero{min-height:510px;padding:84px clamp(34px,7vw,110px);background:radial-gradient(circle at 86% 20%,rgba(39,179,194,.24),transparent 27%),linear-gradient(135deg,#102a43,#153e75);color:#fff}.eyebrow{color:#63d5df;font-size:11px;font-weight:800;letter-spacing:.18em}.hero h1{margin:30px 0 22px;max-width:850px;font-size:clamp(48px,7vw,84px);line-height:.98;letter-spacing:-.055em}.hero h1 em{color:#74d8e2;font-style:normal}.hero p{max-width:760px;color:#d9e2ec;font-size:17px}.hero-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:42px}.hero-meta span{padding:7px 11px;border:1px solid rgba(255,255,255,.2);border-radius:99px;color:#bcccdc;font-size:11px}.section{max-width:1280px;margin:auto;padding:68px clamp(28px,5vw,72px);border-bottom:1px solid var(--line)}.section-head{display:flex;gap:20px;align-items:flex-start;margin-bottom:28px}.section-head>span{color:var(--blue);font-size:12px;font-weight:900;letter-spacing:.12em}.section-head h2{margin:-7px 0 4px;color:var(--navy);font-size:30px;letter-spacing:-.03em}.section-head p{margin:0;color:var(--muted)}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}.kpi,.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 7px 24px rgba(16,42,67,.055)}.kpi{padding:21px}.kpi small,.kpi span{display:block;color:var(--muted)}.kpi strong{display:block;margin:5px 0;color:var(--navy);font-size:30px;letter-spacing:-.04em}.kpi span{font-size:11px}.compact-kpis .kpi strong{font-size:25px}.grid{display:grid;gap:18px;margin:18px 0}.grid.two{grid-template-columns:1fr 1fr}.panel{padding:18px;overflow:hidden}.panel h3{margin:5px 0 16px;color:var(--navy)}.callout{margin:18px 0;padding:18px 20px;border-left:4px solid var(--blue);border-radius:6px;background:#eaf2ff}.callout.warning{border-color:var(--amber);background:#fff7e8}.callout.insight{border-color:var(--cyan);background:#e9fbfc}.model{padding:28px}.model-flow{display:flex;align-items:center;gap:12px}.model-flow span{padding:12px 18px;border-radius:9px;background:#eaf2ff;color:#0b52cc;font-weight:800}.model-flow i{color:var(--muted);font-style:normal}.model-branches{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}.model-branches div{padding:13px;border:1px solid var(--line);border-radius:9px}.model-branches b{font-size:18px;color:var(--navy)}.caption{color:var(--muted);font-size:11px}.narrative{padding:28px}.narrative ul{padding-left:19px}.narrative li{margin:0 0 13px}.insight-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}.insight-grid div{padding:20px;border-top:3px solid var(--cyan);background:#fff}.insight-grid strong,.insight-grid span{display:block}.insight-grid strong{font-size:24px;color:var(--navy)}.insight-grid span{color:var(--muted);font-size:11px}.table-wrap{overflow:auto;max-height:480px}table{width:100%;border-collapse:collapse;white-space:nowrap}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right}th{position:sticky;top:0;background:#f8fafc;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em}th:first-child,td:first-child{text-align:left}td small{display:block;max-width:250px;color:var(--muted);font-size:10px}.variable-table td:nth-child(2),.variable-table th:nth-child(2),.variable-table td:nth-child(3),.variable-table th:nth-child(3),.variable-table td:nth-child(4),.variable-table th:nth-child(4){text-align:left}.variable-panel{padding:0}.ok{color:var(--green);font-weight:800}.bad{color:var(--red);font-weight:800}code{padding:2px 5px;border-radius:4px;background:#edf2f7;color:#334e68}.limitations{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.limitations article{padding:20px;border:1px solid var(--line);border-radius:12px;background:#fff}.limitations b{color:var(--navy)}.limitations p{margin:8px 0 0;color:var(--muted);font-size:12px}.conclusions{background:#fff}.conclusion-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}.conclusion-list article{display:flex;gap:18px;padding:24px;border:1px solid var(--line);border-radius:12px}.conclusion-list article>span{color:var(--blue);font-weight:900}.conclusion-list h3{margin:0 0 7px;color:var(--navy)}.conclusion-list p{margin:0;color:var(--muted)}.final-note{margin-top:28px;padding:24px;border-radius:12px;background:var(--navy);color:#d9e2ec}footer{padding:28px 6vw;color:var(--muted);font-size:11px;text-align:center}@media(max-width:980px){.sidebar{display:none}main{margin-left:0}.grid.two,.limitations{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:1fr 1fr}}@media(max-width:680px){.hero{padding:55px 24px;min-height:auto}.section{padding:48px 18px}.grid.two,.limitations,.conclusion-list,.insight-grid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.model-flow{flex-wrap:wrap}.hero h1{font-size:46px}}
+@font-face{font-family:Inter;src:local("Arial")}*{box-sizing:border-box}:root{--navy:#102a43;--ink:#243b53;--muted:#627d98;--line:#d9e2ec;--paper:#fff;--bg:#f5f7fa;--blue:#1463ff;--cyan:#27b3c2;--green:#22a06b;--amber:#f59e0b;--red:#e5484d}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.sidebar{position:fixed;inset:0 auto 0 0;width:232px;padding:28px 22px;background:#0b1f33;color:#fff;display:flex;flex-direction:column;z-index:5}.brand{display:flex;align-items:center;gap:12px;margin-bottom:42px}.brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--blue);font-size:20px;font-weight:900}.brand b,.brand small{display:block}.brand small{color:#9fb3c8;font-size:11px;text-transform:uppercase;letter-spacing:.12em}.sidebar nav{display:grid;gap:3px}.sidebar nav a{padding:8px 10px;border-radius:7px;color:#bcccdc;text-decoration:none;font-size:12px}.sidebar nav a:hover{background:#173b5f;color:#fff}.side-note{margin-top:auto;color:#829ab1;font-size:11px;line-height:1.7}main{margin-left:232px}.hero{min-height:510px;padding:84px clamp(34px,7vw,110px);background:radial-gradient(circle at 86% 20%,rgba(39,179,194,.24),transparent 27%),linear-gradient(135deg,#102a43,#153e75);color:#fff}.eyebrow{color:#63d5df;font-size:11px;font-weight:800;letter-spacing:.18em}.hero h1{margin:30px 0 22px;max-width:850px;font-size:clamp(48px,7vw,84px);line-height:.98;letter-spacing:-.055em}.hero h1 em{color:#74d8e2;font-style:normal}.hero p{max-width:760px;color:#d9e2ec;font-size:17px}.hero-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:42px}.hero-meta span{padding:7px 11px;border:1px solid rgba(255,255,255,.2);border-radius:99px;color:#bcccdc;font-size:11px}.section{max-width:1280px;margin:auto;padding:68px clamp(28px,5vw,72px);border-bottom:1px solid var(--line)}.section-head{display:flex;gap:20px;align-items:flex-start;margin-bottom:28px}.section-head>span{color:var(--blue);font-size:12px;font-weight:900;letter-spacing:.12em}.section-head h2{margin:-7px 0 4px;color:var(--navy);font-size:30px;letter-spacing:-.03em}.section-head p{margin:0;color:var(--muted)}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}.kpi,.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 7px 24px rgba(16,42,67,.055)}.kpi{padding:21px}.kpi small,.kpi span{display:block;color:var(--muted)}.kpi strong{display:block;margin:5px 0;color:var(--navy);font-size:30px;letter-spacing:-.04em}.kpi span{font-size:11px}.compact-kpis .kpi strong{font-size:25px}.grid{display:grid;gap:18px;margin:18px 0}.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:repeat(3,1fr)}.panel{padding:18px;overflow:hidden}.panel h3{margin:5px 0 16px;color:var(--navy)}.callout{margin:18px 0;padding:18px 20px;border-left:4px solid var(--blue);border-radius:6px;background:#eaf2ff}.callout.warning{border-color:var(--amber);background:#fff7e8}.callout.insight{border-color:var(--cyan);background:#e9fbfc}.model{padding:28px}.model-flow{display:flex;align-items:center;gap:12px}.model-flow span{padding:12px 18px;border-radius:9px;background:#eaf2ff;color:#0b52cc;font-weight:800}.model-flow i{color:var(--muted);font-style:normal}.model-branches{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}.model-branches div{padding:13px;border:1px solid var(--line);border-radius:9px}.model-branches b{font-size:18px;color:var(--navy)}.caption{color:var(--muted);font-size:11px}.narrative{padding:28px}.narrative ul{padding-left:19px}.narrative li{margin:0 0 13px}.insight-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}.insight-grid div{padding:20px;border-top:3px solid var(--cyan);background:#fff}.insight-grid strong,.insight-grid span{display:block}.insight-grid strong{font-size:24px;color:var(--navy)}.insight-grid span{color:var(--muted);font-size:11px}.table-wrap{overflow:auto;max-height:480px}table{width:100%;border-collapse:collapse;white-space:nowrap}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right}th{position:sticky;top:0;background:#f8fafc;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em}th:first-child,td:first-child{text-align:left}td small{display:block;max-width:250px;color:var(--muted);font-size:10px}.variable-table td:nth-child(2),.variable-table th:nth-child(2),.variable-table td:nth-child(3),.variable-table th:nth-child(3),.variable-table td:nth-child(4),.variable-table th:nth-child(4){text-align:left}.variable-panel{padding:0}.ok{color:var(--green);font-weight:800}.bad{color:var(--red);font-weight:800}code{padding:2px 5px;border-radius:4px;background:#edf2f7;color:#334e68}.limitations{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.limitations article{padding:20px;border:1px solid var(--line);border-radius:12px;background:#fff}.limitations b{color:var(--navy)}.limitations p{margin:8px 0 0;color:var(--muted);font-size:12px}.conclusions{background:#fff}.conclusion-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}.conclusion-list article{display:flex;gap:18px;padding:24px;border:1px solid var(--line);border-radius:12px}.conclusion-list article>span{color:var(--blue);font-weight:900}.conclusion-list h3{margin:0 0 7px;color:var(--navy)}.conclusion-list p{margin:0;color:var(--muted)}.final-note{margin-top:28px;padding:24px;border-radius:12px;background:var(--navy);color:#d9e2ec}footer{padding:28px 6vw;color:var(--muted);font-size:11px;text-align:center}.erd-wrapper{background:#0e1e2e;padding:24px;border-radius:12px;margin:20px 0;overflow-x:auto}.erd-svg{display:block;margin:auto;max-width:100%;height:auto;filter:drop-shadow(0 10px 25px rgba(0,0,0,.35))}.erd-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:20px}.erd-card h4{margin:0 0 10px;color:var(--navy);font-size:15px;display:flex;align-items:center;gap:8px}.erd-card h4 span{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700}.erd-tag-primary{background:#e8f1ff;color:#1463ff}.erd-tag-sec{background:#e6fcf5;color:#0ca678}.erd-tag-accent{background:#fff4e6;color:#f76707}.erd-card p{margin:0 0 10px;color:var(--muted);font-size:13px;line-height:1.5}.erd-card ul{margin:0;padding-left:18px;color:var(--ink);font-size:12px}.erd-card li{margin-bottom:6px}.erd-table{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11px}.erd-pk{color:#f59e0b;font-weight:700}.erd-fk{color:#38bdf8;font-weight:700}.erd-attr{color:#cbd5e1}.erd-type{color:#94a3b8;font-size:10px}@media(max-width:980px){.sidebar{display:none}main{margin-left:0}.grid.two,.grid.three,.limitations{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:1fr 1fr}}@media(max-width:680px){.hero{padding:55px 24px;min-height:auto}.section{padding:48px 18px}.grid.two,.grid.three,.limitations,.conclusion-list,.insight-grid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.model-flow{flex-wrap:wrap}.hero h1{font-size:46px}}
 """
 
 
