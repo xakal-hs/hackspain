@@ -1,0 +1,59 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cómo pensar el score · X Ray · HackSpain 2026</title><style>
+:root{--ink:#172b3a;--muted:#66788a;--line:#dce5ec;--navy:#0d2b45;--blue:#1265e8;--cyan:#34c3cf;--paper:#fff;--bg:#f4f7fa}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif}header{padding:72px max(24px,calc((100% - 980px)/2));background:radial-gradient(circle at 85% 15%,rgba(52,195,207,.3),transparent 28%),linear-gradient(135deg,#0d2b45,#164f86);color:#fff}header small{color:var(--cyan);font-weight:800;letter-spacing:.15em;text-transform:uppercase}header h1{margin:18px 0 8px;font-size:clamp(40px,7vw,72px);line-height:.95;letter-spacing:-.06em}header p{margin:0;color:#c7d8e6;font-size:18px}.layout{display:grid;grid-template-columns:230px minmax(0,750px);gap:54px;max-width:1060px;margin:auto;padding:44px 24px 80px}nav{position:sticky;top:24px;align-self:start;padding:20px;border:1px solid var(--line);border-radius:14px;background:#fff}nav b{display:block;margin-bottom:10px;color:var(--navy)}nav a{display:block;padding:5px 0;color:var(--muted);text-decoration:none;font-size:12px}nav a:hover{color:var(--blue)}article{min-width:0}article>h1{display:none}h2{margin:54px 0 14px;padding-top:10px;color:var(--navy);font-size:30px;line-height:1.15;letter-spacing:-.035em}h2:first-child{margin-top:0}h3{margin:30px 0 8px;color:#164f86;font-size:19px}p{margin:0 0 16px}strong{color:var(--navy)}table{width:100%;margin:22px 0 30px;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#eaf2ff;color:#164f86;font-size:12px;text-transform:uppercase;letter-spacing:.06em}tr:last-child td{border-bottom:0}code{padding:2px 6px;border-radius:5px;background:#eaf0f5;color:#234e70}ul,ol{padding-left:22px}li{margin:7px 0}hr{margin:54px 0;border:0;border-top:1px solid var(--line)}blockquote{margin:24px 0;padding:18px 22px;border-left:4px solid var(--cyan);background:#eafcfd}footer{padding:26px;text-align:center;color:var(--muted);font-size:12px}@media(max-width:800px){.layout{display:block}nav{position:static;margin-bottom:30px}header{padding:54px 24px}table{display:block;overflow-x:auto;white-space:normal}h2{font-size:26px}}
+</style></head><body><header><small>HackSpain 2026 · Embat · Interpretación del equipo</small><h1>Cómo pensar el score</h1><p>Si tuvieras 100.000 € para prestar, ¿a quién se los darías?</p></header><div class="layout"><nav><b>Contenido</b><a href="challenge.html">Enunciado</a><a href="#la-prueba-de-los-100000-">Los 100.000 €</a><a href="#criticidad-no-todas-las-senales-pesan-igual">Criticidad</a><a href="#el-output-no-es-solo-un-numero">Más que un número</a><a href="#como-usarlo-al-construir">Al construir</a></nav><article>
+<h1 id="como-pensar-el-score">Cómo pensar el score</h1>
+<p><strong>Interpretación operativa del equipo.</strong> No sustituye el <a href="challenge.html">enunciado</a>: lo traduce a una forma de decidir, con el mismo criterio que usaría alguien que presta su propio dinero.</p>
+<p>El leaderboard pide un número. El producto no puede acabarse ahí.</p>
+
+<h2 id="la-prueba-de-los-100000-">La prueba de los 100.000 €</h2>
+<p>Para simplificar el problema: tienes <strong>100.000 €</strong> y tienes que prestarlos. Si se los prestas a una persona, ¿qué le preguntarías? ¿Qué te preocuparía que hiciera o dejara de hacer?</p>
+<p>Eso es lo que hacen los bancos. El scoring de un consumidor y el de una empresa identifican la <strong>misma naturaleza de riesgo</strong>; cambia el tipo de dato, no la pregunta. Primero se piensa en el mundo del consumidor y después se lleva a la empresa.</p>
+<table>
+<thead><tr><th>Si prestaras a una persona, te preocuparía…</th><th>En la empresa se llama…</th><th>En el dataset se ve en…</th></tr></thead>
+<tbody>
+<tr><td>Que se le acabe el dinero de la cuenta en pocas semanas</td><td>Caja disponible que se evapora</td><td>Saldos reconstruidos + movimientos</td></tr>
+<tr><td>Que cobre tarde o deje de cobrar</td><td>Medio de cobro / DSO</td><td>Facturas emitidas, cobros, <code>pending_amount</code></td></tr>
+<tr><td>Que pague cada vez más tarde a quien le fía</td><td>Medio de pago / DPO</td><td>Facturas recibidas, pagos a proveedores</td></tr>
+<tr><td>Que el sueldo se corte o sea irregular</td><td>Cobros que caen o se vuelven erráticos</td><td><code>transactions</code> (<code>collection</code>, <code>salary</code>)</td></tr>
+<tr><td>Que viva al límite de la tarjeta</td><td>Líneas de crédito agotadas</td><td><code>debt_products.outstanding</code> / <code>granted</code></td></tr>
+<tr><td>Que pida un préstamo para tapar el agujero</td><td>Deuda nueva mientras la caja cae</td><td>Alta de deuda + trayectoria de caja</td></tr>
+<tr><td>Que mienta o no se deje ver las cuentas</td><td>Cobertura / observabilidad</td><td>ERP ausente, conciliación, huecos</td></tr>
+</tbody>
+</table>
+<p>Las palabras raras (DSO, DPO, medio de cobro, medio de pago) hay que poder llevarlas <strong>a lenguaje de consumidor</strong>. Si el jurado o Embat no pueden repetir la explicación en una frase, el score no se entiende.</p>
+
+<h2 id="criticidad-no-todas-las-senales-pesan-igual">Criticidad: no todas las señales pesan igual</h2>
+<p>Una empresa que <strong>reduce la caja disponible muy rápido, en muy poco tiempo</strong>, es una señal grave. Debe tener un nivel de impacto / criticidad alto: el score tiene que moverse mucho más que si, de repente, se deteriora un poco el medio de cobro o el medio de pago.</p>
+<p>Ese matiz es el que un prestamista siente en la tripa y el que un modelo plano (todas las features al mismo peso) pierde.</p>
+<table>
+<thead><tr><th>Criticidad</th><th>Qué ves</th><th>Equivalente consumidor</th><th>Qué no hacer</th></tr></thead>
+<tbody>
+<tr><td><strong>Crítica</strong></td><td>La caja disponible se evapora en poco tiempo</td><td>Se le acaba el efectivo</td><td>No suavizarlo con un promedio de ratios</td></tr>
+<tr><td><strong>Alta</strong></td><td>Deja de cobrar de forma persistente, o paga solo con deuda nueva</td><td>No le entra el sueldo y vive de la tarjeta</td><td>No esperar a que el saldo sea cero</td></tr>
+<tr><td><strong>Media</strong></td><td>DSO o DPO se mueven un poco</td><td>Tarda unos días más en cobrar o pagar</td><td>No dejar que esto domine el ranking</td></tr>
+<tr><td><strong>Bache</strong></td><td>Un mal mes de caja con recuperación</td><td>Un gasto puntual</td><td>No tratarlo como deterioro estructural</td></tr>
+<tr><td><strong>No es salud</strong></td><td>ERP desconectado, mes truncado, categoría <code>-</code></td><td>No te enseña la cuenta</td><td>Tratarlo como cobertura, no como riesgo</td></tr>
+</tbody>
+</table>
+<p>La trayectoria importa más que la foto: una empresa sana que empieza a vaciar la cuenta es peor apuesta que una mediocre que está recapitalizándose. Eso es el ejemplo Northbrook (45 → 65) frente a Velasco (82 → 68), leído con criticidad y no solo con el último número.</p>
+
+<h2 id="el-output-no-es-solo-un-numero">El output no es solo un número</h2>
+<p>Hace falta un número para el leaderboard y para ordenar. Eso no implica que el problema se acabe en un ranking de A contra B. Un prestamista no se queda en “72”: quiere saber <strong>por qué</strong>, <strong>con qué gravedad</strong> y <strong>qué haría</strong>.</p>
+<p>Para cada empresa y mes, el sistema debería poder devolver, además del score:</p>
+<ol>
+<li><strong>Nivel y trayectoria</strong> — dónde está y hacia dónde va.</li>
+<li><strong>Criticidad de lo que se movió</strong> — caja que se evapora ≠ DSO que empeora tres días.</li>
+<li><strong>Por qué, en lenguaje llano</strong> — “se le está acabando el dinero de la cuenta”, no solo <code>Δcash_p10</code>.</li>
+<li><strong>Bache o caída</strong> — si el golpe es puntual o estructural.</li>
+<li><strong>Qué haría un prestamista</strong> — prestar / vigilar / no prestar; o, en el producto, avisar / recortar límite / acelerar cobros.</li>
+</ol>
+<p>Eso encaja con el enunciado: explicación obligatoria, producto encima del score, y la preferencia de Embat por un modelo sencillo que <strong>sirva para decidir</strong> frente a uno sofisticado que se queda en el número.</p>
+
+<h2 id="como-usarlo-al-construir">Cómo usarlo al construir</h2>
+<ul>
+<li>Pesar primero la <strong>velocidad de quema de caja disponible</strong>; después cobros, pagos y deuda.</li>
+<li>Explicar cada movimiento con la analogía consumidor → empresa.</li>
+<li>No imputar salud a partir de huecos de observabilidad.</li>
+<li>Diseñar la demo para que alguien con 100.000 € que prestar sepa, en un vistazo, a quién se los daría y por qué no al otro.</li>
+</ul>
+</article></div><footer>Reto X Ray · Embat · HackSpain 2026 · Interpretación del equipo</footer></body></html>
