@@ -3,6 +3,7 @@
 - Interpret fields according to their domain meaning and include substantive exploratory coverage such as distributions, temporal patterns, correlations, and outliers.
 - Do not rewrite the raw CSVs in `data/`; correct known dirt through a mapping layer instead.
 - After completing a deliverable, open a pull request and merge it into `main`.
+- Preferred models for subagent workflows: GPT-5.6 Sol, Claude Opus 5, GLM-5.3, and DeepSeek V4.1 Flash for quick work. Do not route quality-sensitive work to Claude Sonnet 5 — go to Opus 5 instead. Custom subagent profiles live in `.devin/agents/` (`researcher`, `implementer`, `reviewer`, `prototyper`).
 
 ## Learned Workspace Facts
 - The repository remote is `https://github.com/xakal-hs/hackspain`, with `main` as the default branch.
