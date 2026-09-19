@@ -8,6 +8,8 @@ const props = defineProps({
   chrome: { type: Boolean, default: true }
 })
 
+const { name: companyName, sector: companySector, detail: companyDetail, latest: companyLatest, health: companyHealth, company: selectedCompany } = useSelectedCompany()
+
 const accent = computed(() => props.accentColor)
 
 const selectedState = ref('bien')
@@ -115,6 +117,7 @@ const stateOptions = computed(() =>
 
 <template>
   <div
+    v-if="!companyDetail.isPending.value"
     class="centinela"
     style="box-sizing: border-box; background: var(--bg); color: var(--text); display: flex; overflow: hidden;"
     :style="chrome
@@ -154,7 +157,7 @@ const stateOptions = computed(() =>
         <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--on-navy); font-size: 12px; font-weight: 700; font-family: var(--font-display);" :style="{ background: accent }">CA</div>
         <div style="flex-grow: 1; min-width: 0;">
           <div style="font-size: 12.5px; font-weight: 600; color: var(--on-navy);">César Álvarez</div>
-          <div style="font-size: 11px; color: var(--on-navy-3);">Distribuciones Ibérica</div>
+          <div style="font-size: 11px; color: var(--on-navy-3);">{{ companyName }}</div>
         </div>
       </div>
     </div>
@@ -175,7 +178,7 @@ const stateOptions = computed(() =>
         </div>
         <!-- El simulador de estado es una herramienta de demo, no parte del
              producto: la etiqueta va por title en vez de ocupar ancho fijo. -->
-        <div style="display: flex; background: var(--bg); border-radius: 999px; padding: 1px;" title="Simular estado">
+        <div style="display: flex; background: var(--bg); border-radius: 999px; padding: 1px;" title="Simular escenario de producto" aria-label="Escenario simulado">
           <button
             v-for="s in stateOptions"
             :key="s.id"
@@ -192,12 +195,12 @@ const stateOptions = computed(() =>
 
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
           <div>
-            <h1 style="margin: 0 0 6px; font-family: var(--font-display); font-size: 26px; font-weight: 600;">Divisa Inteligente</h1>
+            <h1 style="margin: 0 0 6px; font-family: var(--font-display); font-size: 26px; font-weight: 600;">Divisa Inteligente · {{ companyName }}</h1>
             <p style="margin: 0; font-size: 13.5px; color: var(--meta);">Predice tus pagos en divisa y cubre al mejor tipo antes de la fecha del cobro o pago.</p>
           </div>
           <div style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; font-size: 12.5px; color: var(--text-2);">
             <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--text-3);"></span>
-            Conectado con Business Central
+            ERP: {{ selectedCompany?.erp || 'Sin dato' }}
           </div>
         </div>
 
@@ -214,7 +217,7 @@ const stateOptions = computed(() =>
           <div style="width: 40px; height: 40px; border-radius: var(--r-lg); display: flex; align-items: center; justify-content: center; font-size: 18px;" :style="{ background: `color-mix(in srgb, ${accent} 16%, transparent)` }">{{ state.icon }}</div>
           <div style="flex-grow: 1;">
             <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2px;" :style="{ color: accent }">{{ state.tag }}</div>
-            <div style="font-family: var(--font-display); font-size: 16.5px; font-weight: 600; margin-bottom: 3px;">{{ state.headline }}</div>
+            <div style="font-family: var(--font-display); font-size: 16.5px; font-weight: 600; margin-bottom: 3px;">Ejemplo simulado · {{ state.headline }}</div>
             <div style="font-size: 13px; color: var(--body); line-height: 1.5;">{{ state.subhead }}</div>
           </div>
           <button
@@ -288,7 +291,7 @@ const stateOptions = computed(() =>
               <span>oct '25</span><span>ene '26</span><span>hoy</span><span>h3 →</span>
             </div>
             <div style="display: flex; gap: 14px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--grid);">
-              <div class="legend-item"><span style="width: 12px; height: 2px; background: var(--text);"></span> Tipo real</div>
+              <div class="legend-item"><span style="width: 12px; height: 2px; background: var(--text);"></span> Tipo simulado</div>
               <div class="legend-item"><span style="width: 12px; height: 2px; background: var(--text); opacity: 0.5;"></span> Predicción h3</div>
               <div class="legend-item"><span style="width: 10px; height: 10px; border-radius: 50%;" :style="{ background: state.chartColor }"></span> Pago FX previsto</div>
             </div>

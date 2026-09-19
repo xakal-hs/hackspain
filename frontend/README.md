@@ -113,3 +113,37 @@ sign-in and fixtures are still unchanged.
 The project `.mcp.json` configures the Supabase MCP server for Claude Code.
 Run `claude /mcp` in a regular terminal, select `supabase`, and choose
 Authenticate to complete the browser OAuth flow with your Supabase account.
+
+### Empresa seleccionada (Supabase)
+
+La vista Empresa permite elegir las 1.286 entradas de `companies` desde el rail
+(y su menú de cambio de vista). Se conserva la selección al navegar y recargar.
+Los identificadores `COMP_…` son las etiquetas: `companies` no tiene un nombre
+comercial. El sector se une por `company_id` desde
+`company_business_profile.top_sector`; `top_sector_score` no es un score de
+salud del sector y no se utiliza como tal.
+
+- `/api/company-directory`: empresas y sectores, paginados en bloques de 500.
+- `/api/company-directory/:id`: panel mensual, score, explicaciones del último
+  score y monedas de cuentas de esa empresa. Las lecturas son independientes:
+  si falla una fuente, se indica y se mantienen las demás.
+- X-Ray Score: `company_health_monthly` aporta nota, banda, trayectoria y cambio
+  a tres meses; `company_health_driver_monthly` aporta contribuciones. Las
+  fechas de los gráficos corresponden a los meses recibidos.
+- Colchón: caja reconstruida y meses de pagos desde `panel_monthly`, en la
+  moneda de la compañía; se avisa cuando `saldo_inconsistente` está marcado.
+- Divisa: moneda de la empresa y monedas de `banking_products`.
+
+**Pendiente / demo:** referencia sectorial (línea explícitamente simulada de 65),
+previsiones, recomendaciones del agente, colchón objetivo, excedentes,
+depósitos, rentabilidad, operaciones, exposición FX, cotizaciones, pagos
+previstos, coberturas y ahorros. El resumen, señales y ofertas generales siguen
+siendo demostraciones y muestran un aviso. Si no hay score se mantiene el
+escenario demo rotulado; un dato de caja ausente se muestra como «Sin dato».
+No se modifica ninguna tabla ni se incluyen secretos en el cliente. El acceso
+sigue el modelo de demo existente; no representa autorización multiempresa de
+un producto autenticado.
+
+Validación: `pnpm typecheck`, `pnpm build`, consulta local de ambas rutas y cambio
+entre empresas/las tres secciones en navegador; verificar que la selección se
+conserva al recargar y que los meses reales no se etiquetan como «hoy».

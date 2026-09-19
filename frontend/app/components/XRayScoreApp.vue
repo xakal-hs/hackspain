@@ -1,6 +1,5 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { leadCompany } from '~/data/demo'
 
 const props = defineProps({
   accentColor: { type: String, default: 'var(--accent)' },
@@ -8,6 +7,8 @@ const props = defineProps({
   // Dentro del panel el shell ya lo pone el dashboard: solo va el contenido.
   chrome: { type: Boolean, default: true }
 })
+
+const { name: companyName, sector: companySector, detail: companyDetail, latest: companyLatest, health: companyHealth, company: selectedCompany } = useSelectedCompany()
 
 const accent = computed(() => props.accentColor)
 
@@ -108,7 +109,37 @@ const states = ref({
   }
 })
 
-const state = computed(() => states.value[selectedState.value] || states.value.mal)
+const state = computed(() => {
+  const mock = states.value[selectedState.value] || states.value.mal
+  const health = companyHealth.value
+  if (!health) return { ...mock, headline: 'Score de demostración · pendiente de datos', chartTag: 'Simulado' }
+  const delta = health.score_delta_3m
+  return { ...mock,
+    drivers: (companyDetail.data.value?.drivers || []).map(driver => ({
+      label: driver.label, value: driver.display_value,
+      contribution: `${driver.contribution > 0 ? '+' : ''}${driver.contribution.toFixed(1)}`,
+      color: 'var(--accent)',
+    })),
+    score: health.health_score.toFixed(1), chip: health.health_band.toUpperCase(),
+    scoreColor: health.health_band === 'sano' ? 'var(--ok)' : health.health_band === 'riesgo' ? 'var(--bad)' : 'var(--warn)',
+    headline: `Score de ${companyName.value}: ${health.health_score.toFixed(1)}`,
+    subhead: `Dato de Supabase · ${health.month.slice(0, 7)}. Las recomendaciones del agente son ejemplos simulados.`,
+    bandText: `Banda: ${health.health_band.toUpperCase()}`, bandTitle: 'Clasificación registrada en Supabase',
+    bandDesc: 'La banda y la nota proceden del mismo mes.',
+    delta3: delta == null ? 'Sin dato' : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} pts`,
+    deltaHint: 'Variación registrada frente a tres meses antes.',
+    forecast: 'Pendiente', forecastHint: 'sin previsión conectada',
+    chartHistory: companyDetail.data.value?.health.map(row => row.health_score) || [],
+    chartForecast: [], chartMarker: null, chartTag: 'Historia real · Supabase',
+    icon: { improving: '↑', stable: '→', deteriorating: '↓' }[health.health_trend],
+    tag: { improving: 'Mejora', stable: 'Estable', deteriorating: 'Deterioro' }[health.health_trend],
+  }
+})
+const scoreMonths = computed(() => companyHealth.value ? companyDetail.data.value?.health.map(row => row.month.slice(0, 7)) : undefined)
+const sectorTraces = computed(() => [
+  { key: 'company', label: companyName.value, history: state.value.chartHistory, forecast: state.value.chartForecast },
+  { key: 'sector', label: `${companySector.value} · referencia simulada`, tone: 'muted', history: state.value.chartHistory.map(() => 65), forecast: [] },
+])
 
 /* '−4,2' → -4.2. El guion es un signo menos tipográfico (U+2212), no un ASCII
  * '-', y el decimal va con coma: ninguno de los dos los entiende parseFloat. */
@@ -144,6 +175,7 @@ const stateOptions = computed(() =>
 
 <template>
   <div
+    v-if="!companyDetail.isPending.value"
     class="centinela"
     style="box-sizing: border-box; background: var(--bg); color: var(--text); display: flex; overflow: hidden;"
     :style="chrome
@@ -183,7 +215,7 @@ const stateOptions = computed(() =>
         <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--on-navy); font-size: 12px; font-weight: 700; font-family: var(--font-display);" :style="{ background: accent }">CA</div>
         <div style="flex-grow: 1; min-width: 0;">
           <div style="font-size: 12.5px; font-weight: 600; color: var(--on-navy);">César Álvarez</div>
-          <div style="font-size: 11px; color: var(--on-navy-3);">Distribuciones Ibérica</div>
+          <div style="font-size: 11px; color: var(--on-navy-3);">{{ companyName }}</div>
         </div>
       </div>
     </div>
@@ -205,7 +237,7 @@ const stateOptions = computed(() =>
         <!-- El simulador de estado es una herramienta de demo, no parte del
              producto: la etiqueta va por title en vez de ocupar ancho fijo, y
              las píldoras se acortan a sus iniciales. -->
-        <div style="display: flex; background: var(--bg); border-radius: 999px; padding: 1px;" title="Simular estado">
+        <div style="display: flex; background: var(--bg); border-radius: 999px; padding: 1px;" title="Simular escenario de producto" aria-label="Escenario simulado">
           <button
             v-for="s in stateOptions"
             :key="s.id"
@@ -222,12 +254,12 @@ const stateOptions = computed(() =>
 
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
           <div>
-            <h1 style="margin: 0 0 6px; font-family: var(--font-display); font-size: 26px; font-weight: 600;">X-Ray Score · Distribuciones Ibérica</h1>
-            <p style="margin: 0; font-size: 13.5px; color: var(--meta);">Tu salud financiera explicada · basado en 24 meses de rastro financiero.</p>
+            <h1 style="margin: 0 0 6px; font-family: var(--font-display); font-size: 26px; font-weight: 600;">X-Ray Score · {{ companyName }}</h1>
+            <p style="margin: 0; font-size: 13.5px; color: var(--meta);">Tu salud financiera explicada · {{ companyDetail.data.value?.health.length || 0 }} meses de score conectados.</p>
           </div>
           <div style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; font-size: 12.5px; color: var(--text-2);">
             <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--text-3);"></span>
-            Última actualización: hace 4 min
+            Mes del score: {{ companyHealth?.month.slice(0, 7) || 'demo' }}
           </div>
         </div>
 
@@ -292,7 +324,7 @@ const stateOptions = computed(() =>
               <span style="font-size: 12px; font-weight: 700;" :style="{ color: accent }" aria-hidden="true">{{ state.icon }}</span>
             </div>
             <div style="font-family: var(--font-display); font-size: 30px; font-weight: 700; margin-top: 8px;">{{ state.forecast }}</div>
-            <div style="font-size: 12px; color: var(--text-2); margin-top: 6px; line-height: 1.4;">Banda 80 % · {{ state.forecastHint }}</div>
+            <div style="font-size: 12px; color: var(--text-2); margin-top: 6px; line-height: 1.4;">{{ state.forecastHint }}</div>
           </div>
 
         </div>
@@ -301,14 +333,10 @@ const stateOptions = computed(() =>
           <div style="margin-bottom: 12px;">
             <div style="font-size: 13.5px; font-weight: 600;">Frente al sector</div>
             <div style="font-size: 11.5px; color: var(--text-3); margin-top: 2px;">
-              Score y plazos frente a la mediana de distribución alimentaria · comparativa anónima
+              {{ companySector }} · referencia sectorial simulada, pendiente de score del sector
             </div>
           </div>
-          <SectorCompare
-            :company="leadCompany"
-            :score="Number(state.score)"
-            :series="{ history: state.chartHistory, forecast: state.chartForecast }"
-          />
+          <ScoreBandChart :traces="sectorTraces" :month-labels="scoreMonths" note="Referencia sectorial simulada" :caption="`Comparativa de ${companyName} frente a ${companySector}. La referencia del sector es de demostración.`" />
         </div>
 
         <!-- CHART + AGENT -->
@@ -318,16 +346,16 @@ const stateOptions = computed(() =>
           <div class="card" style="padding: 20px 22px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
               <div>
-                <div style="font-size: 13.5px; font-weight: 600;">Trayectoria del score · últimos 24 meses</div>
-                <div style="font-size: 11.5px; color: var(--text-3); margin-top: 2px;">Historia + predicción h1-h3 con banda de confianza</div>
+                <div style="font-size: 13.5px; font-weight: 600;">Trayectoria del score</div>
+                <div style="font-size: 11.5px; color: var(--text-3); margin-top: 2px;">{{ companyHealth ? 'Histórico registrado en Supabase' : 'Historia y previsión simuladas' }}</div>
               </div>
               <span style="padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--wash); color: var(--text-2);">{{ state.chartTag }}</span>
             </div>
             <ScoreBandChart
-              :traces="[{ key: 'score', label: 'Distribuciones Ibérica', history: state.chartHistory, forecast: state.chartForecast }]"
+              :traces="[{ key: 'score', label: companyName, history: state.chartHistory, forecast: state.chartForecast }]"
               :marker="state.chartMarker"
-              note="Trazo discontinuo: previsión h1-h3"
-              caption="Score de Distribuciones Ibérica mes a mes durante 24 meses, con previsión a tres."
+              :note="companyHealth ? 'Sin previsión conectada' : 'Previsión simulada h1-h3'"
+              :month-labels="scoreMonths" :caption="`Score de ${companyName} mes a mes`"
             />
           </div>
 
@@ -336,7 +364,7 @@ const stateOptions = computed(() =>
             <div style="display: flex; align-items: center; gap: 10px;">
               <div style="width: 32px; height: 32px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 13px; font-weight: 700;" :style="{ background: accent }">A</div>
               <div style="flex-grow: 1;">
-                <div style="font-family: var(--font-display); font-size: 14px; font-weight: 600;">Agente Centinela</div>
+                <div style="font-family: var(--font-display); font-size: 14px; font-weight: 600;">Agente Centinela · demo</div>
                 <div style="font-size: 11.5px; color: var(--on-navy-3);">{{ state.agentStatus }}</div>
               </div>
               <span style="width: 8px; height: 8px; border-radius: 50%;" :style="{ background: accent }"></span>
@@ -370,11 +398,12 @@ const stateOptions = computed(() =>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <div>
               <div style="font-size: 13.5px; font-weight: 600;">Qué explica el score</div>
-              <div style="font-size: 11.5px; color: var(--text-3); margin-top: 2px;">Contribución exacta de cada señal · suma al score total</div>
+              <div style="font-size: 11.5px; color: var(--text-3); margin-top: 2px;">{{ companyHealth ? 'Contribuciones registradas en Supabase' : 'Explicaciones simuladas' }}</div>
             </div>
             <span style="font-size: 12px; font-weight: 600; color: var(--text-2);">Ver todas las features →</span>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;">
+          <p v-if="!drivers.length">Sin explicaciones disponibles para este mes.</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px;">
             <div
               v-for="d in drivers"
               :key="d.label"

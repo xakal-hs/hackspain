@@ -8,6 +8,8 @@ const props = defineProps({
   chrome: { type: Boolean, default: true }
 })
 
+const { name: companyName, sector: companySector, detail: companyDetail, latest: companyLatest, health: companyHealth, company: selectedCompany } = useSelectedCompany()
+
 const accent = computed(() => props.accentColor)
 
 const selectedState = ref('bien')
@@ -93,7 +95,20 @@ const states = ref({
   }
 })
 
-const state = computed(() => states.value[selectedState.value] || states.value.bien)
+const state = computed(() => {
+  const mock = states.value[selectedState.value] || states.value.bien
+  const row = companyLatest.value
+  const cash = row?.cash_end
+  const currency = selectedCompany.value?.currency
+  return { ...mock,
+    cash: cash == null || !currency ? 'Sin dato' : `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 }).format(cash)} ${currency}`,
+    drivers: [
+      { label: 'Caja / pagos mensuales · dato real', value: row?.runway_m == null ? 'Sin dato' : `${row.runway_m.toFixed(1)} meses`, dot: 'var(--accent)' },
+      { label: 'Score X-Ray · dato real', value: companyHealth.value?.health_score.toFixed(1) ?? 'Sin dato', dot: 'var(--accent)' },
+      ...mock.drivers.slice(2).map(driver => ({ ...driver, label: `${driver.label} · demo` })),
+    ],
+  }
+})
 
 const stateOptions = computed(() =>
   [
@@ -115,6 +130,7 @@ const stateOptions = computed(() =>
 
 <template>
   <div
+    v-if="!companyDetail.isPending.value"
     class="centinela"
     style="box-sizing: border-box; background: var(--bg); color: var(--text); display: flex; overflow: hidden;"
     :style="chrome
@@ -175,7 +191,7 @@ const stateOptions = computed(() =>
         <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--on-navy); font-size: 12px; font-weight: 700; font-family: var(--font-display);" :style="{ background: accent }">CA</div>
         <div style="flex-grow: 1; min-width: 0;">
           <div style="font-size: 12.5px; font-weight: 600; color: var(--on-navy);">César Álvarez</div>
-          <div style="font-size: 11px; color: var(--on-navy-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Distribuciones Ibérica</div>
+          <div style="font-size: 11px; color: var(--on-navy-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ companyName }}</div>
         </div>
       </div>
 
@@ -199,7 +215,7 @@ const stateOptions = computed(() =>
 
         <!-- STATE SIMULATOR. Es una herramienta de demo, no parte del
              producto: la etiqueta va por title en vez de ocupar ancho fijo. -->
-        <div style="display: flex; background: var(--bg); border-radius: 999px; padding: 1px;" title="Simular estado">
+        <div style="display: flex; background: var(--bg); border-radius: 999px; padding: 1px;" title="Simular escenario de producto" aria-label="Escenario simulado">
           <button
             v-for="s in stateOptions"
             :key="s.id"
@@ -217,12 +233,12 @@ const stateOptions = computed(() =>
         <!-- PAGE HEADER -->
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
           <div>
-            <h1 style="margin: 0 0 6px; font-family: var(--font-display); font-size: 26px; font-weight: 600;">Colchón Dinámico</h1>
+            <h1 style="margin: 0 0 6px; font-family: var(--font-display); font-size: 26px; font-weight: 600;">Colchón Dinámico · {{ companyName }}</h1>
             <p style="margin: 0; font-size: 13.5px; color: var(--meta);">Divide tu caja en lo que necesitas y lo que no. Coloca el excedente, prevé las devoluciones.</p>
           </div>
           <div style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; font-size: 12.5px; color: var(--text-2);">
             <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--text-3);"></span>
-            Sincronizado hace 4 min
+            Mes de caja: {{ companyLatest?.month || 'sin dato' }}
           </div>
         </div>
 
@@ -239,7 +255,7 @@ const stateOptions = computed(() =>
           <div style="width: 40px; height: 40px; border-radius: var(--r-lg); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;" :style="{ background: `color-mix(in srgb, ${accent} 16%, transparent)` }">{{ state.icon }}</div>
           <div style="flex-grow: 1;">
             <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2px;" :style="{ color: accent }">{{ state.tag }}</div>
-            <div style="font-family: var(--font-display); font-size: 16.5px; font-weight: 600; margin-bottom: 3px;">{{ state.headline }}</div>
+            <div style="font-family: var(--font-display); font-size: 16.5px; font-weight: 600; margin-bottom: 3px;">Ejemplo simulado · {{ state.headline }}</div>
             <div style="font-size: 13px; color: var(--body); line-height: 1.5;">{{ state.subhead }}</div>
           </div>
           <button
@@ -256,8 +272,8 @@ const stateOptions = computed(() =>
 
           <div class="card" style="padding: 20px 22px;">
             <div style="display: flex; justify-content: space-between; align-items: baseline;">
-              <span style="font-size: 12.5px; color: var(--meta);">Caja actual</span>
-              <span style="font-size: 11px; color: var(--text-2); font-weight: 600;">+ 24k € esta semana</span>
+              <span style="font-size: 12.5px; color: var(--meta);">Caja reconstruida</span>
+              <span style="font-size: 11px; color: var(--text-2); font-weight: 600;">{{ selectedCompany?.currency || 'Sin moneda' }} · dato del panel</span>
             </div>
             <div style="font-family: var(--font-display); font-size: 30px; font-weight: 700; margin-top: 8px;">{{ state.cash }}</div>
             <!-- Sparkline de contexto, no la gráfica de la página: va en tinta
@@ -325,7 +341,7 @@ const stateOptions = computed(() =>
               <span>oct '25</span><span>abr '26</span><span>hoy</span><span>predicción h3 →</span>
             </div>
             <div style="display: flex; gap: 14px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--grid);">
-              <div class="legend-item"><span style="width: 12px; height: 2px;" :style="{ background: state.chartColor }"></span> Excedente real</div>
+              <div class="legend-item"><span style="width: 12px; height: 2px;" :style="{ background: state.chartColor }"></span> Excedente simulado</div>
               <div class="legend-item"><span style="width: 12px; height: 2px; opacity: 0.6;" :style="{ background: state.chartColor }"></span> Predicción h3 (banda 80%)</div>
             </div>
           </div>

@@ -48,6 +48,7 @@ definePageMeta({
   ],
 })
 
+const { selectedId: activeCompanyId, name: activeCompanyName, sector: activeSector } = useSelectedCompany()
 const route = useRoute()
 const role = computed(() => route.params.role as PerspectiveId)
 const profile = computed(() => perspectiveById(role.value)!)
@@ -287,11 +288,12 @@ const connected = activeCompanies.toLocaleString('es-ES')
       </header>
 
       <main id="main-content" class="wk__main" tabindex="-1">
-        <div :key="section" class="wk__pane" :class="{ 'is-live': paneLive }">
+        <CompanyDataContext v-if="role === 'empresa'" :section="section" />
+        <div :key="`${section}-${role === 'empresa' ? activeCompanyId : 'portfolio'}`" class="wk__pane" :class="{ 'is-live': paneLive }">
         <div v-if="!isTreasury" class="wk__head">
           <h1>{{ headline }}</h1>
           <p v-if="role === 'empresa'">
-            {{ leadCompany.name }} · {{ leadCompany.sector }}
+            {{ activeCompanyName }} · {{ activeSector }}
           </p>
           <p v-else>{{ profile.job }}</p>
         </div>
