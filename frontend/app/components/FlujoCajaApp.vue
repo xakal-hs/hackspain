@@ -384,18 +384,21 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
             </tbody>
           </table>
         </div>
+        <!-- La acción del caso, abajo a la derecha, pegada a la tesorería final. -->
+        <div v-if="columns.length && (rotura || excedente)" class="eb__action">
+          <template v-if="rotura">
+            <p>Vas a romper caja {{ span(rotura.from, rotura.to) }}: {{ money(rotura.low) }}</p>
+            <button type="button" class="eb__alert" aria-label="Pedir financiación">
+              <TriangleAlert :size="18" aria-hidden="true" /><span>Pedir financiación</span>
+            </button>
+          </template>
+          <button v-else type="button" class="eb__cta">Gana eficiencia prestando tu caja</button>
+        </div>
       </section>
     </Transition>
 
-    <!-- La barra flotante de Embat, con la acción del caso a su izquierda. -->
+    <!-- La barra flotante de Embat. -->
     <div class="eb__dock">
-      <div v-if="rotura" class="eb__case">
-        <p>Vas a romper caja {{ span(rotura.from, rotura.to) }}: {{ money(rotura.low) }}</p>
-        <button type="button" class="eb__alert" aria-label="Pedir financiación">
-          <TriangleAlert :size="18" aria-hidden="true" /><span>Pedir financiación</span>
-        </button>
-      </div>
-      <button v-else-if="excedente" type="button" class="eb__cta">Gana eficiencia prestando tu caja</button>
       <nav class="eb__pill" aria-label="Herramientas">
         <button type="button" aria-label="Asistente"><Atom :size="20" aria-hidden="true" class="eb__atom" /></button>
         <button type="button" aria-label="Tareas pendientes: 1">
@@ -805,23 +808,14 @@ tbody tr:last-child > * {
   transform: rotate(90deg);
 }
 
-/* Barra flotante abajo y centrada, como en Embat: siempre a la vista y, al llegar al final,
- * en su sitio bajo la tabla, sin tapar la tesorería final. */
+/* La barra de Embat, abajo y centrada. No flota: taparía la acción del caso en pantallas bajas. */
 .eb__dock {
-  position: sticky;
-  bottom: 0;
-  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   margin-top: auto;
   padding: 0 16px 18px;
-  pointer-events: none;
-}
-
-.eb__dock > * {
-  pointer-events: auto;
 }
 
 .eb__pill {
@@ -878,7 +872,6 @@ tbody tr:last-child > * {
   font: inherit;
   font-size: 13.5px;
   font-weight: 600;
-  box-shadow: 0 10px 28px -14px rgb(59 108 245 / 0.8);
   cursor: pointer;
 }
 
@@ -886,22 +879,18 @@ tbody tr:last-child > * {
   background: #2f5de0;
 }
 
-.eb__case {
+.eb__action {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 12px;
-  height: 52px;
-  padding: 0 6px 0 16px;
-  border: 1px solid var(--eb-line);
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 10px 28px -14px rgb(16 20 40 / 0.35);
+  margin-top: 14px;
 }
 
-.eb__case p {
+.eb__action p {
   margin: 0;
   font-weight: 500;
-  white-space: nowrap;
+  color: var(--eb-body);
 }
 
 /* El aviso es un icono negro; al pasar por encima se abre en un botón normal. */
@@ -1008,23 +997,11 @@ tbody tr:last-child > * {
   }
 
   .eb__dock {
-    position: static;
-    flex-direction: column;
-    align-items: stretch;
     padding-bottom: 24px;
   }
 
-  .eb__case {
-    height: auto;
-    padding: 10px 10px 10px 14px;
-  }
-
-  .eb__case p {
-    white-space: normal;
-  }
-
-  .eb__pill {
-    align-self: center;
+  .eb__action {
+    flex-wrap: wrap;
   }
 }
 </style>
