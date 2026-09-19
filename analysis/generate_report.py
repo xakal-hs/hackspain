@@ -159,10 +159,10 @@ def compact(value) -> str:
     return fmt(value)
 
 
-def chart_html(figure: go.Figure, height: int = 380) -> str:
+def chart_html(figure: go.Figure, height: int = 380, margin: dict | None = None) -> str:
     figure.update_layout(
         height=height,
-        margin=dict(l=48, r=22, t=48, b=48),
+        margin=margin or dict(l=48, r=22, t=48, b=48),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font=dict(family="Inter, system-ui, sans-serif", color=COLORS["navy"], size=12),

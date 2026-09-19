@@ -141,6 +141,49 @@ SECTORS = (
     "holding / tesorería",
 )
 
+SECTOR_SHORT = {
+    "comercio minorista": "comercio",
+    "hostelería": "hostelería",
+    "mayorista / distribución": "mayorista",
+    "industria": "industria",
+    "construcción": "obra",
+    "servicios profesionales": "servicios",
+    "software / suscripción": "software",
+    "transporte / logística": "transporte",
+    "alquiler / inmobiliario": "alquiler",
+    "energía": "energía",
+    "holding / tesorería": "holding",
+}
+
+# Color + forma: el color no es el único canal (a11y del scatter).
+SECTOR_COLORS = {
+    "comercio minorista": "#1463ff",
+    "hostelería": "#e5484d",
+    "mayorista / distribución": "#7c3aed",
+    "industria": "#0f766e",
+    "construcción": "#d97706",
+    "servicios profesionales": "#27b3c2",
+    "software / suscripción": "#4f46e5",
+    "transporte / logística": "#64748b",
+    "alquiler / inmobiliario": "#22a06b",
+    "energía": "#ea580c",
+    "holding / tesorería": "#102a43",
+}
+
+SECTOR_SYMBOLS = {
+    "comercio minorista": "square",
+    "hostelería": "diamond",
+    "mayorista / distribución": "hexagon",
+    "industria": "triangle-down",
+    "construcción": "triangle-up",
+    "servicios profesionales": "circle",
+    "software / suscripción": "star",
+    "transporte / logística": "x",
+    "alquiler / inmobiliario": "pentagon",
+    "energía": "cross",
+    "holding / tesorería": "hourglass",
+}
+
 # Mesa de opciones del repo (analysis/productos.py, research/src/service.py,
 # context/oportunidades.md) cruzada con la rejilla sector × tenor de Capchase.
 # No es un SKU empujado: 2–4 opciones que encajan. Pooling de grupo va antes.
@@ -1037,6 +1080,109 @@ def mean(values: list[float | None]) -> float | None:
     return sum(clean) / len(clean)
 
 
+def hex_rgba(color: str, alpha: float) -> str:
+    raw = color.lstrip("#")
+    red, green, blue = int(raw[0:2], 16), int(raw[2:4], 16), int(raw[4:6], 16)
+    return f"rgba({red},{green},{blue},{alpha})"
+
+
+def covariance_ellipse(
+    xs: list[float],
+    ys: list[float],
+    n_std: float = 1.65,
+    n: int = 80,
+) -> tuple[list[float], list[float]] | None:
+    if len(xs) < 5:
+        return None
+    mx = sum(xs) / len(xs)
+    my = sum(ys) / len(ys)
+    cxx = sum((x - mx) ** 2 for x in xs) / (len(xs) - 1)
+    cyy = sum((y - my) ** 2 for y in ys) / (len(ys) - 1)
+    cxy = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / (len(xs) - 1)
+    det = cxx * cyy - cxy * cxy
+    tr = cxx + cyy
+    disc = max(tr * tr / 4 - det, 0.0)
+    lam1 = tr / 2 + math.sqrt(disc)
+    lam2 = tr / 2 - math.sqrt(disc)
+    if abs(cxy) > 1e-12:
+        vx, vy = lam1 - cyy, cxy
+    elif cxx >= cyy:
+        vx, vy = 1.0, 0.0
+    else:
+        vx, vy = 0.0, 1.0
+    norm = math.sqrt(vx * vx + vy * vy) or 1.0
+    vx, vy = vx / norm, vy / norm
+    wx, wy = -vy, vx
+    axis_a = n_std * math.sqrt(max(lam1, 1e-9))
+    axis_b = n_std * math.sqrt(max(lam2, 1e-9))
+    out_x, out_y = [], []
+    for i in range(n + 1):
+        theta = 2 * math.pi * i / n
+        ct, st = math.cos(theta), math.sin(theta)
+        out_x.append(mx + axis_a * ct * vx + axis_b * st * wx)
+        out_y.append(my + axis_a * ct * vy + axis_b * st * wy)
+    return out_x, out_y
+
+
+def add_blob(
+    figure: go.Figure,
+    xs: list[float],
+    ys: list[float],
+    *,
+    color: str,
+    label: str,
+    texts: list[str],
+    symbol: str = "circle",
+    sizes: list[float] | None = None,
+    annotate: bool = True,
+) -> None:
+    ellipse = covariance_ellipse(xs, ys)
+    if ellipse is not None:
+        ex, ey = ellipse
+        figure.add_trace(
+            go.Scatter(
+                x=ex,
+                y=ey,
+                mode="lines",
+                fill="toself",
+                fillcolor=hex_rgba(color, 0.13),
+                line=dict(color=color, width=1.6),
+                hoverinfo="skip",
+                showlegend=False,
+            )
+        )
+    figure.add_trace(
+        go.Scatter(
+            x=xs,
+            y=ys,
+            mode="markers",
+            name=label,
+            marker=dict(
+                size=sizes or 8,
+                color=color,
+                opacity=0.78,
+                symbol=symbol,
+                line=dict(width=0.7, color="rgba(255,255,255,0.9)"),
+            ),
+            text=texts,
+            hovertemplate="%{text}<extra></extra>",
+            showlegend=False,
+        )
+    )
+    if annotate and xs:
+        figure.add_annotation(
+            x=sum(xs) / len(xs),
+            y=sum(ys) / len(ys),
+            text=f"<b>{html.escape(label)}</b>",
+            showarrow=False,
+            font=dict(size=12, color=color, family="Inter, system-ui, sans-serif"),
+            bgcolor="rgba(255,255,255,0.9)",
+            bordercolor=hex_rgba(color, 0.4),
+            borderwidth=1,
+            borderpad=4,
+        )
+
+
 def kind_figure(rows: list[dict]) -> go.Figure:
     eligible = [row for row in rows if row["eligible"] and row["goods_score"] is not None]
     colors = {
@@ -1075,21 +1221,23 @@ def pca_figure(rows: list[dict]) -> go.Figure:
     figure = go.Figure()
     for i, label in enumerate(labels):
         subset = [row for row in clustered if row["regime_label"] == label]
-        figure.add_trace(
-            go.Scatter(
-                x=[row["pc1"] for row in subset],
-                y=[row["pc2"] for row in subset],
-                mode="markers",
-                name=label,
-                marker=dict(size=7, color=palette[i % len(palette)], opacity=0.75),
-                hovertemplate="%{text}<extra></extra>",
-                text=[f"{row['company_id']}<br>{row['business_kind']}" for row in subset],
-            )
+        add_blob(
+            figure,
+            [row["pc1"] for row in subset],
+            [row["pc2"] for row in subset],
+            color=palette[i % len(palette)],
+            label=label,
+            texts=[
+                f"{row['company_id']}<br>{row['business_kind']}<br>{row.get('sector_set') or 'sin sector'}"
+                for row in subset
+            ],
+            symbol=("circle", "square", "diamond", "triangle-up")[i % 4],
         )
     figure.update_layout(
-        title="Régimen operativo · proyección PCA",
-        xaxis_title="Componente 1",
-        yaxis_title="Componente 2",
+        title="Régimen operativo · las manchas son 1,65 σ de cada clúster",
+        xaxis_title="Dirección que más separa la huella",
+        yaxis_title="Segunda dirección",
+        showlegend=False,
     )
     return figure
 
@@ -1196,19 +1344,95 @@ def sector_bar_figure(rows: list[dict]) -> go.Figure:
     figure = go.Figure(
         go.Bar(
             x=[counts[name] for name in ordered],
-            y=ordered,
+            y=[SECTOR_SHORT[name] for name in ordered],
             orientation="h",
-            marker_color=COLORS["blue"],
+            marker=dict(color=[SECTOR_COLORS[name] for name in ordered], line=dict(width=0)),
             text=[fmt(counts[name], 0) for name in ordered],
             textposition="outside",
             cliponaxis=False,
-            hovertemplate="%{y}: %{x}<extra></extra>",
+            hovertemplate="%{y}: %{x} empresas<extra></extra>",
         )
     )
     figure.update_layout(
-        title="Empresas cuya huella es compatible con cada sector",
+        title="Cuántas huellas tocan cada sector",
         xaxis_title="Empresas (una puede contar en varios)",
         yaxis=dict(autorange="reversed"),
+        showlegend=False,
+    )
+    return figure
+
+
+def sector_map_figure(rows: list[dict]) -> go.Figure:
+    clustered = [row for row in rows if row.get("pc1") is not None and row.get("top_sector")]
+    counts = sector_counts(clustered)
+    ordered = sorted((name for name in SECTORS if counts.get(name)), key=lambda name: counts[name], reverse=True)
+    figure = go.Figure()
+    for name in ordered:
+        subset = [row for row in clustered if row.get("top_sector") == name]
+        add_blob(
+            figure,
+            [row["pc1"] for row in subset],
+            [row["pc2"] for row in subset],
+            color=SECTOR_COLORS[name],
+            label=SECTOR_SHORT[name],
+            texts=[
+                (
+                    f"{row['company_id']}<br>{row.get('sector_set')}"
+                    f"<br>{row['business_kind']} · {row.get('regime_label')}"
+                )
+                for row in subset
+            ],
+            symbol=SECTOR_SYMBOLS[name],
+            sizes=[7 + 7 * (row.get("top_sector_score") or 0.5) for row in subset],
+            annotate=len(subset) >= 20,
+        )
+    figure.update_layout(
+        title="Mapa sectorial · color y forma = sector principal, el halo es el grupo",
+        xaxis_title="Dirección que más separa la huella",
+        yaxis_title="Segunda dirección",
+        showlegend=False,
+    )
+    return figure
+
+
+def sector_overlap_figure(rows: list[dict]) -> go.Figure:
+    counts = sector_counts(rows)
+    names = [name for name in SECTORS if counts.get(name)]
+    names.sort(key=lambda name: counts[name], reverse=True)
+    matrix = []
+    text = []
+    for left in names:
+        row_vals = []
+        row_text = []
+        for right in names:
+            n = sum(1 for row in rows if left in (row.get("sectors") or []) and right in (row.get("sectors") or []))
+            row_vals.append(n)
+            row_text.append(fmt(n, 0) if n >= 12 else "")
+        matrix.append(row_vals)
+        text.append(row_text)
+    short = [SECTOR_SHORT[name] for name in names]
+    figure = go.Figure(
+        go.Heatmap(
+            z=matrix,
+            x=short,
+            y=short,
+            text=text,
+            texttemplate="%{text}",
+            colorscale=[
+                [0, "#f5f7fa"],
+                [0.35, "#c5dcff"],
+                [0.7, "#1463ff"],
+                [1, "#102a43"],
+            ],
+            hovertemplate="%{y} ∩ %{x}: %{z}<extra></extra>",
+            colorbar=dict(thickness=10, len=0.7),
+        )
+    )
+    figure.update_layout(
+        title="Dónde se solapan los conjuntos",
+        xaxis=dict(side="top", tickangle=-40),
+        yaxis=dict(autorange="reversed"),
+        showlegend=False,
     )
     return figure
 
@@ -1451,7 +1675,7 @@ def build_report(rows: list[dict], clustering: dict) -> str:
           <p class="caption">Inicialización farthest-point, 60 iteraciones, misma transformación por rango que el k-means de caja.</p>
         </div>
       </div>
-      <div class="panel">{chart_html(pca_figure(rows), 480)}</div>
+      <div class="panel">{chart_html(pca_figure(rows), 520, margin=dict(l=56, r=24, t=52, b=52))}</div>
       <div class="panel"><h3>Qué sobresale en cada régimen</h3>
         {table(["Régimen", "Empresas", "Producto / servicio", "Nómina", "TPV/efectivo", "DSO", "Runway*", "Confianza"], regime_profile_rows(rows, result.labels))}
         <p class="caption">* El runway se mira después, no se usó para agrupar. Sirve para ver si el régimen cambia el colchón típico —la tesis de Embat— sin circularidad.</p>
@@ -1468,7 +1692,13 @@ def build_report(rows: list[dict], clustering: dict) -> str:
         <div class="kpi"><small>Token AP (lo que paga)</small><strong>ignorado</strong><span>todo el mundo paga luz y alquiler</span></div>
       </div>
       <div class="callout insight"><b>No es “esta empresa es hostelería”.</b> Es “esta tesorería es compatible con hostelería y con comercio minorista”. El token de factura emitida (amount &gt; 0) sí puede clavar una etiqueta: si cobra “Hotel…”, entra hostelería aunque el TPV sea flojo.</div>
-      <div class="panel">{chart_html(sector_bar_figure(rows), 480)}</div>
+      <div class="panel">{chart_html(sector_map_figure(rows), 560, margin=dict(l=56, r=24, t=52, b=52))}
+        <p class="caption">PCA de la huella de tesorería. Cada mancha es el grupo a 1,65 σ del sector principal. El tamaño del punto es la puntuación de esa etiqueta; el hover enseña el conjunto completo. Color y forma van juntos: el color no es el único canal.</p>
+      </div>
+      <div class="grid two">
+        <div class="panel">{chart_html(sector_bar_figure(rows), 420, margin=dict(l=96, r=36, t=48, b=48))}</div>
+        <div class="panel">{chart_html(sector_overlap_figure(rows), 420, margin=dict(l=80, r=48, t=88, b=36))}</div>
+      </div>
       <div class="grid two">
         <div class="panel"><h3>Huella de cada sector</h3>
           {table(["Sector", "Empresas", "Producto", "Nómina", "TPV/efectivo", "DSO", "Etiquetas/empresa"], sector_profile_rows(rows))}
