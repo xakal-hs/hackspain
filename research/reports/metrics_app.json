@@ -419,6 +419,132 @@
     "prec_top5_down": 0.436046511627907,
     "prec_top5_up": 0.37790697674418605
    }
+  },
+  {
+   "tag": "ar100",
+   "description": "Base de la ronda 2 (= ar007 con los eventos v3 publicados)",
+   "metrics": {
+    "mae_h1": 4.406905956171145,
+    "mae_h3": 10.50574183647845,
+    "mae_ar1_h3": 10.78264917040804,
+    "skill_vs_ar1_h3": 0.025680825700008625,
+    "auc_deterioro": 0.7171475192887108,
+    "auc_deterioro_ar1": 0.6557666981453286,
+    "auc_mejora": 0.7444546682914293,
+    "auc_mejora_ar1": 0.7160718874603135,
+    "auc_deterioro_top_quintil": 0.6121577352668239,
+    "coverage80_h3": 0.8144389678167585,
+    "share_big_moves": 0.2693534357784865,
+    "auc_level_vs_adverse_6m": 0.5807964235148437,
+    "auc_level_vs_positive_6m": 0.5763207393474429,
+    "prec_top5_down": 0.4127906976744186,
+    "prec_top5_up": 0.36627906976744184
+   }
+  },
+  {
+   "tag": "ar101",
+   "description": "tension_6m: la financiación del grupo deja de censurar como 0 (null)",
+   "metrics": {
+    "mae_h1": 4.387249865446794,
+    "mae_h3": 10.480544499696753,
+    "mae_ar1_h3": 10.739146265290294,
+    "skill_vs_ar1_h3": 0.024080290854158526,
+    "auc_deterioro": 0.7114836284687935,
+    "auc_deterioro_ar1": 0.6528986264874556,
+    "auc_mejora": 0.7480769039891214,
+    "auc_mejora_ar1": 0.7106034137642392,
+    "auc_deterioro_top_quintil": 0.63052391282127,
+    "coverage80_h3": 0.8158886633806901,
+    "share_big_moves": 0.2687735575529139,
+    "auc_level_vs_adverse_6m": 0.5820984534979536,
+    "auc_level_vs_positive_6m": 0.577908440587094,
+    "prec_top5_down": 0.4186046511627907,
+    "prec_top5_up": 0.3372093023255814
+   }
+  },
+  {
+   "tag": "ar102",
+   "description": "Dos notas: la adversa calibra solo con E1-E3; nota de expansión aparte",
+   "metrics": {
+    "mae_h1": 4.112419156712521,
+    "mae_h3": 9.253127823946517,
+    "mae_ar1_h3": 9.50331992497856,
+    "skill_vs_ar1_h3": 0.026326810315460136,
+    "auc_deterioro": 0.6904255000822874,
+    "auc_deterioro_ar1": 0.656773739882404,
+    "auc_mejora": 0.7600943435695757,
+    "auc_mejora_ar1": 0.7271337126600285,
+    "auc_deterioro_top_quintil": 0.6110410179319231,
+    "coverage80_h3": 0.8100898811249637,
+    "share_big_moves": 0.21716439547694985,
+    "auc_level_vs_adverse_6m": 0.5730821234925361,
+    "auc_level_vs_positive_6m": 0.5703579733112161,
+    "prec_top5_down": 0.436046511627907,
+    "prec_top5_up": 0.313953488372093
+   }
+  },
+  {
+   "tag": "ar104",
+   "description": "oper_growth_12m (cobros operativos) sustituye a growth_vs_12m",
+   "metrics": {
+    "mae_h1": 4.115110742834497,
+    "mae_h3": 9.255086084548733,
+    "mae_ar1_h3": 9.515492242027117,
+    "skill_vs_ar1_h3": 0.027366546139173664,
+    "auc_deterioro": 0.6907253155159614,
+    "auc_deterioro_ar1": 0.6575768374164811,
+    "auc_mejora": 0.7592124058411862,
+    "auc_mejora_ar1": 0.7223710037098315,
+    "auc_deterioro_top_quintil": 0.5761818181818181,
+    "coverage80_h3": 0.8129892722528269,
+    "share_big_moves": 0.220063786604813,
+    "auc_level_vs_adverse_6m": 0.5724220033962041,
+    "auc_level_vs_positive_6m": 0.5695700469497474,
+    "prec_top5_down": 0.436046511627907,
+    "prec_top5_up": 0.3081395348837209
+   }
+  },
+  {
+   "tag": "ar105",
+   "description": "La cuota de deuda sale de incumplimiento_6m",
+   "metrics": {
+    "mae_h1": 4.099257377482435,
+    "mae_h3": 9.442680036227028,
+    "mae_ar1_h3": 9.76999440302272,
+    "skill_vs_ar1_h3": 0.03350200146424087,
+    "auc_deterioro": 0.711339987940532,
+    "auc_deterioro_ar1": 0.6731015462690838,
+    "auc_mejora": 0.7525859673213833,
+    "auc_mejora_ar1": 0.7038490146555177,
+    "auc_deterioro_top_quintil": 0.609051098512573,
+    "coverage80_h3": 0.8060307335459553,
+    "share_big_moves": 0.22325311684546245,
+    "auc_level_vs_adverse_6m": 0.5940329695843976,
+    "auc_level_vs_positive_6m": 0.5644307528251307,
+    "prec_top5_down": 0.4186046511627907,
+    "prec_top5_up": 0.32558139534883723
+   }
+  },
+  {
+   "tag": "ar107",
+   "description": "Regla de banda: menos de medio mes de caja no es sano (final de la ronda 2)",
+   "metrics": {
+    "mae_h1": 4.138343476402801,
+    "mae_h3": 9.373740090665239,
+    "mae_ar1_h3": 9.699431666982594,
+    "skill_vs_ar1_h3": 0.033578418560958334,
+    "auc_deterioro": 0.7219245930731524,
+    "auc_deterioro_ar1": 0.6785521550031275,
+    "auc_mejora": 0.756990617517393,
+    "auc_mejora_ar1": 0.6997307546064598,
+    "auc_deterioro_top_quintil": 0.6099346922620225,
+    "coverage80_h3": 0.8109596984633227,
+    "share_big_moves": 0.22325311684546245,
+    "auc_level_vs_adverse_6m": 0.5925033119818626,
+    "auc_level_vs_positive_6m": 0.5595669367141102,
+    "prec_top5_down": 0.4418604651162791,
+    "prec_top5_up": 0.313953488372093
+   }
   }
  ],
  "final": {
@@ -475,7 +601,13 @@
       10.7148,
       10.7496,
       10.4659,
-      10.4966
+      10.4966,
+      10.5057,
+      10.4805,
+      9.2531,
+      9.2551,
+      9.4427,
+      9.3737
      ]
     },
     {
@@ -500,7 +632,13 @@
       10.9978,
       11.0016,
       10.7321,
-      10.7827
+      10.7827,
+      10.7826,
+      10.7391,
+      9.5033,
+      9.5155,
+      9.77,
+      9.6994
      ]
     }
    ],
@@ -524,7 +662,13 @@
     "ar002b",
     "ar004",
     "ar006",
-    "ar007"
+    "ar007",
+    "ar100",
+    "ar101",
+    "ar102",
+    "ar104",
+    "ar105",
+    "ar107"
    ]
   },
   {
@@ -551,12 +695,24 @@
       0.5798,
       0.5798,
       0.5818,
-      0.5808
+      0.5808,
+      0.5808,
+      0.5821,
+      0.5731,
+      0.5724,
+      0.594,
+      0.5925
      ]
     },
     {
      "label": "churn_6m",
      "data": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
       null,
       null,
       null,
@@ -593,12 +749,24 @@
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
       null
      ]
     },
     {
      "label": "decline_6m",
      "data": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
       null,
       null,
       null,
@@ -635,7 +803,13 @@
       0.5823,
       0.5824,
       0.5765,
-      0.5763
+      0.5763,
+      0.5763,
+      0.5779,
+      0.5704,
+      0.5696,
+      0.5644,
+      0.5596
      ]
     }
    ],
@@ -655,7 +829,13 @@
     "ar002b",
     "ar004",
     "ar006",
-    "ar007"
+    "ar007",
+    "ar100",
+    "ar101",
+    "ar102",
+    "ar104",
+    "ar105",
+    "ar107"
    ]
   },
   {

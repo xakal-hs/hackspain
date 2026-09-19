@@ -466,6 +466,37 @@ def build():
         decision="runway pasa a nulo cuando dq_cash_sentinel: la nota va al neutro en liquidez y la confianza baja. La caja implausible por riqueza real (dq_cash_implausible: holdings con mucha caja y poco flujo, eventos a la mitad) no se toca.",
         why="La caja falsa movía la nota ±20-30 puntos en las dos direcciones (COMP_1068: 83,7 «sano» con 87 000 M€ falsos; COMP_0420: 25,3 con −2 000 M€). Marcar no bastaba: el sub-score de runway era alto o bajo, no neutro. La deriva de reconstrucción (has_drift) queda pendiente de un flag por fila y de la exclusión simétrica en los eventos.",
         evidence=f"PM idéntica fuera de las filas centinela (0,6143 = 0,6143 en todas las filas OOF); en cortes {pm(ar['ar006']):.3f} → {pm(ar['ar007']):.3f} (ruido). Detalle: iter_007 y salida/datos_limpieza.md A02/A16.")
+
+    # --- autoresearch, ronda 2 (rama autoresearch/2026-09-19-r2): remedios del consejo (Q2, Q4, Q8, Q11) medidos por evento, no por la PM
+    r2 = {t: load_metrics(t) or {} for t in ("ar100", "ar101", "ar102", "ar104", "ar105", "ar107")}
+    g = lambda m, k: m.get(k, float("nan"))
+    add(category="eventos", title="La financiación del grupo no censura la tensión: la fila financiada queda sin etiqueta (null), no como 0",
+        question="¿Por qué la etiqueta de tensión declaraba sanas a 2 513 filas (22 %) cuya caja la tapaba el grupo? (Q2/Q12 del consejo, remedio 1)",
+        decision="En tension_6m un mes futuro en tensión cuenta aunque haya financiación intragrupo; la fila de hoy con > 20 % de flujo intragrupo queda sin etiqueta. La entrada (tension_entrada_6m) no se toca.",
+        why="La censura convertía en «error» ordenaciones correctas del score. Toda la subida de AUC es de la etiqueta, no del modelo: la misma nota sin recalibrar mide 0,700 contra la etiqueta vieja y 0,753 contra la nueva; recalibrar mueve −0,004. Los jueces fijos (tensión no circular, incumplimiento, caída, expansión, entrada a 2 meses) no se mueven.",
+        evidence=f"Tasa base 0,274 → 0,353 (n 11 223 → 8 710). En cortes, tensión {g(r2['ar100'], 'auc_level_vs_tension_6m'):.3f} → {g(r2['ar101'], 'auc_level_vs_tension_6m'):.3f}; resto de eventos ±0,004. Detalle: salida/iteraciones/iter_101/.")
+    add(category="calibración", title="Dos notas: la adversa calibra solo con tensión, incumplimiento y caída; la de expansión, con la expansión",
+        question="¿Puede una sola nota servir al prestamista y ordenar la expansión? (Q4 del consejo, P173/P120; R10)",
+        decision="HealthScorer(target=\"adversa\") promedia los pesos solo de E1-E3 (es la nota publicada); HealthScorer(target=\"expansion\") da la segunda nota. Mismos percentiles, misma escala, explicación aditiva exacta en las dos.",
+        why="Promediar los pesos de la tensión (runway 3,4) con los de la expansión (runway 0,0) diluía la caja: la nota universal perdía frente a una sola columna en los cuatro anclajes y la Spearman entre las dos notas recalibradas era 0,078. La nota de expansión resulta ser además la mejor para la caída de cobros (0,635): la caída es momentum, no caja.",
+        alternatives="EVENT_W (pesos por evento al promediar, ronda 1): la misma decisión con pesos escondidos. Regla de banda sola: no cambia los pesos.",
+        evidence=f"Nota adversa OOF: tensión 0,749 → 0,796 (+2,9 se), juez no circular 0,772 → 0,818, entrada en estrés a 2 m 0,576 → 0,609; nota de expansión 0,597 frente a 0,568 de la nota única. En cortes, tensión {g(r2['ar101'], 'auc_level_vs_tension_6m'):.3f} → {g(r2['ar102'], 'auc_level_vs_tension_6m'):.3f}; nota de expansión frente a expansión {g(r2['ar102'], 'auc_exp_vs_expansion_6m'):.3f}. Coste declarado: auc_deterioro −0,023 (IC [−0,047, −0,003]) con AR(1) plano: la serie tiene menos saltos (26,9 % → 21,7 %); MAE a 3 m −12 %, precisión de alerta +0,03. Detalle: iter_102/.")
+    add(category="features", title="La tendencia de cobros puntúa en euros operativos (oper_growth_12m), no en entradas totales",
+        question="¿Puede «crecimiento» probarse con apuntes o con entradas que mezclan transferencias? (Q11, P250, P330)",
+        decision="oper_growth_12m = log(cobros operativos 3m / 12m) sustituye a growth_vs_12m en el catálogo; growth_vs_12m sigue como contexto para las reglas C2/C3 y el forecaster. activity_trend no se toca (es la mejor feature para la caída).",
+        why="Por fila, los cobros operativos separan la expansión con 0,649 frente a 0,591 de las entradas totales; el gate literal de Q11 (activity_trend solo si los euros no caen) no aporta nada (0,605 = 0,605). En la nota adversa la feature pesaba 0,006: el cambio es de la nota de expansión.",
+        evidence=f"Nota de expansión OOF frente a expansión 0,597 → 0,640 (+0,043), expansión a 3 m 0,542 → 0,561; nota adversa idéntica. En cortes {g(r2['ar102'], 'auc_exp_vs_expansion_6m'):.3f} → {g(r2['ar104'], 'auc_exp_vs_expansion_6m'):.3f}. Detalle: iter_104/.")
+    add(category="eventos", title="La cuota de deuda sale del evento de incumplimiento",
+        question="¿Es verificable un «impago de cuota» sin calendario de cuotas? (Q8, R16, P152)",
+        decision="incumplimiento_6m = nómina regular que falta dos meses seguidos o IVA que falta dos trimestres; la cuota se publica aparte como impago_cuota_6m y no calibra.",
+        why="El 49 % de los positivos venían solo de la cuota, y la cuota va al revés: más caja y menos carga de deuda → más «impago» (runway 0,404, debt_burden 0,339); el 43 % vuelve a pagar en 6 meses, la caja no cae y solo el 3 % de las empresas tiene calendario. Además la etiqueta premiaba tener deuda (16,8 % vs 6,7 %) y la calibración castigaba la deuda a igual caja (P152: 1,115 → 0,971).",
+        alternatives="has_debt binaria o carga relativa a la caja (R16): la señal no existe entre quien tiene deuda (AUC 0,44-0,48).",
+        evidence=f"Nota adversa OOF frente a E2: 0,571 → 0,624 (+0,035 juez, +0,017 modelo), caída +0,020, mora AP estructural +0,053; coste: tensión −0,010, juez no circular −0,018 (1,0 se). En cortes incumplimiento {g(r2['ar104'], 'auc_level_vs_incumplimiento_6m'):.3f} → {g(r2['ar105'], 'auc_level_vs_incumplimiento_6m'):.3f}, caída {g(r2['ar104'], 'auc_level_vs_caida_6m'):.3f} → {g(r2['ar105'], 'auc_level_vs_caida_6m'):.3f}, deterioro recupera +0,020. debt_burden queda en 0,005 de peso. Detalle: iter_105/.")
+    add(category="reglas", title="Menos de medio mes de caja propia no se publica como «sano»",
+        question="¿Cómo garantizar la cota de banda que pide el prestamista (P120) sin hardcodear la etiqueta? (ronda 1, iter_008)",
+        decision="Sobre la nota suavizada, si runway < log(1,5) la nota se acota a 64,9 con una contribución aditiva ec_regla_liquidez (Σec sigue siendo la nota). Los topes duros (50 / 34,9 con liquidez < 0,25) se descartan por circulares con la etiqueta y por su coste en incumplimiento y caída.",
+        why="Con dos notas la objeción de la ronda 1 (la expansión) ya no aplica. El tope suave toca 480 de 5 436 filas sanas, no mueve ningún AUC (±0,002) y baja la tensión del 20 % mejor por nota de 10,9 % a 8,5 %.",
+        evidence=f"P120: 7,8 % → 0 % de sanas con < 0,5 meses. En cortes PM {pm(r2['ar105']):.3f} → {pm(r2['ar107']):.3f}; deterioro {g(r2['ar105'], 'auc_deterioro'):.3f} → {g(r2['ar107'], 'auc_deterioro'):.3f}. Detalle: iter_107/.")
     return D, its
 
 
@@ -493,12 +524,19 @@ DESCS = {
     "ar004": "− net_margin_6m (sin señal, peso 0)",
     "ar006": "+ oper_persistence_6m (persistencia de cobros operativos)",
     "ar007": "runway sin dato con caja centinela (final del bucle)",
+    "ar100": "Base de la ronda 2 (= ar007 con los eventos v3 publicados)",
+    "ar101": "tension_6m: la financiación del grupo deja de censurar como 0 (null)",
+    "ar102": "Dos notas: la adversa calibra solo con E1-E3; nota de expansión aparte",
+    "ar104": "oper_growth_12m (cobros operativos) sustituye a growth_vs_12m",
+    "ar105": "La cuota de deuda sale de incumplimiento_6m",
+    "ar107": "Regla de banda: menos de medio mes de caja no es sano (final de la ronda 2)",
 }
 
 
 def iterations():
     out = []
-    for tag in ["v1", "v2", "v3a", "v3b", *VARIANTS, "v6", "v7", "ar000", "ar002b", "ar004", "ar006", "ar007"]:
+    for tag in ["v1", "v2", "v3a", "v3b", *VARIANTS, "v6", "v7", "ar000", "ar002b", "ar004", "ar006", "ar007",
+                "ar100", "ar101", "ar102", "ar104", "ar105", "ar107"]:
         m = load_metrics(tag)
         if not m:
             continue

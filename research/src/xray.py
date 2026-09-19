@@ -48,7 +48,7 @@ PRIOR_W = {"runway": 3, "lc_util": 1, "oper_growth_12m": 1.5, "debt_burden": 1, 
 CONTEXT = ["log_scale", "fx_share", "activity_log"]
 BANDS = [(0, 35, "riesgo"), (35, 65, "vigilar"), (65, 101, "sano")]  # ≈ cuartiles de la escala publicada (D17)
 DORMANT_CAP = 30.0
-# regla de banda del prestamista (D35): con menos de medio mes de caja propia (runway < log 1,5) la nota publicada no
+# regla de banda del prestamista (D36): con menos de medio mes de caja propia (runway < log 1,5) la nota publicada no
 # puede ser «sano». Se aplica sobre la nota suavizada como contribución aditiva (ec_regla_liquidez), así Σec = nota.
 LIQ_RULE_MONTHS, LIQ_RULE_CAP = 0.5, 64.9
 POSITIVE_PREFIX = ("positive", "expansion")  # eventos de la cara positiva (nota de expansión)
@@ -69,7 +69,7 @@ class HealthScorer(BaseEstimator, TransformerMixin):
         self.weight_floor = weight_floor
         self.smooth_alpha = smooth_alpha
         self.dormant_cap = dormant_cap
-        self.target = target  # "adversa" (E1-E3), "expansion" (E4) o "todos": qué eventos calibran los pesos (D32)
+        self.target = target  # "adversa" (E1-E3), "expansion" (E4) o "todos": qué eventos calibran los pesos (D33)
 
     # ---------- ajuste ----------
     def fit(self, X: pd.DataFrame, y: pd.Series | None = None):
@@ -96,7 +96,7 @@ class HealthScorer(BaseEstimator, TransformerMixin):
             if len(Y) != len(X):
                 raise ValueError("y debe tener las mismas filas que X")
             Y = Y.set_axis(X.index)
-            # dos notas, no una (D32): promediar los pesos de la tensión con los de la expansión diluía la caja
+            # dos notas, no una (D33): promediar los pesos de la tensión con los de la expansión diluía la caja
             # (runway 3,4 para tensión, 0,0 para expansión). La nota adversa calibra con E1-E3; la de expansión con E4.
             pos_cols = [c for c in Y.columns if c.startswith(POSITIVE_PREFIX)]
             cal_cols = {"adversa": [c for c in Y.columns if c not in pos_cols], "expansion": pos_cols}.get(self.target, list(Y.columns)) or list(Y.columns)
@@ -240,7 +240,7 @@ class HealthScorer(BaseEstimator, TransformerMixin):
         for c in ccols:
             s["e" + c] = e[c]  # contribución suavizada: ec_*
         lin = e.sum(1)
-        # regla de banda de liquidez (D35): menos de medio mes de caja propia no puede publicarse como «sano»
+        # regla de banda de liquidez (D36): menos de medio mes de caja propia no puede publicarse como «sano»
         short = (s.pop("_runway") < np.log1p(LIQ_RULE_MONTHS)).to_numpy()
         s["ec_regla_liquidez"] = np.where(short, np.minimum(0.0, LIQ_RULE_CAP - lin), 0.0)
         s["score"] = lin + s["ec_regla_liquidez"]

@@ -19,15 +19,17 @@ Estados: **abierta** (sin propuesta), **propuesta** (hay recomendación y falta 
 | R07 | Features del brainstorming: ¿salud o desconexión? | en curso | media |
 | R08 | La caja reconstruida no cuadra con los flujos en el 16 % de los meses | diagnosticada: es financiación intragrupo | alta |
 | R09 | La forma del modelo no es el límite: la información sí | decidida | — |
-| R10 | Cómo combinar varios eventos en una nota | abierta | media |
+| R10 | Cómo combinar varios eventos en una nota | decidida (dos notas, D33) | media |
 | R11 | Bache frente a caída sigue sin resolverse | abierta | media |
 | R12 | Alertas que se encienden y se apagan | propuesta | baja |
 | R13 | Modelos generativos (TimeGPT, VAE, DeepAR) | abierta | baja |
 | R14 | Empresas del test fuera de distribución | decidida en parte | media |
 | R15 | Efecto de borde en agosto de 2026 | abierta | baja |
-| R16 | Entre quien tiene deuda, la carga no ordena el riesgo | abierta | media |
-| R17 | Premisas del consejo que resultaron incorrectas (fase 3) | decidida (registro) | — |
-| R18 | La cohorte larga puntúa ~5 puntos menos a igual caja | abierta | baja |
+| R16 | Entre quien tiene deuda, la carga no ordena el riesgo | decidida (la cuota sale de E2, D35; `debt_burden` peso 0,005) | media |
+| R17 | Premisas del consejo que resultaron incorrectas (fase 3) | decidida (registro; ampliado en la ronda 2) | — |
+| R18 | La cohorte larga puntúa ~5 puntos menos a igual caja | diagnosticada (saturación de la ventana de 12 m); remedio medido y descartado | baja |
+| R19 | El suavizado (α) es un dial estabilidad ↔ reacción, no información | decidida (α = 0,5; curva medida) | baja |
+| R20 | Dentro de la nota adversa, liquidez ↔ impago/caída | abierta | media |
 
 ---
 
@@ -282,6 +284,8 @@ Las empresas «sanas» con menos de medio mes de liquidez tienen 4× más unión
 
 **Propuesta concreta para la fase 4:** publicar junto a la nota general una **nota del prestamista** con la misma explicación aditiva: `EVENT_W = {tension_6m: 2}` (3 líneas en `HealthScorer.fit`, medidas en iter_001: AUC frente a tensión 0,718 en vez de 0,659) más la regla de banda de liquidez. Es la opción 1 de esta reflexión, con números.
 
+**Resolución (ronda 2, D33, `salida/iteraciones/iter_102`).** Se implementa la opción 1 con dos notas y sin pesos escondidos: `HealthScorer(target="adversa")` promedia solo E1-E3 y es la nota publicada; `HealthScorer(target="expansion")` calibra con E4. Fuera de grupo: tensión 0,749 → **0,796** (+2,9 se), juez no circular 0,772 → 0,818, entrada en estrés a 2 meses 0,576 → 0,609; la nota de expansión ordena la expansión con 0,597 (0,638 tras D34) frente a 0,568 de la nota única, **y es la mejor para la caída de cobros (0,635)**. Coste declarado: `auc_deterioro` −0,023 en iter_102 (la serie tiene menos saltos), recuperado en iter_105/107 (0,722 final > 0,717 base). La regla de banda «< 0,5 meses de caja → no sano» que la ronda 1 descartó por la expansión entra en D36 sin coste medible. Queda pendiente servir la nota de expansión en la API/SPA.
+
 ## R11 · Bache frente a caída sigue sin resolverse
 
 **Estado:** abierta. AUC 0,53; la regla actual acierta el 74 % solo porque casi todo son caídas.
@@ -346,6 +350,8 @@ Las empresas «sanas» con menos de medio mes de liquidez tienen 4× más unión
 
 **Opciones.** (1) Aplanar el percentil de los positivos con transición suave (p. ej. sub-score = 100 − 50·min(1, carga/0,02)). (2) Carga de deuda relativa a la **caja** (`debt3 / cash_end`) en lugar de a las entradas. (3) Dejarlo: el efecto sobre la PM es pequeño.
 
+**Resolución (ronda 2, D35, `iter_105`).** El hueco no estaba en la feature sino en la **etiqueta**: el 49 % de los positivos de `incumplimiento_6m` venían solo de la cuota de deuda, que va al revés (más caja y menos carga → más «impago»: `runway` 0,404, `debt_burden` 0,339, `debt3/cash` 0,314), el 43 % vuelve a pagar en 6 meses, la caja no cae y solo el 3 % de las empresas tiene calendario de cuotas (Q8). Con la cuota fuera de E2, `debt_burden` queda en **0,005** de peso (la calibración la apaga sola), P152 pasa (a igual caja, sin deuda ya no vale más: 1,115 → 0,971) y la nota ordena el incumplimiento con 0,624 (0,606 juez + 0,017 modelo). `impago_cuota_6m` se publica aparte como marca no verificable.
+
 ## R17 · Premisas del consejo que resultaron incorrectas (fase 3)
 
 **Estado:** decidida (registro; el detalle está en `salida/premisas.jsonl` → `diagnostico` y en `salida/iteraciones/iter_003`, `iter_005`).
@@ -365,13 +371,45 @@ Esto es aprendizaje, no fracaso: cada una se contrastó con los eventos antes de
 | P177 | AUC directo frente a incumplimiento > 0,44 | documentaba el estado: al mejorar la separación baja de 0,44 y «falla» |
 | P008 / P010 (semilla) | volatilidad a la baja y tendencia de actividad anticipan tensión / apagado | ya diagnosticadas en la fase 2 (AUC 0,33 y 0,41); sin cambio |
 
-Y las que son **correctas para el prestamista pero el modelo de una sola nota no puede cumplir** (R10): P120, P122, P173, P175, P176.
+Y las que son **correctas para el prestamista pero el modelo de una sola nota no puede cumplir** (R10): P120, P122, P173, P175, P176. **Ronda 2:** con dos notas P120 pasa (D36) y P173 se queda a 0,002 de pasar.
+
+**Ronda 2 (rama `autoresearch/2026-09-19-r2`).** Veredictos que cambian y premisas nuevas que resultaron incorrectas o que documentaban el estado:
+
+| premisa | decía | los datos dicen |
+|---|---|---|
+| **P152 (revocada)** | sin deuda no debe valer más que con deuda | era **correcta**: la etiqueta de incumplimiento premiaba tener deuda (solo quien tiene cuotas puede dejar de pagarlas); con la cuota fuera (D35) pasa (0,971) |
+| P150 | la póliza sin usar no debe valer más que no tener póliza | sigue fallando (1,25) también con la etiqueta no censurada; calibrar sin póliza (iter_108) rompe la neutralidad al tamaño. La póliza disponible es liquidez real para el prestamista; **decisión del dueño** |
+| P206 | el primer mes sin movimientos publica ≤ 30 | **incorrecta en su literal**: un mes inactivo tiene lift de tensión 0,89 y de caída 2,15; C7 del consejo pide «vigilar», que es lo que hace la nota publicada (0 % sano, máximo 62) |
+| P233 | el tope de inactividad no tiene base en la tensión | parcialmente correcta: la base es la caída (×2,15), no la tensión (×0,89) |
+| P216 / P226 | tener ERP no debe cambiar la nota a igual caja | parcialmente correctas: ~+1,9 puntos son mecánicos (neutro 50 frente a la media 53-71 de las *zero_best*) y ~+1,1 son señal (menos incumplimiento y caída con ERP a igual caja); el neutro «medio» (iter_106) no mueve eventos y traslada el sesgo a las filas con poca cobertura |
+| P327 | ventana fija de 12 meses para la tendencia | remedio medido y descartado (iter_103): cumple el criterio de sesgo (−1,76 → −0,74) pero deja sin dato al 61 % de las filas y la nota de expansión cae 0,05 |
+| P330 | `activity_trend` solo suma a expansión con euros ≥ 0 | correcta en el fondo, no en el remedio: el gate no aporta (0,605 = 0,605); la señal de euros está en los cobros operativos 3m/12m (0,649), que entran como `oper_growth_12m` (D34) |
+| P002, P148, P203, P112, P113, P143, P144, P146, P147, P155, P163, P192, P283, P025, P179, P224 | umbrales que describían las etiquetas viejas o umbrales al filo | fallan por construcción tras D32/D35 o oscilan ±0,01; anotadas en `premisas.jsonl` como «documentaba el estado» / «umbral frágil» |
+| `docs/eventos.md:3` (dueño) | «usamos `tension_np_raw` (caja propia) como estrés de liquidez» | vale como **juez y para anticipación** (así se usa: 0,807 OOF), no como ancla de calibración: calibrar con ella (iter_108) rompe P180 (Spearman tamaño-nota −0,117) y cuesta caída e impago |
 
 ## R18 · La cohorte larga puntúa ~5 puntos menos a igual caja
 
 **Estado:** abierta (hallazgo de `iter_003`).
 
 Con `runway` 0,3-0,7 y dentro del mismo semestre, las empresas con ≥ 13 meses de historia (las 369 que arrancan en 2024-09) puntúan 48-52 frente a 53-56 del resto. Hipótesis: con 12 meses se hacen visibles señales que casi siempre restan (`lost_share`, `hhi_ar_6m`, `growth_vs_12m` con base anual completa), o la cohorte inicial es distinta (más grande, más antigua). Importa para el test oculto: si las 60-80 empresas nuevas llegan con historia completa, se parecerán a esta cohorte.
+
+**Actualización (consejo Q7 + ronda 2, `iter_103`).** El mecanismo está zanjado: **saturación de la ventana de 12 meses** (`features.py:12-14`, `min_samples=1`), no imputación ni cohorte. Intra-empresa, a igual decil de `runway`, la nota adversa cae **−1,76 ± 0,39** puntos entre los meses 10-12 y 13-15 (801 pares; `ec_activity_trend` −0,77). El remedio del consejo (ventana fija `min_periods = 12`) lo reduce a −0,74 pero deja la tendencia sin dato hasta el mes 12 (cobertura 0,88 → 0,39) y la nota de expansión cae de 0,597 a 0,545: **descartado**. Con dos notas el sesgo vive sobre todo en la nota de expansión. Opciones que quedan: `min_samples = 6` (cobertura 0,69), o declarar el sesgo en la ficha de los meses 0-11 (la nota ya es provisional).
+
+## R19 · El suavizado (α) es un dial estabilidad ↔ reacción, no información
+
+**Estado:** decidida (α = 0,5; medido en `salida/iteraciones/iter_109`).
+
+**Lo medido.** Nota adversa fuera de grupo con α ∈ {0,7; 0,5; 0,35; 0,25}: la caja y la anticipación desde sana mejoran de forma monótona al suavizar más (tensión 0,782 → 0,808, entrada a 2 m 0,582 → 0,633) y el incumplimiento empeora (0,629 → 0,605): la nómina que falta es una señal brusca. Ninguna diferencia supera 1,5 se. Los guardarraíles de trayectoria «mejoran» mucho (deterioro 0,722 → 0,787, skill ×3) con la referencia AR(1) plana: es la predictibilidad de un filtro más lento (saltos ≥ 15 a 3 m 22 % → 9 %), no más información. Costes: la nota cae −7,3 (α 0,35) o −5,5 (α 0,25) en los dos meses hasta el arranque confirmado de la tensión, frente a −10,4 con α 0,5; con α 0,35 cuatro meses inactivos se publican «sanos» (P019) porque el tope 30 se aplica al bruto; la cura también se ve más tarde (P252 0,91 → 0,85).
+
+**Consecuencias.** (1) α se queda en 0,5. (2) Los guardarraíles de trayectoria **solo comparan cambios con α fijo**. (3) Si el producto prefiere una nota más estable, hay que mover el tope de inactividad a la nota suavizada (como la regla de liquidez, D36) y aceptar −30 % de reacción.
+
+## R20 · Dentro de la nota adversa, liquidez ↔ impago/caída
+
+**Estado:** abierta.
+
+Resuelto el trade-off con la expansión (D33), queda uno más suave dentro de la nota adversa: cada cambio que la hace «más caja» cuesta impago y caída, y al revés. Medido tres veces en la ronda 2: sacar la cuota de E2 (iter_105: incumplimiento +0,017 de modelo, caída +0,020, tensión −0,010, juez no circular −0,018); calibrar con la caja propia (iter_108: tensión +0,018, entrada +0,026, pero incumplimiento −0,016, caída −0,013 y P180 rota); los topes duros de liquidez (iter_107: tensión +0,04, incumplimiento −0,015, caída −0,013, circulares con la etiqueta).
+
+**Lectura.** Una nota que debe cubrir tensión, impago y caída no puede ser solo caja. La liquidez pura ya está en la ficha (`runway`, `mc`), en la regla de banda (D36) y en los vetos C1/C2/C4 (fase 4). **No** se propone una tercera nota: se propone que el prestamista lea nota adversa + vetos, y que la aseguradora / el CFO lean la nota de expansión (que también es la mejor para la caída).
 
 ---
 

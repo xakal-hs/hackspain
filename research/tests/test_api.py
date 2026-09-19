@@ -92,7 +92,7 @@ def test_explanation_is_exact(raw, scorer):
 
 
 def test_two_notes_calibrate_on_their_own_events(panel, scorer, raw):
-    """D32: la nota adversa calibra con E1-E3 y la de expansión con E4; ambas con explicación aditiva exacta."""
+    """D33: la nota adversa calibra con E1-E3 y la de expansión con E4; ambas con explicación aditiva exacta."""
     assert set(scorer.calibration_) == {"tension_6m", "incumplimiento_6m", "caida_6m"}
     obs = panel.month <= panel.month.max() - pd.DateOffset(months=6)
     exp = HealthScorer(target="expansion").fit(panel, panel[E.EVENTS].where(obs, axis=0))
@@ -104,7 +104,7 @@ def test_two_notes_calibrate_on_their_own_events(panel, scorer, raw):
 
 
 def test_liquidity_band_rule(panel, scorer):
-    """D35: con menos de medio mes de caja propia la nota publicada no es «sano», y la regla es una contribución aditiva."""
+    """D36: con menos de medio mes de caja propia la nota publicada no es «sano», y la regla es una contribución aditiva."""
     from xray import LIQ_RULE_CAP, LIQ_RULE_MONTHS
     s = scorer.score_panel(panel)
     short = panel.sort_values(["company_id", "month"]).reset_index(drop=True)["runway"] < np.log1p(LIQ_RULE_MONTHS)

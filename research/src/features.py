@@ -45,7 +45,7 @@ def add_features(p: pl.DataFrame) -> pl.DataFrame:
         runway=pl.when(cash_ok).then(pl.col("cash_end").sign() * (pl.col("cash_end").abs() / burn + 1).log()),
         lc_util=pl.when(pl.col("lc_limit") > 0).then(pl.col("lc_drawn") / pl.col("lc_limit")),
         # Rentabilidad (ventanas largas: menos reversión a la media, D08); el margen ya no puntúa (D29).
-        # La tendencia que puntúa es la de los cobros OPERATIVOS en euros (D33): las entradas totales mezclan
+        # La tendencia que puntúa es la de los cobros OPERATIVOS en euros (D34): las entradas totales mezclan
         # transferencias y financiación, y «crecer» con apuntes sin euros no es crecer (Q11). growth_vs_12m
         # (entradas totales) se conserva como contexto para las reglas C2/C3 y el forecaster.
         net_margin_6m=(pl.col("in6") - pl.col("out6")) / (pl.col("in6") + pl.col("out6") + EPSC),
@@ -96,7 +96,7 @@ SCORE_FEATURES = ["runway", "lc_util", "oper_growth_12m", "debt_burden", "payrol
                   "ap_late_share", "ar_late_share", "ap_overdue_ratio", "ar_overdue_90_ratio", "refund_rate",
                   "activity_trend", "transfer_dep", "hhi_ar_6m", "net_vol_6m", "cust_trend", "lost_share", "oper_persistence_6m"]
 # net_margin_6m sale del score (AUC 0,47-0,53 frente a E1-E4, peso 0; D29) y queda como contexto para el forecaster;
-# growth_vs_12m (entradas totales) cede su sitio a oper_growth_12m (D33) y queda como contexto y variable de las reglas
+# growth_vs_12m (entradas totales) cede su sitio a oper_growth_12m (D34) y queda como contexto y variable de las reglas
 CONTEXT_FEATURES = ["net_margin_6m", "growth_vs_12m", "log_scale", "fx_share", "uncat_share", "activity_log", "month_idx", "dormant", "months_since_last_tx"]
 DRIVERS = ["inflow", "outflow", "cash_end", "payroll", "debt_service", "overdue_ap", "overdue_ar",
            "late_share_ap", "late_share_ar", "n_tx", "refunds", "lc_drawn"]

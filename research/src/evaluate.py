@@ -96,7 +96,7 @@ def run(tag: str, calibrate: bool = True, use_exog: bool = True, exog: list | No
             rows.append(pr)
             # validez externa del NIVEL: score en el corte vs eventos en los 6 meses siguientes
             at = sc[(sc.month == cut) & sc.company_id.isin(va_ids)][["company_id", "score", "score_raw"]]
-            # segunda nota (expansión, D32): mismos percentiles, pesos calibrados solo con la cara positiva
+            # segunda nota (expansión, D33): mismos percentiles, pesos calibrados solo con la cara positiva
             if calibrate:
                 sc_exp = fit_scorer(hist[hist.company_id.isin(tr_ids)], cut, calibrate, events, target="expansion").score_panel(panel)
                 at = at.merge(sc_exp[sc_exp.month == cut][["company_id", "score"]].rename(columns={"score": "score_exp"}), on="company_id")

@@ -140,7 +140,7 @@ def add_events_v2(d: pd.DataFrame) -> pd.DataFrame:
     tprev = [taxpos.groupby(cid).shift(3 * k) for k in (1, 2, 3)]
     reg_tax = sum(t.fillna(False).astype(int) for t in tprev) >= 2
     miss_tax = fisc & reg_tax & (d.tax <= 0) & (tprev[0] == False) & feed  # noqa: E712  (falta este trimestre y el anterior)
-    # La cuota de deuda NO entra en E2 (D34): sin calendario de cuotas (3 % de cobertura, Q8) no se distingue
+    # La cuota de deuda NO entra en E2 (D35): sin calendario de cuotas (3 % de cobertura, Q8) no se distingue
     # impago de vencimiento o cambio de periodicidad: el 43 % vuelve a pagar en 6 meses, la caja no cae y el
     # score la ordena al revés (0,44). Se publica aparte como impago_cuota_6m, no verificable para calibrar.
     breach = missed_twice("payroll") | miss_tax
