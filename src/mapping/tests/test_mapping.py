@@ -70,6 +70,16 @@ def write_fixture(directory: Path) -> None:
                 "EUR",
                 "2024-02-01",
             ],
+            [
+                "PRODUCT_00004",
+                "COMP_0002",
+                "CHECKING_COP",
+                "checking",
+                "Bancolombia",
+                "bancolombia",
+                "COP",
+                "2024-02-01",
+            ],
         ],
     )
     _write_csv(
@@ -173,6 +183,26 @@ def write_fixture(directory: Path) -> None:
                 "",
                 "",
             ],
+            [
+                "PRODUCT_00004",
+                "COMP_0002",
+                "2026-09-01",
+                5e8,
+                5e8,
+                "",
+                "",
+                5e8,
+            ],
+            [
+                "PRODUCT_00002",
+                "COMP_0001",
+                "2026-09-01",
+                -3e8,
+                "",
+                -3e8,
+                "",
+                "",
+            ],
         ],
     )
     _write_csv(
@@ -218,6 +248,34 @@ def write_fixture(directory: Path) -> None:
                 "",
                 "cash_settlements",
                 "orphan product",
+                "",
+            ],
+            [
+                "txn-3",
+                "COMP_0001",
+                "PRODUCT_00001",
+                "2025-03-01",
+                "2025-03-01",
+                1e9,
+                1,
+                "booked",
+                "",
+                "collection",
+                "sentinel EUR",
+                "",
+            ],
+            [
+                "txn-4",
+                "COMP_0002",
+                "PRODUCT_00004",
+                "2025-03-01",
+                "2025-03-01",
+                -2e9,
+                1,
+                "booked",
+                "",
+                "payment",
+                "2e9 COP ~ 450k EUR",
                 "",
             ],
         ],
@@ -272,6 +330,38 @@ def write_fixture(directory: Path) -> None:
                 "cancel",
                 "cancelled doc",
                 "COUNTERPARTY_12",
+            ],
+            [
+                "op-3",
+                "COMP_0002",
+                "invoice",
+                "2026-10-01",
+                "2026-11-01",
+                "",
+                0,
+                0,
+                "COP",
+                "EUR",
+                4400,
+                "paid",
+                "future, zero, no counterparty",
+                "",
+            ],
+            [
+                "op-4",
+                "COMP_0002",
+                "invoice",
+                "2025-05-01",
+                "2025-06-01",
+                "",
+                6e11,
+                6e11,
+                "COP",
+                "EUR",
+                4400,
+                "pending",
+                "6e11 COP ~ 136 MEUR",
+                "COUNTERPARTY_100001",
             ],
         ],
     )
@@ -422,6 +512,43 @@ class AttachTests(unittest.TestCase):
             "SELECT balance_quality FROM balances WHERE product_id = 'PRODUCT_00099'"
         ).fetchone()[0]
         self.assertEqual(quality, "suspect")
+
+    def test_sentinel_is_measured_in_eur_and_only_on_cash(self) -> None:
+        rows = dict(
+            self.con.execute(
+                "SELECT product_id, dq_balance_suspect FROM balances"
+            ).fetchall()
+        )
+        self.assertTrue(rows["PRODUCT_00099"])   # sin catálogo: se asume caja en EUR
+        self.assertFalse(rows["PRODUCT_00004"])  # 5e8 COP ≈ 113 k€: no es centinela
+        self.assertFalse(rows["PRODUCT_00002"])  # préstamo de −3e8: deuda, no caja
+        eur = self.con.execute(
+            "SELECT balance_eur_approx FROM balances WHERE product_id = 'PRODUCT_00004'"
+        ).fetchone()[0]
+        self.assertLess(eur, 2e5)
+        txn = dict(
+            self.con.execute(
+                "SELECT transaction_id, dq_amount_sentinel FROM transactions"
+            ).fetchall()
+        )
+        self.assertTrue(txn["txn-3"])   # 1e9 EUR
+        self.assertFalse(txn["txn-4"])  # 2e9 COP
+        self.assertFalse(txn["txn-1"])
+
+    def test_invoice_quality_flags(self) -> None:
+        row = self.con.execute(
+            """
+            SELECT dq_amount_sentinel, dq_issued_after_snapshot, dq_amount_zero,
+                   dq_counterparty_missing, counterparty_id
+            FROM invoices WHERE operation_id = 'op-3'
+            """
+        ).fetchone()
+        self.assertEqual(tuple(row[:4]), (False, True, True, True))
+        self.assertIsNone(row[4])
+        big = self.con.execute(
+            "SELECT dq_amount_sentinel, dq_issued_after_snapshot FROM invoices WHERE operation_id = 'op-4'"
+        ).fetchone()
+        self.assertEqual(tuple(big), (True, False))
 
 
 if __name__ == "__main__":

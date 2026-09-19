@@ -1,64 +1,90 @@
 # Fase 4 · La sala de situaciones (presentación final)
 
-Eres el **orquestador** del workflow de autoresearch. Esta es la fase final y su producto es lo que se enseña: una **sala de situaciones** en la UI donde el equipo puede **analizar las +100 situaciones** que definió el consejo, y un caso destacado de **demo proactiva** (empresas nuevas que van a necesitar factoring o refi).
+Eres el **orquestador** del workflow de autoresearch. Esta es la fase final. Su producto es una **sala de situaciones** en la UI donde el equipo analiza las +100 situaciones del consejo, y un caso destacado de **demo proactiva** sobre **empresas reales que el modelo no ha visto**.
+
+Trabajas **en la rama activa** (no crees una nueva): esta fase forma parte del entregable que ya está en curso. Si el árbol tiene cambios sin commitear de la fase 3, es lo esperado.
 
 ## Paso 0 · Los datos de las situaciones
 
-Las situaciones son las premisas de la fase 2, ya evaluadas. Asegúrate de tenerlas exportadas:
+Asegúrate de tenerlas exportadas:
 
 ```bash
 cd research && uv run python ../.devin/workflows/autoresearch/premisas.py export
 ```
 
-Eso escribe `salida/situaciones.json`: un array con, por cada situación:
-
-- `id`, `rol`, `ambito`, `premisa`, `por_que`, `condicion`.
-- `test` (tipo, columnas, `esperado`) y `verificable`.
-- `estado` (`pasa` / `falla` / `no_verificable` / `error`), `resultado.valor`, `resultado.n`.
-- `resultado.ejemplos`: hasta 6 filas `{company_id, month, ...}` que ejemplifican la situación.
-- `central` (marcada por el consejo en la fase 2), `diagnostico` e `iteracion` (los rellena la fase 3).
-
-Si la fase 3 corrió, el `diagnostico` es la parte más valiosa para analizar: distingue «premisa incorrecta» de «modelo incorrecto».
+`salida/situaciones.json` trae, por situación: `id`, `rol`, `ambito`, `premisa`, `por_que`, `condicion`, `test`, `verificable`, `estado`, `resultado.valor`, `resultado.n`, `resultado.ejemplos` (hasta 6 filas `{company_id, month, ...}`) y `central`/`diagnostico`/`iteracion` si corrió la fase 3.
 
 ## Paso 1 · Servir las situaciones
 
-Añade a `research/app/server.py` un endpoint `/api/situaciones` que sirva `salida/situaciones.json` (y `/api/situaciones/{id}` para una sola). Extiende `research/app/API_CONTRACT.md` con el bloque nuevo. Si el fichero no existe, el endpoint responde 200 con una lista vacía y un aviso, no un 500.
+Añade a `research/app/server.py` los endpoints `/api/situaciones` y `/api/situaciones/{id}` que sirvan `salida/situaciones.json`. Extiende `research/app/API_CONTRACT.md`. Si el fichero no existe, responde 200 con lista vacía y aviso, no un 500.
 
 ## Paso 2 · La vista «Situaciones» en la SPA
 
-Añade una pestaña **«Situaciones»** a `research/app/static/index.html` (sigue `research/app/DESIGN.md`). Debe permitir **analizar** las +100 situaciones, no solo listarlas:
+Pestaña **«Situaciones»** en `research/app/static/index.html` (sigue `research/app/DESIGN.md`), para **analizar**, no solo listar:
 
-- **Cabecera de titular:** cuántas situaciones hay, cuántas pasan/fallan y, sobre todo, **cuántas centrales fallan** (eso es la noticia).
-- **Filtros:** por ámbito (liquidez, cobros, pagos, deuda, observabilidad, comportamiento, estabilidad, calibración, producto, recuperación, gaming, sesgos), por rol que la propuso, por estado, por `central`, y búsqueda de texto libre.
-- **Lista ordenada:** primero las centrales, luego las que fallan, luego el resto. Cada fila: id, ámbito, rol, la premisa en una línea, valor vs esperado, y el semáforo de estado.
-- **Detalle al abrir una situación:** la premisa completa, por qué importa (qué decisión de crédito cambia), la condición («si X entonces Y, salvo Z»), el test (tipo, esperado, n), el resultado, el diagnóstico de la fase 3 y la iteración en que cambió.
-- **Ejemplos navegables:** las empresas × mes de `resultado.ejemplos`, cada una enlazando a la ficha de empresa de la SPA (donde se ve la caja, la trayectoria y la explicación). Esto es lo que convierte «una premisa» en «una situación que puedo mirar».
-- Las `no_verificable` se agrupan aparte, con su motivo (son juicio humano/modelo).
+- **Titular:** cuántas hay, cuántas pasan/fallan y, sobre todo, **cuántas centrales fallan**.
+- **Filtros:** ámbito, rol, estado, `central` y búsqueda libre.
+- **Lista ordenada:** centrales primero, luego las que fallan. Cada fila: id, ámbito, rol, la premisa, valor vs esperado, semáforo.
+- **Detalle:** premisa, por qué importa, condición («si X entonces Y, salvo Z»), test, resultado, diagnóstico de la fase 3 e iteración.
+- **Ejemplos navegables:** las empresas × mes de `resultado.ejemplos`, enlazando a la ficha de empresa (caja, trayectoria, explicación).
+- Las `no_verificable` se agrupan aparte con su motivo.
 
-## Paso 3 · El caso destacado: demo proactiva
+## Paso 3 · El motor proactivo (sin modelo de predicción)
 
-Dentro de la misma sala (o como panel destacado), monta el guion que cierra el reto: **empresas nuevas, que no están en el dataset**.
+El «va a romper la caja en 2 meses» **no** sale del forecaster de LGBM. Sale de una **proyección de tesorería determinista y explicable línea a línea**:
 
-- Construye 4-6 empresas `NEW_*` en `salida/demo/escenarios.json` con el esquema del panel (`research/src/panel.py`), cada una con una situación diseñada: **factoring** (caja que se rompe en ~2 meses + pagarés a 60-90 días + sin póliza), **refi** (deuda viva con cuota alta y caja cayendo), **línea** (desfase estacional), un control **decline** (caja negativa persistente, sin cobros) y un control **sano**.
-- Implementa `research/src/proactive.py` y el endpoint `/api/proactive` (extiende `API_CONTRACT.md`): puntúa y prevé con el modelo vigente **sin reentrenar**, detecta el mes de cruce de caja, lee los pagarés y la póliza, y decide **acción** (lend/watch/decline) y **producto** (factoring/confirming/línea/refi/ninguna) según la política de la fase 1.
-- Devuelve `score`, `band`, `accion`, `producto`, `meses_antelacion`, `razones` (Y, Z, K en lenguaje llano) y la contribución por feature (`explain()`).
-- Preséntalo como la cabecera de la sala: *«3 empresas nuevas van a necesitar deuda; esta necesita factoring, score X por Y, Z, K»*.
+```
+caja(T+h) = caja(T)
+          + cobros pendientes con vencimiento en (T, T+h]        (facturas emitidas pendientes, por due_date)
+          − pagos pendientes con vencimiento en (T, T+h]         (facturas recibidas pendientes, por due_date)
+          − nóminas recurrentes de los últimos meses × h         (media robusta, no la del último mes)
+          − cuotas de deuda del cuadro de amortización           (debt_schedule_config; si falta, la media de debt_service)
+```
 
-## Paso 4 · Guion para el jurado
+Reglas:
+- **Nada de LGBM ni del `TrajectoryForecaster`.** Es aritmética sobre el panel y las facturas; cada término se puede señalar en la UI.
+- La «rotura» es el primer `h` con `caja(T+h) < 0` (o por debajo del umbral de tensión de la política de la fase 1).
+- Implementa `research/src/proactive.py` con esa proyección y el endpoint `/api/proactive` (extiende `API_CONTRACT.md`). Puntúa con el **modelo vigente sin reentrenar**.
 
-Escribe `salida/demo/guion.md`: recorrido de 3 minutos. Debe abrirse delante del jurado sin explicaciones previas. Orden sugerido: cabecera proactiva (el caso factoring) → sala de situaciones (las centrales que fallan y por qué) → una situación abierta con sus empresas de ejemplo → la ficha de una de esas empresas.
+## Paso 4 · Qué producto se puede financiar (factoring bien entendido)
+
+No uses `overdue_ar` para decidir un factoring: lo que ya está vencido **casi nunca se descuenta**. Lo que se anticipa son las **facturas emitidas pendientes que aún no han vencido** (`pending_amount ≠ 0`, `status ≠ paid`, `due_date > T`, documento de tipo factura). Usa lo que hay en el dataset, no supuestos:
+
+- `debt_products.type` incluye **24 productos de factoring** y **229 de confirming**; úsalos para saber qué producto encaja y qué hay contratado.
+- `invoices` tiene **53.761 `paymentDocument`** y las facturas emitidas pendientes son la base del anticipo.
+- Hay **~130.000 movimientos** con «pagaré/efecto/remesa» en la descripción: sirven para detectar cobro aplazado y estimar el descuento realizable.
+
+Decide la **acción** (lend / watch / decline) y el **producto** (factoring / confirming / línea / refi / ninguna) según la política de la fase 1, y devuelve `score`, `band`, `accion`, `producto`, `meses_antelacion`, `razones` (Y, Z, K en lenguaje llano) y la contribución por feature (`explain()`).
+
+## Paso 5 · Validación no circular sobre empresas reales
+
+Diseñar un caso para que dispare el factoring y ver que lo dispara **no demuestra nada**. Añade una prueba sobre **empresas reales que el modelo no ha visto**:
+
+1. Elige empresas del panel que **no** estén en el train del artefacto (usa `score_oof`/folds por `group_id`, o un grupo apartado).
+2. Sitúate en un mes **T** cualquiera y deja que el sistema recomiende, sin ver el futuro.
+3. Comprueba qué pasó de verdad en **T+2**: ¿se rompió la caja? ¿entró en tensión?
+4. Reporta la **precisión de la recomendación** a 2 meses (cuántas de las «necesitan deuda» la rompieron, y cuántas de las «no necesitan» no).
+
+El caso ideal para la demo es **«empresa real, dos meses antes»**: se enseña el panel en T, la recomendación, y el desenlace real en T+2. Eso sí convence al jurado.
+
+Para las empresas nuevas de ejemplo, **no** inventes un `escenarios.json` con drivers: `panel.py` lee movimientos y facturas crudos. Genera un CSV con el **esquema del reto** (transactions/invoices/companies) y pásalo por `predict_submission.py --csv-dir <carpeta>`, que es la ruta real de empresas nuevas.
+
+## Paso 6 · Guion para el jurado
+
+Escribe `salida/demo/guion.md`: recorrido de 3 minutos. Orden sugerido: una **empresa real dos meses antes** (panel en T → recomendación → desenlace en T+2) → la **sala de situaciones** (centrales que fallan y por qué) → una situación abierta con sus empresas de ejemplo → la ficha de una de ellas.
 
 ## Criterios de aceptación
 
-- `uv run uvicorn app.server:app --port 8090` responde 200 en `/api/situaciones`, `/api/situaciones/{id}` y `/api/proactive`, y la pestaña «Situaciones» carga.
-- Aparecen **todas** las situaciones (≥100 tras la fase 2); los filtros y la búsqueda funcionan.
-- Los ejemplos de cada situación enlazan a la ficha de empresa real.
-- El factoring y la refi se disparan por la situación de caja + pagarés/deuda, no por una regla cableada a mano; el control «sano» no dispara deuda y el «decline» no la concede.
-- Nada de reentrenar: se usa el modelo vigente.
+- `uv run uvicorn app.server:app --port 8090` responde 200 en `/api/situaciones`, `/api/situaciones/{id}` y `/api/proactive`; la pestaña «Situaciones» carga.
+- Aparecen todas las situaciones (≥100 tras la fase 2); filtros y búsqueda funcionan; los ejemplos enlazan a la ficha real.
+- La proyección de caja es **aritmética y explicable**; no usa el forecaster.
+- El factoring se decide sobre **facturas emitidas pendientes no vencidas**, no sobre vencidas.
+- La validación sobre empresas reales no vistas reporta precisión a 2 meses.
+- El control «sano» no dispara deuda y el «decline» no la concede. Nada de reentrenar.
 
 ## Reglas
 
 - Escribe en `research/src/`, `research/app/`, `research/tests/` y `salida/`. No toques `data/`, ni los CSV, ni `analysis/`.
-- Sigue `AGENTS.md` y `research/app/DESIGN.md`. Nada de secretos en ficheros.
+- Trabajas en la rama activa. Sigue `AGENTS.md` y `research/app/DESIGN.md`. Nada de secretos en ficheros.
 - Escribe en español. Cada afirmación sobre el código lleva su referencia (`file:line`).
-- Termina con: nº de situaciones servidas, las centrales que fallan, el veredicto de las empresas de ejemplo y la ruta de la pestaña «Situaciones» en la SPA.
+- Termina con: nº de situaciones servidas, las centrales que fallan, la precisión a 2 meses de la recomendación y la ruta de la pestaña «Situaciones».

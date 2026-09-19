@@ -10,6 +10,8 @@ orq_model: claude-fable-5-1-high
 
 Si el usuario no dice lo contrario, empieza en **piloto**: es barato, no toca el modelo y deja la política y las premisas listas para revisar. Para pasar a **completo**, cambia `modo` o pídelo en el chat.
 
+**Estrategia: data-lead.** Los datos primero. Antes de formular cualquier hipótesis (cualquier premisa), mira los datos. La fase 0 produce la base de evidencia (`salida/analisis_datos.md`, `salida/hechos_datos.jsonl`); la fase 2 exige que **cada premisa cite su hecho de datos** (`evidencia`). Una premisa sin hecho no entra.
+
 ## Preparación (una vez)
 
 1. Lee `AGENTS.md`, `.devin/workflows/autoresearch/README.md`, `research/ESTADO.md` y `context/scoring.md`.
@@ -17,24 +19,29 @@ Si el usuario no dice lo contrario, empieza en **piloto**: es barato, no toca el
 3. `mkdir -p .devin/workflows/autoresearch/salida/logs`. Todo tu producto va en `salida/`.
 4. Confirma al usuario el modo y arranca.
 
-## Fase 1 · Prestamista
+## Fase 0 · Datos: limpieza y análisis exploratorio data-lead
 
-Sigue **íntegro** `.devin/workflows/autoresearch/fase1_prestamista.md`. Usa subagentes `researcher` en background para las cuatro investigaciones de apoyo. Escribe `salida/politica_prestamo.md`.
+Sigue **íntegro** `.devin/workflows/autoresearch/fase0_datos.md`. Primero ejecuta la auditoría (`auditoria_datos.py`) y el **análisis exploratorio** (`analisis_datos.py` → `salida/analisis_datos.md` + `salida/hechos_datos.jsonl`, la base de evidencia). Después discute cada anomalía en el consejo (¿suciedad o real?) y escribe `salida/datos_limpieza.md` con la acción por anomalía. Aplica la limpieza en la **capa de mapeo** (`src/mapping/`, `research/src/`), **nunca** reescribiendo `data/`. Lo que afecte a las features se mide en la fase 3 con la PM.
+
+## Fase 1 · Prestamista (data-lead)
+
+Sigue **íntegro** `.devin/workflows/autoresearch/fase1_prestamista.md`. Usa subagentes `researcher` en background para las cuatro investigaciones de apoyo; cada una termina en hechos de datos, no en prosa. Escribe `salida/politica_prestamo.md`, con cada criterio de decisión apoyado en un hecho (`H0xx`) o marcado como *hipótesis a verificar*.
 
 **Puerta 1 (breve).** Muestra al usuario un resumen de 10 líneas: el comprador, los 3 criterios de decisión y el nº de premisas candidatas. En modo piloto, pregunta si sigue o si quiere ajustar la política antes del consejo; si no responde o dice «sigue», continúa.
 
-## Fase 2 · Consejo
+## Fase 2 · Consejo (data-lead)
 
-Sigue **íntegro** `.devin/workflows/autoresearch/fase2_consejo.md`. Lanza los seis consejeros (`prestamista`, `cfo`, `auditor-datos`, `riesgo-modelo`, `abogado-diablo`, `cobrador`) con `run_subagent`, ronda 1 en paralelo (`is_background: true`), sintetiza, ronda 2 de refutación, y consolida `salida/premisas.jsonl` con **>100 premisas**.
+Sigue **íntegro** `.devin/workflows/autoresearch/fase2_consejo.md`. Lanza los seis consejeros (`prestamista`, `cfo`, `auditor-datos`, `riesgo-modelo`, `abogado-diablo`, `cobrador`) con `run_subagent`, ronda 1 en paralelo (`is_background: true`) —cada uno lee la base de evidencia y corre sus propias consultas—, sintetiza, ronda 2 de refutación, y **delega la consolidación final** en un subagente `consolidador` (GPT-5.6 Sol, otra familia que tú) para no sesgar la síntesis. Producto: `salida/premisas.jsonl` con **>100 premisas**, **todas con `evidencia`**.
 
-Después ejecuta el runner tú mismo:
+Después, **primero congela umbrales** (solo formato, sin evaluar) y luego evalúa:
 
 ```bash
-cd research && uv run python ../.devin/workflows/autoresearch/premisas.py build
+cd research && uv run python ../.devin/workflows/autoresearch/premisas.py build --oof
+cd research && uv run python ../.devin/workflows/autoresearch/premisas.py validate
 cd research && uv run python ../.devin/workflows/autoresearch/premisas.py run
 ```
 
-Corrige las premisas mal formadas (estado `error`) hasta que no quede ninguna, y arregla las que tengan `n` irrisorio.
+Corrige las premisas mal formadas (estado `error`) hasta que no quede ninguna, y arregla las que tengan `n` irrisorio. El derivado ya trae el score (`score_oof` para verificar en empresas no vistas, `band`, `prob_*`, `ec_*`, `dec_*`), así que el bucle podrá distinguir «premisa mal» de «modelo mal».
 
 **Puerta 2 (importante).** Presenta `salida/premisas_resultado.md`: cuántas pasan, cuántas fallan y cuáles. Marca como **centrales** las que cumplan: (a) las señaló el consejo como centrales, o (b) tocan liquidez/deuda y fallan, o (c) su fallo cambiaría una decisión de concesión. Pide al usuario que confirme o ajuste la lista; si no responde, usa tu criterio y sigue.
 
@@ -51,6 +58,10 @@ No aceptes ningún cambio que baje el AUC del nivel, rompa los tests o deje de c
 Sigue **íntegro** `.devin/workflows/autoresearch/fase4_demo.md`. Es la fase final y su producto es la **sala de situaciones**: una pestaña en la SPA donde el equipo analiza las +100 situaciones del consejo (filtros por ámbito/rol/estado/central, detalle con el diagnóstico y las empresas de ejemplo enlazadas a su ficha), más el caso destacado de demo proactiva (empresas nuevas que necesitan factoring o refi).
 
 Exporta antes los datos de la UI: `cd research && uv run python ../.devin/workflows/autoresearch/premisas.py export`. Comprueba que el servidor responde 200 en `/api/situaciones` y `/api/proactive` (puerto 8090). Al terminar, para el servidor.
+
+## Fase 5 · Documento técnico del score (solo modo completo)
+
+Sigue **íntegro** `.devin/workflows/autoresearch/fase5_documento.md`. Produce `salida/documento_score.md`: la explicación técnica y detallada de cómo se calcula el score, con los números reales de `score_datos.py` y `file:line` en cada paso. Después lo somete a un **consejo adversarial** (≥40 objeciones de ≥5 subagentes) y registra sus veredictos; las preguntas nuevas verificables se añaden a `salida/premisas.jsonl`.
 
 ## Cierre
 
