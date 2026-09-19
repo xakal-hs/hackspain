@@ -12,9 +12,13 @@ mkdir -p "$HERE/salida/logs"
 cd "$ROOT"
 case "${1:-}" in
   fase1)
+    # En -p, "smart" aborta la sesión al primer comando rechazado: se usa "dangerous" y se comprueba
+    # después que no se escribió nada fuera de salida/ (la regla está en el prompt).
+    before="$(git status --porcelain)"
     devin -p --prompt-file "$HERE/fase1_mapa.md" --model "$ORQ_MODEL" \
-      --permission-mode smart --respect-workspace-trust false \
-      --export "$HERE/salida/logs/fase1.md" | tee "$HERE/salida/logs/fase1.out" ;;
+      --permission-mode dangerous --respect-workspace-trust false \
+      --export "$HERE/salida/logs/fase1.md" | tee "$HERE/salida/logs/fase1.out"
+    [ "$before" = "$(git status --porcelain)" ] || { echo "AVISO: la fase 1 cambió ficheros fuera de salida/:"; diff <(echo "$before") <(git status --porcelain); } ;;
   baseline)
     [ "$(git branch --show-current)" = main ] || { echo "la línea base se captura en main"; exit 1; }
     (cd "$ROOT/research" && uv run python "$HERE/verificar.py" baseline) ;;

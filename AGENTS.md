@@ -3,7 +3,8 @@
 - Interpret fields according to their domain meaning and include substantive exploratory coverage such as distributions, temporal patterns, correlations, and outliers.
 - Do not rewrite the raw CSVs in `data/`; correct known dirt through a mapping layer instead.
 - After completing a deliverable, open a pull request and merge it into `main`.
-- Preferred models for subagent workflows: GPT-5.6 Sol, Claude Opus 5, GLM-5.3, and DeepSeek V4.1 Flash for quick work. Do not route quality-sensitive work to Claude Sonnet 5 — go to Opus 5 instead. Custom subagent profiles live in `.devin/agents/` (`researcher`, `implementer`, `reviewer`, `prototyper`).
+- Preferred models for subagent workflows: GPT-5.6 Sol, Claude Opus 5, GLM-5.3, and DeepSeek V4.1 Flash for quick work. Do not route quality-sensitive work to Claude Sonnet 5 — go to Opus 5 instead. Custom subagent profiles live in `.devin/agents/` (`researcher`, `implementer`, `reviewer`, `prototyper`, and the council roles `prestamista`, `cfo`, `auditor-datos`, `riesgo-modelo`, `abogado-diablo`, `cobrador`).
+- The score must be designed bottom-up from the lender's view, with the model explaining why it classified a rating (Y, Z, K), and improved through a measurable test→diagnose→change loop rather than LGBM prediction.
 
 ## Learned Workspace Facts
 - The repository remote is `https://github.com/xakal-hs/hackspain`, with `main` as the default branch.
@@ -12,6 +13,7 @@
 - Historical cash is reconstructed in `analysis/cash_history.py` (formula, sentinel handling, cent rounding, drift flags) and explored in `analysis/app.py`. Persist with `scripts/build_cash_db.py`; do not commit `analysis/cash.duckdb`.
 - Categorical and referential dirt is inventoried in `src/mapping/ISSUES.md` and corrected at read time by DuckDB views in `src/mapping/` (`attach` / `connect`); raw rows stay in `*_raw` views.
 - Score-model experiments, the research API, and the demo SPA live under `research/`.
+- The autoresearch workflow lives in `.devin/workflows/autoresearch/`: fase1 (política de préstamo), fase2 (consejo → `salida/premisas.jsonl`), fase3 (bucle sobre `premisas.py`), fase4 (sala de situaciones en la SPA + demo proactiva de factoring/refi). `premisas.py` (`build`/`run`/`export`) evalúa premisas contra `research/data/panel.parquet` + `features.py` + `targets.py` and exports `salida/situaciones.json` for the UI; `premisas.seed.jsonl` es la semilla. `salida/` no se versiona. The repo-restructuring workflow is in `.devin/workflows/reestructura/`.
 - The visual language of the demo SPA is defined in `research/app/DESIGN.md`; follow it when touching `research/app/static/index.html`.
 
 ## Project Context

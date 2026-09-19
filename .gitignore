@@ -2,3 +2,5 @@
 __pycache__/
 *.py[cod]
 analysis/cash.duckdb
+output_hackspain_data.zip
+output/
