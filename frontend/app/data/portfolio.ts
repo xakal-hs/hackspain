@@ -120,6 +120,8 @@ export function portfolioCompany(summary: CompanySummary): Company {
     // buena nota, así que deducirla del score sería enseñar otra cosa de la que se decide.
     decision: summary.accion ? decisionByAccion[summary.accion] : template.decision,
     action: summary.razon || template.action,
+    vetos: summary.vetos,
+    avisos: summary.avisos,
     delta3: Math.round(summary.delta3_q50),
     delta12: summary.score - history.at(-13)!,
     history,

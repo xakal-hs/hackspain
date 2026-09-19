@@ -26,7 +26,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import decision as dcs
 import predict as prd
 import preprocessing as pre
-from models import CompanyDetail, CompanySummary, Explanation, MonthFlow, PortfolioResponse
+from models import CompanyDetail, CompanySummary, Explanation, MonthFlow, PortfolioResponse, Veto
 
 ARTIFACT = Path(os.getenv("XRAY_ARTIFACT", Path(__file__).parent / "artifacts/scorer.joblib"))
 TREND_MONTHS = 3
@@ -93,6 +93,20 @@ def _num(v):
 def _round(v, nd: int):
     v = _num(v)
     return None if v is None else round(float(v), nd)
+
+
+def _vetos(codes) -> list[Veto]:
+    """Códigos -> vetos con su etiqueta y su explicación.
+
+    El frontend no debe saber qué significa `veto_ss_ausente`: el texto vive con la regla,
+    en decision.py, y viaja con ella.
+    """
+    out = []
+    for c in (v for v in str(codes).split(",") if v):
+        etiqueta, texto = dcs.VETOS.get(c, (c, ""))
+        out.append(Veto(codigo=c, etiqueta=etiqueta, texto=texto,
+                        bloquea=c in dcs.BLOQUEAN, levantable=c in dcs.LEVANTABLES))
+    return out
 
 
 def _trend(delta: float | None) -> str:
@@ -191,8 +205,7 @@ def companies(band: str | None = Query(None, pattern="^(sano|vigilar|riesgo)$"),
             overdue_share=_round(r.overdue_share, 1),
             margin_3m=_round(r.margin_3m, 4), debt_service_ratio_3m=_round(r.debt_burden, 4),
             accion=r.accion, accion_label=dcs.ACCIONES[r.accion], razon=r.razon,
-            vetos=[v for v in str(r.vetos).split(",") if v],
-            avisos=[v for v in str(r.avisos).split(",") if v],
+            vetos=_vetos(r.vetos), avisos=_vetos(r.avisos),
             score_expansion=round(float(r.score_expansion), 1),
         ))
     return PortfolioResponse(companies=out)

@@ -409,6 +409,45 @@
   font-size: var(--t-small);
 }
 
+/* Vetos: hechos de hoy que mandan sobre la nota. El borde de la izquierda los separa
+   del resto del panel sin abrir otra tarjeta. */
+.vetos {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vetos li {
+  display: grid;
+  gap: 4px;
+  padding-left: 10px;
+  border-left: 2px solid var(--amber-ink);
+}
+
+.vetos li[data-blocks='true'] {
+  border-left-color: var(--crimson-ink);
+}
+
+.vetos__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: var(--t-small);
+}
+
+.vetos__why,
+.vetos__lift {
+  font-size: var(--t-small);
+  color: var(--text-muted);
+}
+
+.vetos__lift {
+  font-style: italic;
+}
+
 .ahead__read {
   font-family: var(--font-num);
   font-size: clamp(2.5rem, 4vw, 3.5rem);

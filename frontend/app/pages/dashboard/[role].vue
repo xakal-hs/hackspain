@@ -20,6 +20,7 @@ import {
   type PerspectiveId,
   type SizeBand,
 } from '~/data/demo'
+import type { Company } from '~/data/demo'
 import { portfolioCompanies } from '~/data/portfolio'
 import {
   activeCompanies,
@@ -57,6 +58,9 @@ const companies = computed(() => {
   return rows.length ? portfolioCompanies(rows) : demoCompanies
 })
 const portfolioSource = computed(() => portfolioQuery.data.value?.source || 'demo')
+
+/* Vetos primero y avisos después: lo que bloquea se lee antes que lo que solo advierte. */
+const overrides = (company: Company) => [...(company.vetos || []), ...(company.avisos || [])]
 
 /* Las pantallas de tesorería propia traen su propio encabezado y solo
  * existen para la perspectiva empresa. */
@@ -311,7 +315,31 @@ const connected = activeCompanies.toLocaleString('es-ES')
               </span>
             </div>
             <p class="verdict__shape">{{ shapeLabel[subject.shape] }}</p>
-            <p class="verdict__action">{{ subject.action }}</p>
+            <!-- Cuando manda un veto, la acción ya es su texto: no se repite debajo. -->
+            <p v-if="subject.action !== overrides(subject)[0]?.texto" class="verdict__action">
+              {{ subject.action }}
+            </p>
+
+            <!-- Un veto manda sobre la nota, así que tiene que poder discutirse: va con su
+                 explicación y con si se levanta enseñando un papel. -->
+            <ul v-if="overrides(subject).length" class="vetos">
+              <li
+                v-for="veto in overrides(subject)"
+                :key="veto.codigo"
+                :data-blocks="veto.bloquea"
+              >
+                <p class="vetos__head">
+                  <b>{{ veto.etiqueta }}</b>
+                  <span class="chip" :class="veto.bloquea ? 'chip--crimson' : 'chip--amber'">{{
+                    veto.bloquea ? 'manda sobre la nota' : 'aviso'
+                  }}</span>
+                </p>
+                <p class="vetos__why">{{ veto.texto }}</p>
+                <p v-if="veto.levantable" class="vetos__lift">
+                  Se levanta con el documento que lo justifique.
+                </p>
+              </li>
+            </ul>
           </section>
 
           <section class="panel span-4 ahead">

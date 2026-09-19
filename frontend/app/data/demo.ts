@@ -1,3 +1,5 @@
+import type { Veto } from '~/types/portfolio'
+
 /* Demo portfolio for the X-Ray walkthrough.
  *
  * Figures are illustrative but internally consistent: every cash line is the
@@ -136,6 +138,9 @@ export interface Company {
   coverage: number
   flows?: MonthFlow[]
   signals?: Signal[]
+  /** Hechos de hoy que mandan sobre la nota. Solo llegan del backend real. */
+  vetos?: Veto[]
+  avisos?: Veto[]
 }
 
 const flowMonths = months.slice(16) as unknown as string[]

@@ -30,6 +30,19 @@ class MonthFlow(BaseModel):
     cash: float
 
 
+class Veto(BaseModel):
+    """Un hecho de HOY que manda sobre la nota. Va con su explicación porque una decisión
+    que no se puede discutir no es una decisión de crédito: el CFO tiene que poder
+    enseñarte el justificante y tumbarla."""
+    codigo: str
+    etiqueta: str
+    texto: str
+    #: bloquea el préstamo, o solo mueve a «vigilar»
+    bloquea: bool
+    #: se puede levantar con un documento (el cuadro de amortización, el justificante de IVA)
+    levantable: bool = False
+
+
 class CompanySummary(BaseModel):
     """Una empresa en su último mes: es la fila de la cartera."""
     company_id: str
@@ -65,9 +78,12 @@ class CompanySummary(BaseModel):
     # --- decisión del prestamista: los vetos mandan sobre la nota
     accion: Accion
     accion_label: str
+    #: la razón que manda, ya redactada. Es el titular de la decisión.
     razon: str = ""
-    vetos: list[str] = []
-    avisos: list[str] = []
+    #: vetos que bloquean el préstamo, con su explicación
+    vetos: list[Veto] = []
+    #: señales que no bloquean pero mueven a «vigilar»
+    avisos: list[Veto] = []
     #: segunda nota, calibrada con la cara positiva: «¿está creciendo?»
     score_expansion: float | None = None
 

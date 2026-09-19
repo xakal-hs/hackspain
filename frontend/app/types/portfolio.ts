@@ -8,6 +8,16 @@ export interface MonthFlow {
   cash: number
 }
 
+/** Espejo de `Veto` en `backend/models.py`. El texto viaja con la regla: la interfaz no
+ *  sabe qué significa `veto_ss_ausente`, lo lee. */
+export interface Veto {
+  codigo: string
+  etiqueta: string
+  texto: string
+  bloquea: boolean
+  levantable: boolean
+}
+
 export interface CompanySummary {
   company_id: string
   group_id: string
@@ -32,8 +42,10 @@ export interface CompanySummary {
   accion?: 'prestar' | 'vigilar' | 'no_prestar' | 'sin_nota'
   /** La razón que manda, ya redactada por el backend. */
   razon?: string
-  vetos?: string[]
-  avisos?: string[]
+  /** Vetos que bloquean el préstamo, con su explicación. Mandan sobre la nota. */
+  vetos?: Veto[]
+  /** Señales que no bloquean pero mueven a «vigilar». */
+  avisos?: Veto[]
   score_expansion?: number
   cash_end?: number | null
   runway_now?: number | null
