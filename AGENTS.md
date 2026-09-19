@@ -8,6 +8,7 @@
 - Size and rank financial products by client impact first, then Embat take within that impact, then the right to create or intermediate the rail. Embat is not a bank today; a partner with an existing banking license is enough to move money.
 
 ## Learned Workspace Facts
+- `context/`, `notebooks/`, `research/` and `analysis/` are encrypted in `vault/*.enc` and gitignored as working copies. Decrypt them before reading, editing or running anything in those trees: copy `.env.example` to `.env`, set `DECRYPT_KEY`, then `python3 scripts/vault.py decrypt`. After changing those folders, `python3 scripts/vault.py encrypt` refreshes the packs. The key never goes in git.
 - The repository remote is `https://github.com/xakal-hs/hackspain`, with `main` as the default branch.
 - Hackathon datasets and their data dictionary live under `data/`; `data/invoices.csv` and `data/transactions.csv` are tracked with Git LFS.
 - The reproducible exploratory report consists of `analysis/generate_report.py` and the generated self-contained artifact `analysis/report.html`.
