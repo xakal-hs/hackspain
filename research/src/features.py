@@ -38,9 +38,11 @@ def add_features(p: pl.DataFrame) -> pl.DataFrame:
     # base de gasto robusta: la mayor entre la media reciente y la anual -> encogerse no infla la liquidez (D09)
     burn = pl.max_horizontal(pl.col("out3") / 3, pl.col("out12") / 12) + EPSC
     pay6 = pl.col("payroll").rolling_mean(6, min_samples=3).over(**KEY)
+    # caja centinela (saldo o transacción > 1e8 € de generador, A01/A02): la caja reconstruida no es fiable → sin dato
+    cash_ok = ~pl.col("dq_cash_sentinel").fill_null(False) if "dq_cash_sentinel" in p.columns else pl.lit(True)
     f = p.with_columns(
         # Liquidez
-        runway=pl.col("cash_end").sign() * (pl.col("cash_end").abs() / burn + 1).log(),
+        runway=pl.when(cash_ok).then(pl.col("cash_end").sign() * (pl.col("cash_end").abs() / burn + 1).log()),
         lc_util=pl.when(pl.col("lc_limit") > 0).then(pl.col("lc_drawn") / pl.col("lc_limit")),
         # Rentabilidad (ventanas largas: menos reversión a la media, D08); el margen ya no puntúa (D27)
         net_margin_6m=(pl.col("in6") - pl.col("out6")) / (pl.col("in6") + pl.col("out6") + EPSC),
