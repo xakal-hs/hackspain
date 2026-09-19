@@ -72,6 +72,9 @@ case "${1:-}" in
   debate)  # seguimiento del debate: la unidad de medida (grupo) + preguntas nuevas (Q6-Q12)
     [ -f "$HERE/salida/consejo/debate_veredicto.md" ] || { echo "falta salida/consejo/debate_veredicto.md (ejecuta fase2)"; exit 1; }
     run_orq "$HERE/fase2b_debate_seguimiento.md" debate2 ;;
+  radar)  # debate del radar de competidores contra nuestras conclusiones
+    [ -f "$HERE/salida/consejo/debate_veredicto.md" ] || { echo "falta salida/consejo/debate_veredicto.md (ejecuta fase2)"; exit 1; }
+    run_orq "$HERE/fase2c_debate_radar.md" debate_radar ;;
   premisas) runner ;;
   fase3)  _run "$HERE/fase3_autoresearch.md" fase3 ;;
   fase4)  _run "$HERE/fase4_demo.md" fase4 ;;
