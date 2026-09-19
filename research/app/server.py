@@ -102,12 +102,13 @@ def _events_df():
 
 
 @app.get("/api/events")
-def events(company_id: str | None = None, month: str | None = None):
+def events(company_id: str | None = None, group_id: str | None = None, month: str | None = None):
     """Eventos v2 para la vista «Eventos».
 
     Sin parámetros devuelve el último mes completo (el último en que todas las etiquetas son
     observables; las de 6 meses se censuran al final del panel). Con `company_id` devuelve toda
-    la historia de esa empresa, que es lo que interesa en su ficha. `month` fuerza un mes concreto.
+    la historia de esa empresa, que es lo que interesa en su ficha; con `group_id`, la de todas
+    las empresas del grupo, porque las hermanas se miran juntas. `month` fuerza un mes concreto.
     """
     meta = _read_json(EVENTS_JSON)
     if not meta:
@@ -117,15 +118,16 @@ def events(company_id: str | None = None, month: str | None = None):
     types = [c["type"] for c in catalog]
 
     if company_id:
-        sel = df[df.company_id == company_id]
-        if sel.empty and company_id not in set(df.company_id):
-            # empresa sin eventos: no es un 404, simplemente no tiene nada que contar
-            sel = df.iloc[0:0]
-        scope, ref_month = "empresa", None
+        # empresa sin eventos no es un 404: simplemente no tiene nada que contar
+        sel, scope, ref_month = df[df.company_id == company_id], "empresa", None
+    elif group_id:
+        sel, scope, ref_month = df[df.group_id == group_id], "grupo", None
     else:
         ref_month = month or meta.get("month")
         sel = df[df.month == ref_month]
         scope = "mes"
+    if month and scope != "mes":
+        sel = sel[sel.month == month]
 
     texts = {c["type"]: c for c in catalog}
     out = []
@@ -134,6 +136,7 @@ def events(company_id: str | None = None, month: str | None = None):
             if t in df.columns and int(getattr(r, t, 0)) > 0:
                 out.append({
                     "company_id": r.company_id,
+                    "group_id": getattr(r, "group_id", None),
                     "month": r.month,
                     "type": t,
                     "text": EVENT_TEXTS.get(t, "{c}: evento {t}").format(c=r.company_id, t=t),
@@ -141,14 +144,15 @@ def events(company_id: str | None = None, month: str | None = None):
                     "severity": texts.get(t, {}).get("severity", "riesgo"),
                     "label": texts.get(t, {}).get("label", t),
                 })
-    out.sort(key=lambda e: (e["month"], e["company_id"], e["type"]), reverse=scope == "empresa")
+    out.sort(key=lambda e: (e["month"], e["company_id"], e["type"]), reverse=scope in ("empresa", "grupo"))
 
     counts = {t: 0 for t in types}
     for e in out:
         counts[e["type"]] += 1
     return {
         "month": ref_month, "month_label": _month_label(ref_month) if ref_month else None,
-        "scope": scope, "company_id": company_id,
+        "scope": scope, "company_id": company_id, "group_id": group_id,
+        "companies": sorted({e["company_id"] for e in out}),
         "summary": meta.get("summary", {}), "rates_6m": meta.get("rates_6m", {}),
         "last_observable": meta.get("last_observable", {}),
         "last_month_panel": meta.get("last_month_panel"),

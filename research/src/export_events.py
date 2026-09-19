@@ -162,8 +162,14 @@ def month_label(m: str) -> str:
 
 
 def build_events(panel: pd.DataFrame) -> pd.DataFrame:
+    """Una fila por empresa-mes con algún evento activo.
+
+    Se arrastra `group_id` porque la navegación del producto es cartera -> grupo -> empresa:
+    sin él, el front tendría que cruzar con otra fuente sólo para poder filtrar por grupo, y las
+    empresas hermanas se miran juntas (se prestan caja entre ellas antes que a un banco).
+    """
     d = EV.build(panel)
-    out = d[["company_id", "month", *COLS]].copy()
+    out = d[["company_id", "group_id", "month", *COLS]].copy()
     for c in COLS:
         out[c] = pd.to_numeric(out[c], errors="coerce").fillna(0).astype("int8")
     out = out[out[COLS].sum(axis=1) > 0].copy()          # sólo filas con algo que contar
@@ -200,6 +206,7 @@ def summarize(ev: pd.DataFrame, d: pd.DataFrame) -> dict:
     cur = ev[ev.month == last]
     summary = {c: int(cur[c].sum()) for c in COLS}
     summary["empresas"] = int(cur.company_id.nunique())
+    summary["grupos"] = int(cur.group_id.nunique())
     summary["eventos"] = int(cur[COLS].to_numpy().sum())
 
     rates = {}
@@ -234,7 +241,7 @@ def main() -> None:
     OUT_JSON.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(f"{OUT_PARQUET.relative_to(ROOT)}: {len(ev)} filas, {ev.company_id.nunique()} empresas, "
-          f"{ev.month.min()}..{ev.month.max()}")
+          f"{ev.group_id.nunique()} grupos, {ev.month.min()}..{ev.month.max()}")
     print(f"{OUT_JSON.relative_to(ROOT)}: mes de referencia {meta['month']} ({meta['month_label']}), "
           f"último mes del panel {meta['last_month_panel']}")
     print("\nÚltimo mes observable por etiqueta:")

@@ -114,7 +114,9 @@ Respuesta:
 Eventos v2 (`src/events_v2.py`, exportados por `src/export_events.py`). Alimenta la vista «Eventos».
 
 Parámetros: `?company_id=COMP_0001` devuelve toda la historia de esa empresa (`scope: "empresa"`);
-`?month=2025-11` fuerza un mes; sin parámetros, el último mes completo (`scope: "mes"`).
+`?group_id=GROUP_0218`, la de todas sus empresas hermanas (`scope: "grupo"`), que se miran juntas
+porque se prestan caja entre ellas antes que a un banco; `?month=2025-11` fuerza un mes (solo, o
+combinado con los anteriores para acotarlos); sin parámetros, el último mes completo (`scope: "mes"`).
 
 «Último mes completo» **no** es el último del panel: las etiquetas miran 6 meses hacia delante
 (E1 necesita 3 más para confirmarse), así que los últimos meses están censurados y sólo tendrían
@@ -124,7 +126,9 @@ corte de cada una y `last_month_panel` el final del panel.
 ```jsonc
 {
   "month": "2025-11", "month_label": "noviembre de 2025",
-  "scope": "mes" | "empresa", "company_id": null | "COMP_0001",
+  "scope": "mes" | "empresa" | "grupo",
+  "company_id": null | "COMP_0001", "group_id": null | "GROUP_0218",
+  "companies": ["COMP_0001"],                  // empresas presentes en esta respuesta
   "summary": {"E1_clean": 20, "E2_strict": 62, "E3": 71, "E4": 38, "E5_bache": 166,
               "E1_group_funded": 0, "E1_onset": 2, "empresas": 300, "eventos": 359},  // del mes de referencia
   "rates_6m": {"E1_clean": {"n": 10278, "positivos": 171, "tasa": 1.66}},  // sobre filas no censuradas, toda la historia
@@ -141,7 +145,7 @@ corte de cada una y `last_month_panel` el final del panel.
     "desc": "string", "why": "string", "excl": "string"     // divulgativo, en español
   }],
   "events": [{
-    "company_id": "COMP_0009", "month": "2025-11", "type": "E1_clean",
+    "company_id": "COMP_0009", "group_id": "GROUP_0218", "month": "2025-11", "type": "E1_clean",
     "text": "COMP_0009 se quedó sin colchón de caja",
     "month_label": "noviembre de 2025",
     "severity": "riesgo", "label": "Tensión de caja"
