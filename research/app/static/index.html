@@ -402,6 +402,35 @@ input[type="range"] { width: 100%; accent-color: var(--accent); margin: 4px 0; h
 .mon-figs { display: flex; gap: 20px; text-align: right; }
 .mon-figs .fig-value { font-size: 17px; }
 
+/* Productos financieros */
+.prod-kpi-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.prod-kpi-tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; display: grid; gap: 4px; }
+.prod-kpi-tile .v { font-size: 28px; font-weight: 600; letter-spacing: -.02em; }
+.prod-kpi-tile .k { font-size: 12px; color: var(--ink-2); }
+.prod-kpi-tile .d { font-size: 11px; color: var(--muted); }
+.prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 540px), 1fr)); gap: 16px; }
+.prod-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; display: grid; gap: 10px; }
+.prod-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow); }
+.prod-header { display: flex; gap: 10px; align-items: flex-start; }
+.prod-icon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; flex: none; }
+.prod-icon svg { width: 22px; height: 22px; }
+.prod-title { font-size: 15px; font-weight: 600; line-height: 1.3; }
+.prod-desc { font-size: 13px; color: var(--ink-2); line-height: 1.4; }
+.prod-metrics { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+.prod-metric { display: grid; gap: 2px; }
+.prod-metric .v { font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
+.prod-metric .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.prod-status { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; }
+.prod-status-disponible { background: color-mix(in srgb, var(--good) 14%, var(--surface)); color: var(--good-text); }
+.prod-status-recomendado { background: color-mix(in srgb, var(--warn) 22%, var(--surface)); color: color-mix(in srgb, var(--warn) 60%, #7a5200); }
+.prod-status-preventivo { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); color: var(--accent); }
+.prod-status-preventivo-lejano { background: var(--surface-3); color: var(--muted); }
+.prod-status-ahorro { background: color-mix(in srgb, var(--good) 14%, var(--surface)); color: var(--good-text); }
+.prod-status-rentable { background: color-mix(in srgb, var(--series-4) 18%, var(--surface)); color: color-mix(in srgb, var(--series-4) 70%, #7a5200); }
+.prod-consumer { font-size: 13px; color: var(--ink-2); font-style: italic; border-left: 3px solid var(--accent); padding-left: 10px; margin-top: 4px; }
+.prod-score-impact { font-size: 11px; color: var(--muted); }
+.prod-link { display: inline-flex; gap: 5px; align-items: center; font-size: 13px; color: var(--accent); font-weight: 500; }
+
 /* Métricas y decisiones */
 .metric-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
 .mtile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 2px; }
@@ -522,6 +551,7 @@ figure.gchart figcaption { font-size: 12.5px; color: var(--muted); margin-top: 8
     <nav class="nav" aria-label="Secciones">
       <a href="#/cartera" data-route="cartera">Cartera</a>
       <a href="#/tesoreria" data-route="tesoreria">Tesorería</a>
+      <a href="#/productos" data-route="productos">Productos</a>
       <a href="#/monitor" data-route="monitor">Monitor <span class="count" id="nav-alerts" hidden></span></a>
       <a href="#/metricas" data-route="metricas">Métricas</a>
       <a href="#/decisiones" data-route="decisiones">Decisiones</a>
@@ -704,6 +734,9 @@ const getTreasury = (id) => cached('treasury:' + id, () => api('/api/company/' +
 const getDrivers = () => cached('drivers', () => api('/api/scenario/drivers'));
 const getMonitor = () => cached('monitor', () => api('/api/monitor'));
 const getMetrics = () => cached('metrics', () => api('/api/metrics'));
+const getProducts = () => cached('products', () => api('/api/products/collection'));
+const getProductForCompany = (cid) => api(`/api/products/${cid}`);
+const getProductAdoption = () => cached('adoption', () => api('/api/products/adoption'));
 const getDecisions = () => cached('decisions', () => api('/api/decisions'));
 
 /* ═════════════ Estado y vistas comunes ═════════════ */
@@ -821,9 +854,9 @@ async function route() {
   main.replaceChildren(loading());
   const view = parts[0] || 'cartera';
   setActiveNav(view === 'empresa' ? 'cartera' : view);
-  const titles = { cartera: 'Cartera', empresa: parts[1] || 'Empresa', tesoreria: 'Tesorería', monitor: 'Monitor', metricas: 'Métricas', decisiones: 'Decisiones' };
+  const titles = { cartera: 'Cartera', empresa: parts[1] || 'Empresa', tesoreria: 'Tesorería', productos: 'Productos', monitor: 'Monitor', metricas: 'Métricas', decisiones: 'Decisiones' };
   document.title = `${titles[view] || 'X-Ray'} · X-Ray`;
-  const views = { cartera: viewCartera, empresa: () => viewEmpresa(parts[1]), tesoreria: (t) => viewTesoreria(parts[1], t), monitor: viewMonitor, metricas: viewMetricas, decisiones: viewDecisiones };
+  const views = { cartera: viewCartera, empresa: () => viewEmpresa(parts[1]), tesoreria: (t) => viewTesoreria(parts[1], t), productos: viewProductos, monitor: viewMonitor, metricas: viewMetricas, decisiones: viewDecisiones };
   const fn = views[view];
   if (!fn) { main.replaceChildren(errorBox({ message: `No existe la sección «${view}».` })); return; }
   try {
@@ -960,6 +993,106 @@ async function viewCartera(token) {
   return root;
 }
 
+/* ═════════════ Vista: Productos Financieros ═════════════ */
+async function viewProductos(token) {
+  const [data, companies] = await Promise.all([getProducts(), getCompanies()]);
+  if (!isCurrent(token)) return null;
+  const recs = data.recommendations || [];
+  const summary = data.summary || {};
+  const all = companies.companies || [];
+
+  const root = h('div');
+  root.append(h('div', { class: 'page-head' },
+    h('div', null,
+      h('h1', null, 'Productos financieros'),
+      h('p', null, `Cada producto se recomienda si la empresa cumple las condiciones del score. Haz clic en una empresa para ver la ficha completa.`))));
+
+  // KPI tiles
+  const totalYield = recs.reduce((s, r) => s + (r.total_annual_yield || 0), 0);
+  const totalComm = recs.reduce((s, r) => s + (r.total_commissions || 0), 0);
+  const root2 = h('div');
+  root2.append(h('div', { class: 'prod-kpi-tiles' },
+    h('div', { class: 'prod-kpi-tile' }, h('span', { class: 'k' }, 'Empresas activas'), h('span', { class: 'v' }, NF[0].format(recs.length))),
+    h('div', { class: 'prod-kpi-tile' }, h('span', { class: 'k' }, 'Yield'), h('span', { class: 'v' }, summary.total_yield_products || 0)),
+    h('div', { class: 'prod-kpi-tile' }, h('span', { class: 'k' }, 'Reserve'), h('span', { class: 'v' }, summary.total_reserve_products || 0)),
+    h('div', { class: 'prod-kpi-tile' }, h('span', { class: 'k' }, 'Factoring'), h('span', { class: 'v' }, summary.total_factoring_products || 0)),
+    h('div', { class: 'prod-kpi-tile' }, h('span', { class: 'k' }, 'Yield anual'), h('span', { class: 'v' }, fmtMoney(totalYield))),
+    h('div', { class: 'prod-kpi-tile' }, h('span', { class: 'k' }, 'Comisiones'), h('span', { class: 'v' }, fmtMoney(totalComm))),
+  ));
+  root.append(root2);
+
+  // Filters
+  const selProd = h('select', { class: 'select', onchange: (e) => { state.prodBand = e.target.value; renderTable(); } },
+    [h('option', { value: '' }, 'Todos los productos'),
+     h('option', { value: 'yield' }, 'Yield'), h('option', { value: 'reserve' }, 'Reserve'),
+     h('option', { value: 'fx' }, 'FX Shield'), h('option', { value: 'factoring' }, 'Factoring'), h('option', { value: 'credit' }, 'Credit')]);
+  const selStatus = h('select', { class: 'select', onchange: (e) => { state.prodStatus = e.target.value; renderTable(); } },
+    [h('option', { value: '' }, 'Todos los estados'),
+     h('option', { value: 'disponible' }, 'Disponible'), h('option', { value: 'recomendado' }, 'Recomendado'),
+     h('option', { value: 'preventivo' }, 'Preventivo'), h('option', { value: 'ahorro' }, 'Ahorro'), h('option', { value: 'rentable' }, 'Rentable')]);
+  const search = h('input', { class: 'input', type: 'search', placeholder: 'Buscar empresa…', value: '', 'aria-label': 'Buscar', oninput: (e) => { state.prodQ = e.target.value; renderTable(); } });
+  const countEl = h('span', { class: 'result-count', 'aria-live': 'polite' });
+
+  root.append(h('div', { class: 'filters' }, search, selProd, selStatus, countEl));
+
+  const card = h('div', { class: 'card' });
+  root.append(card);
+
+  function renderTable() {
+    const q = (state.prodQ || '').toLowerCase().trim();
+    const prodFilter = state.prodBand || '';
+
+    let rows = recs;
+    if (q) rows = rows.filter(r => r.company_id.toLowerCase().includes(q));
+    if (prodFilter) rows = rows.filter(r => r.products && r.products.some(p => p.id === prodFilter));
+
+    countEl.textContent = `${NF[0].format(rows.length)} de ${NF[0].format(recs.length)} empresas`;
+
+    const tbody = h('tbody');
+    rows.forEach(r => {
+      const href = '#/productos/' + r.company_id;
+      const products = r.products || [];
+
+      // Build product chips for display
+      const productChips = products.map(p => {
+        const statusClass = `prod-status-${p.status || 'disponible'}`;
+        const statusLabel = p.status ? p.status.charAt(0).toUpperCase() + p.status.slice(1) : 'Disponible';
+        return h('span', { class: `prod-status ${statusClass}`, style: { margin: '2px', 'font-size': '11px' } }, statusLabel);
+      });
+
+      // Build score badge from REAL score
+      const scoreBadge = h('span', { class: `chip chip-band-${r.band || 'vigilar'}`, style: { 'font-size': '11px' } },
+        `${r.score || '--'}/100 · ${r.band || 'vigilar'}`
+      );
+
+      tbody.append(h('tr', {
+        onclick: (e) => { if (!e.target.closest('a')) location.hash = href; },
+        style: { cursor: 'pointer', 'border-bottom': '2px solid var(--line-strong)' }
+      },
+        h('td', { class: 'c-id', 'data-label': 'Empresa' },
+          h('a', { class: 'cid', href, style: { pointerEvents: 'none' } }, r.company_id),
+          h('div', { class: 'cmeta' }, scoreBadge, ...productChips)
+        ),
+        h('td', { class: 'r num', 'data-label': 'Score' }, r.score != null ? fmt(r.score) : '—'),
+        h('td', { 'data-label': 'Productos' },
+          h('div', { style: { display: 'flex', gap: '4px', flexWrap: 'wrap' } }, ...productChips)
+        ),
+        h('td', { class: 'r num', 'data-label': 'Yield/año' }, r.total_annual_yield != null ? fmtMoney(r.total_annual_yield) : '—'),
+        h('td', { class: 'r num', 'data-label': 'Comisiones' }, r.total_commissions != null ? fmtMoney(r.total_commissions) : '—')
+      ));
+    });
+
+    card.replaceChildren(h('div', { class: 'table-wrap' },
+      h('table', { class: 'companies' },
+        h('thead', null, h('tr', null, h('th', { scope: 'col' }, 'Empresa'), h('th', { scope: 'col', class: 'r' }, 'Score'), h('th', { scope: 'col' }, 'Productos activos'), h('th', { scope: 'col', class: 'r' }, 'Yield/año'), h('th', { scope: 'col', class: 'r' }, 'Comisiones/mes'))),
+        tbody
+      )
+    ));
+  }
+  renderTable();
+  return root;
+}
+
 /* ═════════════ Vista: Empresa ═════════════ */
 async function viewEmpresa(id, token) {
   token = state.renderToken;
@@ -977,7 +1110,9 @@ async function viewEmpresa(id, token) {
   state.tesCid = c.company_id || id;
   root.append(h('div', { style: { display: 'flex', 'justify-content': 'space-between', 'align-items': 'baseline', gap: '12px' } },
     h('a', { class: 'back', href: '#/cartera' }, icon('back'), 'Cartera'),
-    h('a', { class: 'btn btn-sm', href: '#/tesoreria/' + encodeURIComponent(c.company_id || id) }, 'Ver tesorería')));
+    h('div', { style: { display: 'flex', gap: '8px' } },
+      h('a', { class: 'btn btn-sm', href: '#/productos/' + encodeURIComponent(c.company_id || id) }, 'Ver productos'),
+      h('a', { class: 'btn btn-sm', href: '#/tesoreria/' + encodeURIComponent(c.company_id || id) }, 'Ver tesorería')));
   const header = h('section', { class: 'card card-pad', 'aria-labelledby': 'company-title' },
     h('div', { class: 'hero' },
       h('div', null,
