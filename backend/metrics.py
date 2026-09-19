@@ -86,8 +86,9 @@ def temporal_oof(d: pd.DataFrame, cutoffs: list[str] = CUTOFFS, n_splits: int = 
             sc = prd.fit(train, pre.labels(train, cutoff=cut))
             val = hist[hist.company_id.isin(va_ids)]
             s = prd.score_panel(sc, val)
-            at = s[s.month == cut][["company_id", "group_id", "score"]]
-            ev = d[d.month == cut].drop(columns=["group_id", "score"], errors="ignore")
+            at = s[s.month == cut][["company_id", "group_id", "score"]].rename(columns={"score": "score_oof"})
+            # el panel puede traer ya una columna de nota: fuera, o el merge duplica nombres
+            ev = d[d.month == cut].drop(columns=["group_id", "score", "score_oof"], errors="ignore")
             rows.append(at.merge(ev, on="company_id").assign(fold=fold, cutoff=cut))
     return pd.concat(rows, ignore_index=True)
 
