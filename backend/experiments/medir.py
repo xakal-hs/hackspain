@@ -38,7 +38,9 @@ ARMS = {"A": "17 features · pesos calibrados (backend)",
         "D": "42 features del doc · pesos calibrados",
         "E": "17 features · mezcla 50/50 de calibrado y doc",
         "F": "17 + 7 features del doc que el brazo D calibró con peso · calibradas",
-        "G": "17 + las 2 features del doc que pagan solas · calibradas"}
+        "G": "17 + las 2 features del doc que pagan solas · calibradas",
+        "H": "17 + payroll_continuity_6m (aísla la nómina)",
+        "I": "17 + tax_miss (aísla el IVA, que además es primo del veto)"}
 # La cara positiva se calibra aparte (README §4.4): estos dos brazos solo se comparan entre sí.
 EXP_ARMS = {"Aexp": "17 features · nota de expansión",
             "Gexp": "17 + 2 features del doc · nota de expansión"}
@@ -52,6 +54,11 @@ F_EXTRA = ["tax_miss", "payroll_continuity_6m", "payee_concentration", "lost_acc
 # (incumplimiento 0,588). Si el brazo F gana por ellas, G debe conservar la ganancia sin pagar
 # el precio de las otras cinco.
 G_EXTRA = ["tax_miss", "payroll_continuity_6m"]
+# H e I parten G en dos. Son la respuesta a una objeción concreta: `tax_miss` es pariente del
+# veto `veto_iva_ausente` (que es un subconjunto suyo: 176 filas de 3.267) y del propio evento
+# `impago_iva_6m`, calculado con casi la misma fórmula. Si la ganancia de G vive en I, es en
+# buena parte autocorrelación del mismo hecho; si vive en H, es una señal de verdad.
+EXTRA = {"F": F_EXTRA, "G": G_EXTRA, "H": ["payroll_continuity_6m"], "I": ["tax_miss"]}
 # La única métrica-resumen que se reporta: media del AUC del nivel frente a los cuatro eventos
 # ancla. Se reporta, no decide: promediar esconde que un cambio mejore uno y estropee otro.
 PM_EVENTS = pre.EVENTS
@@ -77,8 +84,8 @@ def _patch(arm: str):
             prd._fit_weights = _blend
             prd.PRIOR_W = {f: pre.PRIOR_W.get(f, 1.0) for f in prd.SCORE_FEATURES}
             return d
-    elif arm in ("F", "G"):
-        extra = F_EXTRA if arm == "F" else G_EXTRA
+    elif arm in EXTRA:
+        extra = EXTRA[arm]
         d = cat.build()
         prd.FEATURES = {**pre.FEATURES, **{f: cat.CATALOG[f] for f in extra}}
         prd.SCORE_FEATURES = pre.SCORE_FEATURES + extra

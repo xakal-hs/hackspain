@@ -1,0 +1,222 @@
+{
+ "arm": "H",
+ "desc": "17 + payroll_continuity_6m (aísla la nómina)",
+ "n_features": 18,
+ "minutos": 1.2,
+ "pm": 0.63,
+ "auc": [
+  {
+   "evento": "tension_np_raw_6m",
+   "auc": 0.8511,
+   "se": 0.0141,
+   "ic95_lo": 0.8237,
+   "ic95_hi": 0.8767,
+   "n": 10926,
+   "positivos": 4822,
+   "grupos": 192
+  },
+  {
+   "evento": "incumplimiento_6m",
+   "auc": 0.5994,
+   "se": 0.0278,
+   "ic95_lo": 0.5473,
+   "ic95_hi": 0.6572,
+   "n": 6263,
+   "positivos": 408,
+   "grupos": 149
+  },
+  {
+   "evento": "caida_6m",
+   "auc": 0.5767,
+   "se": 0.0261,
+   "ic95_lo": 0.5301,
+   "ic95_hi": 0.6336,
+   "n": 5583,
+   "positivos": 552,
+   "grupos": 142
+  },
+  {
+   "evento": "expansion_6m",
+   "auc": 0.4926,
+   "se": 0.0321,
+   "ic95_lo": 0.4269,
+   "ic95_hi": 0.5543,
+   "n": 8013,
+   "positivos": 468,
+   "grupos": 159
+  },
+  {
+   "evento": "tension_6m",
+   "auc": 0.824,
+   "se": 0.0131,
+   "ic95_lo": 0.7984,
+   "ic95_hi": 0.8512,
+   "n": 8453,
+   "positivos": 3000,
+   "grupos": 192
+  },
+  {
+   "evento": "entrada_estres_2m",
+   "auc": 0.6518,
+   "se": 0.0199,
+   "ic95_lo": 0.6148,
+   "ic95_hi": 0.6876,
+   "n": 9198,
+   "positivos": 550,
+   "grupos": 220
+  },
+  {
+   "evento": "rompe_caja_2m",
+   "auc": 0.669,
+   "se": 0.0353,
+   "ic95_lo": 0.5964,
+   "ic95_hi": 0.734,
+   "n": 9198,
+   "positivos": 62,
+   "grupos": 220
+  },
+  {
+   "evento": "tension_entrada_6m",
+   "auc": 0.5735,
+   "se": 0.0411,
+   "ic95_lo": 0.4824,
+   "ic95_hi": 0.6389,
+   "n": 5918,
+   "positivos": 130,
+   "grupos": 165
+  },
+  {
+   "evento": "impago_nomina_6m",
+   "auc": 0.5322,
+   "se": 0.0495,
+   "ic95_lo": 0.428,
+   "ic95_hi": 0.6304,
+   "n": 3563,
+   "positivos": 347,
+   "grupos": 121
+  },
+  {
+   "evento": "impago_ss_6m",
+   "auc": 0.5756,
+   "se": 0.0488,
+   "ic95_lo": 0.4839,
+   "ic95_hi": 0.6637,
+   "n": 4400,
+   "positivos": 230,
+   "grupos": 123
+  },
+  {
+   "evento": "impago_iva_6m",
+   "auc": 0.6227,
+   "se": 0.0468,
+   "ic95_lo": 0.5177,
+   "ic95_hi": 0.7085,
+   "n": 4637,
+   "positivos": 123,
+   "grupos": 129
+  },
+  {
+   "evento": "impago_cuota_6m",
+   "auc": 0.407,
+   "se": 0.0408,
+   "ic95_lo": 0.3366,
+   "ic95_hi": 0.4885,
+   "n": 2688,
+   "positivos": 376,
+   "grupos": 116
+  },
+  {
+   "evento": "impago_ap_6m",
+   "auc": 0.5386,
+   "se": 0.0309,
+   "ic95_lo": 0.4824,
+   "ic95_hi": 0.6002,
+   "n": 8595,
+   "positivos": 5106,
+   "grupos": 160
+  },
+  {
+   "evento": "cura_3m",
+   "auc": 0.3227,
+   "se": 0.0217,
+   "ic95_lo": 0.284,
+   "ic95_hi": 0.3644,
+   "n": 16986,
+   "positivos": 442,
+   "grupos": 247
+  },
+  {
+   "evento": "recaida_6m",
+   "auc": 0.5661,
+   "se": 0.0238,
+   "ic95_lo": 0.518,
+   "ic95_hi": 0.6067,
+   "n": 649,
+   "positivos": 494,
+   "grupos": 124
+  },
+  {
+   "evento": "caida_3m_corto",
+   "auc": 0.536,
+   "se": 0.0134,
+   "ic95_lo": 0.5115,
+   "ic95_hi": 0.5628,
+   "n": 14260,
+   "positivos": 2513,
+   "grupos": 245
+  },
+  {
+   "evento": "expansion_3m",
+   "auc": 0.5165,
+   "se": 0.0176,
+   "ic95_lo": 0.4807,
+   "ic95_hi": 0.5501,
+   "n": 14260,
+   "positivos": 2302,
+   "grupos": 245
+  },
+  {
+   "evento": "tension_grupo_6m",
+   "auc": 0.7029,
+   "se": 0.0256,
+   "ic95_lo": 0.6542,
+   "ic95_hi": 0.7481,
+   "n": 13000,
+   "positivos": 5472,
+   "grupos": 232
+  }
+ ],
+ "anticipacion": {
+  "entradas_en_estres": 349,
+  "avisadas": 65,
+  "cobertura": 0.186,
+  "meses_mediana": 4.0,
+  "meses_media": 4.71,
+  "con_2m_o_mas": 0.846
+ },
+ "pesos": {
+  "runway": 0.2683,
+  "payroll_continuity_6m": 0.1285,
+  "activity_trend": 0.106,
+  "payroll_cv": 0.098,
+  "oper_persistence_6m": 0.0905,
+  "lost_share": 0.0615,
+  "ar_late_share": 0.0356,
+  "ap_overdue_ratio": 0.0332,
+  "hhi_ar_6m": 0.0288,
+  "debt_burden": 0.0263,
+  "ap_late_share": 0.026,
+  "transfer_dep": 0.0206,
+  "lc_util": 0.0174,
+  "net_vol_6m": 0.0167,
+  "cust_trend": 0.0156,
+  "refund_rate": 0.0144,
+  "ar_overdue_90_ratio": 0.0076,
+  "oper_growth_12m": 0.005
+ },
+ "escala": [
+  -65.966,
+  2.226
+ ],
+ "cobertura_media": 0.7106
+}

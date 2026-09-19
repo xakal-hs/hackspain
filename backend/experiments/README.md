@@ -6,8 +6,13 @@ calibrados**. Poner lo uno en lugar de lo otro mezcla dos cambios, así que se m
 
 **Resultado: no.** Con los pesos del doc el ancla del sistema (tensión de caja) cae de 0,848 a
 0,719 de AUC — **−9,7 σ** en bootstrap pareado — y la anticipación cae 4,8 σ. El PM no lo ve
-(0,6285 → 0,6303), que es la razón por la que el PM se reporta y no decide. Lo que sí sobrevive
-son **dos** variables sueltas: `tax_miss` y `payroll_continuity_6m` (brazo G).
+(0,6285 → 0,6303), que es la razón por la que el PM se reporta y no decide.
+
+De las 42 variables sobrevive **una**: `payroll_continuity_6m` (brazo H), ya adoptada en
+`preprocessing.py` como la feature 18. La otra candidata, `tax_miss`, se descartó al aislarla
+(brazo I): `veto_iva_ausente` es un subconjunto estricto suyo —es el veto con memoria, no una
+feature— y su ganancia es en buena parte autocorrelación, porque el evento `impago_iva_6m` se
+calcula con casi la misma fórmula. Además se lleva todo el daño a la expansión (−4,2 σ).
 
 El informe completo, con las tablas y el diagnóstico: [`pesos_2x2.html`](pesos_2x2.html).
 
@@ -53,7 +58,9 @@ comprar ±0,005 de AUC en las dos direcciones no se paga.
 | D | **42 features del doc** · pesos calibrados | 0,835 | 0,6199 | 22,9 % |
 | E | 17 features · mezcla 50/50 | 0,819 | 0,6386 | 18,9 % |
 | F | 17 + 7 features nuevas · calibradas | 0,849 | 0,6288 | 20,3 % |
-| **G** | **17 + 2 features nuevas · calibradas** | **0,848** | 0,6243 | **22,6 %** |
+| G | 17 + 2 features nuevas · calibradas | 0,848 | 0,6243 | 22,6 % |
+| **H** | **17 + `payroll_continuity_6m`** (la adoptada) | **0,851** | 0,6300 | 18,6 % |
+| I | 17 + `tax_miss` (descartada) | 0,846 | 0,6224 | 22,9 % |
 
 `Aexp` y `Gexp` repiten A y G calibrando contra la cara positiva (la nota de expansión), porque
 el único coste de G se mide ahí y con los pesos adversos salía cuatro veces más grande.

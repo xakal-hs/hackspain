@@ -13,14 +13,16 @@ HERE = Path(__file__).resolve().parent
 OUT = HERE / "pesos_2x2.html"
 S = HERE / "salida"
 
-ARMS = ["A", "B", "C", "D", "E", "F", "G"]
+ARMS = ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
 DESC = {"A": ("17 features · pesos calibrados", "el backend de hoy"),
         "B": ("17 features · pesos del doc", "solo cambian los pesos"),
         "C": ("42 features del doc · pesos del doc", "el doc entero, tal cual"),
         "D": ("42 features del doc · pesos calibrados", "solo cambian las features"),
         "E": ("17 features · mezcla 50/50", "¿y a medio camino?"),
         "F": ("17 + 7 features nuevas · calibradas", "las nuevas que aguantan la calibración"),
-        "G": ("17 + 2 features nuevas · calibradas", "la extracción neta: lo único que se adopta")}
+        "G": ("17 + 2 features nuevas · calibradas", "la extracción neta, antes de aislarla"),
+        "H": ("17 + payroll_continuity_6m", "la única que se adopta"),
+        "I": ("17 + tax_miss", "descartada: es el veto con memoria")}
 ANCLAS = ["tension_np_raw_6m", "incumplimiento_6m", "caida_6m", "expansion_6m"]
 CLAVE = ANCLAS + ["entrada_estres_2m", "rompe_caja_2m", "tension_entrada_6m", "impago_iva_6m",
                   "impago_ap_6m", "caida_3m_corto", "recaida_6m", "tension_grupo_6m"]
@@ -256,21 +258,45 @@ def main() -> None:
     es cuatro veces menor:</li>
   </ul>
   {exp_tbl}
+
+  <h3>Y una objeción que parte G en dos</h3>
+  <p><code>tax_miss</code> huele a veto, y lo es: <code>veto_iva_ausente</code> es un
+  <b>subconjunto estricto</b> suyo (176 filas de 3.267; la diferencia es que el veto exige
+  regularidad y feed vivo, y <code>tax_miss</code> arrastra el trimestre fallado). Peor aún, el
+  evento <code>impago_iva_6m</code> se calcula con casi la misma fórmula, así que su +4,5 σ es en
+  buena parte <b>autocorrelación</b>: la misma contaminación que el documento denuncia en
+  <code>ap_overdue_ratio</code>. Los brazos H e I lo separan:</p>
+  <div class="table-wrap"><table><thead><tr><th>frente al backend</th><th class="num">tensión (ancla)</th>
+  <th class="num">entrada en estrés 2m</th><th class="num">impago IVA</th><th class="num">expansión</th>
+  <th class="num">avisos cubiertos</th></tr></thead><tbody>
+  <tr><td><b>H</b> · solo <code>payroll_continuity_6m</code></td><td class="num">+0,003 <span class="flat">(1,5 σ)</span></td>
+  <td class="num"><span class="win">+0,015 (+4,1 σ)</span></td><td class="num"><span class="win">+0,024 (+3,5 σ)</span></td>
+  <td class="num"><span class="lose">−0,013 (−2,7 σ)</span></td><td class="num">18,6 %</td></tr>
+  <tr><td><b>I</b> · solo <code>tax_miss</code></td><td class="num">−0,002 <span class="flat">(−0,9 σ)</span></td>
+  <td class="num">+0,012 <span class="flat">(1,8 σ)</span></td><td class="num"><span class="win">+0,035 (+4,5 σ)</span></td>
+  <td class="num"><span class="lose">−0,034 (−4,2 σ)</span></td><td class="num">22,9 %</td></tr>
+  </tbody></table></div>
+  <p>Todo el daño a la expansión y casi toda la ganancia contaminada viven en <code>tax_miss</code>.
+  Lo que queda limpio es <code>payroll_continuity_6m</code>, y su mejor número no es un impago: es
+  <b>anticipar la entrada en estrés a 2 meses, +4,1 σ</b>, el evento con menos parentesco posible con
+  «paga la nómina todos los meses». Mejora incluso el IVA (+3,5 σ) sin mirar un dato fiscal.</p>
+
   <blockquote><p><b>Recomendación.</b> No adoptar los pesos del documento (B), ni el catálogo completo
-  (C), ni la mezcla (E): las tres compran eventos secundarios pagando con liquidez y anticipación.
-  Adoptar <b>G</b>: dos features nuevas, ancla intacta, +5,9 σ en impago de IVA y cuatro puntos más de
-  cobertura de aviso, a cambio de −0,015 de AUC en expansión. Y corregir el documento: los pesos que
-  publica no son los del score y, medidos, no deberían serlo.</p></blockquote>
+  (C), ni la mezcla (E): las tres compran eventos secundarios pagando con liquidez y anticipación. De
+  las 42 variables se adopta <b>una</b>, la del brazo <b>H</b>: <code>payroll_continuity_6m</code>.
+  <code>tax_miss</code> se queda fuera del score — lo que aporta de bueno es recordar el trimestre
+  fallado, y ese sitio es la capa de vetos, no una media ponderada. Y el documento hay que corregirlo:
+  los pesos que publica no son los del score y, medidos, no deberían serlo.</p></blockquote>
 </section>
 
 <section class="block">
   <h2>Cómo reproducirlo</h2>
-  <p>Nueve brazos (siete adversos y dos de expansión), ~1-2 minutos cada uno. Los pesos del documento no se copian a mano: se regeneran
+  <p>Once brazos (nueve adversos y dos de expansión), ~1-2 minutos cada uno. Los pesos del documento no se copian a mano: se regeneran
   ejecutando el propio generador del artefacto.</p>
   <div class="table-wrap"><table><thead><tr><th>paso</th><th>comando</th></tr></thead><tbody>
   <tr><td>pesos del doc</td><td><code>uv run --with duckdb python experiments/dump_pesos_doc.py &gt; experiments/pesos_doc.json</code></td></tr>
   <tr><td>las 42 features</td><td><code>uv run python experiments/catalogo.py</code></td></tr>
-  <tr><td>un brazo</td><td><code>uv run python experiments/medir.py A|B|C|D|E|F</code></td></tr>
+  <tr><td>un brazo</td><td><code>uv run python experiments/medir.py A|B|C|D|E|F|G|H|I</code></td></tr>
   <tr><td>comparación</td><td><code>uv run python experiments/medir.py informe</code></td></tr>
   <tr><td>esta página</td><td><code>uv run python experiments/informe_html.py</code></td></tr>
   </tbody></table></div>
