@@ -43,9 +43,12 @@ def main(mode: str) -> int:
         a, b = a.reset_index(drop=True), b.reset_index(drop=True)
         num = a.select_dtypes("number").columns
         diff = (a[num] - b[num]).abs().max().max() if len(num) else 0
-        txt = [c for c in a.columns if c not in num and not a[c].fillna("").equals(b[c].fillna(""))]
-        ok = diff <= 1e-6 and not txt
-        print(("✓" if ok else "✗"), f, f"máx |Δ| numérico = {diff:.2e}", f"columnas de texto distintas: {txt}" if txt else "")
+        diff = 0.0 if pd.isna(diff) else float(diff)
+        nulls = [c for c in a.columns if not a[c].isna().equals(b[c].isna())]  # nulo <-> valor
+        txt = [c for c in a.columns if c not in num and not a[c].dropna().astype(str).equals(b[c].dropna().astype(str))]
+        ok = diff <= 1e-6 and not txt and not nulls
+        print(("✓" if ok else "✗"), f, f"máx |Δ| numérico = {diff:.2e}",
+              f"nulos distintos: {nulls}" if nulls else "", f"texto distinto: {txt}" if txt else "")
         bad += not ok
     return 1 if bad else 0
 
