@@ -1,0 +1,130 @@
+/* X-Ray tokens.
+ *
+ * Two complete themes. Dark is the default: the product is read in a dealing
+ * room, not on paper. Every accent below has exactly one job, and `--ahead`
+ * is reserved for anything the product knows before it happens.
+ */
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --canvas: #090c22;
+  --panel: #10142f;
+  --panel-raised: #1a1f42;
+  --panel-sunken: #0b0e26;
+  --line: rgba(190, 200, 255, 0.1);
+  --line-strong: rgba(190, 200, 255, 0.19);
+
+  --text: #eef0fb;
+  --text-muted: #9aa0c4;
+  --text-dim: #8288b0;
+
+  /* Graphic fills: bars, traces, dots. */
+  --mint: #63dfa4;
+  --coral: #ff8f74;
+  --amber: #f2b33d;
+  --crimson: #f4626f;
+  --live: #5b74ff;
+  --ahead: #c5b6ff;
+
+  /* Filled actions use a deeper blue than the trace so white labels clear AA. */
+  --live-solid: #4d5fea;
+
+  /* Text-safe variants on this theme's panels. */
+  --mint-ink: #7ce8b4;
+  --coral-ink: #ffa48d;
+  --amber-ink: #f6c464;
+  --crimson-ink: #ff8791;
+  --live-ink: #93a3ff;
+  --ahead-ink: #cfc2ff;
+
+  /* Chip and well fills. */
+  --mint-wash: rgba(99, 223, 164, 0.13);
+  --coral-wash: rgba(255, 143, 116, 0.13);
+  --amber-wash: rgba(242, 179, 61, 0.14);
+  --crimson-wash: rgba(244, 98, 111, 0.14);
+  --live-wash: rgba(91, 116, 255, 0.16);
+  --ahead-wash: rgba(197, 182, 255, 0.13);
+  --neutral-wash: rgba(190, 200, 255, 0.07);
+
+  --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  --grid-line: rgba(190, 200, 255, 0.09);
+  --on-live: #ffffff;
+  --focus-ring: #93a3ff;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --canvas: #f4f5fb;
+  --panel: #ffffff;
+  --panel-raised: #ebeef9;
+  --panel-sunken: #f7f8fd;
+  --line: #dcdfef;
+  --line-strong: #c1c6e0;
+
+  --text: #151833;
+  --text-muted: #5a6088;
+  --text-dim: #666c95;
+
+  --mint: #16a672;
+  --coral: #f0714b;
+  --amber: #e09612;
+  --crimson: #e0364b;
+  --live: #3552e8;
+  --ahead: #7a5af0;
+
+  --live-solid: #3552e8;
+
+  --mint-ink: #0d7d55;
+  --coral-ink: #b04d20;
+  --amber-ink: #8a5a00;
+  --crimson-ink: #b8253a;
+  --live-ink: #2a42c9;
+  --ahead-ink: #5b3fd6;
+
+  --mint-wash: rgba(22, 166, 114, 0.1);
+  --coral-wash: rgba(240, 113, 75, 0.11);
+  --amber-wash: rgba(224, 150, 18, 0.13);
+  --crimson-wash: rgba(224, 54, 75, 0.09);
+  --live-wash: rgba(53, 82, 232, 0.09);
+  --ahead-wash: rgba(122, 90, 240, 0.09);
+  --neutral-wash: rgba(21, 24, 51, 0.045);
+
+  --sheen: none;
+  --grid-line: rgba(21, 24, 51, 0.08);
+  --on-live: #ffffff;
+  --focus-ring: #2a42c9;
+}
+
+:root {
+  /* Schibsted Grotesk carries every word. Chivo Mono is restricted to large
+   * numeric readings — never to small labels. */
+  --font-ui: 'Schibsted Grotesk', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', sans-serif;
+  --font-num: 'Chivo Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --t-micro: 0.78rem;
+  --t-small: 0.875rem;
+  --t-body: 1rem;
+  --t-lead: 1.125rem;
+  --t-h4: 1.375rem;
+  --t-h3: 1.75rem;
+  --t-h2: 2.375rem;
+  --t-h1: clamp(2.25rem, 4.4vw, 3.25rem);
+  /* Tuned so each clause of the hero headline holds a single line beside the
+     rail; below 900px the rail becomes a top bar and the clauses may wrap. */
+  --t-display: clamp(2rem, 4.2vw, 3.5rem);
+
+  /* Three radii, tied to nesting depth rather than applied uniformly. */
+  --r-panel: 18px;
+  --r-inner: 10px;
+  --r-pill: 999px;
+
+  --rail: 232px;
+  --shell-max: 1240px;
+  --gutter: clamp(1.25rem, 3.5vw, 3rem);
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}

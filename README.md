@@ -37,6 +37,7 @@ acción (prestar / vigilar / no prestar).
 | [`analysis/`](analysis) | Exploración del dataset. Informes autocontenidos que se abren sin servidor (`report.html`, `features_analisis_automatico.html`, `features_challenge.html`), la reconstrucción del histórico de caja (`cash_history.py`) y un explorador interactivo de esa caja en Streamlit (`app.py`) |
 | [`scripts/`](scripts) | Utilidades del panel de caja: materializarlo en `analysis/cash.duckdb` (`build_cash_db.py`), validarlo contra el saldo ancla (`validate_cash.py`) y comprobar que sale idéntico en tres construcciones (`check_determinism.py`) |
 | [`research/`](research) | **El sistema.** Panel mensual, score, previsión, monitor, simulador, API y demo. Tiene su propio [README](research/README.md) |
+| [`frontend/`](frontend) | Frontend de producción en Nuxt 4 + Vue 3/TypeScript, con Vite, Nitro, Pinia, TanStack Query y el sistema visual de X-Ray |
 | [`features.md`](features.md) | Brief de brainstorming de features: el reto, las trampas del dataset y las 17 features actuales con su peso |
 | [`AGENTS.md`](AGENTS.md) | Contexto permanente para agentes de código, más `.agents/skills/` y `skills-lock.json` |
 
@@ -97,6 +98,17 @@ score, así que se ejecuta desde el entorno de `research/`:
 
 ```bash
 cd research && uv run python ../analysis/challenge_features.py   # -> analysis/features_challenge.html
+```
+
+El frontend moderno se ejecuta por separado y puede usar datos de desarrollo o conectarse a la API
+FastAPI mediante `XRAY_API_BASE`:
+
+```bash
+cd frontend
+nvm install && nvm use       # Node 22.22 (fijado en frontend/.nvmrc)
+corepack enable
+pnpm install
+pnpm dev
 ```
 
 La capa de mapeo se comprueba con sus propios tests (con fixtures, no necesitan el dataset) y con una
