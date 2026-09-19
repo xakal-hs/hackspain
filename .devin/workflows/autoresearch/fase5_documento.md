@@ -35,11 +35,11 @@ Requisito de exactitud: si un paso del documento no coincide con el código, **m
 
 ## Paso 3 · El consejo adversarial sobre el documento
 
-Lanza en paralelo subagentes que **ataquen el documento**, cada uno desde su rol: `riesgo-modelo` (¿es defendible y estable?), `auditor-datos` (¿el dato sostiene cada paso? ¿coincide con el código?), `abogado-diablo` (¿dónde miente o se rompe?), `prestamista` (¿sirve para decidir un crédito?), `cfo` (¿lo entendería el cliente?), `cobrador` (¿qué falta del después?).
+Lanza en paralelo **solo tres** subagentes que **ataquen el documento**, cada uno desde su rol y absorbiendo la perspectiva de los roles recortados: `riesgo-modelo` (¿es defendible y estable? ¿sirve para decidir un crédito?), `auditor-datos` (¿el dato sostiene cada paso? ¿coincide con el código? ¿dónde miente o se rompe?), `cfo` (¿lo entendería el cliente? ¿qué falta del después?). No lances `abogado-diablo`, `prestamista` ni `cobrador`: sus preguntas quedan repartidas entre los tres.
 
 Cada subagente produce **preguntas del estilo del reto** (falsables, con condición «si X entonces Y, salvo Z»), por ejemplo: «si una empresa lleva 3 meses con la caja rota, ¿el documento explica por qué la banda es riesgo y bajo qué condiciones se prestaría?», «¿la fórmula del sub-score trata el cero igual que el código en `xray.py:_sub`?», «¿qué pasa con una empresa sin ERP en cada paso?».
 
-Objetivo: **≥ 40 preguntas nuevas** sobre el documento, además de las >100 de la fase 2. Distingue las que el documento ya responde (y dónde) de las que descubren un hueco.
+Objetivo: **≥ 24 preguntas nuevas** (8 por subagente) sobre el documento, además de las >100 de la fase 2. Distingue las que el documento ya responde (y dónde) de las que descubren un hueco.
 
 ## Paso 4 · Incorpora y realimenta
 
@@ -55,7 +55,7 @@ Objetivo: **≥ 40 preguntas nuevas** sobre el documento, además de las >100 de
 
 - `salida/documento_score.md` existe, cubre los 14 puntos y **cada número coincide con `score_datos.py`**.
 - Cada paso cita su `file:line`; hay un ejemplo trabajado de explicación Y/Z/K con una empresa real.
-- El documento tiene la sección «Cuestionado por» con **≥ 40 objeciones** de ≥ 5 subagentes, con veredicto.
+- El documento tiene la sección «Cuestionado por» con **≥ 24 objeciones** de los 3 subagentes, con veredicto.
 - Las preguntas nuevas verificables están en `premisas.jsonl` y pasan `validate` sin errores.
 
 ## Reglas
