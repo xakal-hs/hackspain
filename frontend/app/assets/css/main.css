@@ -1604,131 +1604,156 @@ table {
 }
 
 /* ===========================================================================
-   Entry
+   Auth
    ======================================================================== */
 
-.entry {
+.auth {
   min-height: 100vh;
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  padding: 24px clamp(24px, 5vw, 72px) 28px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: clamp(16px, 1.6vw, 24px);
+  background: var(--panel);
 }
 
-.entry__top {
+.auth__art {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+  padding: clamp(24px, 3vw, 40px);
+  border-radius: var(--r-panel);
+  background:
+    linear-gradient(180deg, rgba(9, 12, 34, 0.1), rgba(9, 12, 34, 0.6)),
+    url('../images/login-bg.png') center / cover no-repeat;
+}
+
+/* The mark is blue everywhere else; on the art panel it sits on its own
+ * artwork, and a white mark is the only one that holds against it. */
+.auth__art .brand-mark {
+  width: clamp(30px, 2.6vw, 38px);
+  height: clamp(30px, 2.6vw, 38px);
+  color: var(--text);
+}
+
+.auth__art .lp__brand {
+  gap: 14px;
+  font-size: clamp(1.5rem, 2.2vw, 1.9rem);
+}
+
+.auth__art .lp__brand small {
+  font-size: var(--t-small);
+}
+
+.auth__stats {
+  display: grid;
+  gap: clamp(26px, 4.5vh, 52px);
+}
+
+.auth__stats dt {
+  font-family: var(--font-num);
+  font-size: clamp(2.4rem, 4vw, 3.4rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.auth__stats dd {
+  margin-top: 6px;
+  font-size: var(--t-body);
+  color: var(--text-muted);
+}
+
+.auth__form {
+  display: flex;
+  flex-direction: column;
+  padding: 10px clamp(24px, 4vw, 64px) 28px;
+}
+
+.auth__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
 }
 
-.entry__main {
-  align-self: center;
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  align-items: center;
-  gap: clamp(32px, 6vw, 80px);
-  padding: clamp(36px, 6vw, 72px) 0;
-  max-width: var(--shell-max);
-}
-
-.entry__intro h1 {
-  font-size: var(--t-h1);
-  max-width: 18ch;
-}
-
-.entry__intro p {
-  margin-top: 16px;
-  max-width: 44ch;
-  color: var(--text-muted);
-}
-
-.entry__panel {
-  display: grid;
-  gap: 18px;
-}
-
-.entry__panel fieldset {
-  border: 0;
-  padding: 0;
-  display: grid;
-  gap: 8px;
-}
-
-.entry__role {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 14px;
-  padding: 15px 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-inner);
-  cursor: pointer;
-  transition: border-color 0.12s var(--ease);
-}
-
-.entry__role:hover {
-  border-color: var(--line-strong);
-}
-
-.entry__role.is-chosen {
-  border-color: var(--live);
-  background: var(--live-wash);
-}
-
-.entry__role input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.entry__role:focus-within {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.entry__role i {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--r-inner);
-  background: var(--panel-raised);
-  border: 1px solid var(--line);
-  font-size: var(--t-micro);
-  font-weight: 600;
-  font-style: normal;
-}
-
-.entry__role > span {
-  display: grid;
-  gap: 2px;
-}
-
-.entry__role b {
-  font-weight: 500;
-}
-
-.entry__role em {
-  font-style: normal;
-  font-size: var(--t-micro);
-  color: var(--text-dim);
-}
-
-.entry__role > span > span {
-  font-size: var(--t-small);
-  color: var(--text-muted);
-}
-
-.entry__note {
-  font-size: var(--t-micro);
-  color: var(--text-dim);
-}
-
-.entry__back {
-  justify-self: start;
+.auth__back {
   font-size: var(--t-small);
   color: var(--text-muted);
   border-bottom: 1px solid var(--line-strong);
   padding-bottom: 1px;
+}
+
+.auth__box {
+  width: 100%;
+  max-width: 380px;
+  margin: auto;
+  display: grid;
+  gap: 22px;
+}
+
+.auth__box h1 {
+  font-size: var(--t-h2);
+}
+
+.auth__fake {
+  display: grid;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  font-size: var(--t-small);
+  color: var(--text-muted);
+}
+
+.field input {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-inner);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.field input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.auth__recover {
+  justify-self: start;
+  font-size: var(--t-small);
+  font-weight: 500;
+  color: var(--text);
+}
+
+.auth__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+}
+
+.auth__divider::before,
+.auth__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.auth__demo {
+  display: grid;
+  gap: 10px;
+}
+
+.auth__note {
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+  text-align: center;
 }
 
 /* ===========================================================================
@@ -1807,10 +1832,12 @@ table {
     text-wrap: balance;
   }
 
-  .entry__main {
+  .auth {
     grid-template-columns: minmax(0, 1fr);
-    align-content: center;
-    gap: 32px;
+  }
+
+  .auth__art {
+    min-height: 240px;
   }
 }
 

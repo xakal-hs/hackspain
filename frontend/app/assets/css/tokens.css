@@ -139,7 +139,8 @@
  * without competing with it. Re-pointing the tokens rather than restating the
  * colours means every descendant follows, popovers and buttons included. */
 .rail,
-.lp__rail {
+.lp__rail,
+.auth__art {
   --canvas: var(--ink-canvas);
   --panel: var(--ink-panel);
   --panel-raised: var(--ink-raised);
