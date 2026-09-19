@@ -36,7 +36,7 @@ The most obvious buyer is Embat or the company contributing its own treasury dat
 
 ## Scoring Philosophy
 
-Operational frame: [`context/scoring.md`](context/scoring.md) (readable page: [`context/scoring.html`](context/scoring.html)).
+Operational frame: [`context/scoring.md`](context/scoring.md) (readable page: [`context/scoring.html`](context/scoring.html)). The CFO product row — what is sold and what it is worth on this portfolio — is in [`context/monetizacion.md`](context/monetizacion.md) (readable page: [`context/monetizacion.html`](context/monetizacion.html)).
 
 - Design the score as a lender with €100,000 to place. Start from consumer credit questions, then map them onto company cash, invoices and debt. The nature of the risk is the same; the data type is not.
 - **Criticality is not uniform.** Cash available that evaporates quickly must move the score far more than a mild shift in collection days (DSO) or payment days (DPO). Do not give every feature the same weight.

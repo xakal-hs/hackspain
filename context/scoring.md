@@ -79,3 +79,4 @@ El leaderboard puede pedir un número. El producto no: hay que dejar claro **par
 - Diseñar la demo para que alguien con 100.000 € que prestar sepa, en un vistazo, a quién se los daría y por qué no al otro.
 - Llevar el pitch a bancos: Embat tiene el rastro que ellos no ven.
 - No fijar una sola métrica. Condicionarla a la oferta y al rol de quien mira.
+- La fila del CFO — qué se le vende y cuánto vale sobre esta cartera — está en [Monetización](monetizacion.md).
