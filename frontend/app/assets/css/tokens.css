@@ -1,43 +1,115 @@
-/* X-Ray tokens.
+/* X-Ray tokens, re-pointed onto Embat's own design system.
  *
- * Two complete themes. Dark is the default: the product is read in a dealing
- * room, not on paper. Every accent below has exactly one job, and `--ahead`
- * is reserved for anything the product knows before it happens.
+ * Every colour below is taken from Embat's published tokens — the
+ * `--wp--preset--color--*` variables on embat.io and the design-taste engine's
+ * read of that page — rather than approximated: content-primary #050b2c,
+ * background-primary/secondary/tertiary, border-primary/secondary, the four
+ * semantic ramps (success / warning / danger / highlight-info), the aquamarine
+ * and purple accents, and the two inverse ramps the dark theme is built from.
+ *
+ * Two complete themes, light first because that is how Embat's own product is
+ * read. `--ahead` keeps its single job — anything the product knows before it
+ * happens — and takes the purple from Embat's brand gradient, which is the one
+ * place that gradient appears.
  */
 
-/* The dark surface palette, named apart from the themes because the navigation
- * rail keeps it under both of them. The dark theme is these values; the light
- * theme borrows them only for the rail. Defined once so the two never drift. */
+/* The inverse ramp, named apart from the themes because the navigation rail
+ * keeps it under both of them: in Embat the navy is the chrome, and a navy
+ * edge framing a white canvas is the signature. Defined once so the two
+ * cannot drift. */
 :root {
-  --ink-canvas: #090c22;
-  --ink-panel: #10142f;
-  --ink-raised: #1a1f42;
-  --ink-sunken: #0b0e26;
-  --ink-line: rgba(190, 200, 255, 0.1);
-  --ink-line-strong: rgba(190, 200, 255, 0.19);
-  --ink-text: #eef0fb;
-  --ink-muted: #9aa0c4;
-  --ink-dim: #8288b0;
-  --ink-neutral-wash: rgba(190, 200, 255, 0.07);
-  --ink-live: #5b74ff;
-  --ink-live-solid: #4d5fea;
-  --ink-live-ink: #93a3ff;
-  --ink-live-wash: rgba(91, 116, 255, 0.16);
-  --ink-sheen: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  --ink-canvas: #050b2c; /* inverse background primary */
+  --ink-panel: #0e1431; /* inverse overlay, made opaque */
+  --ink-raised: #232845; /* inverse background secondary */
+  --ink-sunken: #030718;
+  --ink-line: #373c56; /* inverse border primary */
+  --ink-line-strong: #696d80; /* inverse border secondary */
+  --ink-text: #ffffff; /* inverse content primary */
+  --ink-muted: #afafbb; /* inverse content tertiary */
+  --ink-dim: #8f92a6; /* inverse content disabled, lifted to clear 4.5:1 on the panel */
+  --ink-neutral-wash: #ffffff0d; /* inverse transparent 2 */
+  --ink-live: #5c92fe; /* inverse highlight-info */
+  --ink-live-solid: #1a56da; /* inverse highlight-info medium */
+  --ink-live-ink: #a5c4ff; /* inverse highlight-info hover */
+  --ink-live-wash: rgba(92, 146, 254, 0.16);
+  --ink-sheen: none;
 
-  /* Los acentos de estado sobre superficie oscura. Viven aquí, y no solo en el
-   * tema oscuro, porque el panel navy de las métricas del modelo los necesita
-   * también bajo el tema claro: allí un `--mint-ink` de tema claro es un verde
-   * oscuro que sobre navy no se lee. */
-  --ink-mint: #63dfa4;
-  --ink-mint-ink: #7ce8b4;
-  --ink-mint-wash: rgba(99, 223, 164, 0.13);
-  --ink-amber: #f2b33d;
-  --ink-amber-ink: #f6c464;
-  --ink-amber-wash: rgba(242, 179, 61, 0.14);
-  --ink-crimson: #f4626f;
-  --ink-crimson-ink: #ff8791;
-  --ink-crimson-wash: rgba(244, 98, 111, 0.14);
+  /* Status accents on a navy surface. They live here, and not only in the dark
+   * theme, because the model panel needs them under the light theme too. */
+  --ink-mint: #80efa2; /* inverse success */
+  --ink-mint-ink: #80efa2;
+  --ink-mint-wash: rgba(128, 239, 162, 0.14);
+  --ink-amber: #dfb631; /* inverse warning */
+  --ink-amber-ink: #f3d375; /* warning medium */
+  --ink-amber-wash: rgba(223, 182, 49, 0.16);
+  --ink-coral: #f7b2a8; /* inverse highlight-info-2 */
+  --ink-coral-ink: #f7b2a8;
+  --ink-coral-wash: rgba(247, 178, 168, 0.14);
+  --ink-crimson: #e5775b; /* inverse danger */
+  --ink-crimson-ink: #e5775b;
+  --ink-crimson-wash: rgba(229, 119, 91, 0.16);
+  --ink-ahead: #b083e8; /* inverse purple */
+  --ink-ahead-ink: #b083e8;
+  --ink-ahead-wash: rgba(176, 131, 232, 0.16);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --canvas: #ffffff; /* background primary */
+  --panel: #ffffff;
+  --panel-raised: #f3f4f6; /* background secondary / states hover */
+  --panel-sunken: #fbfbfc; /* background tertiary */
+  --line: #e8e8ed; /* border primary */
+  --line-strong: #d2d2db; /* border secondary */
+
+  --text: #050b2c; /* content primary */
+  --text-muted: #6e707c; /* content secondary */
+  /* One notch above Embat's disabled grey: their #888996 is 3.5:1, and this
+   * tier carries axis labels and notes, not disabled text. */
+  --text-dim: #73757f;
+
+  /* Graphic fills: bars, traces, dots. */
+  --mint: #08ab39; /* semantic success */
+  --coral: #e5775b; /* highlight-info-2, saturated to read on white */
+  --amber: #dfb631; /* semantic warning */
+  --crimson: #c2401f; /* semantic danger */
+  --live: #3878f6; /* semantic highlight-info */
+  --ahead: #8041d1; /* other-colors purple */
+
+  /* Filled actions land one step in from the brand blue: white on #3878f6 is
+   * 4.05:1 and a 16px button label has to clear 4.5:1. #1a56da is Embat's own
+   * inverse highlight-info-medium and clears it at 6.2:1; hover is their
+   * highlight-info hover. */
+  --live-solid: #1a56da;
+  --live-solid-hover: #0338bb;
+
+  /* Text-safe variants on this theme's panels. */
+  --mint-ink: #007d25; /* success dark */
+  --coral-ink: #b0421f;
+  --amber-ink: #8a6b00; /* warning dark, darkened to clear 4.5:1 on its wash */
+  --crimson-ink: #931d00; /* danger dark */
+  --live-ink: #0338bb;
+  --ahead-ink: #6b2fb5;
+
+  /* Chip and well fills. */
+  --mint-wash: #e7ffee; /* success light */
+  --coral-wash: #fff0ed; /* highlight-info-2 light */
+  --amber-wash: #fff5de; /* warning light */
+  --crimson-wash: #ffe7e0; /* danger light */
+  --live-wash: #e7efff; /* highlight-info light */
+  --ahead-wash: #f1e7ff; /* purple light */
+  --neutral-wash: #f3f4f6;
+
+  --sheen: none;
+  --grid-line: #e8e8ed;
+  --on-live: #ffffff;
+  --focus-ring: #0338bb;
+
+  /* Elevation, as published: three levels at 9% black. */
+  --shadow-1: 0px 1px 4px rgba(0, 0, 0, 0.09);
+  --shadow-2: 0px 3px 12px rgba(0, 0, 0, 0.09);
+  --shadow-3: 0px 8px 16px rgba(0, 0, 0, 0.09);
 }
 
 :root,
@@ -55,91 +127,53 @@
   --text-muted: var(--ink-muted);
   --text-dim: var(--ink-dim);
 
-  /* Graphic fills: bars, traces, dots. */
   --mint: var(--ink-mint);
-  --coral: #ff8f74;
+  --coral: var(--ink-coral);
   --amber: var(--ink-amber);
   --crimson: var(--ink-crimson);
   --live: var(--ink-live);
-  --ahead: #c5b6ff;
+  --ahead: var(--ink-ahead);
 
-  /* Filled actions use a deeper blue than the trace so white labels clear AA. */
   --live-solid: var(--ink-live-solid);
+  --live-solid-hover: #2563eb;
 
-  /* Text-safe variants on this theme's panels. */
   --mint-ink: var(--ink-mint-ink);
-  --coral-ink: #ffa48d;
+  --coral-ink: var(--ink-coral-ink);
   --amber-ink: var(--ink-amber-ink);
   --crimson-ink: var(--ink-crimson-ink);
   --live-ink: var(--ink-live-ink);
-  --ahead-ink: #cfc2ff;
+  --ahead-ink: var(--ink-ahead-ink);
 
-  /* Chip and well fills. */
   --mint-wash: var(--ink-mint-wash);
-  --coral-wash: rgba(255, 143, 116, 0.13);
+  --coral-wash: var(--ink-coral-wash);
   --amber-wash: var(--ink-amber-wash);
   --crimson-wash: var(--ink-crimson-wash);
   --live-wash: var(--ink-live-wash);
-  --ahead-wash: rgba(197, 182, 255, 0.13);
+  --ahead-wash: var(--ink-ahead-wash);
   --neutral-wash: var(--ink-neutral-wash);
 
   --sheen: var(--ink-sheen);
-  --grid-line: rgba(190, 200, 255, 0.09);
+  --grid-line: var(--ink-line);
   --on-live: #ffffff;
-  --focus-ring: #93a3ff;
+  --focus-ring: var(--ink-live-ink);
+
+  /* Embat publishes no inverse shadows; on navy a 9% black shadow is invisible,
+   * so the dark theme leans on borders and one deep shadow for popovers. */
+  --shadow-1: none;
+  --shadow-2: 0px 3px 12px rgba(0, 0, 0, 0.35);
+  --shadow-3: 0px 8px 16px rgba(0, 0, 0, 0.45);
 }
 
-:root[data-theme='light'] {
-  color-scheme: light;
-
-  --canvas: #f4f5fb;
-  --panel: #ffffff;
-  --panel-raised: #ebeef9;
-  --panel-sunken: #f7f8fd;
-  --line: #dcdfef;
-  --line-strong: #c1c6e0;
-
-  --text: #151833;
-  --text-muted: #5a6088;
-  --text-dim: #666c95;
-
-  --mint: #16a672;
-  --coral: #f0714b;
-  --amber: #e09612;
-  --crimson: #e0364b;
-  --live: #3552e8;
-  --ahead: #7a5af0;
-
-  --live-solid: #3552e8;
-
-  --mint-ink: #0d7d55;
-  --coral-ink: #b04d20;
-  --amber-ink: #8a5a00;
-  --crimson-ink: #b8253a;
-  --live-ink: #2a42c9;
-  --ahead-ink: #5b3fd6;
-
-  --mint-wash: rgba(22, 166, 114, 0.1);
-  --coral-wash: rgba(240, 113, 75, 0.11);
-  --amber-wash: rgba(224, 150, 18, 0.13);
-  --crimson-wash: rgba(224, 54, 75, 0.09);
-  --live-wash: rgba(53, 82, 232, 0.09);
-  --ahead-wash: rgba(122, 90, 240, 0.09);
-  --neutral-wash: rgba(21, 24, 51, 0.045);
-
-  --sheen: none;
-  --grid-line: rgba(21, 24, 51, 0.08);
-  --on-live: #ffffff;
-  --focus-ring: #2a42c9;
-}
-
-/* Both rails — the landing index and the cockpit navigation — stay on the dark
- * palette under the light theme. They are chrome: the reader's eye should fall
- * on the panels that carry the numbers, and a dark edge frames a light canvas
- * without competing with it. Re-pointing the tokens rather than restating the
- * colours means every descendant follows, popovers and buttons included. */
+/* The navy surfaces. The two rails — the landing index and the cockpit
+ * navigation — keep it under both themes, because they are chrome, exactly as
+ * the navy header is chrome on Embat's own site. The landing hero keeps it too:
+ * Embat opens on navy with the product screen sitting on it, and that is the
+ * one place our own page is allowed to raise its voice. Re-pointing the tokens
+ * rather than restating the colours means every descendant follows — charts,
+ * popovers, buttons and focus rings included. */
 .rail,
-.lp__rail {
+.lp__rail,
+.lp__hero {
   --canvas: var(--ink-canvas);
   --panel: var(--ink-panel);
   --panel-raised: var(--ink-raised);
@@ -152,10 +186,13 @@
   --neutral-wash: var(--ink-neutral-wash);
   --live: var(--ink-live);
   --live-solid: var(--ink-live-solid);
+  --live-solid-hover: #2563eb;
   --live-ink: var(--ink-live-ink);
   --live-wash: var(--ink-live-wash);
   --sheen: var(--ink-sheen);
   --focus-ring: var(--ink-live-ink);
+  --shadow-1: none;
+  --shadow-2: 0px 3px 12px rgba(0, 0, 0, 0.35);
 
   /* So the nav's own overflow scrollbar is dark too under the light theme. */
   color-scheme: dark;
@@ -164,34 +201,57 @@
 }
 
 :root {
-  /* Schibsted Grotesk carries every word. Chivo Mono is restricted to large
-   * numeric readings — never to small labels. */
-  --font-ui: 'Schibsted Grotesk', ui-sans-serif, system-ui, -apple-system,
-    'Segoe UI', sans-serif;
+  /* Embat sets every word in HafferSQXH, which is licensed and self-hosted, so
+   * Inter Tight stands in at the same weights and rhythm — the closest free
+   * grotesque at that x-height and tightness. Chivo Mono is kept for one job
+   * only: large numeric readings, never small labels. */
+  --font-ui: 'Inter Tight', ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Arial, sans-serif;
   --font-num: 'Chivo Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  --t-micro: 0.78rem;
+  /* Embat's published type scale: detail-1 / small / body-2 / body-1 /
+   * headline-3 / headline-2 / headline-1 / x-large. */
+  --t-micro: 0.75rem;
   --t-small: 0.875rem;
   --t-body: 1rem;
   --t-lead: 1.125rem;
-  --t-h4: 1.375rem;
-  --t-h3: 1.75rem;
-  --t-h2: 2.375rem;
-  --t-h1: clamp(2.25rem, 4.4vw, 3.25rem);
-  /* Tuned so each clause of the hero headline holds a single line beside the
-     rail; below 900px the rail becomes a top bar and the clauses may wrap. */
-  --t-display: clamp(2rem, 4.2vw, 3.5rem);
+  --t-h4: 1.25rem;
+  --t-h3: clamp(1.25rem, 1.25rem + ((1vw - 0.2rem) * 0.806), 1.75rem);
+  --t-h2: clamp(1.5rem, 1.5rem + ((1vw - 0.2rem) * 1.613), 2.5rem);
+  --t-h1: clamp(2rem, 2rem + ((1vw - 0.2rem) * 2.016), 3.25rem);
+  /* The landing headline splits in two clauses, so it is set one step down
+   * from headline-1 to keep each clause on one line beside the rail. */
+  --t-display: clamp(1.9rem, 1.9rem + ((1vw - 0.2rem) * 1.613), 2.75rem);
 
-  /* Three radii, tied to nesting depth rather than applied uniformly. */
-  --r-panel: 18px;
-  --r-inner: 10px;
+  /* Radii, as published: 3 / 4 / 6 / 8 / 12. */
+  --r-xs: 3px;
+  --r-sm: 4px;
+  --r-inner: 6px;
+  --r-card: 8px;
+  --r-panel: 12px;
   --r-pill: 999px;
 
+  /* Embat's own surfaces: the brand gradient for the one moment the product
+   * speaks for itself, the soft gradient as a decorative wash. */
+  --gradient-brand: linear-gradient(
+    275deg,
+    #c357ec 4.22%,
+    #9d4bdd 50%,
+    #415de6 95.78%
+  );
+  --gradient-soft: linear-gradient(90deg, #f2f4fd 0%, #f8f2fd 50%, #fbf3fe 100%);
+  --aquamarine: #c5f8fc;
+  --aquamarine-ink: #007b93;
+
   --rail: 232px;
-  --shell-max: 1240px;
+  --shell-max: 1312px; /* Embat's wide size */
   --gutter: clamp(1.25rem, 3.5vw, 3rem);
 
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  /* Embat standardises colour transitions at 0.3s; dense cockpit controls move
+   * faster than that, so the two durations live apart. */
+  --dur: 0.3s;
+  --dur-fast: 0.12s;
   /* Overshoot for the theme thumb and the rail tab — they land like the
      score crossing a threshold. */
   --sw-ease: cubic-bezier(0.34, 1.25, 0.64, 1);
@@ -200,32 +260,33 @@
 /* Paleta de los mocks Centinela (Colchón Dinámico, Divisa Inteligente, X-Ray
  * Score). Va acotada a `.centinela` en lugar de a `:root` porque `--text` ya
  * existe arriba con otro valor por tema: redefinirlo en `:root` rompería el
- * resto de la app. El bloque de abajo es el tema claro, de origen del mock. */
+ * resto de la app. Los valores son los de Embat, para que un mock no sea una
+ * isla de otro producto dentro del suyo. */
 .centinela {
-  --bg: #f3f4f8;
+  --bg: #f3f4f6;
   --card: #ffffff;
-  --border: #e4e6f0;
+  --border: #e8e8ed;
   /* Relleno neutro de chips y pistas de progreso, y la retícula de los SVG. */
-  --wash: #eef0f7;
-  --grid: #eef0f7;
+  --wash: #f3f4f6;
+  --grid: #e8e8ed;
 
-  --text: #12142b;
-  --text-2: #565a7a;
-  --text-3: #9298b5;
-  --meta: #6b7089;
-  --body: #23253f;
+  --text: #050b2c;
+  --text-2: #6e707c;
+  --text-3: #888996;
+  --meta: #6e707c;
+  --body: #050b2c;
 
-  --accent: #3b5bff;
+  --accent: #3878f6;
 
   /* Los paneles navy no se tematizan: son un acento deliberado que funciona
    * igual sobre lienzo claro que oscuro. Su tinta va aparte de `--card` para
    * que siga siendo blanca cuando `--card` se oscurece. */
-  --navy-1: #171b4c;
-  --navy-2: #0b0e2a;
+  --navy-1: #232845;
+  --navy-2: #050b2c;
   --on-navy: #ffffff;
-  --on-navy-2: #b7bee8;
-  --on-navy-3: #8990c4;
-  --on-navy-4: #6970a6;
+  --on-navy-2: #d2d2db;
+  --on-navy-3: #afafbb;
+  --on-navy-4: #787d96;
 
   /* Tinta sobre un botón de estado relleno. Blanca aquí porque en claro los
    * estados son tonos medios saturados; en oscuro se invierte. */
@@ -233,30 +294,31 @@
 
   /* Cada estado tiene tres capas: `-bg` para el fondo del aviso, `-chip` para
    * un relleno más marcado, y `-strong` para la tinta que va encima. */
-  --ok: #1fa971;
-  --ok-bg: #e9f7f0;
-  --ok-border: #bfe3c8;
-  --ok-chip: #d0efdd;
-  --ok-strong: #17805a;
+  --ok: #08ab39;
+  --ok-bg: #e7ffee;
+  --ok-border: #a8e8bd;
+  --ok-chip: #d3f6de;
+  --ok-strong: #007d25;
 
-  --warn: #c08a1e;
-  --warn-bg: #fff7e5;
-  --warn-border: #f1e4c0;
-  --warn-chip: #f5e4b8;
-  --warn-strong: #8a6410;
+  --warn: #dfb631;
+  --warn-bg: #fff5de;
+  --warn-border: #f0dfa6;
+  --warn-chip: #f8ecc4;
+  --warn-strong: #997800;
 
-  --bad: #e14c43;
-  --bad-bg: #fde9e7;
-  --bad-border: #f5b8b4;
-  --bad-chip: #f7cfcc;
-  --bad-strong: #b0322a;
+  --bad: #c2401f;
+  --bad-bg: #ffe7e0;
+  --bad-border: #f4bcab;
+  --bad-chip: #fbd7cc;
+  --bad-strong: #931d00;
 
-  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
+  /* Una sola familia para todo, como en Embat: el mock no es otro producto. */
+  --font-display: var(--font-ui);
+  --font-body: var(--font-ui);
 
-  --r-sm: 8px;
-  --r-md: 10px;
-  --r-lg: 12px;
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 8px;
 
   color: var(--text);
   font-family: var(--font-body);
@@ -270,7 +332,7 @@
   --bg: var(--ink-canvas);
   --card: var(--ink-panel);
   --border: var(--ink-line);
-  --wash: rgba(190, 200, 255, 0.12);
+  --wash: var(--ink-raised);
   --grid: var(--ink-line);
 
   --text: var(--ink-text);

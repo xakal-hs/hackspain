@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css', '~/assets/css/workspace.css'],
   app: {
     head: {
-      htmlAttrs: { lang: 'es', 'data-theme': 'dark' },
+      htmlAttrs: { lang: 'es', 'data-theme': 'light' },
       meta: [
         {
           name: 'description',
@@ -19,7 +19,7 @@ export default defineNuxtConfig({
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Chivo+Mono:wght@300;400&family=Space+Grotesk:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap',
+          href: 'https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Chivo+Mono:wght@300;400&display=swap',
         },
       ],
     },

@@ -1,0 +1,1637 @@
+{
+  "profile": {
+    "brand_name": "Embat",
+    "source_url": "https://www.embat.io",
+    "page_type_category": "Core Marketing",
+    "page_type": "Homepage",
+    "industry": "FinTech / Corporate Treasury",
+    "primary_purpose": "Drive demo requests by positioning Embat as an AI-powered corporate treasury platform that consolidates cash management, risk, reconciliation, and payments into one intelligent system",
+    "main_cta": "Book a demo",
+    "copy_tone": [
+      "Confident",
+      "Professional",
+      "Clear"
+    ],
+    "brand_signature": "Deep navy/dark blue (#050B2C) primary with clean white backgrounds creates a professional, enterprise-grade financial technology aesthetic. Balanced use of product UI screenshots and subtle blue accent (#3878F6) demonstrates platform capability while maintaining trust through restrained visual hierarchy.",
+    "visual_language": {
+      "keywords": [
+        "enterprise",
+        "clean",
+        "structured",
+        "trustworthy",
+        "data-driven"
+      ],
+      "accent_strategy": "Blue (#3878F6) used sparingly for primary CTAs and interactive elements against predominantly dark navy and white backgrounds, creating clear visual hierarchy without overwhelming the financial data presentation",
+      "highlights": "Product UI screenshots and dashboard visualizations showcased prominently to demonstrate platform capabilities and data consolidation"
+    },
+    "strategy": {
+      "target_audience": [
+        "CFOs and Finance Directors at mid-market to enterprise companies seeking treasury automation and cash visibility",
+        "Treasury managers responsible for multi-bank cash management, reconciliation, and payment operations",
+        "Finance operations leaders evaluating AI-powered solutions to reduce manual processes and month-end close times"
+      ],
+      "executive_synthesis": "Embat's visual strategy balances enterprise credibility with modern SaaS approachability. The dark navy hero with prominent client logos immediately establishes trust with finance decision-makers, while clean white content sections with product UI screenshots demonstrate tangible platform value. The AI messaging (TellMe) is positioned as a differentiator but secondary to core treasury functionality, reflecting enterprise buyer priorities for proven capabilities before innovation claims. Integration partner logos (SAP, Oracle, major banks) and client testimonials address the primary B2B concern of system compatibility and peer validation."
+    },
+    "style_classification": {
+      "primary_style": "Flat Design",
+      "confidence": "High",
+      "category_style": "Digital/UI Design",
+      "reasoning": "**Visual Analysis:** The screenshot reveals a polished, professional SaaS website with a clean dark navy hero (#050B2C) contrasting against white content sections. The design uses product dashboard mockups as visual anchors, with a strict two-column layout for feature sections. The overall impression is of understated corporate sophistication with a modern digital-first approach.\n\n**Forensic Evidence Match to Flat Design:**\n- **Color:** The palette is remarkably restrained\u2014monochromatic blue scale (deep navy #050B2C, action blue #3878F6, soft blue wash #E7EFFF) with clean white backgrounds. This matches Flat Design's \"bold, saturated\" color approach but executed with corporate restraint.\n- **Typography:** HafferSQXH is a geometric sans-serif used uniformly across all weights (400-500), which aligns perfectly with Flat Design's \"Sans-Serif Modern, Geometric\" requirement.\n- **Shape:** The surface profile reveals \"gradient_linear\" as the only texture classification, with predominantly flat solid color surfaces. Cards use subtle borders (#E8E8ED) rather than heavy shadows. This is quintessentially Flat\u2014no skeuomorphic textures, no complex 3D effects.\n- **Layout:** Grid-based strict (12-column), generous whitespace, and clear section separation through background color alternation (dark navy vs. white vs. light gray). This matches Flat Design's \"Grid-Based Strict, Generous Whitespace\" requirements.\n\n**Key Differentiator:** While the design uses linear gradients for accents (primary gradient with pink-purple-blue), these are decorative flourishes on CTAs rather than pervasive visual language. The core surfaces remain completely flat with no shadows, no depth simulation, and no realistic textures\u2014the defining characteristic of Flat Design.",
+      "secondary_style": "Corporate",
+      "reasoning_secondary": "**Corporate Modifier Application:** The design exhibits strong Corporate tonal characteristics overlaid on the Flat Design foundation:\n- **Conservative Color Palette:** The monochromatic blue scale communicates trust, reliability, and professionalism\u2014hallmarks of corporate styling\n- **B2B SaaS Context:** Treasury management software with enterprise client logos (Revolut, Meta, JPM, Citi) signals a corporate audience\n- **Professional Photography/Mockups:** Clean product interface mockups rather than illustrations suggest competence and seriousness\n- **Testimonials Grid:** Multiple client testimonials with titles and company names reinforce corporate credibility\n- **Media Outlet Section:** \"Most important media outlets\" section adds corporate legitimacy\n- **Formal Tone:** \"Where Corporate Treasury meets Intelligence\" headline explicitly positions as enterprise-focused\n\nThe design deliberately avoids playful elements, illustrations, or casual visual language, instead maintaining formal professionalism throughout\u2014this is Corporate Flat Design, not consumer-facing Flat Design."
+    }
+  },
+  "layout": {
+    "classification": [
+      "grid_based_strict",
+      "generous_whitespace"
+    ],
+    "grid": {
+      "columns": 12,
+      "gutter": "2rem",
+      "max_width": "1312px"
+    },
+    "breakpoints": {
+      "mobile": "0px - 759px (1 Column, 16px gutter)",
+      "tablet": "760px - 899px (8 Columns, 24px gutter)",
+      "desktop": "900px - 1025px (12 Columns, 32px gutter)",
+      "large": "1026px+ (12 Columns, 40px gutter)"
+    },
+    "section_separation": "Alternating background colors (dark navy for hero/AI CTA, white for features, light gray for integrations/testimonials/media), generous vertical whitespace (--block-space variable), subtle borders on cards",
+    "ascii_template": "```\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502  [LOGO] Product\u25be Learn  Pricing Resources\u25be Company\u25be     \u2502\n\u2502                                   [Login] [Get Started]  \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502                    [HERO - Split Layout]                 \u2502\n\u2502  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u2502\n\u2502  \u2502 Where Corporate     \u2502  \u2502  [Dashboard Preview]     \u2502  \u2502\n\u2502  \u2502 Treasury meets      \u2502  \u2502  Charts, graphs, data    \u2502  \u2502\n\u2502  \u2502 Intelligence        \u2502  \u2502  [Analytics interface]   \u2502  \u2502\n\u2502  \u2502                     \u2502  \u2502                          \u2502  \u2502\n\u2502  \u2502 [Get Started \u2192]     \u2502  \u2502                          \u2502  \u2502\n\u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502          [LOGO BAR - Client Logos in Row]                \u2502\n\u2502  [Revolut] [Meta] [Brex] [Layer] [gr8] [HOPE] [OQQ]    \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502              One platform.                               \u2502\n\u2502           Every treasury workflow.                       \u2502\n\u2502                                                          \u2502\n\u2502  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510   \u2502\n\u2502  \u2502         [Product Features Grid]                  \u2502   \u2502\n\u2502  \u2502  [Banking] [Accounting] [Reconciliation]         \u2502   \u2502\n\u2502  \u2502         [Workflow interface mockup]              \u2502   \u2502\n\u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518   \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u2502\n\u2502  \u2502 Complete risk       \u2502  \u2502  Your full cash position \u2502  \u2502\n\u2502  \u2502 visibility          \u2502  \u2502  Real time. One screen   \u2502  \u2502\n\u2502  \u2502                     \u2502  \u2502                          \u2502  \u2502\n\u2502  \u2502 [Mockup: Risk       \u2502  \u2502  [Mockup: Cash           \u2502  \u2502\n\u2502  \u2502  dashboard]         \u2502  \u2502   position table]        \u2502  \u2502\n\u2502  \u2502                     \u2502  \u2502                          \u2502  \u2502\n\u2502  \u2502 [Get Started \u2192]     \u2502  \u2502  [Financial Reconciliation\u2192]\u2502\n\u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u2502\n\u2502  \u2502 Faster month-end    \u2502  \u2502  All payments,           \u2502  \u2502\n\u2502  \u2502 close. Every cycle  \u2502  \u2502  one place. Full control \u2502  \u2502\n\u2502  \u2502                     \u2502  \u2502                          \u2502  \u2502\n\u2502  \u2502 [Accounting         \u2502  \u2502  [Payment workflow       \u2502  \u2502\n\u2502  \u2502  dashboard]         \u2502  \u2502   interface]             \u2502  \u2502\n\u2502  \u2502                     \u2502  \u2502                          \u2502  \u2502\n\u2502  \u2502 [Fast Accounting    \u2502  \u2502                          \u2502  \u2502\n\u2502  \u2502  Reconciliation \u2192]  \u2502  \u2502                          \u2502  \u2502\n\u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502         Smarter treasury operations,                     \u2502\n\u2502              powered by AI                               \u2502\n\u2502                                                          \u2502\n\u2502          [See Treasury Copilot \u2192]                        \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502       Your finance stack, with superpowers               \u2502\n\u2502                                                          \u2502\n\u2502  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u2502\n\u2502  \u2502 Your ERP, updated   \u2502  \u2502  Your whole banking      \u2502  \u2502\n\u2502  \u2502 both ways           \u2502  \u2502  pool on one screen      \u2502  \u2502\n\u2502  \u2502                     \u2502  \u2502                          \u2502  \u2502\n\u2502  \u2502 [See all ERPs \u2192]    \u2502  \u2502  [See all banking pools\u2192]\u2502  \u2502\n\u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2502\n\u2502                                                          \u2502\n\u2502  [Integration Logos: Xero, QBO, NetSuite, Sage, etc.]   \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510  \u2502\n\u2502  \u2502 Every expense       \u2502  \u2502  Embed works where       \u2502  \u2502\n\u2502  \u2502 with its receipt    \u2502  \u2502  your team already works \u2502  \u2502\n\u2502  \u2502 and history         \u2502  \u2502                          \u2502  \u2502\n\u2502  \u2502                     \u2502  \u2502                          \u2502  \u2502\n\u2502  \u2502 [Integration Logos] \u2502  \u2502  [Integration Logos]     \u2502  \u2502\n\u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518  \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502              What our clients say...                     \u2502\n\u2502                                                          \u2502\n\u2502  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510    \u2502\n\u2502  \u2502[Testimonial] \u2502 \u2502[Testimonial] \u2502 \u2502[Testimonial] \u2502    \u2502\n\u2502  \u2502              \u2502 \u2502              \u2502 \u2502              \u2502    \u2502\n\u2502  \u2502  [Name]      \u2502 \u2502  [Name]      \u2502 \u2502  [Name]      \u2502    \u2502\n\u2502  \u2502  [Title]     \u2502 \u2502  [Title]     \u2502 \u2502  [Title]     \u2502    \u2502\n\u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518 \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518 \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518    \u2502\n\u2502                                                          \u2502\n\u2502  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510                      \u2502\n\u2502  \u2502[Testimonial] \u2502 \u2502[Testimonial] \u2502                      \u2502\n\u2502  \u2502              \u2502 \u2502              \u2502                      \u2502\n\u2502  \u2502  [Name]      \u2502 \u2502  [Name]      \u2502                      \u2502\n\u2502  \u2502  [Title]     \u2502 \u2502  [Title]     \u2502                      \u2502\n\u2502  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518 \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518                      \u2502\n\u2502                                                          \u2502\n\u2502              [Read More]                                 \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502       ...and the most important media outlets            \u2502\n\u2502                                                          \u2502\n\u2502  [Media quote]        [Media quote]      [Media quote]   \u2502\n\u2502                                                          \u2502\n\u2502              [Read More]                                 \u2502\n\u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524\n\u2502                     [FOOTER]                             \u2502\n\u2502                                                          \u2502\n\u2502  Product            Learn              Company           \u2502\n\u2502  [Links]            [Links]            [Links]           \u2502\n\u2502                                                          \u2502\n\u2502  Support            Helpful             Features         \u2502\n\u2502  [Links]            [Links]            [Links]           \u2502\n\u2502                                                          \u2502\n\u2502  \u00a9 Routable Inc    [Privacy Policy]  [Terms]  [Status]  \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n```\n\n---VISUAL ANNOTATIONS---\n\n**NAV:**\n- Background: Solid dark navy blue (#0A1128 approx)\n- Logo: \"Routable\" with icon on left\n- Buttons/CTAs: \"Login\" (text link, white) | \"Get Started\" (solid white button, dark text, pill-shaped)\n- Colors: Dark navy background, white text\n- Typography: Clean sans-serif, minimal weight\n\n**HERO:**\n- Background: Dark navy blue matching nav\n- Layout: Split 50/50 - text left, product mockup right\n- Imagery: Dashboard/analytics interface mockup showing charts, graphs, and data tables in purple/blue color scheme\n- Buttons/CTAs: \"Get Started \u2192\" (solid purple/blue gradient button, white text, pill-shaped)\n- Colors: Dark navy blue background, white text, purple accents in mockup\n- Typography: Large bold headline, body text in lighter weight\n\n**LOGO BAR:**\n- Background: Dark navy blue\n- Layout: Horizontal row of grayscale client logos\n- Logos: Revolut, Meta, Brex, Layer, gr8, HOPE, OQQ\n- Colors: White/gray logos on dark background\n- Treatment: Grayscale/monochrome logos\n\n**PLATFORM SECTION:**\n- Background: White/light gray\n- Headline: \"One platform. Every treasury workflow.\" (centered, bold)\n- Imagery: Product interface mockup showing workflow categories and list view\n- Colors: White background, dark text, subtle borders\n- Components: Navigation tabs, data table interface\n\n**FEATURES GRID (Split Sections):**\n\n*Risk Visibility (Left):*\n- Background: White\n- Imagery: Dashboard mockup with metrics (20, 11) and data visualization\n- Buttons/CTAs: \"Get Started \u2192\" (text link with arrow, purple/blue)\n- Colors: White background, purple data visualization elements\n\n*Cash Position (Right):*\n- Background: White\n- Imagery: Table/spreadsheet interface mockup\n- Buttons/CTAs: \"Financial Reconciliation \u2192\" (text link with arrow, purple/blue)\n- Colors: White background, organized data tables\n\n*Month-End Close (Left):*\n- Background: White\n- Imagery: Accounting dashboard with tabs (Accounting, Invoices, Accounting, Operations)\n- Buttons/CTAs: \"Fast Accounting Reconciliation \u2192\" (text link with arrow)\n- Colors: Clean interface, purple accents\n\n*Payments Control (Right):*\n- Background: White\n- Imagery: Payment workflow interface with status indicators\n- Colors: White background, blue/purple status badges\n\n**AI CTA SECTION:**\n- Background: Dark navy blue (matching hero)\n- Headline: \"Smarter treasury operations, powered by AI\" (white, centered)\n- Buttons/CTAs: \"See Treasury Copilot \u2192\" (outline button, white border, pill-shaped)\n- Colors: Dark navy, white text\n- Typography: Bold headline, prominent CTA\n\n**INTEGRATIONS SECTION:**\n- Background: Light gray/white\n- Headline: \"Your finance stack, with superpowers\" (centered)\n- Layout: Two-column cards\n\n*ERP Card (Left):*\n- Background: White card with subtle shadow\n- Buttons/CTAs: \"See all ERPs \u2192\" (text link with arrow)\n- Integration logos: Xero, QuickBooks Online, NetSuite, Sage, Oracle shown below\n\n*Banking Card (Right):*\n- Background: White card with subtle shadow\n- Buttons/CTAs: \"See all banking pools \u2192\" (text link with arrow)\n- Integration logos: Various banking partners shown below\n\n*Additional Integration Cards:*\n- Background: White cards\n- Integration logos: PayPal, Plaid, Bill.com, Stripe, Deel, Rippling, JPM, HubSpot\n- Layout: Logo grid format\n\n**TESTIMONIALS SECTION:**\n- Background: Light gray/white\n- Headline: \"What our clients say...\" (bold, left-aligned)\n- Layout: Card grid (3 cards top row, 2 cards bottom row)\n- Cards: White background, subtle shadow, testimonial text with name and title below\n- Buttons/CTAs: \"Read More\" (outline button, dark border, centered below cards)\n- Colors: White cards on light background\n- Typography: Quote text in regular weight, names in bold\n\n**MEDIA SECTION:**\n- Background: White\n- Headline: \"...and the most important media outlets\" (centered)\n- Layout: Three-column text quotes\n- Buttons/CTAs: \"Read More\" (outline button, dark border, centered)\n- Colors: Dark text on white\n- Typography: Quoted text format\n\n**FOOTER:**\n- Background: Dark navy blue (very dark, almost black)\n- Layout: Multi-column link structure\n- Columns: Product, Learn, Company, Support, Helpful, Features\n- Colors: White/gray text on dark navy\n- Bottom row: Copyright, legal links\n- Typography: Light weight, organized in columns\n- Links: \"Privacy Policy\" | \"Terms\" | \"Status\" (text links, gray)",
+    "insights": [
+      "Strict two-column split pattern dominates features and integrations sections, creating strong visual rhythm",
+      "Dark navy (#050b2c) and white backgrounds alternate to clearly delineate major sections without visible dividers",
+      "Generous vertical spacing (64px - 80px between sections) and breathing room around content creates a premium, spacious feel",
+      "Card-based components with subtle shadows and rounded corners (border-radius: 4-12px) provide modular, contained content blocks",
+      "Responsive grid collapses from 2-column to single-column stacks on mobile, maintaining visual hierarchy at all breakpoints"
+    ]
+  },
+  "colors": {
+    "baseline": [
+      {
+        "name": "Clean White",
+        "type": "Light",
+        "rules": {
+          "description": "Serves as the primary canvas for the page, providing maximum contrast and breathing room for the content.",
+          "when_to_use": [
+            "Main page background",
+            "Feature card surfaces",
+            "Navbar background"
+          ]
+        },
+        "hex": "#FFFFFF",
+        "alpha": null,
+        "shades": [],
+        "score": 1.0
+      },
+      {
+        "name": "Soft Blue Wash",
+        "type": "Light",
+        "rules": {
+          "description": "Provides gentle section delineation and subtle emphasis without drawing attention away from primary content.",
+          "when_to_use": [
+            "Secondary section backgrounds",
+            "Subtle hover states on interactive elements",
+            "Badge or tag backgrounds"
+          ]
+        },
+        "hex": "#E7EFFF",
+        "alpha": null,
+        "shades": [],
+        "score": 1.0
+      }
+    ],
+    "secondary": [
+      {
+        "name": "Action Blue",
+        "type": "Cool Color",
+        "rules": {
+          "description": "Acts as the primary interactive and brand color, guiding the user's eye toward key actions and functional elements.",
+          "when_to_use": [
+            "Primary CTA button backgrounds",
+            "Text links and active states",
+            "Key iconography and accents"
+          ]
+        },
+        "hex": "#3878F6",
+        "alpha": null,
+        "shades": [],
+        "score": 1.0
+      },
+      {
+        "name": "Deep Navy Ink",
+        "type": "Dark",
+        "rules": {
+          "description": "Provides high-contrast, legible typography while remaining softer and more integrated into the brand than a pure black.",
+          "when_to_use": [
+            "Primary heading text",
+            "Body copy",
+            "Dark footer background"
+          ]
+        },
+        "hex": "#050B2C",
+        "alpha": null,
+        "shades": [],
+        "score": 1.0
+      }
+    ],
+    "insights": [
+      "The palette relies on a monochromatic blue scale, using extreme contrast between the deep navy ink and the white canvas to ensure stark readability.",
+      "By reserving the vibrant Action Blue exclusively for actions and highlights, the design establishes a clear, unmistakable interactive language."
+    ]
+  },
+  "typography": {
+    "titles": {
+      "variants": [
+        {
+          "name": "HafferSQXH",
+          "role": "Headline 1",
+          "specs": {
+            "size": "clamp(2rem, 2rem + ((1vw - 0.2rem) * 2.016), 3.25rem)",
+            "line_height": "1.2",
+            "font_weight": "500",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        },
+        {
+          "name": "HafferSQXH",
+          "role": "Headline 2",
+          "specs": {
+            "size": "clamp(1.5rem, 1.5rem + ((1vw - 0.2rem) * 1.613), 2.5rem)",
+            "line_height": "1.2",
+            "font_weight": "500",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        },
+        {
+          "name": "HafferSQXH",
+          "role": "Headline 3",
+          "specs": {
+            "size": "clamp(1.25rem, 1.25rem + ((1vw - 0.2rem) * 0.806), 1.75rem)",
+            "line_height": "1.2",
+            "font_weight": "500",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        },
+        {
+          "name": "HafferSQXH",
+          "role": "Large",
+          "specs": {
+            "size": "clamp(22.041px, 1.378rem + ((1vw - 3.2px) * 1.407), 36px)",
+            "line_height": "",
+            "font_weight": "",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        },
+        {
+          "name": "HafferSQXH",
+          "role": "X-Large",
+          "specs": {
+            "size": "clamp(25.014px, 1.563rem + ((1vw - 3.2px) * 1.712), 42px)",
+            "line_height": "",
+            "font_weight": "",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        }
+      ]
+    },
+    "paragraphs": {
+      "description": "Body are used for longer passages of text in your app. Use typefaces intended for body styles, which are readable at smaller sizes and can be comfortably read in longer passages.",
+      "variants": [
+        {
+          "name": "HafferSQXH",
+          "role": "Body 1",
+          "specs": {
+            "size": "1.125rem",
+            "line_height": "150%",
+            "font_weight": "400",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        },
+        {
+          "name": "HafferSQXH",
+          "role": "Body 2",
+          "specs": {
+            "size": "1rem",
+            "line_height": "22px",
+            "font_weight": "400",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        },
+        {
+          "name": "HafferSQXH",
+          "role": "Body Medium",
+          "specs": {
+            "size": "clamp(14px, 0.875rem + ((1vw - 3.2px) * 0.605), 20px)",
+            "line_height": "",
+            "font_weight": "",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        }
+      ]
+    },
+    "labels": {
+      "description": "Label styles are smaller, utilitarian styles, used for things like the text inside components or for very small text in the content body, such as captions.",
+      "variants": [
+        {
+          "name": "HafferSQXH",
+          "role": "Button",
+          "specs": {
+            "size": "1rem",
+            "line_height": "22px",
+            "font_weight": "500",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        },
+        {
+          "name": "HafferSQXH",
+          "role": "Body 3 / Label",
+          "specs": {
+            "size": "0.875rem",
+            "line_height": "",
+            "font_weight": "400",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        },
+        {
+          "name": "HafferSQXH",
+          "role": "Caption",
+          "specs": {
+            "size": "0.8rem",
+            "line_height": "",
+            "font_weight": "",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        },
+        {
+          "name": "HafferSQXH",
+          "role": "Detail 1",
+          "specs": {
+            "size": "0.75rem",
+            "line_height": "",
+            "font_weight": "",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        },
+        {
+          "name": "HafferSQXH",
+          "role": "Detail 2",
+          "specs": {
+            "size": "0.625rem",
+            "line_height": "",
+            "font_weight": "",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        },
+        {
+          "name": "HafferSQXH",
+          "role": "Small",
+          "specs": {
+            "size": "13px",
+            "line_height": "",
+            "font_weight": "",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        }
+      ]
+    },
+    "others": {
+      "description": "Font that does not have a classifier, that is small like regular.",
+      "variants": [
+        {
+          "name": "HafferSQXH",
+          "role": "Pullquote",
+          "specs": {
+            "size": "clamp(0.984em, -0.1664em + 0.984rem + 0.832vw, 1.5em)",
+            "line_height": "1.6",
+            "font_weight": "",
+            "font_variation_settings": ""
+          },
+          "licensing": {
+            "is_proprietary": true,
+            "source": "self-hosted"
+          },
+          "technical": {
+            "font_family_css": "HafferSQXH, Arial, Verdana",
+            "file_url": null
+          }
+        }
+      ]
+    },
+    "highlights": null,
+    "insights": [
+      "A single typeface (HafferSQXH) is used consistently across the system, indicating a unified, modern brand identity without relying on contrasting typographic pairs.",
+      "Extensive use of CSS 'clamp()' for fluid typography ensures optimal readability across screen sizes for headings and larger body text.",
+      "The typography hierarchy relies heavily on explicit sizing via CSS variables (headline-1 to headline-3, body-1 to body-3, detail-1 to detail-2), offering a structured, scalable token system."
+    ]
+  },
+  "surfaces": {
+    "texture_classification": [
+      "gradient_linear"
+    ],
+    "solid_colors": [
+      {
+        "name": "Background Primary",
+        "description": "Main background surface for the site",
+        "when_to_use": [
+          "Page backgrounds",
+          "Card backgrounds",
+          "Input fields"
+        ],
+        "hex": "#FFFFFF"
+      },
+      {
+        "name": "Background Secondary",
+        "description": "Secondary background for surfaces and sections",
+        "when_to_use": [
+          "Section backgrounds",
+          "Panel backgrounds",
+          "Team headers"
+        ],
+        "hex": "#F3F4F6"
+      },
+      {
+        "name": "Background Tertiary",
+        "description": "Tertiary surface for card containers",
+        "when_to_use": [
+          "Card backgrounds",
+          "Content blocks",
+          "Integration cards"
+        ],
+        "hex": "#FBFBFC"
+      },
+      {
+        "name": "Background Aquamarine",
+        "description": "Light aquamarine surface accent",
+        "when_to_use": [
+          "Accent backgrounds",
+          "Highlight sections"
+        ],
+        "hex": "#C5F8FC"
+      },
+      {
+        "name": "Background Overlay",
+        "description": "Dark overlay with transparency (66% opacity)",
+        "when_to_use": [
+          "Modal overlays",
+          "Image overlays"
+        ],
+        "hex": "#0E1431"
+      },
+      {
+        "name": "Inverse Background Primary",
+        "description": "Dark theme primary background",
+        "when_to_use": [
+          "Dark sections",
+          "Hero backgrounds",
+          "CTA banners"
+        ],
+        "hex": "#050B2C"
+      },
+      {
+        "name": "Inverse Background Secondary",
+        "description": "Dark theme secondary background",
+        "when_to_use": [
+          "Dark cards",
+          "Dark inputs",
+          "Dark panels"
+        ],
+        "hex": "#232845"
+      },
+      {
+        "name": "Inverse Background Tertiary",
+        "description": "Dark theme tertiary background",
+        "when_to_use": [
+          "Dark surface states",
+          "Dark containers"
+        ],
+        "hex": "#41465F"
+      },
+      {
+        "name": "Border Primary",
+        "description": "Primary border color for elements",
+        "when_to_use": [
+          "Card borders",
+          "Input borders",
+          "Dividers"
+        ],
+        "hex": "#E8E8ED"
+      },
+      {
+        "name": "Border Secondary",
+        "description": "Secondary border with more contrast",
+        "when_to_use": [
+          "Focused borders",
+          "Banner borders",
+          "Content dividers"
+        ],
+        "hex": "#D2D2DB"
+      },
+      {
+        "name": "Inverse Border Primary",
+        "description": "Dark theme primary border",
+        "when_to_use": [
+          "Dark section borders",
+          "Dark card borders"
+        ],
+        "hex": "#373C56"
+      }
+    ],
+    "gradients": [
+      {
+        "name": "Soft Gradient",
+        "description": "Horizontal gradient transitioning from light blue to pink through purple",
+        "when_to_use": [
+          "Background accents",
+          "Decorative surfaces"
+        ],
+        "css_code": "linear-gradient(90deg, #F2F4FD 0%, #F8F2FD 50%, #FBF3FE 100%)"
+      },
+      {
+        "name": "Primary Gradient",
+        "description": "Diagonal gradient from pink through purple to blue",
+        "when_to_use": [
+          "Hero sections",
+          "Featured backgrounds",
+          "Brand surfaces"
+        ],
+        "css_code": "linear-gradient(275deg, #C357EC 4.22%, #9D4BDD 50%, #415DE6 95.78%)"
+      },
+      {
+        "name": "Inverse Soft Gradient",
+        "description": "Dark horizontal gradient transitioning from dark blue to purple",
+        "when_to_use": [
+          "Dark mode sections",
+          "Dark decorative surfaces"
+        ],
+        "css_code": "linear-gradient(90deg, #172464 0%, #301F61 50%, #3E2266 100%)"
+      },
+      {
+        "name": "Inverse Primary Gradient",
+        "description": "Dark theme diagonal gradient from pink through purple to light blue",
+        "when_to_use": [
+          "Dark mode hero sections",
+          "Dark featured backgrounds"
+        ],
+        "css_code": "linear-gradient(275deg, #C357EC 4.22%, #B565F3 50%, #5C92FE 95.78%)"
+      },
+      {
+        "name": "Icon Gradient",
+        "description": "Horizontal gradient from light blue to purple for icons",
+        "when_to_use": [
+          "Icon backgrounds",
+          "Icon accents"
+        ],
+        "css_code": "linear-gradient(270deg, #88aaf7, #9f93ee)"
+      },
+      {
+        "name": "Fade White Left",
+        "description": "Fade gradient from transparent to white (left edge fade)",
+        "when_to_use": [
+          "Slider edge fades",
+          "Content overflow masks"
+        ],
+        "css_code": "linear-gradient(270deg, rgba(255, 255, 255, 0) 0px, rgb(255, 255, 255) 100%)"
+      },
+      {
+        "name": "Fade White Right",
+        "description": "Fade gradient from transparent to white (right edge fade)",
+        "when_to_use": [
+          "Slider edge fades",
+          "Content overflow masks"
+        ],
+        "css_code": "linear-gradient(90deg, rgba(255, 255, 255, 0) 0px, rgb(255, 255, 255) 100%)"
+      },
+      {
+        "name": "Video Overlay",
+        "description": "Dark overlay with 20% opacity for video thumbnails",
+        "when_to_use": [
+          "Video thumbnails",
+          "Image overlays"
+        ],
+        "css_code": "linear-gradient(rgba(18, 18, 18, 0.2))"
+      },
+      {
+        "name": "Video Hover Overlay",
+        "description": "Dark overlay with 40% opacity for video hover states",
+        "when_to_use": [
+          "Video thumbnail hover states"
+        ],
+        "css_code": "linear-gradient(rgba(18, 18, 18, 0.4))"
+      },
+      {
+        "name": "Button Default Gradient",
+        "description": "Light button gradient from white to light gray",
+        "when_to_use": [
+          "Default button backgrounds",
+          "Table of contents button"
+        ],
+        "css_code": "linear-gradient(rgb(255, 255, 255) 0px, rgb(224, 224, 224) 100%)"
+      }
+    ],
+    "highlights": [
+      "Slider edge fades with 60px-120px gradient masks on logo sliders",
+      "Video story cards with dark overlay gradients (20% default, 40% on hover) over rgba(18,18,18)",
+      "Soft shadows on open positions items with box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.09)",
+      "Glass panel surfaces documented in class patterns but implementation details not visible in default theme",
+      "TOC buttons with gradient backgrounds and shadow effects: 0px 3px 5px inset rgba(0, 0, 0, 0.125)"
+    ]
+  },
+  "elevation": {
+    "description": "Elevation allows elements to be lifted from the background. It can be defined by applying drop shadows or other visual cues, such as color and borders",
+    "shadows": {
+      "description": "Elevation using shadows reflects a spatial relationship by indicating separation from the background or allowing content to be scrolled under another element.",
+      "levels": [
+        {
+          "name": "Natural Shadow",
+          "type": "drop",
+          "description": "20% (#000000) opacity / Offset: 6px 6px / Blur: 9 - Provides a natural, soft shadow effect",
+          "css_value": "6px 6px 9px rgba(0, 0, 0, 0.2)",
+          "when_to_use": [
+            "General elevation",
+            "Subtle depth effects"
+          ]
+        },
+        {
+          "name": "Deep Shadow",
+          "type": "drop",
+          "description": "40% (#000000) opacity / Offset: 12px 12px / Blur: 50 - Creates strong depth for prominent elements",
+          "css_value": "12px 12px 50px rgba(0, 0, 0, 0.4)",
+          "when_to_use": [
+            "Modals",
+            "Overlays",
+            "High-prominence elements"
+          ]
+        },
+        {
+          "name": "Sharp Shadow",
+          "type": "drop",
+          "description": "20% (#000000) opacity / Offset: 6px 6px / Blur: 0 - Flat, sharp shadow with no blur",
+          "css_value": "6px 6px 0px rgba(0, 0, 0, 0.2)",
+          "when_to_use": [
+            "Stylized elements",
+            "Retro/flat design accents"
+          ]
+        },
+        {
+          "name": "Outlined Shadow",
+          "type": "drop",
+          "description": "Multi-layer shadow with white inset and black outline for a bordered shadow effect",
+          "css_value": "6px 6px 0px -3px rgb(255, 255, 255), 6px 6px rgb(0, 0, 0)",
+          "when_to_use": [
+            "Outlined buttons",
+            "Stylized cards",
+            "Decorative elements"
+          ]
+        },
+        {
+          "name": "Crisp Shadow",
+          "type": "drop",
+          "description": "Solid black shadow with no blur - creates a hard, graphic shadow effect",
+          "css_value": "6px 6px 0px rgb(0, 0, 0)",
+          "when_to_use": [
+            "Graphic design elements",
+            "Bold UI accents"
+          ]
+        },
+        {
+          "name": "Level 1 - Subtle",
+          "type": "drop",
+          "description": "9% (#000000) opacity / Offset: 0px 1px / Blur: 4 - Lightest elevation for subtle lift",
+          "css_value": "0px 1px 4px rgba(0, 0, 0, 0.09)",
+          "when_to_use": [
+            "Cards",
+            "List items",
+            "Hover states on interactive elements"
+          ]
+        },
+        {
+          "name": "Level 2 - Raised",
+          "type": "drop",
+          "description": "9% (#000000) opacity / Offset: 0px 3px / Blur: 12 - Medium elevation for raised elements",
+          "css_value": "0px 3px 12px rgba(0, 0, 0, 0.09)",
+          "when_to_use": [
+            "Dropdowns",
+            "Popovers",
+            "Floating action buttons"
+          ]
+        },
+        {
+          "name": "Level 3 - Floating",
+          "type": "drop",
+          "description": "9% (#000000) opacity / Offset: 0px 8px / Blur: 16 - Highest elevation for floating elements",
+          "css_value": "0px 8px 16px rgba(0, 0, 0, 0.09)",
+          "when_to_use": [
+            "Modals",
+            "Dialogs",
+            "Floating panels"
+          ]
+        },
+        {
+          "name": "Button Inset Active",
+          "type": "inset",
+          "description": "12.5% (#000000) opacity / Offset: 0px 3px / Blur: 5 - Inset shadow for pressed/active button states",
+          "css_value": "rgba(0, 0, 0, 0.125) 0px 3px 5px inset",
+          "when_to_use": [
+            "Active button states",
+            "Pressed states",
+            "Toggle buttons"
+          ]
+        },
+        {
+          "name": "Team Testimonial Image",
+          "type": "drop",
+          "description": "Ring shadow using box-shadow for image highlighting with border-secondary color variable",
+          "css_value": "0 0 0 1px var(--wp--preset--color--border-secondary)",
+          "when_to_use": [
+            "Profile images",
+            "Avatar highlights",
+            "Testimonial cards"
+          ]
+        },
+        {
+          "name": "Active Text Shadow",
+          "type": "drop",
+          "description": "Text shadow for active/selected tab states using black color",
+          "css_value": "0 0 2px var(--wp--preset--color--black)",
+          "when_to_use": [
+            "Active tabs",
+            "Selected navigation items"
+          ]
+        }
+      ]
+    },
+    "borders": [
+      {
+        "hex": "#E8E8ED",
+        "width": "1px",
+        "style": "solid"
+      },
+      {
+        "hex": "#D2D2DB",
+        "width": "1px",
+        "style": "solid"
+      },
+      {
+        "hex": "#373C56",
+        "width": "1px",
+        "style": "solid"
+      },
+      {
+        "hex": "#696D80",
+        "width": "1px",
+        "style": "solid"
+      },
+      {
+        "hex": "#AAAAAA",
+        "width": "1px",
+        "style": "solid"
+      },
+      {
+        "hex": "#CCCCCC",
+        "width": "1px",
+        "style": "solid"
+      }
+    ]
+  },
+  "interactions": {
+    "global_patterns": [
+      "sticky_header",
+      "scroll_reveal",
+      "tab_switching",
+      "hover_transform"
+    ],
+    "animations": [
+      {
+        "name": "bk-marquee-logos",
+        "css": "@keyframes bk-marquee-logos { 0% { transform: translateX(0px); } 100% { transform: translateX(-50%); } }",
+        "description": "Continuous horizontal scroll animation for the client logo strip in the hero section"
+      },
+      {
+        "name": "bk-fade-in",
+        "css": "",
+        "description": "Fade-in animation for tab content panels and feature sections; animation defined in JS or inline styles with 0.8s ease-in-out timing"
+      },
+      {
+        "name": "button-hover-transition",
+        "css": "transition: background-color 0.3s, border-color 0.3s",
+        "description": "Smooth color transition on button hover states"
+      },
+      {
+        "name": "tab-transition",
+        "css": "transition: background 0.2s, border-color 0.2s, transform 0.2s",
+        "description": "Smooth state change transition for tab buttons in finance teams section"
+      },
+      {
+        "name": "content-panel-reveal",
+        "css": "transition: opacity var(--bk-anim-duration, 700ms) var(--bk-anim-easing, ease), transform var(--bk-anim-duration, 700ms) var(--bk-anim-easing, ease)",
+        "description": "Staggered reveal animation for tab content with translateY and opacity changes"
+      },
+      {
+        "name": "logo-hover-transition",
+        "css": "transition: filter 0.3s, opacity 0.3s",
+        "description": "Logo images transition from grayscale/dimmed to full color on hover"
+      }
+    ],
+    "insights": [
+      "The design system uses a consistent 4px border-radius (rounded) for buttons, creating a subtle softness while maintaining a professional, enterprise appearance appropriate for B2B fintech.",
+      "Color transitions are standardized at 0.3s across interactive elements, creating a cohesive feel for hover and state changes throughout the interface.",
+      "The page leverages a dual-theme pattern with dark navy sections (hero, AI banner) contrasting against light sections, using inverted button styles (outline on dark, filled on light) to maintain visual hierarchy."
+    ]
+  },
+  "actions": {
+    "button_list": [
+      {
+        "name": "Book a demo (Primary CTA)",
+        "usage": "Main call-to-action in hero section, used to drive demo bookings",
+        "specs": {
+          "radius": "rounded-sm",
+          "sizes": [
+            {
+              "name": "Default",
+              "font": "HafferSQXH, Arial, Verdana",
+              "size": "1rem",
+              "padding": "12px 24px"
+            }
+          ]
+        },
+        "visuals": {
+          "default": {
+            "background": "#3878F6",
+            "text_color": "#FFFFFF",
+            "border_color": "#3878F6",
+            "border_width": "1px",
+            "opacity": null,
+            "cursor": null
+          },
+          "hover": {
+            "background": "#0338BB",
+            "text_color": "#FFFFFF",
+            "border_color": "#0338BB",
+            "border_width": "1px",
+            "opacity": null,
+            "cursor": null
+          },
+          "disabled": {
+            "background": "#3878F6",
+            "text_color": "#FFFFFF",
+            "border_color": "#3878F6",
+            "border_width": "1px",
+            "opacity": "0.5",
+            "cursor": "not-allowed"
+          }
+        }
+      },
+      {
+        "name": "See TellMe in action (AI Feature CTA)",
+        "usage": "Secondary CTA in dark AI banner section, styled as outline button on dark background",
+        "specs": {
+          "radius": "rounded-sm",
+          "sizes": [
+            {
+              "name": "Default",
+              "font": "HafferSQXH, Arial, Verdana",
+              "size": "1rem",
+              "padding": "12px 24px"
+            }
+          ]
+        },
+        "visuals": {
+          "default": {
+            "background": "transparent",
+            "text_color": "#FFFFFF",
+            "border_color": "#FFFFFF",
+            "border_width": "1px",
+            "opacity": null,
+            "cursor": null
+          },
+          "hover": {
+            "background": "#FFFFFF",
+            "text_color": "#050B2C",
+            "border_color": "#FFFFFF",
+            "border_width": "1px",
+            "opacity": null,
+            "cursor": null
+          },
+          "disabled": {
+            "background": "transparent",
+            "text_color": "#FFFFFF",
+            "border_color": "#FFFFFF",
+            "border_width": "1px",
+            "opacity": "0.5",
+            "cursor": "not-allowed"
+          }
+        }
+      },
+      {
+        "name": "Read more (Secondary Light)",
+        "usage": "Used for testimonials and media sections, secondary action with outline style on light background",
+        "specs": {
+          "radius": "rounded-sm",
+          "sizes": [
+            {
+              "name": "Default",
+              "font": "HafferSQXH, Arial, Verdana",
+              "size": "1rem",
+              "padding": "12px 24px"
+            }
+          ]
+        },
+        "visuals": {
+          "default": {
+            "background": "transparent",
+            "text_color": "#050B2C",
+            "border_color": "#050B2C",
+            "border_width": "1px",
+            "opacity": null,
+            "cursor": null
+          },
+          "hover": {
+            "background": "#050B2C",
+            "text_color": "#FFFFFF",
+            "border_color": "#050B2C",
+            "border_width": "1px",
+            "opacity": null,
+            "cursor": null
+          },
+          "disabled": {
+            "background": "transparent",
+            "text_color": "#050B2C",
+            "border_color": "#050B2C",
+            "border_width": "1px",
+            "opacity": "0.5",
+            "cursor": "not-allowed"
+          }
+        }
+      },
+      {
+        "name": "Treasury Management (Link Button)",
+        "usage": "Inline text link button for navigating to feature pages, styled as arrow link",
+        "specs": {
+          "radius": "rounded-none",
+          "sizes": [
+            {
+              "name": "Default",
+              "font": "HafferSQXH, Arial, Verdana",
+              "size": "1rem",
+              "padding": "0"
+            }
+          ]
+        },
+        "visuals": {
+          "default": {
+            "background": "transparent",
+            "text_color": "#3878F6",
+            "border_color": "transparent",
+            "border_width": "0",
+            "opacity": null,
+            "cursor": null
+          },
+          "hover": {
+            "background": "transparent",
+            "text_color": "#0338BB",
+            "border_color": "transparent",
+            "border_width": "0",
+            "opacity": null,
+            "cursor": null
+          },
+          "disabled": {
+            "background": "transparent",
+            "text_color": "#3878F6",
+            "border_color": "transparent",
+            "border_width": "0",
+            "opacity": "0.5",
+            "cursor": "not-allowed"
+          }
+        }
+      }
+    ],
+    "button_group": {
+      "description": "Buttons are typically placed individually or in centered layouts for CTAs",
+      "spacing": "24px"
+    },
+    "links": {
+      "text_decoration": "none"
+    }
+  },
+  "navigation": {
+    "top_nav": {
+      "height": "64px",
+      "position": "sticky",
+      "background": {
+        "hex": "#050B2C",
+        "color_reference": "Content/Primary (inverse-background-inverse-primary)",
+        "opacity": null,
+        "blur": null
+      },
+      "border_bottom": null
+    },
+    "announcement_bar": null,
+    "tabs": {
+      "style_name": "Pill Tab",
+      "description": "Tabs used in finance teams section with pill-shaped buttons that change background on selection",
+      "when_to_use": [
+        "Switching between product use cases",
+        "Filtering content by category",
+        "Navigation within a feature section"
+      ],
+      "states": [
+        {
+          "name": "default",
+          "visual_change": "White background with border",
+          "background": "#FFFFFF",
+          "text": "#050B2C",
+          "icon": null
+        },
+        {
+          "name": "hover",
+          "visual_change": "Background shifts to tertiary gray",
+          "background": "#F3F4F6",
+          "text": "#050B2C",
+          "icon": null
+        },
+        {
+          "name": "active",
+          "visual_change": "Background matches hover state, indicates selection",
+          "background": "#F3F4F6",
+          "text": "#050B2C",
+          "icon": null
+        }
+      ]
+    }
+  },
+  "data_display": {
+    "charts": [],
+    "tables": [],
+    "tiles": [
+      {
+        "name": "Testimonial Card",
+        "description": "Card displaying client testimonial with company logo, quote text, and author information with photo",
+        "when_to_use": [
+          "Social proof sections",
+          "Client testimonials",
+          "Success stories preview"
+        ]
+      },
+      {
+        "name": "Integration Card",
+        "description": "Feature card showing integration capabilities with title, description, CTA link, and logo grid",
+        "when_to_use": [
+          "Integration showcases",
+          "Feature explanations with partner logos",
+          "Connectivity demonstrations"
+        ]
+      },
+      {
+        "name": "News Card",
+        "description": "Media mention card with publication logo, date, and article excerpt",
+        "when_to_use": [
+          "Press mentions",
+          "Media coverage sections",
+          "External validation displays"
+        ]
+      }
+    ]
+  },
+  "structure": {
+    "accordion": null,
+    "dividers": [
+      {
+        "name": "Section Divider",
+        "description": "Implicit spacing between major page sections using padding and background color changes",
+        "when_to_use": [
+          "Between major content sections",
+          "Separating dark and light themed areas"
+        ],
+        "color": "#E8E8ED",
+        "height": "1px",
+        "style": "solid"
+      },
+      {
+        "name": "Card Border",
+        "description": "Light border around testimonial and integration cards",
+        "when_to_use": [
+          "Card boundaries",
+          "Content grouping"
+        ],
+        "color": "#E8E8ED",
+        "height": "1px",
+        "style": "solid"
+      }
+    ]
+  },
+  "icons": [],
+  "assets": {
+    "logos": [
+      {
+        "role": "Monochrome",
+        "format": "SVG",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome-6.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome-6.svg",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2026/03/Logotype-Treatwell-White.svg",
+        "description": "Treatwell Logo"
+      },
+      {
+        "role": "Monochrome",
+        "format": "SVG",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome-2.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome-2.svg",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2026/03/Logotype-PetLab-Co.-White.svg",
+        "description": "PetLab Co. Logo"
+      },
+      {
+        "role": "Monochrome",
+        "format": "SVG",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome-7.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome-7.svg",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2026/03/Logotype-Northern-Data-Group-White.svg",
+        "description": "Northern Data Group Logo"
+      },
+      {
+        "role": "Monochrome",
+        "format": "SVG",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome.svg",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2026/03/Logotype-Fever-White-1.svg",
+        "description": "Fever Logo"
+      },
+      {
+        "role": "Monochrome",
+        "format": "SVG",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome-5.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome-5.svg",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2026/03/Logotype-Glas-Agency-White-1.svg",
+        "description": "Glas Agency Logo"
+      },
+      {
+        "role": "Monochrome",
+        "format": "SVG",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome-3.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome-3.svg",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2026/03/Logotype-Hoff-White.svg",
+        "description": "Hoff Logo"
+      },
+      {
+        "role": "Monochrome",
+        "format": "SVG",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome-4.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/monochrome-4.svg",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2026/03/Logotype-DOJO-White-2.svg",
+        "description": "DOJO Logo"
+      },
+      {
+        "role": "Primary",
+        "format": "PNG",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary.png",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary.png",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2026/03/66cc82f92bcd442c4f6ea804_R2-Hotels-logo-caso-exito-Embat-14.png",
+        "description": "R2 Hotels Logo"
+      },
+      {
+        "role": "Primary",
+        "format": "WebP",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary.webp",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary.webp",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2025/11/HOFF.webp",
+        "description": "HOFF Logo"
+      },
+      {
+        "role": "Primary",
+        "format": "WebP",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary-2.webp",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary-2.webp",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2025/11/Cementos-Molins.webp",
+        "description": "Cementos Molins Logo"
+      },
+      {
+        "role": "Primary",
+        "format": "WebP",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary-3.webp",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary-3.webp",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2025/11/CPS.webp",
+        "description": "CPS Group Logo"
+      },
+      {
+        "role": "Primary",
+        "format": "SVG",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary.svg",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2025/12/Logotype-Wired-Color.svg",
+        "description": "Wired Logo"
+      },
+      {
+        "role": "Primary",
+        "format": "SVG",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary-2.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary-2.svg",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2025/12/Logotype-Finextra-Color.svg",
+        "description": "Finextra Logo"
+      },
+      {
+        "role": "Primary",
+        "format": "SVG",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary-3.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/logos/primary-3.svg",
+        "origin_url": "https://www.embat.io/wp-content/uploads/2025/12/Logotype-CBS-News-Color.svg",
+        "description": "CBS News Logo"
+      }
+    ],
+    "media": [
+      {
+        "name": "Home Hero Background Video",
+        "type": "video",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/video/home-hero-background-video.mp4",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/video/home-hero-background-video.mp4",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/video/home-hero-background-video.mp4",
+        "usage_context": "Background video playing in the homepage hero section."
+      },
+      {
+        "name": "Home Hero Background Image",
+        "type": "image",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/home-hero-background-image.webp",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/home-hero-background-image.webp",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/home-hero-background-image.webp",
+        "usage_context": "Fallback background image for the hero section."
+      },
+      {
+        "name": "Cash Position Feature Card",
+        "type": "illustration",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/cash-position-feature-card.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/cash-position-feature-card.svg",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/cash-position-feature-card.svg",
+        "usage_context": "Illustrates the 'Your full cash position' feature in the workflows section."
+      },
+      {
+        "name": "Risk Visibility Feature Card",
+        "type": "illustration",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/risk-visibility-feature-card.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/risk-visibility-feature-card.svg",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/risk-visibility-feature-card.svg",
+        "usage_context": "Illustrates the 'Complete risk visibility' feature in the workflows section."
+      },
+      {
+        "name": "Month-End Close Feature Card",
+        "type": "illustration",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/month-end-close-feature-card.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/month-end-close-feature-card.svg",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/month-end-close-feature-card.svg",
+        "usage_context": "Illustrates the 'Faster month-end close' feature in the workflows section."
+      },
+      {
+        "name": "Corporate Payments Feature Card",
+        "type": "illustration",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/corporate-payments-feature-card.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/corporate-payments-feature-card.svg",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/corporate-payments-feature-card.svg",
+        "usage_context": "Illustrates the 'All payments. One place' feature in the workflows section."
+      },
+      {
+        "name": "AI Operations Banner Background",
+        "type": "image",
+        "url": "https://www.embat.io/wp-content/uploads/2026/03/Ready-to-flow-3-scaled.webp",
+        "path": null,
+        "origin_url": null,
+        "usage_context": "Background image for the 'Smarter treasury operations' promotional banner."
+      },
+      {
+        "name": "ERP Integrations Diagram",
+        "type": "illustration",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/erp-integrations-diagram.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/erp-integrations-diagram.svg",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/erp-integrations-diagram.svg",
+        "usage_context": "Visual ecosystem of connected ERP platforms like Sage and NetSuite."
+      },
+      {
+        "name": "Bank Integrations Diagram",
+        "type": "illustration",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/bank-integrations-diagram.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/bank-integrations-diagram.svg",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/bank-integrations-diagram.svg",
+        "usage_context": "Visual ecosystem of connected financial institutions and banking partners."
+      },
+      {
+        "name": "Expense Management Integrations Diagram",
+        "type": "illustration",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/expense-management-integrations-diagram.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/expense-management-integrations-diagram.svg",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/expense-management-integrations-diagram.svg",
+        "usage_context": "Visual ecosystem of expense, receipt, and payment integrations."
+      },
+      {
+        "name": "Team Connections Integrations Diagram",
+        "type": "illustration",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/team-connections-integrations-diagram.svg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/team-connections-integrations-diagram.svg",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/illustration/team-connections-integrations-diagram.svg",
+        "usage_context": "Visual ecosystem showing integrations with tools like Slack and Teams."
+      },
+      {
+        "name": "Francisco Rodr\u00edguez Serrano Portrait",
+        "type": "image",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/francisco-rodr-guez-serrano-portrait.jpeg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/francisco-rodr-guez-serrano-portrait.jpeg",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/francisco-rodr-guez-serrano-portrait.jpeg",
+        "usage_context": "Portrait accompanying a client testimonial from R2 Hotels."
+      },
+      {
+        "name": "Javier Gay\u00e1 Portrait",
+        "type": "image",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/javier-gay-portrait.jpeg",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/javier-gay-portrait.jpeg",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/javier-gay-portrait.jpeg",
+        "usage_context": "Portrait accompanying a client testimonial from HOFF."
+      },
+      {
+        "name": "Michele Laria Portrait",
+        "type": "image",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/michele-laria-portrait.webp",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/michele-laria-portrait.webp",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/michele-laria-portrait.webp",
+        "usage_context": "Portrait accompanying a client testimonial from Cementos Molins."
+      },
+      {
+        "name": "\u00c1ngel L\u00f3pez Portrait",
+        "type": "image",
+        "url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/ngel-l-pez-portrait.png",
+        "path": "0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/ngel-l-pez-portrait.png",
+        "origin_url": "https://sb.engine.thetaste.ai/storage/v1/object/public/artifacts/0fbc0352-691b-4bc9-b2e6-40ab55614859/site-assets/media/image/ngel-l-pez-portrait.png",
+        "usage_context": "Portrait accompanying a client testimonial from CPS Group."
+      }
+    ]
+  },
+  "sections": [
+    {
+      "type": "Navigation",
+      "layout_pattern": "Horizontal bar, logo left, links center, CTAs right",
+      "headline": null,
+      "subheadline": null,
+      "components": [
+        {
+          "type": "logo",
+          "description": "Routable logo with icon, white on dark navy"
+        },
+        {
+          "type": "navigation",
+          "description": "Dropdown menu links (Product, Learn, Resources, Company) in white text"
+        },
+        {
+          "type": "button",
+          "description": "Login text link in white"
+        },
+        {
+          "type": "button",
+          "description": "Get Started button, solid white background, dark text, pill-shaped"
+        }
+      ]
+    },
+    {
+      "type": "Hero",
+      "layout_pattern": "Split 50/50 - text left, product mockup right",
+      "headline": "Where Corporate Treasury meets Intelligence",
+      "subheadline": null,
+      "components": [
+        {
+          "type": "button",
+          "description": "Book a demo button, purple/blue gradient background, white text, pill-shaped"
+        },
+        {
+          "type": "video",
+          "description": "Dashboard/analytics interface mockup showing charts, graphs, and data tables in purple/blue color scheme"
+        },
+        {
+          "type": "image",
+          "description": "Product interface with data visualization elements"
+        }
+      ]
+    },
+    {
+      "type": "Logo Bar",
+      "layout_pattern": "Horizontal row, centered",
+      "headline": null,
+      "subheadline": null,
+      "components": [
+        {
+          "type": "logo_strip",
+          "description": "Client logos in grayscale/white: Treatwell, PetLab Co., Northern Data Group, Fever, Glas Agency, Hoff, DOJO"
+        }
+      ]
+    },
+    {
+      "type": "Features Grid",
+      "layout_pattern": "Centered headline, vertical stack of split 50/50 cards",
+      "headline": "One platform. Every treasury workflow.",
+      "subheadline": null,
+      "components": [
+        {
+          "type": "card",
+          "description": "Risk visibility card with dashboard mockup showing metrics (20, 11) and purple data visualization"
+        },
+        {
+          "type": "image",
+          "description": "Cash position table/spreadsheet interface mockup"
+        },
+        {
+          "type": "card",
+          "description": "Month-end close card with accounting dashboard showing tabs"
+        },
+        {
+          "type": "image",
+          "description": "Payment workflow interface with blue/purple status badges"
+        },
+        {
+          "type": "button",
+          "description": "Text links with arrows in purple/blue (Treasury Management, Risk Management, etc.)"
+        }
+      ]
+    },
+    {
+      "type": "Split Feature - Risk Visibility",
+      "layout_pattern": "Split 50/50 - mockup left, text right",
+      "headline": "Your full cash position. Real time. One screen.",
+      "subheadline": null,
+      "components": [
+        {
+          "type": "image",
+          "description": "Dashboard mockup with metrics and data visualization in purple"
+        },
+        {
+          "type": "button",
+          "description": "Treasury Management text link with arrow, purple/blue"
+        }
+      ]
+    },
+    {
+      "type": "Split Feature - Cash Position",
+      "layout_pattern": "Split 50/50 - mockup left, text right",
+      "headline": null,
+      "subheadline": null,
+      "components": [
+        {
+          "type": "image",
+          "description": "Table/spreadsheet interface mockup showing organized data"
+        },
+        {
+          "type": "button",
+          "description": "Risk Management text link with arrow"
+        }
+      ]
+    },
+    {
+      "type": "Split Feature - Month-End Close",
+      "layout_pattern": "Split 50/50 - mockup left, text right",
+      "headline": "Faster month-end close. Every cycle.",
+      "subheadline": null,
+      "components": [
+        {
+          "type": "image",
+          "description": "Accounting dashboard with tabs (Accounting, Invoices, Operations) in purple accents"
+        },
+        {
+          "type": "button",
+          "description": "Cash Accounting & Reconciliation text link with arrow"
+        }
+      ]
+    },
+    {
+      "type": "Split Feature - Payments",
+      "layout_pattern": "Split 50/50 - mockup left, text right",
+      "headline": "All payments. One place. Full control.",
+      "subheadline": null,
+      "components": [
+        {
+          "type": "image",
+          "description": "Payment workflow interface with status indicators and blue/purple badges"
+        },
+        {
+          "type": "button",
+          "description": "Corporate Payments text link with arrow"
+        }
+      ]
+    },
+    {
+      "type": "CTA Banner - AI",
+      "layout_pattern": "Centered, dark background",
+      "headline": "Smarter treasury operations, powered by AI",
+      "subheadline": null,
+      "components": [
+        {
+          "type": "button",
+          "description": "See TellMe in action outline button, white border, pill-shaped"
+        }
+      ]
+    },
+    {
+      "type": "Integrations",
+      "layout_pattern": "Centered headline, 2x2 grid of cards",
+      "headline": "Your finance stack, with superpowers",
+      "subheadline": null,
+      "components": [
+        {
+          "type": "card",
+          "description": "ERP card with white background, subtle shadow, text link"
+        },
+        {
+          "type": "logo_strip",
+          "description": "Integration logos: Xero, QuickBooks Online, NetSuite, Sage, Oracle"
+        },
+        {
+          "type": "card",
+          "description": "Banking card with white background, subtle shadow, text link"
+        },
+        {
+          "type": "logo_strip",
+          "description": "Banking partner logos"
+        },
+        {
+          "type": "card",
+          "description": "Expense management card with PayPal, Plaid, Bill.com, Stripe logos"
+        },
+        {
+          "type": "card",
+          "description": "Collaboration tools card with Slack, Teams, Claude, ChatGPT logos"
+        }
+      ]
+    },
+    {
+      "type": "Testimonials",
+      "layout_pattern": "Grid layout - headline left, cards right (3 top row, 2 bottom row)",
+      "headline": "What our clients say...",
+      "subheadline": null,
+      "components": [
+        {
+          "type": "card",
+          "description": "White background testimonial card with company logo, quote text, headshot, name and title - R2 Hotels"
+        },
+        {
+          "type": "card",
+          "description": "White background testimonial card - HOFF"
+        },
+        {
+          "type": "card",
+          "description": "White background testimonial card - Cementos Molins"
+        },
+        {
+          "type": "card",
+          "description": "White background testimonial card - CPS Group"
+        },
+        {
+          "type": "button",
+          "description": "Read more outline button, dark border, centered"
+        }
+      ]
+    },
+    {
+      "type": "Media / Press",
+      "layout_pattern": "Centered headline, three-column card layout",
+      "headline": "...and the most important media outlets",
+      "subheadline": null,
+      "components": [
+        {
+          "type": "card",
+          "description": "Media card with Wired logo, date, quote text"
+        },
+        {
+          "type": "card",
+          "description": "Media card with Finextra logo, date, quote text"
+        },
+        {
+          "type": "card",
+          "description": "Media card with CBS News logo, date, quote text"
+        },
+        {
+          "type": "button",
+          "description": "Read more outline button, dark border, centered"
+        }
+      ]
+    },
+    {
+      "type": "Footer",
+      "layout_pattern": "Multi-column link structure",
+      "headline": null,
+      "subheadline": null,
+      "components": [
+        {
+          "type": "navigation",
+          "description": "Footer navigation organized in columns: Product, Learn, Company, Support, Helpful, Features - white/gray text on dark navy"
+        },
+        {
+          "type": "button",
+          "description": "Legal links at bottom: Privacy Policy, Terms, Status - gray text links"
+        }
+      ]
+    }
+  ]
+}

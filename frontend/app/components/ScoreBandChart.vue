@@ -80,14 +80,14 @@ const clamp = (value: number) => Math.min(100, Math.max(0, value))
 
 const zones = computed(() =>
   [
-    { key: 'sano', label: 'SANO ≥ 65', top: 0, bottom: clamp(scales.value.y(65)) },
+    { key: 'sano', label: 'Sano ≥ 65', top: 0, bottom: clamp(scales.value.y(65)) },
     {
       key: 'vigilar',
-      label: 'VIGILANCIA',
+      label: 'Vigilancia',
       top: clamp(scales.value.y(65)),
       bottom: clamp(scales.value.y(35)),
     },
-    { key: 'riesgo', label: 'RIESGO ≤ 35', top: clamp(scales.value.y(35)), bottom: 100 },
+    { key: 'riesgo', label: 'Riesgo ≤ 35', top: clamp(scales.value.y(35)), bottom: 100 },
   ]
     .filter((zone) => zone.bottom - zone.top > 2)
     .map((zone) => ({
