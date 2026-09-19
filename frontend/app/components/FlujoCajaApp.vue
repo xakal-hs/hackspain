@@ -382,10 +382,10 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
             </tbody>
           </table>
         </div>
-        <!-- Abajo a la derecha, pegado a la tesorería final: si va a romper caja, el aviso;
-             si no, prestar la caja. -->
-        <div v-if="columns.length" class="eb__action">
-          <template v-if="rotura">
+        <!-- Abajo a la derecha, pegado a la tesorería final. Qué sale lo decide el baremo del
+             servidor: el aviso si va a romper caja, prestar con excedente y score sano, o nada. -->
+        <div v-if="columns.length && flujo.data.value?.action" class="eb__action">
+          <template v-if="flujo.data.value.action === 'financiar' && rotura">
             <p>Vas a romper caja {{ span(rotura.from, rotura.to) }}: {{ money(rotura.low) }}</p>
             <button type="button" class="eb__alert" aria-label="Pedir financiación">
               <TriangleAlert :size="18" aria-hidden="true" /><span>Pedir financiación</span>

@@ -37,8 +37,8 @@ SNAPSHOT = pd.Timestamp("2026-09-01")
 HORIZON = pd.date_range("2026-09-02", "2026-11-30", freq="D")
 MONTHS = ["2026-09", "2026-10", "2026-11"]
 CUSHION_MONTHS = 3
-# Los dos casos reales que se enseñan en la demo (ver el mensaje del commit).
-DEMO = {"COMP_0835": "excedente", "COMP_0829": "rotura"}
+# Los casos reales de la demo (frontend/shared/demoCases.ts). COMP_0837 tiene excedente pero no score sano.
+DEMO = {"COMP_0835": "excedente", "COMP_0837": "excedente", "COMP_0829": "rotura"}
 
 
 def recurring_day(tx: pd.DataFrame, cid: str, cats: set[str]) -> int:

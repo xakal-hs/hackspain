@@ -88,7 +88,10 @@ export interface CashForecast {
 }
 /** Mes → categoría bancaria → importe neto; cada mes suma el net_bank de panel_monthly. */
 export type CashflowCategories = Record<string, Record<string, number>>
+/** Qué sale bajo la tesorería final: prestar la caja, pedir financiación o nada. */
+export type CashflowAction = 'prestar' | 'financiar' | null
 export interface Cashflow {
+  action: CashflowAction
   panel: CashflowMonth[]
   categories: CashflowCategories
   currency: string | null
