@@ -11,7 +11,8 @@ Con esas pruebas decide, con reglas fijas y explicables:
   vencido a más de 90 días y límite propuesto por debajo de la mayor exposición que ese cliente ya ha
   tenido (o sea, deuda que ya ha devuelto antes).
 - denegado: hay vencido a más de 90 días o paga con más de 60 días de retraso medio.
-- estudio: el resto, con el motivo de lo que falta.
+- estudio: el resto. Ahí el expediente puede estar completo en el ERP, y entonces se cotiza al
+  momento, o faltar algo, y entonces va a la aseguradora con lo que hay.
 
 El límite propuesto es la mayor exposición de los últimos doce meses redondeada a la baja; la prima es
 una hipótesis de producto (tasa sobre ventas aseguradas), no un precio de ninguna aseguradora.
@@ -22,6 +23,7 @@ Escribe frontend/server/assets/clientes.json (asset de Nitro).
 """
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -43,7 +45,8 @@ MAX_DELAY = 45            # días de retraso medio admitidos en la preautorizaci
 DECLINE_DELAY = 60        # días de retraso medio que deniegan por sí solos
 PREMIUM_RATE = 0.0035     # hipótesis: 0,35 % sobre ventas aseguradas
 COVER = 0.9               # hipótesis: 90 % de cobertura
-MIN_SALES = 1000          # por debajo no hay nada que asegurar
+MIN_SALES = 1000          # por debajo no hay nada que asegurar...
+MIN_ROWS = 12             # ...salvo que la empresa se quede con menos clientes que esto
 
 
 def euros(v: float) -> str:
@@ -54,8 +57,15 @@ def round_limit(v: float) -> float:
     """Redondea a la baja a una cifra que se pueda decir en voz alta."""
     if v <= 0:
         return 0.0
-    step = 1000 if v < 50_000 else 5000 if v < 500_000 else 25_000
-    return float(int(v // step) * step)
+    step = 500 if v < 5_000 else 1000 if v < 50_000 else 5000 if v < 500_000 else 25_000
+    return float(max(int(v // step) * step, step))
+
+
+def expediente(company_id: str, cliente: str) -> str:
+    """Si el ERP trae el expediente completo o falta algo. Sale de un hash del par empresa-cliente,
+    así que el mismo cliente da siempre lo mismo, también al recargar."""
+    h = hashlib.sha1(f"{company_id}:{cliente}".encode()).digest()[0]
+    return "completo" if h % 2 == 0 else "incompleto"
 
 
 def decide(row) -> tuple[str, str]:
@@ -119,8 +129,11 @@ def main() -> None:
         group by 1, 2""").df()
 
     df = clientes.merge(picos, on=["company_id", "cliente"], how="left").fillna({"pico": 0.0, "ventas_12m": 0.0})
-    # Clientes de menos de mil euros al año no se aseguran: solo ensucian la lista.
-    df = df[df.ventas_12m >= MIN_SALES].copy()
+    # Clientes de menos de mil euros al año no se aseguran y solo ensucian la lista, pero una
+    # empresa con pocos clientes se quedaba sin cartera que enseñar: ahí se mantienen los mayores.
+    df = df[df.ventas_12m > 0].copy()
+    df["rank"] = df.groupby("company_id").ventas_12m.rank(ascending=False, method="first")
+    df = df[(df.ventas_12m >= MIN_SALES) | (df["rank"] <= MIN_ROWS)].copy()
     df["retraso_medio"] = df.retraso_medio.round(1)
     df["orden"] = df.groupby("company_id").ventas_12m.rank(ascending=False, method="first")
     df = df[df.orden <= TOP_CLIENTS]
@@ -134,8 +147,14 @@ def main() -> None:
             limite = round_limit(float(row.pico))
             if estado == "preautorizado" and limite <= 0:
                 estado, motivo = "estudio", "Estudio de la aseguradora: sin exposición previa que sirva de referencia."
+            exped = expediente(cid, row.cliente)
+            # Con el expediente completo se cotiza al momento aunque falte historial para
+            # preautorizar: el tope sale de la mayor deuda previa o de dos meses de ventas.
+            if estado == "estudio" and exped == "completo" and limite <= 0:
+                limite = round_limit(max(float(row.pico), float(row.ventas_12m) / 6, 500.0))
             filas.append({
                 "cliente": row.cliente,
+                "expediente": exped,
                 "ventas_12m": round(float(row.ventas_12m), 2),
                 "expuesto": round(float(row.expuesto), 2),
                 "vencido": round(float(row.vencido), 2),

@@ -41,6 +41,23 @@ const dias = (v: number | null) =>
   v == null ? 'sin dato' : v === 0 ? 'en fecha' : v < 0 ? `${nf.format(-v)} días antes` : `${nf.format(v)} días tarde`
 
 const preautorizado = computed(() => props.row?.estado === 'preautorizado')
+/* Con el expediente completo se cotiza sin pasar por la aseguradora. */
+const cotizable = computed(() => props.row?.estado === 'estudio' && props.row.expediente === 'completo')
+const conQuote = computed(() => preautorizado.value || cotizable.value)
+
+/* La cotización entra sola: un instante de cálculo y aparece. */
+const quote = ref(false)
+let timer: ReturnType<typeof setTimeout> | undefined
+watch(
+  () => [props.open, props.row?.cliente] as const,
+  ([open]) => {
+    clearTimeout(timer)
+    quote.value = false
+    if (open && conQuote.value) timer = setTimeout(() => (quote.value = true), 520)
+  },
+  { immediate: true },
+)
+onUnmounted(() => clearTimeout(timer))
 
 /* Lo que Embat ya ha leído del ERP y conciliado con el banco. */
 const delErp = computed(() => {
@@ -96,7 +113,13 @@ const carencia = 90
         <header class="sheet__head">
           <div>
             <h2 :id="titleId">
-              {{ preautorizado ? 'Cobertura de este cliente' : 'Enviar este cliente a estudio' }}
+              {{
+                preautorizado
+                  ? 'Cobertura de este cliente'
+                  : cotizable
+                    ? 'Cotización de este cliente'
+                    : 'Enviar este cliente a estudio'
+              }}
             </h2>
             <p class="sheet__who">{{ row.cliente }} · {{ selectedId }}</p>
           </div>
@@ -106,13 +129,20 @@ const carencia = 90
         </header>
 
         <div class="sheet__body">
-          <template v-if="preautorizado">
+          <template v-if="conQuote">
             <p :id="leadId" class="sheet__lead">
-              No hay que rellenar nada: Embat ya tiene las pruebas de pago conciliadas con el banco
-              hasta el {{ snapshot }}. Solo tienes que aceptar las condiciones.
+              <template v-if="preautorizado">
+                No hay que rellenar nada: Embat ya tiene las pruebas de pago conciliadas con el banco
+                hasta el {{ snapshot }}. Solo tienes que aceptar las condiciones.
+              </template>
+              <template v-else>
+                El expediente de este cliente está completo en tu ERP, así que la cotización sale
+                ahora mismo, sin pasar por la aseguradora ni pedirte un dato.
+              </template>
             </p>
 
-            <dl class="sheet__read">
+            <p v-if="!quote" class="sheet__calc" role="status">Calculando la cotización…</p>
+            <dl v-else class="sheet__read is-in">
               <div>
                 <dt>Límite asegurado</dt>
                 <dd>{{ money(row.limite) }}</dd>
@@ -127,8 +157,8 @@ const carencia = 90
               </div>
             </dl>
 
-            <h3>Condiciones</h3>
-            <ul class="sheet__terms">
+            <h3 v-if="quote">Condiciones</h3>
+            <ul v-if="quote" class="sheet__terms">
               <li>
                 <b>Qué cubre</b>
                 <span>
@@ -195,23 +225,30 @@ const carencia = 90
         </div>
 
         <footer class="sheet__foot">
-          <p v-if="preautorizado">
+          <p v-if="conQuote">
             {{
               hecho
                 ? 'Cobertura activada. La póliza recoge este límite en la próxima declaración.'
-                : `Al activar, este cliente queda cubierto hasta ${money(row.limite)}.`
+                : quote
+                  ? `Al activar, este cliente queda cubierto hasta ${money(row.limite)}.`
+                  : 'Cotización en curso.'
             }}
           </p>
           <p v-else>
             {{ hecho ? 'Expediente enviado. La aseguradora responde en 24-72 h.' : 'No te pedimos ningún dato más.' }}
           </p>
-          <button class="sheet__ask" type="button" :disabled="hecho" @click="emit('confirm', row)">
+          <button
+            class="sheet__ask"
+            type="button"
+            :disabled="hecho || (conQuote && !quote)"
+            @click="emit('confirm', row)"
+          >
             {{
               hecho
-                ? preautorizado
+                ? conQuote
                   ? 'Cobertura activada'
                   : 'Enviado a estudio'
-                : preautorizado
+                : conQuote
                   ? 'Aceptar condiciones y activar'
                   : 'Enviar a estudio'
             }}
@@ -357,6 +394,26 @@ const carencia = 90
   color: var(--sheet-muted);
 }
 
+.sheet__calc {
+  margin: 18px 0 0;
+  padding: 22px 16px;
+  border-radius: 10px;
+  background: var(--sheet-fill);
+  color: var(--sheet-muted);
+  text-align: center;
+}
+
+.sheet__read.is-in {
+  animation: quote-in 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes quote-in {
+  from {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+}
+
 .sheet__read {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -491,7 +548,8 @@ const carencia = 90
 
 @media (prefers-reduced-motion: reduce) {
   .sheet[open] .sheet__scrim,
-  .sheet[open] .sheet__panel {
+  .sheet[open] .sheet__panel,
+  .sheet__read.is-in {
     animation: none;
   }
 }

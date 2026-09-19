@@ -119,6 +119,8 @@ export interface ClientRow {
   limite: number
   prima: number
   estado: 'preautorizado' | 'estudio' | 'denegado'
+  /** Si el ERP trae todo lo que hace falta para cotizar en el momento. */
+  expediente: 'completo' | 'incompleto'
   motivo: string
 }
 export interface SuretyLine {

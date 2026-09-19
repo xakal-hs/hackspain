@@ -144,7 +144,9 @@ watch(selectedId, () => {
                         ? 'Solicitada'
                         : row.estado === 'preautorizado'
                           ? 'Pedir cobertura'
-                          : 'Pedir estudio'
+                          : row.expediente === 'completo'
+                            ? 'Cotizar'
+                            : 'Pedir estudio'
                     }}
                   </button>
                   <span v-else class="cc__chip is-off">Sin cobertura</span>
