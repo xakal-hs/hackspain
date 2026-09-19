@@ -333,6 +333,236 @@ def _fmtv(v):
     return "sin dato" if v is None else es(v, 2)
 
 
+# ──────────────────────────────────────────────────────────────
+# Productos financieros – integrados con el scoring de HealthScorer
+# Usan FEATURES REALES del modelo: SPEC de xray.py, PILLARS, band_of()
+# ──────────────────────────────────────────────────────────────
+
+# Definiciones de productos financieras – cada una mapea a features reales del score
+# El score tiene: score (0–100), band (sano/vigilar/riesgo), trend (mejora/deterioro/estable),
+#   pillars (liquidez, rentabilidad, solvencia, disciplina, estabilidad),
+#   features (SPEC): inflow, outflow, cash_end, runway, debt_burden, late_share_ap,
+#   late_share_ar, overdue_ap, overdue_ar, net_margin_6m, growth_vs_12m, refund_rate,
+#   lc_util, lost_share, cust_trend, hhi_ar_6m, net_vol_6m, transfer_dep, has_erp,
+#   months_since_last_tx, months_since_final_tx
+
+PRODUCT_DEFS = [
+    {
+        "id": "yield",
+        "label": "Yield · Colocación de excedente",
+        "icon": "chart-line",
+        "description": "El score detecta cajas ociosas: diferencia entre lo que entra y lo que necesita para operar. Coloca el excedente al 2–3 % anual.",
+        "requires_score_min": 40,  # Solo si el score es decente (la empresa no está en problemas)
+        "condition_key": "cash_end",  # Feature real del score
+        "condition_alt": "outflow",
+        "calc_rule": lambda f: max(_num(f.get("cash_end", 0)) or 0 - (_num(f.get("outflow", 0)) or 0) * 2, 0),
+        "calc_label": "excedente_ocioso",
+        "risk": 0,
+        "rate": 0.025,
+        "commission_bps": 100,
+        "pitch": "Tu score dice que tienes {excess_fmt} ociosos cada mes → genera {yield_fmt}/mes al 2,5 %. Embat cobra 1 % de comisión.",
+        "lender_action": "colocar",
+    },
+    {
+        "id": "reserve",
+        "label": "Reserve · Financiación preventiva",
+        "icon": "shield-halved",
+        "description": "El score detecta deterioro o runway corto → la empresa negocia una línea de crédito ANTES de quedarse sin caja.",
+        "requires_score_max": 60,  # Solo para empresas no sanas (score bajo)
+        "condition_key": "runway",
+        "condition_alt": "trend",
+        "calc_rule": lambda f: max(0, 6 - (_num(f.get("runway")) or 999)) * (_num(f.get("outflow")) or 1) * 0.5,
+        "calc_label": "linea_recomendada",
+        "risk": 1,
+        "commission_bps": 50,
+        "pitch": "El score detecta deterioro. Tu caja se acaba en {runway} meses → línea recomendada de {linea_fmt}. Negocia con 60 días de antelación.",
+        "lender_action": "vigilar",
+    },
+    {
+        "id": "fx",
+        "label": "FX Shield · Cobertura de divisa",
+        "icon": "globe",
+        "description": "El score detecta exposición a divisas: transacciones en moneda distinta a la local. Cubre el tipo de cambio.",
+        "condition_key": "fx_exposure",
+        "condition_alt": None,
+        "calc_rule": lambda f: _num(f.get("n_tx", 0)) or 0,  # Se calcula aparte con panel data
+        "calc_label": "fx_notional",
+        "risk": 0.3,
+        "commission_bps": 15,
+        "pitch": "El score ve {fx_fmt} en divisa en 2 meses → ahorra {fx_savings_fmt} con {fx_bps} pb.",
+        "lender_action": "colocar",
+    },
+    {
+        "id": "factoring",
+        "label": "Factoring · Anticipos de cobros",
+        "icon": "file-invoice-dollar",
+        "description": "El score detecta AR vencido alto: la empresa puede anticipar cobros de clientes morosos a 1,5 % de descuento.",
+        "condition_key": "overdue_ar",
+        "condition_alt": None,
+        "calc_rule": lambda f: _num(f.get("overdue_ar", 0)) or 0,
+        "calc_label": "overdue_ar",
+        "risk": 0.5,
+        "commission_bps": 150,
+        "pitch": "AR vencido: {ar_fmt} → cobra hoy a 1,5 % ({disc_fmt} de descuento). El score ya sabe cuánto riesgo hay.",
+        "lender_action": "cobrar",
+    },
+    {
+        "id": "credit",
+        "label": "Credit · Seguro de impago",
+        "icon": "shield-check",
+        "description": "El score detecta morosidad alta en cobros: la aseguradora ajusta la prima sobre impago de clientes según la salud.",
+        "condition_key": "late_share_ar",
+        "condition_alt": "overdue_ar",
+        "calc_rule": lambda f: _num(f.get("late_share_ar", 0)) or 0,
+        "calc_label": "late_share_ar_pct",
+        "risk": 0.7,
+        "commission_bps": 20,
+        "pitch": "{late_fmt}% de cobros tardíos → la aseguradora ajusta la prima en tiempo real. Póliza que se entera antes que el siniestro.",
+        "lender_action": "asegurar",
+    },
+]
+
+
+def _product_recommendations(feats_row, scored_row, cid):
+    """Calcula recomendaciones de producto para una empresa basada en FEATURES y SCORE REALES."""
+    fr = feats_row if feats_row is not None else pd.Series()
+    sr = scored_row if scored_row is not None else pd.Series()
+
+    score_val = _num(sr.get("score")) or 50.0
+    band_val = _str(sr.get("band")) or "vigilar"
+
+    recs = []
+
+    for pdef in PRODUCT_DEFS:
+        pid = pdef["id"]
+
+        # Check score-based conditions
+        if pdef.get("requires_score_min") and score_val < pdef["requires_score_min"]:
+            continue
+        if pdef.get("requires_score_max") and score_val > pdef["requires_score_max"]:
+            continue
+
+        # Check feature-based conditions
+        val = _num(fr.get(pdef["condition_key"]))
+        alt_val = _num(fr.get(pdef["condition_alt"])) if pdef.get("condition_alt") else None
+
+        meets = False
+        if pid == "yield":
+            meets = (val or 0) > (alt_val or 0) * 2  # cash_end > outflow * 2
+        elif pid == "reserve":
+            runway = _num(fr.get("runway")) or 999
+            trend = _str(fr.get("trend")) or "estable"
+            meets = runway < 6 or trend == "deterioro"
+        elif pid == "fx":
+            # Needs panel data for fx_exposure calculation
+            meets = (_num(fr.get("n_tx")) or 0) > 50  # Proxy: active companies likely have FX
+        elif pid == "factoring":
+            meets = (val or 0) > 50000  # overdue_ar > 50K €
+        elif pid == "credit":
+            meets = ((val or 0) > 0.15 or (alt_val or 0) > 200000)  # late_share_ar > 15% or overdue_ar > 200K
+
+        if not meets:
+            continue
+
+        # Calculate metrics based on real features
+        cash_end = _num(fr.get("cash_end")) or 0
+        outflow = _num(fr.get("outflow")) or 1
+        inflow = _num(fr.get("inflow")) or 1
+        overdue_ar = _num(fr.get("overdue_ar")) or 0
+        runway = _num(fr.get("runway")) or 999
+        late_share_ar = _num(fr.get("late_share_ar")) or 0
+
+        if pid == "yield":
+            excess = max(cash_end - outflow * 2, 0)
+            monthly_yield = round(excess * pdef["rate"] / 12, 2)
+            annual_yield = round(excess * pdef["rate"], 2)
+            commission = round(excess * pdef["commission_bps"] / 10000, 2)
+            rec = {
+                **pdef,
+                "meets": True,
+                "excess": round(excess, 2),
+                "monthly_yield": monthly_yield,
+                "annual_yield": annual_yield,
+                "commission": commission,
+                "status": "disponible",
+                "consumer_text": f"{fmtMoney(excess)} ociosos cada mes → genera {fmtMoney(monthly_yield)}/mes al 2,5 %.",
+                "score_impact": "positivo" if score_val > 60 else "neutro" if score_val > 40 else "crítico",
+            }
+
+        elif pid == "reserve":
+            recommended_line = round(outflow * min(max(runway, 0.5), 3) * 0.5, 2)
+            commission = round(recommended_line * pdef["commission_bps"] / 10000, 2)
+            rec = {
+                **pdef,
+                "meets": True,
+                "runway": round(runway, 1),
+                "recommended_line": round(recommended_line, 2),
+                "commission": commission,
+                "status": "recomendado" if runway < 3 else "preventivo" if runway < 6 else "preventivo-lejano",
+                "consumer_text": f"Caja se acaba en {runway:.0f} meses → línea recomendada de {fmtMoney(recommended_line)}.",
+                "score_impact": "crítico" if runway < 2 else "importante" if runway < 4 else "moderado",
+            }
+
+        elif pid == "fx":
+            # Estimate FX exposure from transactions
+            fx_exp = min(0.30, max(0.05, (_num(fr.get("n_tx")) or 100) / 1000))  # Simple proxy
+            fx_notional = round(inflow * fx_exp, 2)
+            savings = round(fx_notional * pdef["commission_bps"] / 10000, 2)
+            rec = {
+                **pdef,
+                "meets": True,
+                "fx_exposure": round(fx_exp * 100, 1),
+                "fx_notional": round(fx_notional, 2),
+                "savings": savings,
+                "status": "ahorro",
+                "consumer_text": f"{fx_exp * 100:.1f}% flujo en divisa ({fmtMoney(fx_notional)} en 2 meses) → ahorra {fmtMoney(savings)}.",
+                "score_impact": "positivo" if score_val > 50 else "neutro",
+            }
+
+        elif pid == "factoring":
+            discount = round(overdue_ar * 0.015, 2)
+            cash_improvement = round(overdue_ar * 0.985, 2)
+            rec = {
+                **pdef,
+                "meets": True,
+                "overdue_ar": round(overdue_ar, 2),
+                "discount": discount,
+                "cash_improvement": cash_improvement,
+                "status": "rentable" if overdue_ar > 200000 else "rentable",
+                "consumer_text": f"AR vencido: {fmtMoney(overdue_ar)} → cobra hoy a 1,5 % ({fmtMoney(discount)}).",
+                "score_impact": "positivo" if score_val < 60 else "leve",
+            }
+
+        elif pid == "credit":
+            premium = round(inflow * 0.005 * late_share_ar, 2)
+            ref_fee = round(premium * 0.20, 2)
+            rec = {
+                **pdef,
+                "meets": True,
+                "late_share_ar": round(late_share_ar * 100, 1),
+                "overdue_ar": round(overdue_ar, 2),
+                "premium": premium,
+                "referral_fee": ref_fee,
+                "status": "recomendado",
+                "consumer_text": f"{late_share_ar * 100:.1f}% cobros tardíos → aseguradora ajusta la prima en tiempo real.",
+                "score_impact": "positivo",
+            }
+        else:
+            rec = {**pdef, "meets": True, "status": "disponible", "consumer_text": ""}
+
+        recs.append(rec)
+
+    return {
+        "company_id": cid,
+        "score": round(score_val, 2),
+        "band": band_val,
+        "products": recs,
+        "total_products": len(recs),
+        "total_annual_yield": round(sum(r.get("annual_yield", 0) for r in recs), 2),
+        "total_commissions": round(sum(r.get("commission", 0) for r in recs), 2),
+    }
+
+
 if __name__ == "__main__":
     import time
     t0 = time.time()
