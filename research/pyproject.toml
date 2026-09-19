@@ -3,6 +3,9 @@ name = "xray-research"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
+    # Empaqueta el histórico oficial del BCE (eurofxref-hist.zip): permite reconstruir los tipos
+    # de cambio reales cuando la web del BCE no es accesible desde la máquina (ver src/fx.py).
+    "currencyconverter>=0.18",
     "fastapi>=0.141.1",
     "lightgbm>=4.7.0",
     "matplotlib>=3.11.2",
