@@ -550,7 +550,6 @@ def iterations():
     out = []
     for tag in ["v1", "v2", "v3a", "v3b", *VARIANTS, "v6", "v7", "ar000", "ar002b", "ar004", "ar006", "ar007",
                 "ar100", "ar101", "ar102", "ar104", "ar105", "ar107"]:
-    for tag in ["v1", "v2", "v3a", "v3b", *VARIANTS, "v6", "v7"]:
         m = load_metrics(tag)
         if not m:
             continue
