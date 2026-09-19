@@ -10,9 +10,7 @@ como un único producto de comisión.
 Artefactos:
   analysis/cluster_sector.html
   data/processed/company_sector.csv
-  data/processed/empresa_sector.csv  (company_id, sector más probable, tipo)
-
-No reescribe los CSV de data/ ni cablea el score.
+  data/processed/empresa_sector.csv  (company_id, sector, tipo, tenor, product_fit, score, confidence)
 
 No reescribe los CSV de data/ ni cablea el score.
 """
@@ -1055,15 +1053,42 @@ def write_table(rows: list[dict]) -> None:
                 else:
                     out[field] = value
             writer.writerow(out)
+    map_fields = [
+        "company_id",
+        "group_id",
+        "sector",
+        "tipo",
+        "sector_set",
+        "n_sectors",
+        "top_sector_score",
+        "tenor",
+        "product_fit",
+        "confidence",
+    ]
     with MAP.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["company_id", "sector", "tipo"])
+        writer = csv.DictWriter(handle, fieldnames=map_fields)
         writer.writeheader()
         for row in sorted(rows, key=lambda item: item["company_id"]):
             writer.writerow(
                 {
                     "company_id": row["company_id"],
+                    "group_id": row.get("group_id") or "",
                     "sector": row.get("top_sector") or "",
                     "tipo": row.get("business_kind") or "",
+                    "sector_set": row.get("sector_set") or "",
+                    "n_sectors": row.get("n_sectors") or 0,
+                    "top_sector_score": (
+                        f"{row['top_sector_score']:.6g}"
+                        if isinstance(row.get("top_sector_score"), float)
+                        else (row.get("top_sector_score") or "")
+                    ),
+                    "tenor": row.get("tenor") or "",
+                    "product_fit": row.get("product_fit") or "",
+                    "confidence": (
+                        f"{row['confidence']:.6g}"
+                        if isinstance(row.get("confidence"), float)
+                        else (row.get("confidence") or "")
+                    ),
                 }
             )
 
@@ -1791,11 +1816,9 @@ def build_report(rows: list[dict], clustering: dict) -> str:
 </html>"""
 
 
-def main() -> None:
-    connection = duckdb.connect()
-    connection.execute("PRAGMA threads=4")
-    attach(connection, DATA)
-    print("Building company footprint…", flush=True)
+def infer_sectors(connection, write_html: bool = False) -> tuple[list[dict], dict]:
+    """Una sola pasada: huella, mesa, régimen, y los dos CSV alineados."""
+    print("Inferring sector mesa…", flush=True)
     setup_features(connection)
     rows = assemble_rows(connection)
     classify_kind(rows)
@@ -1803,7 +1826,17 @@ def main() -> None:
     assign_product_fit(rows)
     clustering = cluster_regimes(rows)
     write_table(rows)
-    OUTPUT.write_text(build_report(rows, clustering), encoding="utf-8")
+    if write_html:
+        OUTPUT.write_text(build_report(rows, clustering), encoding="utf-8")
+    return rows, clustering
+
+
+def main() -> None:
+    connection = duckdb.connect()
+    connection.execute("PRAGMA threads=4")
+    attach(connection, DATA)
+    print("Building company footprint…", flush=True)
+    rows, clustering = infer_sectors(connection, write_html=True)
     counts = kind_counts(rows)
     result: KMeansResult = clustering["result"]
     print(
