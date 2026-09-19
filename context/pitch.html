@@ -389,9 +389,9 @@
     <p style="margin-top: 2.5em; font-size: 0.72em; color: var(--faint); letter-spacing: 0.1em; text-transform: uppercase;">
       HackSpain 2026 · Hecho por Xakal
     </p>
-    <div class="page-num">1 / 11</div>
+    <div class="page-num">1 / 12</div>
     <div class="nav-hint">← → para navegar · F para pantalla completa</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 9%;"></div></div>
+    <div class="progress-track"><div class="progress-fill" style="width: 8%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -428,8 +428,8 @@
         "El problema no es que no haya datos. Es que nadie pregunta: <strong>¿cuál es la salud real de esta empresa hoy?</strong>"
       </div>
     </div>
-    <div class="page-num">2 / 11</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 18%;"></div></div>
+    <div class="page-num">2 / 12</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 17%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -462,8 +462,8 @@
         <p style="font-size: 0.85em; color: var(--muted);">Cada empresa sabe su runway.<br>Embat actúa antes.<br>El dinero fluye.</p>
       </div>
     </div>
-    <div class="page-num">3 / 11</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 27%;"></div></div>
+    <div class="page-num">3 / 12</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 25%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -498,8 +498,8 @@
       </p>
       <p style="font-size: 0.72em; color: var(--faint);">Scorecard aditivo, no caja negra. AUC 0,849 en tensión de liquidez, fuera de grupo y fuera del futuro.</p>
     </div>
-    <div class="page-num">4 / 11</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 36%;"></div></div>
+    <div class="page-num">4 / 12</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 33%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -595,15 +595,97 @@
     <p style="font-size: 0.68em; color: var(--faint); max-width: 820px; margin-top: 14px;">
       El catálogo de 42 pesos a priori, medido contra estos 18, perdió 9,7&nbsp;σ frente al ancla: el peso se calibra, no se declara.
     </p>
-    <div class="page-num">5 / 11</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 45%;"></div></div>
+    <div class="page-num">5 / 12</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 42%;"></div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 6 — SEGMENTACIÓN POR SECTOR
+       ═══════════════════════════════════════ -->
+  <div class="slide dark diagram">
+    <div class="section-label">5 · La segmentación</div>
+    <h2 style="font-size: 2.3em;">Nadie nos dijo a qué se dedica<br>cada empresa. Lo dice su tesorería.</h2>
+    <p style="font-size: 0.82em; max-width: 880px; margin: 6px 0 16px;">
+      El dataset no trae CNAE. Agrupamos la huella —categorías de movimiento, nómina, TPV, ciclo de cobro y de pago—
+      <strong>sin mirar la caja ni el runway</strong>: eso mezclaría salud con sector. Y luego medimos si el resultado
+      debía mover la nota.
+    </p>
+    <svg viewBox="0 0 1400 412" class="arch" role="img" aria-label="Clasificador de sector: de la huella de tesorería al régimen, el sector y la mesa de productos">
+    <defs>
+    <linearGradient id="core3" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#5b74ff" stop-opacity=".2"/><stop offset="1" stop-color="#5b74ff" stop-opacity=".03"/>
+    </linearGradient>
+    <marker id="ar3" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M0 1 L6 4 L0 7" fill="none" stroke="#5b74ff" stroke-width="1.3" stroke-linecap="round"/></marker>
+    </defs>
+    <rect x="12" y="16" width="324" height="178" rx="12" fill="#10142f" stroke="rgba(190,200,255,.19)" stroke-width="1"/>
+    <text x="30" y="42" class="s" style="font-size:11px; letter-spacing:.12em;">HUELLA DE TESORERÍA</text>
+    <text x="30" y="74" class="big" style="font-size:22px;">1.286</text>
+    <line x1="30" y1="88" x2="318" y2="88" stroke="rgba(190,200,255,.14)"/>
+    <text x="30" y="108" class="d" style="font-size:11px;">categorías de movimiento</text>
+    <text x="30" y="125" class="d" style="font-size:11px;">nómina y TPV</text>
+    <text x="30" y="142" class="d" style="font-size:11px;">ciclo de cobro y de pago</text>
+    <text x="30" y="159" class="d" style="font-size:11px;">sin caja ni runway: mezclaría</text>
+    <text x="30" y="176" class="d" style="font-size:11px;">salud con sector</text>
+    <line x1="340" y1="105.0" x2="357" y2="105.0" stroke="#5b74ff" stroke-width="1.3" marker-end="url(#ar3)" opacity=".85"/>
+    <rect x="362" y="16" width="324" height="178" rx="12" fill="#10142f" stroke="rgba(190,200,255,.19)" stroke-width="1"/>
+    <text x="380" y="42" class="s" style="font-size:11px; letter-spacing:.12em;">K-MEANS</text>
+    <text x="380" y="74" class="big" style="font-size:22px;">4 regímenes</text>
+    <line x1="380" y1="88" x2="668" y2="88" stroke="rgba(190,200,255,.14)"/>
+    <text x="380" y="108" class="d" style="font-size:11px;">liquidación TPV + cobros (537)</text>
+    <text x="380" y="125" class="d" style="font-size:11px;">seguridad social + nóminas (237)</text>
+    <text x="380" y="142" class="d" style="font-size:11px;">cobros (217)</text>
+    <text x="380" y="159" class="d" style="font-size:11px;">efectivo (217)</text>
+    <text x="380" y="176" class="d" style="font-size:11px;">78 sin cobertura suficiente</text>
+    <line x1="690" y1="105.0" x2="707" y2="105.0" stroke="#5b74ff" stroke-width="1.3" marker-end="url(#ar3)" opacity=".85"/>
+    <rect x="712" y="16" width="324" height="178" rx="12" fill="#10142f" stroke="rgba(190,200,255,.19)" stroke-width="1"/>
+    <text x="730" y="42" class="s" style="font-size:11px; letter-spacing:.12em;">SECTOR</text>
+    <text x="730" y="74" class="big" style="font-size:22px;">11 sectores</text>
+    <line x1="730" y1="88" x2="1018" y2="88" stroke="rgba(190,200,255,.14)"/>
+    <text x="730" y="108" class="d" style="font-size:11px;">1.195 empresas clasificadas</text>
+    <text x="730" y="125" class="d" style="font-size:11px;">678 con uno</text>
+    <text x="730" y="142" class="d" style="font-size:11px;">517 con dos o tres</text>
+    <text x="730" y="159" class="d" style="font-size:11px;">es un conjunto,</text>
+    <text x="730" y="176" class="d" style="font-size:11px;">no una etiqueta única</text>
+    <line x1="1040" y1="105.0" x2="1057" y2="105.0" stroke="#5b74ff" stroke-width="1.3" marker-end="url(#ar3)" opacity=".85"/>
+    <rect x="1062" y="16" width="324" height="178" rx="12" fill="url(#core3)" stroke="#5b74ff" stroke-width="1.5"/>
+    <text x="1080" y="42" class="s" style="font-size:11px; letter-spacing:.12em;">MESA + TENOR</text>
+    <text x="1080" y="74" class="big" style="font-size:22px;">3–4 productos</text>
+    <line x1="1080" y1="88" x2="1368" y2="88" stroke="rgba(190,200,255,.14)"/>
+    <text x="1080" y="108" class="d" style="font-size:11px;">en 1.026 empresas</text>
+    <text x="1080" y="125" class="d" style="font-size:11px;">tenor: días · 6m · 12m · largo</text>
+    <text x="1080" y="142" class="d" style="font-size:11px;">Yield, Reserve, Factoring,</text>
+    <text x="1080" y="159" class="d" style="font-size:11px;">Confirming, Seguro de cobro</text>
+    <rect x="12" y="220" width="675" height="188" rx="12" fill="#10142f" stroke="rgba(190,200,255,.19)" stroke-width="1" stroke-dasharray="5 5"/>
+    <text x="32" y="248" class="s" style="font-size:11px; letter-spacing:.12em;">MEDIDO Y DESCARTADO</text>
+    <text x="32" y="282" class="big" style="font-size:24px;">0,267</text>
+    <text x="32" y="312" class="d" style="font-size:11.5px;">La tasa de tensión global en el tramo donde se decide (0,5–1 mes de caja). Ningún sector se</text>
+    <text x="32" y="330" class="d" style="font-size:11.5px;">separa de ella, con IC 95 % remuestreando grupos enteros. Y el mecanismo tampoco está: el</text>
+    <text x="32" y="348" class="d" style="font-size:11.5px;">mayorista cobra a 15,9 días; el de suscripción, a 21,0.</text>
+    <line x1="32" y1="372" x2="667" y2="372" stroke="rgba(190,200,255,.14)"/>
+    <text x="32" y="394" class="t" style="font-size:12.5px; letter-spacing:0;">El sector no mueve el listón de la nota.</text>
+    <rect x="713" y="220" width="675" height="188" rx="12" fill="#10142f" stroke="#5b74ff" stroke-width="1"/>
+    <text x="733" y="248" class="s" style="font-size:11px; letter-spacing:.12em;">MEDIDO Y ADOPTADO</text>
+    <text x="733" y="282" class="big" style="font-size:24px;">19,8 % vs 10,1 %</text>
+    <text x="733" y="312" class="d" style="font-size:11.5px;">Entre las empresas que el modelo llama sanas, vivir del grupo dobla la tasa de tensión futura.</text>
+    <text x="733" y="330" class="d" style="font-size:11.5px;">Es información que la nota no tiene, y es justo el caso que le importa al prestamista: buena</text>
+    <text x="733" y="348" class="d" style="font-size:11.5px;">nota, pero la liquidez que se le ve es de la matriz.</text>
+    <line x1="733" y1="372" x2="1368" y2="372" stroke="rgba(190,200,255,.14)"/>
+    <text x="733" y="394" class="t" style="font-size:12.5px; letter-spacing:0;">Entra como aviso, no como veto.</text>
+    </svg>
+    <p style="font-size: 0.68em; color: var(--faint); max-width: 900px; margin-top: 14px;">
+      Por eso el sector no toca el score: decide <strong>qué ofrecerle</strong>, no <strong>quién está sano</strong>.
+      La mesa que se enseña aquí es la que el stack cubre hoy.
+    </p>
+    <div class="page-num">6 / 12</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 50%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
        SLIDE 5 — UNA CAJA, TRES FUGAS
        ═══════════════════════════════════════ -->
   <div class="slide white">
-    <div class="section-label">5 · El problema de verdad</div>
+    <div class="section-label">6 · El problema de verdad</div>
     <h2 style="font-size: 2.2em;">Sigue el dinero de una empresa.<br>Tu caja gotea por dos sitios.</h2>
 
     <p style="font-size: 0.85em; margin: 1em 0 1.5em; max-width: 700px;">
@@ -640,15 +722,15 @@
     <p style="text-align: center; margin-top: 1.5em; font-size: 0.82em; color: var(--muted);">
       Dos fugas distintas. Pero fíjate: <strong style="color: var(--accent);">las dos son la misma pregunta</strong> — ¿cuánto necesitas, cuánto te sobra y cuándo?
     </p>
-    <div class="page-num">6 / 11</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 55%;"></div></div>
+    <div class="page-num">7 / 12</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 58%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
        SLIDE 6 — UN CÁLCULO, TRES PRODUCTOS
        ═══════════════════════════════════════ -->
   <div class="slide white">
-    <div class="section-label">6 · La solución</div>
+    <div class="section-label">7 · La solución</div>
     <h2 style="font-size: 2.2em;">El colchón dinámico responde<br>las tres preguntas a la vez</h2>
 
     <p style="font-size: 0.85em; margin: 1em 0 1.5em; max-width: 700px;">
@@ -689,15 +771,15 @@
     <p style="text-align: center; margin-top: 1.5em; font-size: 0.8em; color: var(--muted); font-style: italic;">
       Se crean ~€20M de valor al año para las empresas. Embat captura €3,2M — sin captar un solo cliente nuevo.
     </p>
-    <div class="page-num">7 / 11</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 64%;"></div></div>
+    <div class="page-num">8 / 12</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 67%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
        SLIDE 7 — MONETIZACIÓN (todo junto)
        ═══════════════════════════════════════ -->
   <div class="slide white">
-    <div class="section-label">7 · Monetización</div>
+    <div class="section-label">8 · Monetización</div>
     <h2>Dos fugas, un negocio</h2>
 
     <p style="font-size: 0.85em; margin-bottom: 2em;">
@@ -727,15 +809,15 @@
       <p style="font-size: 0.72em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px;">Revenue anual medido sobre la cartera (banda €2,3–4,1M)</p>
       <p style="font-size: 0.65em; color: var(--faint); margin-top: 8px;">Con las hipótesis del brief sobre bases convertidas a EUR. Crudo sin convertir: €12.1M — <strong style="color: #fff;">nosotros lo presentamos corregido</strong>.</p>
     </div>
-    <div class="page-num">8 / 11</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 73%;"></div></div>
+    <div class="page-num">9 / 12</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 75%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
        SLIDE 8 — DÓNDE SER NOSOTROS (dos palos)
        ═══════════════════════════════════════ -->
   <div class="slide white">
-    <div class="section-label">8 · Dónde ser nosotros</div>
+    <div class="section-label">9 · Dónde ser nosotros</div>
     <h2 style="font-size: 2.1em;">Dos palos grandes.<br>Uno capta, el otro presta.</h2>
 
     <p style="font-size: 0.82em; margin: 0.5em 0 0.8em; max-width: 780px;">
@@ -781,15 +863,15 @@
     <p style="text-align: center; margin-top: 0.6em; font-size: 0.78em; color: var(--muted); font-style: italic;">
       Hoy un partner ejecuta. El score ya es la política del banco que Embat todavía no es.
     </p>
-    <div class="page-num">9 / 11</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 82%;"></div></div>
+    <div class="page-num">10 / 12</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 83%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
        SLIDE 9 — TRES CAPAS DE VALOR + ESCALERA
        ═══════════════════════════════════════ -->
   <div class="slide white">
-    <div class="section-label">9 · El encuadre</div>
+    <div class="section-label">10 · El encuadre</div>
     <h2 style="font-size: 2.2em;">Un score, tres capas.<br>Y una escalera al banco.</h2>
 
     <p style="font-size: 0.85em; margin: 1em 0 1.5em; max-width: 720px;">
@@ -840,8 +922,8 @@
     <p style="text-align: center; margin-top: 1.2em; font-size: 0.76em; color: var(--muted); font-style: italic;">
       Con €120M colocados al 35% de adopción: €1.2M de fee como intermediario → €4.8M de NIM como banco. El score es el mismo.
     </p>
-    <div class="page-num">10 / 11</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 91%;"></div></div>
+    <div class="page-num">11 / 12</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 92%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -860,7 +942,7 @@
     <p style="font-size: 0.72em; color: var(--faint); letter-spacing: 0.12em; text-transform: uppercase;">
       Xakal · Embat · HackSpain 2026
     </p>
-    <div class="page-num">11 / 11</div>
+    <div class="page-num">12 / 12</div>
     <div class="progress-track"><div class="progress-fill" style="width: 100%;"></div></div>
   </div>
 
