@@ -256,7 +256,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  min-height: 54px;
+  min-height: 64px; /* la altura de cabecera de Embat */
   padding: 0 clamp(18px, 2.4vw, 30px);
   border-bottom: 1px solid var(--line);
   background: color-mix(in srgb, var(--canvas) 88%, transparent);
@@ -329,7 +329,7 @@
 .wk__grid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 16px;
+  gap: 20px;
 }
 
 /* Unequal spans on purpose: identical tiles would flatten the hierarchy. */
@@ -1570,15 +1570,30 @@
   --crimson: var(--ink-crimson);
   --crimson-ink: var(--ink-crimson-ink);
   --crimson-wash: var(--ink-crimson-wash);
+  --coral: var(--ink-coral);
+  --coral-ink: var(--ink-coral-ink);
+  --coral-wash: var(--ink-coral-wash);
+  --ahead: var(--ink-ahead);
+  --ahead-ink: var(--ink-ahead-ink);
+  --ahead-wash: var(--ink-ahead-wash);
 
+  position: relative;
+  overflow: hidden;
   color-scheme: dark;
-  background: linear-gradient(
-    135deg,
-    var(--ink-raised) 0%,
-    var(--ink-canvas) 100%
-  );
+  background: var(--ink-canvas);
   border-color: var(--ink-line);
   color: var(--ink-text);
+}
+
+/* El degradado de marca aparece una sola vez en toda la aplicación, aquí: es el
+ * mismo gesto con el que Embat firma su banda de producto, y va como filete de
+ * borde y no como fondo, porque debajo hay una tabla que tiene que leerse. */
+.panel--ink::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--gradient-brand);
 }
 
 .model .panel__title {

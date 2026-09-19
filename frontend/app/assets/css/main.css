@@ -87,7 +87,7 @@ table {
 :focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
-  border-radius: 3px;
+  border-radius: var(--r-xs);
 }
 
 ::selection {
@@ -112,7 +112,7 @@ table {
   left: 10px;
   z-index: 40;
   padding: 10px 16px;
-  border-radius: var(--r-inner);
+  border-radius: var(--r-sm);
   background: var(--live-solid);
   color: var(--on-live);
   font-size: var(--t-small);
@@ -135,22 +135,25 @@ table {
   flex: none;
 }
 
+/* Embat's button: 4px radius, 12px/24px padding, one type size, and a colour
+ * transition slow enough to be read as a state change rather than a flicker. */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 40px;
-  padding: 0 16px;
-  border-radius: var(--r-inner);
+  min-height: 44px;
+  padding: 12px 24px;
+  border-radius: var(--r-sm);
   border: 1px solid transparent;
-  font-size: var(--t-small);
+  font-size: var(--t-body);
   font-weight: 500;
   letter-spacing: -0.005em;
   white-space: nowrap;
   transition:
-    background-color 0.12s var(--ease),
-    border-color 0.12s var(--ease);
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
 }
 
 .btn--live {
@@ -159,7 +162,7 @@ table {
 }
 
 .btn--live:hover:not(:disabled) {
-  background: color-mix(in oklab, var(--live-solid) 88%, white);
+  background: var(--live-solid-hover);
 }
 
 .btn--quiet {
@@ -172,8 +175,8 @@ table {
 }
 
 .btn--lg {
-  min-height: 48px;
-  padding: 0 22px;
+  min-height: 52px;
+  padding: 14px 28px;
   font-size: var(--t-body);
 }
 
@@ -183,19 +186,19 @@ table {
   color: var(--text-dim);
 }
 
-/* Chips are data keys and status, never a label hung above a heading. */
+/* Chips are data keys and status, never a label hung above a heading. Sentence
+ * case, like every other word Embat writes: nothing in their interface is set
+ * in tracked capitals. */
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px 4px 8px;
+  padding: 4px 11px 4px 9px;
   border-radius: var(--r-pill);
   background: var(--neutral-wash);
   color: var(--text-muted);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  font-size: var(--t-micro);
+  font-weight: 500;
   white-space: nowrap;
 }
 
@@ -271,11 +274,14 @@ table {
   color: var(--crimson-ink);
 }
 
+/* Embat lifts a card with one hairline border and their level-1 shadow, not
+ * with an inset sheen; on navy the shadow is dropped and the border carries it
+ * alone. */
 .panel {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--r-panel);
-  box-shadow: var(--sheen);
+  box-shadow: var(--shadow-1);
   padding: clamp(18px, 2vw, 26px);
 }
 
@@ -429,7 +435,7 @@ table {
   height: var(--sw-h);
   border-radius: var(--r-pill);
   background: var(--panel-raised);
-  box-shadow: var(--sheen);
+  box-shadow: var(--shadow-1);
   transition: transform 0.32s var(--sw-ease);
 }
 
@@ -848,9 +854,9 @@ table {
   min-width: 9.5rem;
   padding: 8px 10px;
   border: 1px solid var(--line-strong);
-  border-radius: var(--r-inner);
+  border-radius: var(--r-card);
   background: var(--panel);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--shadow-3);
   pointer-events: none;
 }
 
@@ -1233,13 +1239,20 @@ table {
 }
 
 .lp__main {
+  /* The gutter lives in a variable so the navy band can bleed back out to the
+     rail while its content keeps the same inset as every section below it. */
+  --lp-pad: clamp(24px, 4vw, 64px);
   min-width: 0;
   overflow-x: clip;
-  padding-inline: clamp(24px, 4vw, 64px);
+  padding-inline: var(--lp-pad);
 }
 
+/* Embat opens on navy with the product screen sitting on it. The landing's one
+   raised voice is that band — the rail and the band are the same navy, so the
+   page reads as a white sheet framed in chrome. */
 .lp__hero {
-  padding: clamp(44px, 7vw, 100px) 0 clamp(50px, 6vw, 86px);
+  margin-inline: calc(-1 * var(--lp-pad));
+  padding: clamp(44px, 7vw, 100px) var(--lp-pad) clamp(50px, 6vw, 86px);
 }
 
 /* The rule between the two clauses is the same device as the threshold line in
@@ -1288,6 +1301,15 @@ table {
 .lp__section {
   padding-top: clamp(46px, 6vw, 82px);
   border-top: 1px solid var(--line);
+}
+
+/* Una sola sección se separa por fondo y no por filete, como hace Embat con
+ * sus bandas grises: es la que compara un bache con una caída, y el cambio de
+ * superficie marca que ahí se cambia de registro. */
+.lp__section--band {
+  margin-inline: calc(-1 * var(--lp-pad));
+  padding: clamp(46px, 6vw, 82px) var(--lp-pad);
+  background: var(--panel-raised);
 }
 
 .lp__section-head h2 {
@@ -1482,7 +1504,7 @@ table {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--r-panel);
-  box-shadow: var(--sheen);
+  box-shadow: var(--shadow-1);
   overflow: hidden;
 }
 
@@ -1612,6 +1634,12 @@ table {
   display: grid;
   grid-template-rows: auto 1fr auto;
   padding: 24px clamp(24px, 5vw, 72px) 28px;
+}
+
+/* The access screen is mostly empty, which is what Embat's soft gradient is
+   for: a decorative surface, never a background for content. */
+:root[data-theme='light'] .entry {
+  background: var(--gradient-soft);
 }
 
 .entry__top {
@@ -1768,9 +1796,13 @@ table {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* The rail turns into the top bar, at Embat's own header height. */
   .lp__rail {
-    position: static;
+    position: sticky;
+    top: 0;
+    z-index: 30;
     height: auto;
+    min-height: 64px;
     flex-direction: row;
     align-items: center;
     gap: 16px;
@@ -1800,7 +1832,7 @@ table {
   }
 
   .lp__main {
-    padding-inline: clamp(18px, 5vw, 32px);
+    --lp-pad: clamp(18px, 5vw, 32px);
   }
 
   .lp__head span {

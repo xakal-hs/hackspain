@@ -189,7 +189,7 @@ const readings = computed(() => {
         </ul>
       </section>
 
-      <section id="bache" class="lp__section">
+      <section id="bache" class="lp__section lp__section--band">
         <div class="lp__section-head">
           <h2>Un bache no es una caída.</h2>
           <p>

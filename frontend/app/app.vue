@@ -6,7 +6,7 @@ useHead({
   meta: [
     {
       name: 'theme-color',
-      content: () => (theme.value === 'light' ? '#f4f5fb' : '#090c22'),
+      content: () => (theme.value === 'light' ? '#ffffff' : '#050b2c'),
     },
   ],
 })
