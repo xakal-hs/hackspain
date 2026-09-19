@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ArrowDown, ArrowRight, ArrowUp } from '@lucide/vue'
-import { leadCompany } from '~/data/demo'
 import type { AlertDirection } from './TreasuryAlert.vue'
 import type { TreasuryState } from './TreasuryHead.vue'
 
 const selected = ref<TreasuryState>('mal')
+
+const { name: companyName, sector: companySector, detail: companyDetail, latest: companyLatest, health: companyHealth, company: selectedCompany } = useSelectedCompany()
 
 // TODO: sustituir por fetch a /api/... cuando el endpoint esté listo
 const states = {
@@ -131,7 +132,37 @@ const states = {
   },
 }
 
-const state = computed(() => states[selected.value])
+const state = computed(() => {
+  const mock = states[selected.value]
+  const health = companyHealth.value
+  if (!health) return { ...mock, headline: 'Score de demostración · pendiente de datos', chartTag: 'Simulado' }
+  const delta = health.score_delta_3m
+  return { ...mock,
+    drivers: (companyDetail.data.value?.drivers || []).map(driver => ({
+      label: driver.label, value: driver.display_value,
+      contribution: `${driver.contribution > 0 ? '+' : ''}${driver.contribution.toFixed(1)}`,
+      color: 'var(--accent)',
+    })),
+    score: health.health_score.toFixed(1), chip: health.health_band.toUpperCase(),
+    scoreColor: health.health_band === 'sano' ? 'var(--ok)' : health.health_band === 'riesgo' ? 'var(--bad)' : 'var(--warn)',
+    headline: `Score de ${companyName.value}: ${health.health_score.toFixed(1)}`,
+    subhead: `Dato de Supabase · ${health.month.slice(0, 7)}. Las recomendaciones del agente son ejemplos simulados.`,
+    band: health.health_band, bandTitle: 'Clasificación registrada en Supabase',
+    bandDesc: 'La banda y la nota proceden del mismo mes.',
+    delta3: delta == null ? 'Sin dato' : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} pts`,
+    deltaHint: 'Variación registrada frente a tres meses antes.',
+    forecast: 'Pendiente', forecastHint: 'sin previsión conectada',
+    chartHistory: companyDetail.data.value?.health.map(row => row.health_score) || [],
+    chartForecast: [], chartMarker: null, chartTag: 'Historia real · Supabase',
+    direction: (health.health_trend === 'improving' ? 'up' : health.health_trend === 'deteriorating' ? 'down' : 'flat') as AlertDirection,
+  }
+})
+const scoreMonths = computed(() => companyHealth.value ? companyDetail.data.value?.health.map(row => row.month.slice(0, 7)) : undefined)
+const sectorTraces = computed(() => [
+  { key: 'company', label: companyName.value, history: state.value.chartHistory, forecast: state.value.chartForecast },
+  { key: 'sector', label: `${companySector.value} · referencia simulada`, tone: 'muted' as const, history: state.value.chartHistory.map(() => 65), forecast: [] },
+])
+
 
 const arrow = computed(
   () => ({ up: ArrowUp, flat: ArrowRight, down: ArrowDown, alert: ArrowDown })[state.value.direction],
@@ -155,12 +186,12 @@ const drivers = computed(() => {
 </script>
 
 <template>
-  <div class="centinela tz">
+  <div v-if="!companyDetail.isPending.value" class="centinela tz">
     <TreasuryHead
       v-model="selected"
-      title="X-Ray Score · Distribuciones Ibérica"
-      lead="Tu salud financiera explicada, a partir de 24 meses de rastro financiero."
-      sync="Actualizado hace 4 min"
+      :title="`X-Ray Score · ${companyName}`"
+      :lead="`Tu salud financiera explicada · ${companyDetail.data.value?.health.length || 0} meses de score conectados`"
+      :sync="`Mes del score: ${companyHealth?.month.slice(0, 7) || 'demo'}`"
     />
 
     <TreasuryAlert
@@ -200,7 +231,7 @@ const drivers = computed(() => {
           <component :is="arrow" :size="14" class="xs-arrow" aria-hidden="true" />
         </p>
         <p class="tz-read__figure">{{ state.forecast }}</p>
-        <p class="tz-read__hint">Banda del 80 % · {{ state.forecastHint }}</p>
+        <p class="tz-read__hint">{{ state.forecastHint }}</p>
       </div>
     </section>
 
@@ -208,22 +239,18 @@ const drivers = computed(() => {
       <header class="tz-card__bar">
         <div>
           <h2>Frente al sector</h2>
-          <p>Score y plazos frente a la mediana de distribución alimentaria · comparativa anónima</p>
+          <p>{{ companySector }} · referencia sectorial simulada, pendiente del score del sector</p>
         </div>
       </header>
-      <SectorCompare
-        :company="leadCompany"
-        :score="Number(state.score)"
-        :series="{ history: state.chartHistory, forecast: state.chartForecast }"
-      />
+      <ScoreBandChart :traces="sectorTraces" :month-labels="scoreMonths" note="Referencia sectorial simulada" :caption="`Comparativa de ${companyName} frente a ${companySector}. Referencia sectorial simulada.`" />
     </section>
 
     <div class="tz-split">
       <section class="tz-card">
         <header class="tz-card__bar">
           <div>
-            <h2>Trayectoria del score · últimos 24 meses</h2>
-            <p>Historia y previsión a tres meses con banda de confianza</p>
+            <h2>Trayectoria del score</h2>
+            <p>{{ companyHealth ? 'Histórico registrado en Supabase' : 'Historia y previsión simuladas' }}</p>
           </div>
           <span class="tz-tag">{{ state.chartTag }}</span>
         </header>
@@ -231,14 +258,14 @@ const drivers = computed(() => {
           :traces="[
             {
               key: 'score',
-              label: 'Distribuciones Ibérica',
+              label: companyName,
               history: state.chartHistory,
               forecast: state.chartForecast,
             },
           ]"
           :marker="state.chartMarker"
-          note="Trazo discontinuo: previsión a 3 meses"
-          caption="Score de Distribuciones Ibérica mes a mes durante 24 meses, con previsión a tres."
+          :note="companyHealth ? 'Sin previsión conectada' : 'Previsión simulada'"
+          :month-labels="scoreMonths" :caption="`Score de ${companyName} mes a mes`"
         />
       </section>
 
@@ -246,7 +273,7 @@ const drivers = computed(() => {
         <header>
           <span class="xs-agent__mark" aria-hidden="true">A</span>
           <div>
-            <h2>Agente Centinela</h2>
+            <h2>Agente Centinela · demo</h2>
             <p>{{ state.agentStatus }}</p>
           </div>
         </header>
@@ -265,9 +292,10 @@ const drivers = computed(() => {
       <header class="tz-card__bar">
         <div>
           <h2>Qué explica el score</h2>
-          <p>Contribución exacta de cada señal · suma al score total</p>
+          <p>{{ companyHealth ? 'Contribuciones registradas en Supabase' : 'Explicaciones simuladas' }}</p>
         </div>
       </header>
+      <p v-if="!drivers.length">Sin explicaciones disponibles para este mes.</p>
       <ul class="xs-drivers">
         <li v-for="d in drivers" :key="d.label">
           <span>{{ d.label }}</span>

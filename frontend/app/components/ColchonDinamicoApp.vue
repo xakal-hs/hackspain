@@ -11,6 +11,8 @@ interface Fact {
   flagged?: boolean
 }
 
+const { name: companyName, sector: companySector, detail: companyDetail, latest: companyLatest, health: companyHealth, company: selectedCompany } = useSelectedCompany()
+
 // TODO: sustituir por fetch a /api/... cuando el endpoint esté listo
 const states: Record<
   TreasuryState,
@@ -128,21 +130,36 @@ const states: Record<
   },
 }
 
-const state = computed(() => states[selected.value])
+const state = computed(() => {
+  const mock = states[selected.value]
+  const row = companyLatest.value
+  const cash = row?.cash_end
+  const currency = selectedCompany.value?.currency
+  return { ...mock,
+    cash: cash == null || !currency ? 'Sin dato' : `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 2 }).format(cash)} ${currency}`,
+    drivers: [
+      { label: 'Caja / pagos mensuales · dato real', value: row?.runway_m == null ? 'Sin dato' : `${row.runway_m.toFixed(1)} meses`, flagged: true },
+      { label: 'Score X-Ray · dato real', value: companyHealth.value?.health_score.toFixed(1) ?? 'Sin dato', flagged: true },
+      ...mock.drivers.slice(2).map(driver => ({ ...driver, label: `${driver.label} · demo` })),
+    ],
+  }
+})
+
+
 </script>
 
 <template>
-  <div class="centinela tz">
+  <div v-if="!companyDetail.isPending.value" class="centinela tz">
     <TreasuryHead
       v-model="selected"
-      title="Colchón Dinámico"
+      :title="`Colchón Dinámico · ${companyName}`"
       lead="Divide tu caja en lo que necesitas y lo que no. Coloca el excedente y prevé las devoluciones."
-      sync="Sincronizado hace 4 min"
+      :sync="`Mes de caja: ${companyLatest?.month || 'sin dato'}`"
     />
 
     <TreasuryAlert
       :direction="state.direction"
-      :headline="state.headline"
+      :headline="`Ejemplo simulado · ${state.headline}`"
       :text="state.subhead"
       :cta="state.ctaLabel"
       :cta-filled="state.ctaFilled"
@@ -150,7 +167,7 @@ const state = computed(() => states[selected.value])
 
     <section class="tz-card tz-strip" aria-label="Caja, colchón y excedente">
       <div>
-        <p class="tz-read__label">Caja actual <b>+24k € esta semana</b></p>
+        <p class="tz-read__label">Caja reconstruida <b>{{ selectedCompany?.currency || 'Sin moneda' }} · dato del panel</b></p>
         <p class="tz-read__figure">{{ state.cash }}</p>
       </div>
       <div>
@@ -243,7 +260,7 @@ const state = computed(() => states[selected.value])
           <span>oct '25</span><span>abr '26</span><span>hoy</span><span>+3 meses</span>
         </p>
         <ul class="tz-legend">
-          <li><i :style="{ color: state.chartColor }"></i>Excedente real</li>
+          <li><i :style="{ color: state.chartColor }"></i>Excedente simulado</li>
           <li>
             <i class="is-dashed" :style="{ color: state.chartColor }"></i>Previsión a 3 meses
             (banda del 80 %)

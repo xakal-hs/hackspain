@@ -13,6 +13,8 @@ interface Payment {
   urgent?: boolean
 }
 
+const { name: companyName, sector: companySector, detail: companyDetail, latest: companyLatest, health: companyHealth, company: selectedCompany } = useSelectedCompany()
+
 // TODO: sustituir por fetch a /api/... cuando el endpoint esté listo
 const states: Record<
   TreasuryState,
@@ -146,17 +148,17 @@ const state = computed(() => states[selected.value])
 </script>
 
 <template>
-  <div class="centinela tz">
+  <div v-if="!companyDetail.isPending.value" class="centinela tz">
     <TreasuryHead
       v-model="selected"
-      title="Divisa Inteligente"
+      :title="`Divisa Inteligente · ${companyName}`"
       lead="Prevé tus pagos en divisa y cubre al mejor tipo antes de la fecha del cobro o del pago."
-      sync="Conectado con Business Central"
+      :sync="`ERP: ${selectedCompany?.erp || 'Sin dato'}`"
     />
 
     <TreasuryAlert
       :direction="state.direction"
-      :headline="state.headline"
+      :headline="`Ejemplo simulado · ${state.headline}`"
       :text="state.subhead"
       :cta="state.ctaLabel"
       :cta-filled="state.ctaFilled"
@@ -249,7 +251,7 @@ const state = computed(() => states[selected.value])
           <span>oct '25</span><span>ene '26</span><span>hoy</span><span>+3 meses</span>
         </p>
         <ul class="tz-legend">
-          <li><i style="color: var(--text)"></i>Tipo real</li>
+          <li><i style="color: var(--text)"></i>Tipo simulado</li>
           <li><i class="is-dashed" style="color: var(--text)"></i>Previsión</li>
           <li><i class="is-dot" :style="{ background: state.chartColor }"></i>Pago en divisa previsto</li>
         </ul>
