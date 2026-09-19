@@ -11,6 +11,40 @@ son **dos** variables sueltas: `tax_miss` y `payroll_continuity_6m` (brazo G).
 
 El informe completo, con las tablas y el diagnóstico: [`pesos_2x2.html`](pesos_2x2.html).
 
+## El enfoque escalonado, por separado
+
+El catálogo tiene dos escaleras y conviene no juzgarlas juntas:
+
+1. **La criticidad declarada a mano** — P0 1,00 · P1 0,72 · P2 0,45 · P3 0,25 · COV 0,05.
+2. **El reparto** `peso = peso_del_pilar × (prioridad / Σ prioridades del pilar)`.
+
+El brazo B las mide juntas y pierde 9,7σ, pero **la culpa es de la segunda**: repartir el 24 %
+de liquidez entre seis variables impide que ninguna pase del 4,8 %, mientras la calibración
+pone 27 % en `runway` sola. La escalera dice «la caja es P0» y el reparto se lo quita acto
+seguido. Con las 42 variables del doc y pesos calibrados (brazo D) el ancla vuelve a 0,835.
+
+Así que se probó la primera **sola**, como **cota inferior** sobre el peso calibrado
+(`w_f ≥ 0,02 × criticidad_f`, renormalizado antes de ajustar la escala). Resultado:
+
+| evento | calibrado | con piso | σ pareadas |
+|---|---:|---:|---:|
+| `tension_np_raw_6m` (ancla) | 0,849 | 0,848 | **−2,6** |
+| `tension_6m` | 0,823 | 0,821 | **−3,0** |
+| `caida_3m_corto` | 0,538 | 0,543 | +8,3 |
+| `impago_ap_6m` | 0,539 | 0,544 | +4,5 |
+| `caida_6m` | 0,577 | 0,583 | +3,6 |
+
+**No se adopta, y el motivo es que las sigmas engañan aquí.** El piso solo mueve dos features
+—`oper_growth_12m` 0,005 → 0,009 y `ar_overdue_90_ratio` 0,008 → 0,009—, así que los dos brazos
+son casi el mismo modelo: el error típico de la diferencia se hace minúsculo y cualquier cambio
+de 0,005 de AUC sale con muchas sigmas. Es el error de celebrar sigmas, con el signo cambiado.
+
+Y sobre todo: **no hay nada que rescatar**. El piso existía para evitar que una feature crítica
+acabase en peso 0, y con el ancla de caja propia eso ya no pasa — `debt_burden` (P1) calibra a
+0,026, muy por encima de su piso de 0,014. La patología que justificaba la escalera era del
+ancla vieja con póliza. Añadir 18 juicios de criticidad a mano y un parámetro `PISO` para
+comprar ±0,005 de AUC en las dos direcciones no se paga.
+
 | brazo | qué es | ancla | PM | avisos cubiertos |
 |---|---|---:|---:|---:|
 | A | 17 features · pesos calibrados (el backend) | **0,848** | 0,6285 | 18,6 % |

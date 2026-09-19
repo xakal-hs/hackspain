@@ -5,7 +5,7 @@ El panel lo construye etl.py (CSV crudos -> data/panel.parquet). Aquí empieza e
 Una sola entrada: `build()` lee `panel.parquet` y devuelve un DataFrame pandas con
 una fila por (company_id, month) que contiene:
 
-  - las 17 features que PUNTUAN (FEATURES)      -> entran en la nota
+  - las 18 features que PUNTUAN (FEATURES)      -> entran en la nota
   - las features de CONTEXTO (CONTEXT)          -> OOD, confianza, reglas
   - los eventos a 6/3/2 meses (EVENTS/JUDGES)   -> 1 ocurre, 0 no ocurre, NaN no observable
 
@@ -43,6 +43,11 @@ FEATURES: dict[str, dict] = {
                         formula="cuotas + intereses / entradas (3m)"),
     "payroll_cv": dict(pilar="solvencia", dir=-1, zero_best=False, label="Regularidad de nóminas",
                        formula="semidesviación a la baja de las nóminas / media (6m); sin nóminas = no aplica"),
+    # Mide si la nómina SALE, no cuánto varía: son cosas distintas y la que anticipa es esta.
+    # Única superviviente del catálogo a priori de docs/explicacion_pesos.md en el 2x2 de
+    # experiments/ (+4,1 σ pareadas anticipando la entrada en estrés a 2 meses).
+    "payroll_continuity_6m": dict(pilar="solvencia", dir=+1, zero_best=False, label="Continuidad de nóminas",
+                                 formula="meses de los últimos 6 con nómina pagada; sin nóminas = no aplica"),
     "ap_late_share": dict(pilar="disciplina", dir=-1, zero_best=True, label="Pagos tardíos a proveedores",
                           formula="% facturas recibidas vencidas >15 días sin pagar o pagadas tarde (3m)"),
     "ar_late_share": dict(pilar="disciplina", dir=-1, zero_best=True, label="Cobros tardíos de clientes",
@@ -73,6 +78,7 @@ PILLARS = ["liquidez", "rentabilidad", "solvencia", "disciplina", "estabilidad"]
 
 # Peso a priori del prestamista, antes de calibrar. Se usa tal cual si no hay etiquetas.
 PRIOR_W = {"runway": 3.0, "lc_util": 1.0, "oper_growth_12m": 1.5, "debt_burden": 1.0, "payroll_cv": 0.5,
+           "payroll_continuity_6m": 1.0,
            "ap_late_share": 1.5, "ar_late_share": 1.0, "ap_overdue_ratio": 1.0, "ar_overdue_90_ratio": 0.5,
            "refund_rate": 0.5, "activity_trend": 1.5, "transfer_dep": 0.5, "hhi_ar_6m": 0.5, "net_vol_6m": 0.5,
            "cust_trend": 1.0, "lost_share": 1.0, "oper_persistence_6m": 1.0}
@@ -118,7 +124,7 @@ def _log_ratio(num: pl.Expr, den: pl.Expr, eps: pl.Expr | float = EPS) -> pl.Exp
 
 
 def add_features(p: pl.DataFrame) -> pl.DataFrame:
-    """Panel crudo -> + las 17 features y las de contexto."""
+    """Panel crudo -> + las features que puntúan y las de contexto."""
     p = p.sort("company_id", "month").with_columns(
         [pl.col(c).fill_null(strategy="forward", limit=3).over("company_id", order_by="month")
          for c in STICKY if c in p.columns])
@@ -187,6 +193,11 @@ def add_features(p: pl.DataFrame) -> pl.DataFrame:
                     / (pl.max_horizontal(pl.col("out3") / 3, pl.col("out12") / 12) + pl.col("eps"))),
         payroll_cv=pl.when(pl.col("pay6") > 0).then(
             pl.col("payneg2").rolling_mean(6, min_samples=3).over(**KEY).sqrt() / pl.col("pay6")),
+        # la condición es «alguna vez pagó nómina en la ventana»: a quien no tiene plantilla no se
+        # le puntúa una continuidad de 0, se le deja sin dato (NaN, que el scorer manda al centro).
+        payroll_continuity_6m=pl.when(pl.col("payroll").rolling_max(6, min_samples=3).over(**KEY) > 0)
+                                .then((pl.col("payroll") > 0).cast(pl.Float64))
+                                .rolling_mean(6, min_samples=3).over(**KEY),
     )
     # 0/0 (empresa sin flujos) = sin dato, no NaN numérico
     return f.with_columns([pl.col(c).fill_nan(None) for c in SCORE_FEATURES + CONTEXT

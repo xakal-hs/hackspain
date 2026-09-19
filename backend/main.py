@@ -283,7 +283,7 @@ def explain(cid: str, month: str | None = None):
 
 @app.get("/api/model")
 def model():
-    """Qué aprendió el modelo. Es todo: 17 pesos, dos números de escala y las curvas de probabilidad."""
+    """Qué aprendió el modelo. Es todo: un peso por feature, dos números de escala y las curvas."""
     return {
         "target": S.scorer.target, "alpha_ewma": S.scorer.alpha,
         "weights": {k: round(v, 4) for k, v in sorted(S.scorer.weights.items(), key=lambda kv: -kv[1])},
