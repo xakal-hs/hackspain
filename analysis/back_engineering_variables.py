@@ -511,6 +511,12 @@ FINDINGS = [
 
 PRIORITY_BASE = {"P0": 1.00, "P1": 0.72, "P2": 0.45, "P3": 0.25, "COV": 0.05}
 
+# Peso objetivo por pilar (punto medio de la banda sugerida). Los pilares puntuables se
+# normalizan a 100; GRP (overlay) y OBS (cobertura) no puntúan. El reparto dentro de cada
+# pilar es proporcional a la prioridad de cada variable: peso_var = peso_pilar × prioridad/Σ.
+PILLAR_TARGET = {"LIQ": 24.0, "AR": 20.0, "DEBT": 18.0, "CF": 14.0, "AP": 9.5, "STAB": 10.0, "SOLV": 3.5}
+PILLAR_NON_SCORING = {"GRP": "overlay", "OBS": "cobertura"}
+
 # Variables críticas sin AUC propia: se les asigna una fuerza de marco (0-1) para que la
 # ordenación no las hunda por falta de medida. El HTML las marca como 'marco', no 'medida'.
 STRENGTH_OVERRIDE = {
@@ -631,6 +637,46 @@ def fmt_int(v) -> str:
     return f"{v:,}".replace(",", ".")
 
 
+def fmt_weight(v: float) -> str:
+    return f"{v:.1f} %".replace(".", ",")
+
+
+def ordered_items(items: list[dict]) -> list[dict]:
+    return sorted(items, key=lambda x: (["P0", "P1", "P2", "P3", "COV"].index(x["tier"]), x["var"]))
+
+
+def pillar_weights(items_by_pillar: dict[str, list], cov: dict[str, int]) -> tuple[dict[str, float], dict[str, float]]:
+    """Reparte el peso de cada pilar entre sus variables, proporcional a la prioridad.
+
+    Devuelve (peso por variable, peso realizado por pilar). Los pilares overlay/cobertura
+    no puntúan: sus variables salen sin peso.
+    """
+    scored_total = sum(PILLAR_TARGET.values())
+    var_w: dict[str, float] = {}
+    pillar_w: dict[str, float] = {}
+    for p in PILLARS:
+        pid = p["id"]
+        items = ordered_items(items_by_pillar[pid])
+        if pid in PILLAR_NON_SCORING:
+            pillar_w[pid] = 0.0
+            for it in items:
+                var_w[it["var"]] = 0.0
+            continue
+        target = PILLAR_TARGET.get(pid, 0.0) * 100.0 / scored_total
+        pris = [max(priority(it, cov)[0], 1) for it in items]
+        s = sum(pris) or 1
+        raw = [target * pr / s for pr in pris]
+        rounded = [round(r, 1) for r in raw]
+        residual = round(target - sum(rounded), 1)
+        if rounded and abs(residual) >= 0.05:
+            top = max(range(len(rounded)), key=lambda i: rounded[i])
+            rounded[top] = round(rounded[top] + residual, 1)
+        for it, w in zip(items, rounded):
+            var_w[it["var"]] = w
+        pillar_w[pid] = round(sum(rounded), 1)
+    return var_w, pillar_w
+
+
 def crit_badge(tier: str) -> str:
     label, color = TIER_LABEL[tier]
     return f'<span class="crit" style="--c:{color}">{label}</span>'
@@ -691,20 +737,29 @@ def build_html(cov: dict[str, int]) -> str:
     items_by_pillar: dict[str, list] = {pid: [] for pid in pillar_order}
     for it in ITEMS:
         items_by_pillar[it["pillar"]].append(it)
+    var_w, pillar_w = pillar_weights(items_by_pillar, cov)
 
     pillar_blocks = []
     for p in PILLARS:
         rows = []
-        for it in sorted(items_by_pillar[p["id"]], key=lambda x: (["P0", "P1", "P2", "P3", "COV"].index(x["tier"]), x["var"])):
+        items = ordered_items(items_by_pillar[p["id"]])
+        non_scoring = p["id"] in PILLAR_NON_SCORING
+        for it in items:
             prio, comp = priority(it, cov)
             src_tag = '<span class="srcmark">medida</span>' if comp["src"] == "medida" else '<span class="srcmark marco">marco</span>'
             cov_n = cov.get(it["cov"], 0)
             cov_frac = (cov_n / n_companies) if n_companies else 0
+            w = var_w.get(it["var"], 0.0)
+            if non_scoring:
+                w_cell = f'<td class="num wt noW">—<small>{PILLAR_NON_SCORING[p["id"]]}</small></td>'
+            else:
+                w_cell = f'<td class="num wt"><b>{fmt_weight(w)}</b><small>del score total</small></td>'
             rows.append(
                 f"""<tr>
                   <td><b>{html.escape(it['var'])}</b><small>{html.escape(it['plain'])}</small></td>
                   <td class="item"><code>{html.escape(it['item'])}</code></td>
                   <td>{crit_badge(it['tier'])}</td>
+                  {w_cell}
                   <td class="dir">{html.escape(it['dir'])}</td>
                   <td class="num">{fmt_int(cov_n)}<small>{cov_frac*100:.0f} % empresas</small></td>
                   <td class="num prio"><b>{prio}</b><small>{src_tag}</small></td>
@@ -712,26 +767,42 @@ def build_html(cov: dict[str, int]) -> str:
                 </tr>"""
             )
         color = PILLAR_COLOR[p["id"]]
+        realized = pillar_w.get(p["id"], 0.0)
+        total_txt = (
+            f'<b>{fmt_weight(realized)}</b><small>{len(items)} variables · no puntúa (modificador)</small>'
+            if non_scoring else
+            f'<b>{fmt_weight(realized)}</b><small>{len(items)} variables · banda {html.escape(p["weight"])}</small>'
+        )
         pillar_blocks.append(
             f"""<section class="pblock" style="--pc:{color}">
               <div class="phead">
                 <div><span class="ptag">{html.escape(p['id'])}</span><h3>{html.escape(p['name'])}</h3></div>
-                <div class="pweight">peso sugerido <b>{html.escape(p['weight'])}</b></div>
+                <div class="pweight">peso del pilar {total_txt}</div>
               </div>
               <p class="pwhy">{html.escape(p['why'])}</p>
               <div class="table-wrap"><table>
-                <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
+                <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Peso</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
                 <tbody>{''.join(rows)}</tbody>
               </table></div>
             </section>"""
         )
 
     # --- Pillar summary -----------------------------------------------------
+    def pillar_vars(p) -> str:
+        items = ordered_items(items_by_pillar[p["id"]])
+        if p["id"] in PILLAR_NON_SCORING:
+            return ", ".join(f"<code>{html.escape(it['var'])}</code>" for it in items)
+        return ", ".join(
+            f"<code>{html.escape(it['var'])}</code> <span class='wchip'>{fmt_weight(var_w.get(it['var'], 0))}</span>"
+            for it in items
+        )
+
     pillar_rows = "".join(
         f"""<tr>
           <td><b>{html.escape(p['id'])}</b><small>{html.escape(p['name'])}</small></td>
-          <td class="num w">{html.escape(p['weight'])}</td>
-          <td>{html.escape(p['items'])}</td>
+          <td class="num w">{html.escape(p['weight'])}<small>realizado {fmt_weight(pillar_w.get(p['id'], 0.0))}</small></td>
+          <td class="num">{len(items_by_pillar[p['id']])}<small>variables</small></td>
+          <td>{pillar_vars(p)}</td>
         </tr>"""
         for p in PILLARS
     )
@@ -756,10 +827,13 @@ def build_html(cov: dict[str, int]) -> str:
     for i, it in enumerate(ranked[:22], 1):
         prio, comp = priority(it, cov)
         src_tag = '<span class="srcmark">medida</span>' if comp["src"] == "medida" else '<span class="srcmark marco">marco</span>'
+        w = var_w.get(it["var"], 0.0)
+        w_txt = "—" if it["pillar"] in PILLAR_NON_SCORING else fmt_weight(w)
         rank_rows += (
             f"<tr><td class='num'>{i}</td>"
             f"<td><b>{html.escape(it['var'])}</b><small>{html.escape(it['plain'])}</small></td>"
             f"<td>{crit_badge(it['tier'])}</td>"
+            f"<td class='num wt'>{w_txt}</td>"
             f"<td class='num prio'>{prio}</td>"
             f"<td class='num small'>{comp['strength']:.2f}{src_tag}</td>"
             f"<td class='num small'>{comp['cov_factor']:.2f}</td>"
@@ -809,17 +883,18 @@ def build_html(cov: dict[str, int]) -> str:
 
   <section class="block">
     <h2>3 · Back-engineering ítem → variable → pilar → prioridad</h2>
-    <p class="lead">Cada fila parte del ítem crudo de <code>data/</code> y llega a la variable. La columna <b>Score</b> combina criticidad base, evidencia y cobertura: <code>100 × base × (0,55 + 0,45·evidencia) × (0,5 + 0,5·√cobertura)</code>. La evidencia es la mayor |AUC−0,5| medida (<span class="srcmark">medida</span>); cuando la variable no tiene AUC propia se usa la criticidad de marco (<span class="srcmark marco">marco</span>), porque el marco manda aunque no haya evento medible. Es una guía de ordenación, no un peso final: los pesos se calibran con signo restringido (D12).</p>
+    <p class="lead">Cada fila parte del ítem crudo de <code>data/</code> y llega a la variable, con <b>peso</b> (reparto de arranque dentro de su pilar), <b>prioridad</b>, <b>cobertura</b> y evidencia. La columna Score combina criticidad base, evidencia y cobertura: <code>100 × base × (0,55 + 0,45·evidencia) × (0,5 + 0,5·√cobertura)</code>. La evidencia es la mayor |AUC−0,5| medida (<span class="srcmark">medida</span>); cuando la variable no tiene AUC propia se usa la criticidad de marco (<span class="srcmark marco">marco</span>), porque el marco manda aunque no haya evento medible. Ni el peso ni el score son el peso final: se calibran con signo restringido (D12).</p>
     {''.join(pillar_blocks)}
   </section>
 
   <section class="block">
-    <h2>4 · Prioridad por grupo (pilar)</h2>
+    <h2>4 · Prioridad por grupo (pilar) y reparto de pesos</h2>
+    <p class="lead">El peso de cada variable sale del peso del pilar repartido por prioridad: <code>peso_var = peso_pilar × prioridad / Σ prioridad del pilar</code>. Los pilares puntuables se normalizan a 100; <b>GRP</b> es modificador y <b>OBS</b> no puntúa. Es un reparto de arranque: los pesos finales se calibran con signo restringido (D12).</p>
     <div class="table-wrap"><table>
-      <thead><tr><th>Pilar</th><th>Peso v8 sugerido</th><th>Ítems que lo alimentan</th></tr></thead>
+      <thead><tr><th>Pilar</th><th>Peso (banda / realizado)</th><th>Variables</th><th>Reparto dentro del pilar</th></tr></thead>
       <tbody>{pillar_rows}</tbody>
     </table></div>
-    <p class="caveat-note">El pilar <b>GRP</b> actúa como modificador (filtro intragrupo y comparación con hermanas), no como suma de peso. <b>OBS</b> no puntúa: ajusta la confianza.</p>
+    <p class="caveat-note">El pilar <b>GRP</b> actúa como modificador (filtro intragrupo, comparación con hermanas y régimen de negocio), así que sus variables no suman al score. <b>OBS</b> tampoco puntúa: ajusta la confianza. El resto reparte 100 % entre sus variables.</p>
   </section>
 
   <section class="block">
@@ -835,7 +910,7 @@ def build_html(cov: dict[str, int]) -> str:
     <h2>6 · Ranking de variables por prioridad</h2>
     <p class="lead">Las 22 primeras según el score transparente. Las que suben con los findings nuevos son, sobre todo, <code>lost_accel</code>, <code>payroll_cv</code>, <code>payee_concentration</code> e <code>hhi_ap_6m</code>; las que bajan, <code>net_margin_6m</code>, <code>refund_rate</code>, <code>tax_miss</code> y <code>billing_to_cash</code>.</p>
     <div class="table-wrap"><table>
-      <thead><tr><th>#</th><th>Variable</th><th>Prioridad</th><th>Score</th><th>Fuerza</th><th>Cobertura</th><th>Nota</th></tr></thead>
+      <thead><tr><th>#</th><th>Variable</th><th>Prioridad</th><th>Peso</th><th>Score</th><th>Fuerza</th><th>Cobertura</th><th>Nota</th></tr></thead>
       <tbody>{rank_rows}</tbody>
     </table></div>
   </section>
@@ -970,6 +1045,10 @@ td.auc.flat{color:var(--slate)}
 .risk{color:var(--red);font-size:11px}
 .srcmark{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:1px 6px;border-radius:999px;background:#e6f6ec;color:#16794c;margin-left:5px}
 .srcmark.marco{background:#eef1f6;color:#5b6b80}
+td.num.wt{white-space:nowrap}
+td.num.wt b{color:#0b3a6b;font-size:14px}
+td.num.wt.noW{color:#8a97a8}
+.wchip{display:inline-block;background:#e7f0fb;color:#1a4f86;border-radius:999px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:4px}
 .caveat-note{color:#6b7c93;font-size:13px;margin-top:12px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
 .grid2 h3{margin:0 0 6px;font-size:15px;color:#164f86}
