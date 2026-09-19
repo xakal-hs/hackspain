@@ -1,0 +1,1287 @@
+company_id,sector,tipo
+COMP_0001,servicios profesionales,servicio
+COMP_0002,servicios profesionales,servicio
+COMP_0003,holding / tesorería,mixto
+COMP_0004,mayorista / distribución,producto
+COMP_0005,comercio minorista,producto
+COMP_0006,holding / tesorería,producto
+COMP_0007,mayorista / distribución,producto
+COMP_0008,comercio minorista,mixto
+COMP_0009,comercio minorista,producto
+COMP_0010,servicios profesionales,mixto
+COMP_0011,servicios profesionales,servicio
+COMP_0012,,insuficiente
+COMP_0013,servicios profesionales,servicio
+COMP_0014,software / suscripción,servicio
+COMP_0015,mayorista / distribución,producto
+COMP_0016,holding / tesorería,producto
+COMP_0017,comercio minorista,producto
+COMP_0018,mayorista / distribución,producto
+COMP_0019,servicios profesionales,servicio
+COMP_0020,holding / tesorería,servicio
+COMP_0021,servicios profesionales,servicio
+COMP_0022,hostelería,servicio
+COMP_0023,hostelería,servicio
+COMP_0024,comercio minorista,mixto
+COMP_0025,servicios profesionales,servicio
+COMP_0026,servicios profesionales,servicio
+COMP_0027,transporte / logística,servicio
+COMP_0028,construcción,mixto
+COMP_0029,,mixto
+COMP_0030,comercio minorista,producto
+COMP_0031,comercio minorista,mixto
+COMP_0032,,insuficiente
+COMP_0033,servicios profesionales,servicio
+COMP_0034,comercio minorista,servicio
+COMP_0035,holding / tesorería,producto
+COMP_0036,servicios profesionales,servicio
+COMP_0037,comercio minorista,mixto
+COMP_0038,holding / tesorería,servicio
+COMP_0039,servicios profesionales,servicio
+COMP_0040,servicios profesionales,servicio
+COMP_0041,holding / tesorería,servicio
+COMP_0042,comercio minorista,servicio
+COMP_0043,holding / tesorería,producto
+COMP_0044,holding / tesorería,servicio
+COMP_0045,,insuficiente
+COMP_0046,comercio minorista,producto
+COMP_0047,software / suscripción,producto
+COMP_0048,servicios profesionales,servicio
+COMP_0049,servicios profesionales,servicio
+COMP_0050,,insuficiente
+COMP_0051,comercio minorista,mixto
+COMP_0052,comercio minorista,producto
+COMP_0053,servicios profesionales,servicio
+COMP_0054,holding / tesorería,servicio
+COMP_0055,alquiler / inmobiliario,servicio
+COMP_0056,comercio minorista,producto
+COMP_0057,servicios profesionales,servicio
+COMP_0058,industria,producto
+COMP_0059,transporte / logística,servicio
+COMP_0060,comercio minorista,mixto
+COMP_0061,comercio minorista,mixto
+COMP_0062,servicios profesionales,servicio
+COMP_0063,comercio minorista,servicio
+COMP_0064,comercio minorista,mixto
+COMP_0065,construcción,servicio
+COMP_0066,servicios profesionales,servicio
+COMP_0067,holding / tesorería,mixto
+COMP_0068,comercio minorista,servicio
+COMP_0069,servicios profesionales,mixto
+COMP_0070,comercio minorista,mixto
+COMP_0071,holding / tesorería,mixto
+COMP_0072,,insuficiente
+COMP_0073,transporte / logística,servicio
+COMP_0074,holding / tesorería,servicio
+COMP_0075,hostelería,servicio
+COMP_0076,comercio minorista,producto
+COMP_0077,holding / tesorería,mixto
+COMP_0078,holding / tesorería,servicio
+COMP_0079,servicios profesionales,servicio
+COMP_0080,construcción,producto
+COMP_0081,alquiler / inmobiliario,servicio
+COMP_0082,holding / tesorería,servicio
+COMP_0083,holding / tesorería,servicio
+COMP_0084,servicios profesionales,servicio
+COMP_0085,alquiler / inmobiliario,servicio
+COMP_0086,servicios profesionales,servicio
+COMP_0087,comercio minorista,producto
+COMP_0088,holding / tesorería,servicio
+COMP_0089,holding / tesorería,servicio
+COMP_0090,,mixto
+COMP_0091,hostelería,servicio
+COMP_0092,comercio minorista,mixto
+COMP_0093,servicios profesionales,servicio
+COMP_0094,holding / tesorería,servicio
+COMP_0095,,insuficiente
+COMP_0096,holding / tesorería,servicio
+COMP_0097,construcción,mixto
+COMP_0098,servicios profesionales,servicio
+COMP_0099,holding / tesorería,mixto
+COMP_0100,comercio minorista,mixto
+COMP_0101,servicios profesionales,servicio
+COMP_0102,holding / tesorería,servicio
+COMP_0103,holding / tesorería,mixto
+COMP_0104,transporte / logística,servicio
+COMP_0105,servicios profesionales,servicio
+COMP_0106,mayorista / distribución,producto
+COMP_0107,comercio minorista,producto
+COMP_0108,mayorista / distribución,producto
+COMP_0109,comercio minorista,servicio
+COMP_0110,servicios profesionales,servicio
+COMP_0111,servicios profesionales,servicio
+COMP_0112,comercio minorista,mixto
+COMP_0113,mayorista / distribución,mixto
+COMP_0114,,insuficiente
+COMP_0115,servicios profesionales,servicio
+COMP_0116,comercio minorista,servicio
+COMP_0117,servicios profesionales,servicio
+COMP_0118,servicios profesionales,servicio
+COMP_0119,comercio minorista,mixto
+COMP_0120,servicios profesionales,servicio
+COMP_0121,holding / tesorería,servicio
+COMP_0122,comercio minorista,servicio
+COMP_0123,holding / tesorería,servicio
+COMP_0124,servicios profesionales,servicio
+COMP_0125,holding / tesorería,mixto
+COMP_0126,holding / tesorería,servicio
+COMP_0127,,insuficiente
+COMP_0128,mayorista / distribución,mixto
+COMP_0129,holding / tesorería,producto
+COMP_0130,servicios profesionales,servicio
+COMP_0131,comercio minorista,producto
+COMP_0132,holding / tesorería,mixto
+COMP_0133,holding / tesorería,producto
+COMP_0134,,insuficiente
+COMP_0135,comercio minorista,mixto
+COMP_0136,servicios profesionales,servicio
+COMP_0137,holding / tesorería,servicio
+COMP_0138,comercio minorista,servicio
+COMP_0139,servicios profesionales,servicio
+COMP_0140,energía,servicio
+COMP_0141,comercio minorista,producto
+COMP_0142,servicios profesionales,servicio
+COMP_0143,comercio minorista,servicio
+COMP_0144,servicios profesionales,servicio
+COMP_0145,holding / tesorería,servicio
+COMP_0146,servicios profesionales,servicio
+COMP_0147,comercio minorista,servicio
+COMP_0148,servicios profesionales,servicio
+COMP_0149,servicios profesionales,mixto
+COMP_0150,comercio minorista,mixto
+COMP_0151,software / suscripción,mixto
+COMP_0152,servicios profesionales,servicio
+COMP_0153,servicios profesionales,servicio
+COMP_0154,,insuficiente
+COMP_0155,holding / tesorería,producto
+COMP_0156,servicios profesionales,servicio
+COMP_0157,comercio minorista,producto
+COMP_0158,comercio minorista,producto
+COMP_0159,servicios profesionales,servicio
+COMP_0160,servicios profesionales,servicio
+COMP_0161,servicios profesionales,servicio
+COMP_0162,servicios profesionales,servicio
+COMP_0163,servicios profesionales,servicio
+COMP_0164,holding / tesorería,mixto
+COMP_0165,servicios profesionales,servicio
+COMP_0166,comercio minorista,producto
+COMP_0167,software / suscripción,servicio
+COMP_0168,,insuficiente
+COMP_0169,comercio minorista,servicio
+COMP_0170,,insuficiente
+COMP_0171,holding / tesorería,mixto
+COMP_0172,comercio minorista,producto
+COMP_0173,comercio minorista,mixto
+COMP_0174,servicios profesionales,servicio
+COMP_0175,servicios profesionales,servicio
+COMP_0176,servicios profesionales,mixto
+COMP_0177,comercio minorista,producto
+COMP_0178,holding / tesorería,servicio
+COMP_0179,comercio minorista,producto
+COMP_0180,energía,servicio
+COMP_0181,holding / tesorería,mixto
+COMP_0182,comercio minorista,servicio
+COMP_0183,servicios profesionales,servicio
+COMP_0184,mayorista / distribución,mixto
+COMP_0185,hostelería,servicio
+COMP_0186,comercio minorista,mixto
+COMP_0187,,insuficiente
+COMP_0188,comercio minorista,servicio
+COMP_0189,comercio minorista,producto
+COMP_0190,comercio minorista,servicio
+COMP_0191,servicios profesionales,servicio
+COMP_0192,holding / tesorería,mixto
+COMP_0193,comercio minorista,mixto
+COMP_0194,,producto
+COMP_0195,comercio minorista,producto
+COMP_0196,construcción,producto
+COMP_0197,servicios profesionales,servicio
+COMP_0198,mayorista / distribución,producto
+COMP_0199,servicios profesionales,servicio
+COMP_0200,comercio minorista,producto
+COMP_0201,holding / tesorería,servicio
+COMP_0202,mayorista / distribución,producto
+COMP_0203,holding / tesorería,servicio
+COMP_0204,servicios profesionales,servicio
+COMP_0205,comercio minorista,servicio
+COMP_0206,comercio minorista,servicio
+COMP_0207,servicios profesionales,servicio
+COMP_0208,mayorista / distribución,producto
+COMP_0209,hostelería,servicio
+COMP_0210,servicios profesionales,servicio
+COMP_0211,comercio minorista,mixto
+COMP_0212,,insuficiente
+COMP_0213,comercio minorista,servicio
+COMP_0214,construcción,producto
+COMP_0215,servicios profesionales,servicio
+COMP_0216,hostelería,servicio
+COMP_0217,,insuficiente
+COMP_0218,holding / tesorería,mixto
+COMP_0219,transporte / logística,servicio
+COMP_0220,mayorista / distribución,producto
+COMP_0221,comercio minorista,servicio
+COMP_0222,comercio minorista,mixto
+COMP_0223,holding / tesorería,mixto
+COMP_0224,comercio minorista,producto
+COMP_0225,comercio minorista,producto
+COMP_0226,servicios profesionales,servicio
+COMP_0227,servicios profesionales,servicio
+COMP_0228,comercio minorista,producto
+COMP_0229,servicios profesionales,servicio
+COMP_0230,holding / tesorería,mixto
+COMP_0231,holding / tesorería,mixto
+COMP_0232,mayorista / distribución,producto
+COMP_0233,comercio minorista,producto
+COMP_0234,hostelería,servicio
+COMP_0235,comercio minorista,producto
+COMP_0236,servicios profesionales,servicio
+COMP_0237,servicios profesionales,servicio
+COMP_0238,servicios profesionales,servicio
+COMP_0239,servicios profesionales,servicio
+COMP_0240,,insuficiente
+COMP_0241,construcción,mixto
+COMP_0242,,mixto
+COMP_0243,comercio minorista,servicio
+COMP_0244,servicios profesionales,servicio
+COMP_0245,servicios profesionales,servicio
+COMP_0246,construcción,mixto
+COMP_0247,software / suscripción,producto
+COMP_0248,hostelería,servicio
+COMP_0249,construcción,producto
+COMP_0250,alquiler / inmobiliario,servicio
+COMP_0251,servicios profesionales,servicio
+COMP_0252,,insuficiente
+COMP_0253,software / suscripción,mixto
+COMP_0254,holding / tesorería,servicio
+COMP_0255,alquiler / inmobiliario,servicio
+COMP_0256,servicios profesionales,servicio
+COMP_0257,hostelería,servicio
+COMP_0258,construcción,mixto
+COMP_0259,servicios profesionales,servicio
+COMP_0260,,insuficiente
+COMP_0261,mayorista / distribución,producto
+COMP_0262,comercio minorista,producto
+COMP_0263,holding / tesorería,mixto
+COMP_0264,servicios profesionales,servicio
+COMP_0265,servicios profesionales,servicio
+COMP_0266,comercio minorista,servicio
+COMP_0267,servicios profesionales,servicio
+COMP_0268,comercio minorista,mixto
+COMP_0269,holding / tesorería,producto
+COMP_0270,holding / tesorería,servicio
+COMP_0271,comercio minorista,servicio
+COMP_0272,servicios profesionales,servicio
+COMP_0273,servicios profesionales,servicio
+COMP_0274,holding / tesorería,producto
+COMP_0275,,insuficiente
+COMP_0276,,mixto
+COMP_0277,holding / tesorería,servicio
+COMP_0278,comercio minorista,mixto
+COMP_0279,holding / tesorería,mixto
+COMP_0280,,mixto
+COMP_0281,comercio minorista,servicio
+COMP_0282,servicios profesionales,servicio
+COMP_0283,servicios profesionales,servicio
+COMP_0284,servicios profesionales,mixto
+COMP_0285,mayorista / distribución,mixto
+COMP_0286,comercio minorista,mixto
+COMP_0287,software / suscripción,servicio
+COMP_0288,comercio minorista,mixto
+COMP_0289,comercio minorista,producto
+COMP_0290,comercio minorista,servicio
+COMP_0291,holding / tesorería,servicio
+COMP_0292,comercio minorista,producto
+COMP_0293,transporte / logística,producto
+COMP_0294,mayorista / distribución,producto
+COMP_0295,comercio minorista,mixto
+COMP_0296,servicios profesionales,servicio
+COMP_0297,hostelería,servicio
+COMP_0298,servicios profesionales,servicio
+COMP_0299,servicios profesionales,servicio
+COMP_0300,servicios profesionales,servicio
+COMP_0301,comercio minorista,servicio
+COMP_0302,servicios profesionales,servicio
+COMP_0303,servicios profesionales,servicio
+COMP_0304,comercio minorista,servicio
+COMP_0305,comercio minorista,servicio
+COMP_0306,hostelería,servicio
+COMP_0307,,insuficiente
+COMP_0308,holding / tesorería,servicio
+COMP_0309,holding / tesorería,mixto
+COMP_0310,holding / tesorería,servicio
+COMP_0311,holding / tesorería,servicio
+COMP_0312,comercio minorista,servicio
+COMP_0313,servicios profesionales,mixto
+COMP_0314,servicios profesionales,servicio
+COMP_0315,mayorista / distribución,producto
+COMP_0316,holding / tesorería,mixto
+COMP_0317,servicios profesionales,servicio
+COMP_0318,servicios profesionales,servicio
+COMP_0319,comercio minorista,servicio
+COMP_0320,mayorista / distribución,producto
+COMP_0321,mayorista / distribución,mixto
+COMP_0322,comercio minorista,producto
+COMP_0323,hostelería,servicio
+COMP_0324,comercio minorista,servicio
+COMP_0325,,insuficiente
+COMP_0326,energía,mixto
+COMP_0327,construcción,mixto
+COMP_0328,servicios profesionales,servicio
+COMP_0329,comercio minorista,producto
+COMP_0330,holding / tesorería,mixto
+COMP_0331,servicios profesionales,servicio
+COMP_0332,holding / tesorería,servicio
+COMP_0333,holding / tesorería,producto
+COMP_0334,comercio minorista,mixto
+COMP_0335,servicios profesionales,servicio
+COMP_0336,servicios profesionales,servicio
+COMP_0337,,insuficiente
+COMP_0338,holding / tesorería,servicio
+COMP_0339,,insuficiente
+COMP_0340,servicios profesionales,servicio
+COMP_0341,comercio minorista,mixto
+COMP_0342,servicios profesionales,servicio
+COMP_0343,hostelería,mixto
+COMP_0344,comercio minorista,producto
+COMP_0345,servicios profesionales,servicio
+COMP_0346,mayorista / distribución,producto
+COMP_0347,servicios profesionales,servicio
+COMP_0348,servicios profesionales,servicio
+COMP_0349,comercio minorista,mixto
+COMP_0350,servicios profesionales,servicio
+COMP_0351,comercio minorista,producto
+COMP_0352,holding / tesorería,producto
+COMP_0353,comercio minorista,producto
+COMP_0354,mayorista / distribución,mixto
+COMP_0355,,insuficiente
+COMP_0356,holding / tesorería,servicio
+COMP_0357,servicios profesionales,servicio
+COMP_0358,hostelería,servicio
+COMP_0359,servicios profesionales,servicio
+COMP_0360,comercio minorista,servicio
+COMP_0361,holding / tesorería,producto
+COMP_0362,comercio minorista,producto
+COMP_0363,servicios profesionales,servicio
+COMP_0364,comercio minorista,mixto
+COMP_0365,hostelería,servicio
+COMP_0366,servicios profesionales,servicio
+COMP_0367,comercio minorista,producto
+COMP_0368,hostelería,servicio
+COMP_0369,mayorista / distribución,mixto
+COMP_0370,mayorista / distribución,producto
+COMP_0371,,insuficiente
+COMP_0372,servicios profesionales,servicio
+COMP_0373,comercio minorista,servicio
+COMP_0374,mayorista / distribución,mixto
+COMP_0375,servicios profesionales,servicio
+COMP_0376,holding / tesorería,servicio
+COMP_0377,comercio minorista,producto
+COMP_0378,servicios profesionales,servicio
+COMP_0379,comercio minorista,mixto
+COMP_0380,mayorista / distribución,producto
+COMP_0381,servicios profesionales,servicio
+COMP_0382,,insuficiente
+COMP_0383,servicios profesionales,servicio
+COMP_0384,servicios profesionales,servicio
+COMP_0385,holding / tesorería,servicio
+COMP_0386,holding / tesorería,servicio
+COMP_0387,servicios profesionales,mixto
+COMP_0388,servicios profesionales,servicio
+COMP_0389,servicios profesionales,servicio
+COMP_0390,,insuficiente
+COMP_0391,construcción,mixto
+COMP_0392,comercio minorista,mixto
+COMP_0393,servicios profesionales,servicio
+COMP_0394,comercio minorista,servicio
+COMP_0395,servicios profesionales,servicio
+COMP_0396,servicios profesionales,servicio
+COMP_0397,transporte / logística,servicio
+COMP_0398,holding / tesorería,mixto
+COMP_0399,comercio minorista,servicio
+COMP_0400,comercio minorista,producto
+COMP_0401,construcción,producto
+COMP_0402,servicios profesionales,servicio
+COMP_0403,comercio minorista,producto
+COMP_0404,servicios profesionales,servicio
+COMP_0405,hostelería,servicio
+COMP_0406,transporte / logística,mixto
+COMP_0407,comercio minorista,mixto
+COMP_0408,servicios profesionales,servicio
+COMP_0409,servicios profesionales,servicio
+COMP_0410,comercio minorista,producto
+COMP_0411,comercio minorista,servicio
+COMP_0412,holding / tesorería,mixto
+COMP_0413,comercio minorista,mixto
+COMP_0414,alquiler / inmobiliario,servicio
+COMP_0415,alquiler / inmobiliario,servicio
+COMP_0416,comercio minorista,mixto
+COMP_0417,servicios profesionales,servicio
+COMP_0418,holding / tesorería,mixto
+COMP_0419,,insuficiente
+COMP_0420,comercio minorista,producto
+COMP_0421,,insuficiente
+COMP_0422,servicios profesionales,servicio
+COMP_0423,mayorista / distribución,producto
+COMP_0424,hostelería,mixto
+COMP_0425,construcción,producto
+COMP_0426,,insuficiente
+COMP_0427,servicios profesionales,servicio
+COMP_0428,holding / tesorería,mixto
+COMP_0429,,mixto
+COMP_0430,servicios profesionales,servicio
+COMP_0431,servicios profesionales,servicio
+COMP_0432,servicios profesionales,servicio
+COMP_0433,comercio minorista,producto
+COMP_0434,holding / tesorería,mixto
+COMP_0435,holding / tesorería,producto
+COMP_0436,holding / tesorería,producto
+COMP_0437,servicios profesionales,mixto
+COMP_0438,servicios profesionales,servicio
+COMP_0439,comercio minorista,mixto
+COMP_0440,comercio minorista,producto
+COMP_0441,holding / tesorería,servicio
+COMP_0442,comercio minorista,producto
+COMP_0443,servicios profesionales,servicio
+COMP_0444,mayorista / distribución,mixto
+COMP_0445,,insuficiente
+COMP_0446,mayorista / distribución,mixto
+COMP_0447,comercio minorista,producto
+COMP_0448,holding / tesorería,mixto
+COMP_0449,comercio minorista,producto
+COMP_0450,servicios profesionales,servicio
+COMP_0451,holding / tesorería,producto
+COMP_0452,mayorista / distribución,producto
+COMP_0453,servicios profesionales,servicio
+COMP_0454,servicios profesionales,servicio
+COMP_0455,comercio minorista,producto
+COMP_0456,servicios profesionales,servicio
+COMP_0457,servicios profesionales,servicio
+COMP_0458,holding / tesorería,producto
+COMP_0459,comercio minorista,producto
+COMP_0460,servicios profesionales,servicio
+COMP_0461,comercio minorista,producto
+COMP_0462,comercio minorista,producto
+COMP_0463,comercio minorista,producto
+COMP_0464,,insuficiente
+COMP_0465,hostelería,mixto
+COMP_0466,hostelería,servicio
+COMP_0467,holding / tesorería,servicio
+COMP_0468,servicios profesionales,servicio
+COMP_0469,comercio minorista,producto
+COMP_0470,servicios profesionales,servicio
+COMP_0471,comercio minorista,producto
+COMP_0472,holding / tesorería,mixto
+COMP_0473,holding / tesorería,producto
+COMP_0474,software / suscripción,servicio
+COMP_0475,,insuficiente
+COMP_0476,servicios profesionales,servicio
+COMP_0477,comercio minorista,producto
+COMP_0478,servicios profesionales,servicio
+COMP_0479,comercio minorista,mixto
+COMP_0480,comercio minorista,mixto
+COMP_0481,servicios profesionales,servicio
+COMP_0482,comercio minorista,producto
+COMP_0483,servicios profesionales,servicio
+COMP_0484,servicios profesionales,servicio
+COMP_0485,holding / tesorería,mixto
+COMP_0486,alquiler / inmobiliario,producto
+COMP_0487,comercio minorista,producto
+COMP_0488,,insuficiente
+COMP_0489,,insuficiente
+COMP_0490,servicios profesionales,servicio
+COMP_0491,hostelería,mixto
+COMP_0492,holding / tesorería,producto
+COMP_0493,servicios profesionales,servicio
+COMP_0494,comercio minorista,mixto
+COMP_0495,mayorista / distribución,producto
+COMP_0496,comercio minorista,producto
+COMP_0497,,insuficiente
+COMP_0498,mayorista / distribución,producto
+COMP_0499,hostelería,servicio
+COMP_0500,servicios profesionales,servicio
+COMP_0501,servicios profesionales,servicio
+COMP_0502,comercio minorista,producto
+COMP_0503,comercio minorista,producto
+COMP_0504,mayorista / distribución,producto
+COMP_0505,comercio minorista,producto
+COMP_0506,software / suscripción,servicio
+COMP_0507,servicios profesionales,servicio
+COMP_0508,mayorista / distribución,mixto
+COMP_0509,hostelería,servicio
+COMP_0510,servicios profesionales,servicio
+COMP_0511,servicios profesionales,servicio
+COMP_0512,software / suscripción,servicio
+COMP_0513,servicios profesionales,servicio
+COMP_0514,,insuficiente
+COMP_0515,comercio minorista,producto
+COMP_0516,holding / tesorería,servicio
+COMP_0517,mayorista / distribución,mixto
+COMP_0518,servicios profesionales,servicio
+COMP_0519,industria,mixto
+COMP_0520,mayorista / distribución,mixto
+COMP_0521,construcción,producto
+COMP_0522,transporte / logística,servicio
+COMP_0523,hostelería,servicio
+COMP_0524,holding / tesorería,servicio
+COMP_0525,servicios profesionales,servicio
+COMP_0526,holding / tesorería,producto
+COMP_0527,holding / tesorería,mixto
+COMP_0528,comercio minorista,producto
+COMP_0529,mayorista / distribución,producto
+COMP_0530,comercio minorista,mixto
+COMP_0531,servicios profesionales,servicio
+COMP_0532,mayorista / distribución,producto
+COMP_0533,servicios profesionales,servicio
+COMP_0534,hostelería,servicio
+COMP_0535,servicios profesionales,servicio
+COMP_0536,hostelería,mixto
+COMP_0537,comercio minorista,producto
+COMP_0538,comercio minorista,producto
+COMP_0539,mayorista / distribución,producto
+COMP_0540,servicios profesionales,servicio
+COMP_0541,construcción,mixto
+COMP_0542,mayorista / distribución,producto
+COMP_0543,comercio minorista,mixto
+COMP_0544,servicios profesionales,servicio
+COMP_0545,servicios profesionales,servicio
+COMP_0546,mayorista / distribución,mixto
+COMP_0547,comercio minorista,producto
+COMP_0548,energía,servicio
+COMP_0549,comercio minorista,producto
+COMP_0550,holding / tesorería,producto
+COMP_0551,mayorista / distribución,mixto
+COMP_0552,holding / tesorería,producto
+COMP_0553,energía,servicio
+COMP_0554,servicios profesionales,servicio
+COMP_0555,holding / tesorería,mixto
+COMP_0556,hostelería,producto
+COMP_0557,,insuficiente
+COMP_0558,comercio minorista,servicio
+COMP_0559,,insuficiente
+COMP_0560,comercio minorista,producto
+COMP_0561,servicios profesionales,servicio
+COMP_0562,software / suscripción,servicio
+COMP_0563,holding / tesorería,producto
+COMP_0564,servicios profesionales,servicio
+COMP_0565,servicios profesionales,servicio
+COMP_0566,mayorista / distribución,mixto
+COMP_0567,servicios profesionales,servicio
+COMP_0568,mayorista / distribución,mixto
+COMP_0569,servicios profesionales,servicio
+COMP_0570,mayorista / distribución,producto
+COMP_0571,servicios profesionales,mixto
+COMP_0572,,insuficiente
+COMP_0573,alquiler / inmobiliario,mixto
+COMP_0574,comercio minorista,servicio
+COMP_0575,servicios profesionales,servicio
+COMP_0576,holding / tesorería,mixto
+COMP_0577,holding / tesorería,servicio
+COMP_0578,comercio minorista,producto
+COMP_0579,,insuficiente
+COMP_0580,mayorista / distribución,producto
+COMP_0581,servicios profesionales,servicio
+COMP_0582,mayorista / distribución,mixto
+COMP_0583,mayorista / distribución,producto
+COMP_0584,servicios profesionales,servicio
+COMP_0585,,insuficiente
+COMP_0586,holding / tesorería,producto
+COMP_0587,comercio minorista,producto
+COMP_0588,software / suscripción,servicio
+COMP_0589,servicios profesionales,servicio
+COMP_0590,comercio minorista,producto
+COMP_0591,mayorista / distribución,producto
+COMP_0592,comercio minorista,producto
+COMP_0593,mayorista / distribución,producto
+COMP_0594,hostelería,producto
+COMP_0595,comercio minorista,producto
+COMP_0596,holding / tesorería,producto
+COMP_0597,comercio minorista,mixto
+COMP_0598,hostelería,mixto
+COMP_0599,,insuficiente
+COMP_0600,comercio minorista,producto
+COMP_0601,construcción,producto
+COMP_0602,mayorista / distribución,producto
+COMP_0603,servicios profesionales,servicio
+COMP_0604,comercio minorista,producto
+COMP_0605,comercio minorista,producto
+COMP_0606,servicios profesionales,servicio
+COMP_0607,mayorista / distribución,producto
+COMP_0608,comercio minorista,producto
+COMP_0609,construcción,mixto
+COMP_0610,comercio minorista,mixto
+COMP_0611,construcción,producto
+COMP_0612,holding / tesorería,servicio
+COMP_0613,holding / tesorería,servicio
+COMP_0614,software / suscripción,servicio
+COMP_0615,servicios profesionales,servicio
+COMP_0616,comercio minorista,mixto
+COMP_0617,comercio minorista,mixto
+COMP_0618,mayorista / distribución,producto
+COMP_0619,comercio minorista,servicio
+COMP_0620,servicios profesionales,servicio
+COMP_0621,comercio minorista,producto
+COMP_0622,servicios profesionales,servicio
+COMP_0623,comercio minorista,mixto
+COMP_0624,comercio minorista,producto
+COMP_0625,servicios profesionales,mixto
+COMP_0626,comercio minorista,producto
+COMP_0627,comercio minorista,servicio
+COMP_0628,comercio minorista,producto
+COMP_0629,comercio minorista,mixto
+COMP_0630,mayorista / distribución,producto
+COMP_0631,comercio minorista,producto
+COMP_0632,comercio minorista,producto
+COMP_0633,comercio minorista,producto
+COMP_0634,holding / tesorería,servicio
+COMP_0635,mayorista / distribución,servicio
+COMP_0636,hostelería,mixto
+COMP_0637,servicios profesionales,servicio
+COMP_0638,comercio minorista,producto
+COMP_0639,comercio minorista,mixto
+COMP_0640,servicios profesionales,servicio
+COMP_0641,servicios profesionales,mixto
+COMP_0642,construcción,producto
+COMP_0643,construcción,servicio
+COMP_0644,holding / tesorería,mixto
+COMP_0645,holding / tesorería,mixto
+COMP_0646,servicios profesionales,servicio
+COMP_0647,transporte / logística,producto
+COMP_0648,comercio minorista,mixto
+COMP_0649,holding / tesorería,producto
+COMP_0650,mayorista / distribución,producto
+COMP_0651,comercio minorista,producto
+COMP_0652,comercio minorista,producto
+COMP_0653,mayorista / distribución,producto
+COMP_0654,comercio minorista,producto
+COMP_0655,comercio minorista,producto
+COMP_0656,mayorista / distribución,mixto
+COMP_0657,comercio minorista,producto
+COMP_0658,transporte / logística,mixto
+COMP_0659,comercio minorista,servicio
+COMP_0660,construcción,producto
+COMP_0661,comercio minorista,mixto
+COMP_0662,construcción,servicio
+COMP_0663,servicios profesionales,servicio
+COMP_0664,comercio minorista,producto
+COMP_0665,construcción,producto
+COMP_0666,hostelería,mixto
+COMP_0667,hostelería,mixto
+COMP_0668,mayorista / distribución,producto
+COMP_0669,hostelería,servicio
+COMP_0670,holding / tesorería,servicio
+COMP_0671,servicios profesionales,servicio
+COMP_0672,,insuficiente
+COMP_0673,hostelería,mixto
+COMP_0674,software / suscripción,servicio
+COMP_0675,servicios profesionales,servicio
+COMP_0676,servicios profesionales,servicio
+COMP_0677,servicios profesionales,servicio
+COMP_0678,holding / tesorería,producto
+COMP_0679,holding / tesorería,producto
+COMP_0680,comercio minorista,producto
+COMP_0681,mayorista / distribución,mixto
+COMP_0682,energía,mixto
+COMP_0683,holding / tesorería,servicio
+COMP_0684,servicios profesionales,servicio
+COMP_0685,comercio minorista,mixto
+COMP_0686,software / suscripción,mixto
+COMP_0687,servicios profesionales,servicio
+COMP_0688,holding / tesorería,producto
+COMP_0689,hostelería,servicio
+COMP_0690,,insuficiente
+COMP_0691,servicios profesionales,servicio
+COMP_0692,holding / tesorería,producto
+COMP_0693,holding / tesorería,servicio
+COMP_0694,construcción,producto
+COMP_0695,transporte / logística,producto
+COMP_0696,mayorista / distribución,mixto
+COMP_0697,alquiler / inmobiliario,servicio
+COMP_0698,holding / tesorería,mixto
+COMP_0699,holding / tesorería,mixto
+COMP_0700,mayorista / distribución,mixto
+COMP_0701,,insuficiente
+COMP_0702,,insuficiente
+COMP_0703,holding / tesorería,servicio
+COMP_0704,,insuficiente
+COMP_0705,servicios profesionales,servicio
+COMP_0706,servicios profesionales,servicio
+COMP_0707,comercio minorista,servicio
+COMP_0708,hostelería,producto
+COMP_0709,comercio minorista,producto
+COMP_0710,servicios profesionales,servicio
+COMP_0711,holding / tesorería,mixto
+COMP_0712,,insuficiente
+COMP_0713,comercio minorista,producto
+COMP_0714,holding / tesorería,producto
+COMP_0715,,insuficiente
+COMP_0716,comercio minorista,producto
+COMP_0717,holding / tesorería,producto
+COMP_0718,servicios profesionales,servicio
+COMP_0719,mayorista / distribución,producto
+COMP_0720,comercio minorista,producto
+COMP_0721,comercio minorista,producto
+COMP_0722,,insuficiente
+COMP_0723,mayorista / distribución,mixto
+COMP_0724,servicios profesionales,servicio
+COMP_0725,comercio minorista,producto
+COMP_0726,servicios profesionales,servicio
+COMP_0727,servicios profesionales,servicio
+COMP_0728,mayorista / distribución,mixto
+COMP_0729,holding / tesorería,mixto
+COMP_0730,comercio minorista,producto
+COMP_0731,mayorista / distribución,mixto
+COMP_0732,servicios profesionales,mixto
+COMP_0733,comercio minorista,producto
+COMP_0734,,insuficiente
+COMP_0735,,insuficiente
+COMP_0736,holding / tesorería,producto
+COMP_0737,servicios profesionales,servicio
+COMP_0738,hostelería,mixto
+COMP_0739,servicios profesionales,servicio
+COMP_0740,comercio minorista,mixto
+COMP_0741,comercio minorista,mixto
+COMP_0742,holding / tesorería,mixto
+COMP_0743,software / suscripción,servicio
+COMP_0744,comercio minorista,producto
+COMP_0745,comercio minorista,producto
+COMP_0746,comercio minorista,producto
+COMP_0747,comercio minorista,mixto
+COMP_0748,comercio minorista,producto
+COMP_0749,servicios profesionales,servicio
+COMP_0750,comercio minorista,producto
+COMP_0751,comercio minorista,mixto
+COMP_0752,servicios profesionales,servicio
+COMP_0753,holding / tesorería,mixto
+COMP_0754,comercio minorista,producto
+COMP_0755,comercio minorista,mixto
+COMP_0756,comercio minorista,producto
+COMP_0757,servicios profesionales,mixto
+COMP_0758,,insuficiente
+COMP_0759,comercio minorista,servicio
+COMP_0760,hostelería,servicio
+COMP_0761,holding / tesorería,producto
+COMP_0762,comercio minorista,producto
+COMP_0763,servicios profesionales,servicio
+COMP_0764,servicios profesionales,mixto
+COMP_0765,comercio minorista,producto
+COMP_0766,comercio minorista,mixto
+COMP_0767,servicios profesionales,servicio
+COMP_0768,servicios profesionales,servicio
+COMP_0769,servicios profesionales,servicio
+COMP_0770,mayorista / distribución,producto
+COMP_0771,,insuficiente
+COMP_0772,comercio minorista,producto
+COMP_0773,servicios profesionales,servicio
+COMP_0774,holding / tesorería,producto
+COMP_0775,comercio minorista,producto
+COMP_0776,holding / tesorería,mixto
+COMP_0777,,mixto
+COMP_0778,mayorista / distribución,mixto
+COMP_0779,holding / tesorería,producto
+COMP_0780,comercio minorista,mixto
+COMP_0781,mayorista / distribución,producto
+COMP_0782,servicios profesionales,servicio
+COMP_0783,servicios profesionales,servicio
+COMP_0784,mayorista / distribución,producto
+COMP_0785,servicios profesionales,servicio
+COMP_0786,servicios profesionales,servicio
+COMP_0787,construcción,mixto
+COMP_0788,comercio minorista,mixto
+COMP_0789,comercio minorista,producto
+COMP_0790,hostelería,producto
+COMP_0791,comercio minorista,producto
+COMP_0792,comercio minorista,producto
+COMP_0793,hostelería,mixto
+COMP_0794,comercio minorista,producto
+COMP_0795,comercio minorista,servicio
+COMP_0796,hostelería,producto
+COMP_0797,comercio minorista,mixto
+COMP_0798,industria,mixto
+COMP_0799,comercio minorista,mixto
+COMP_0800,comercio minorista,producto
+COMP_0801,mayorista / distribución,mixto
+COMP_0802,construcción,producto
+COMP_0803,software / suscripción,servicio
+COMP_0804,,insuficiente
+COMP_0805,holding / tesorería,producto
+COMP_0806,mayorista / distribución,producto
+COMP_0807,,insuficiente
+COMP_0808,servicios profesionales,servicio
+COMP_0809,mayorista / distribución,mixto
+COMP_0810,construcción,mixto
+COMP_0811,alquiler / inmobiliario,mixto
+COMP_0812,hostelería,servicio
+COMP_0813,mayorista / distribución,mixto
+COMP_0814,construcción,mixto
+COMP_0815,holding / tesorería,producto
+COMP_0816,comercio minorista,mixto
+COMP_0817,comercio minorista,producto
+COMP_0818,,insuficiente
+COMP_0819,servicios profesionales,servicio
+COMP_0820,servicios profesionales,servicio
+COMP_0821,holding / tesorería,mixto
+COMP_0822,comercio minorista,mixto
+COMP_0823,,mixto
+COMP_0824,servicios profesionales,servicio
+COMP_0825,comercio minorista,producto
+COMP_0826,holding / tesorería,producto
+COMP_0827,construcción,producto
+COMP_0828,construcción,producto
+COMP_0829,industria,mixto
+COMP_0830,comercio minorista,producto
+COMP_0831,comercio minorista,producto
+COMP_0832,comercio minorista,producto
+COMP_0833,comercio minorista,producto
+COMP_0834,servicios profesionales,servicio
+COMP_0835,hostelería,mixto
+COMP_0836,mayorista / distribución,producto
+COMP_0837,comercio minorista,producto
+COMP_0838,holding / tesorería,producto
+COMP_0839,holding / tesorería,producto
+COMP_0840,comercio minorista,mixto
+COMP_0841,hostelería,servicio
+COMP_0842,construcción,producto
+COMP_0843,software / suscripción,servicio
+COMP_0844,holding / tesorería,producto
+COMP_0845,comercio minorista,producto
+COMP_0846,hostelería,servicio
+COMP_0847,servicios profesionales,mixto
+COMP_0848,comercio minorista,mixto
+COMP_0849,mayorista / distribución,mixto
+COMP_0850,comercio minorista,mixto
+COMP_0851,,insuficiente
+COMP_0852,comercio minorista,mixto
+COMP_0853,construcción,producto
+COMP_0854,software / suscripción,servicio
+COMP_0855,holding / tesorería,servicio
+COMP_0856,transporte / logística,mixto
+COMP_0857,construcción,producto
+COMP_0858,holding / tesorería,producto
+COMP_0859,holding / tesorería,mixto
+COMP_0860,comercio minorista,producto
+COMP_0861,comercio minorista,producto
+COMP_0862,servicios profesionales,mixto
+COMP_0863,comercio minorista,producto
+COMP_0864,software / suscripción,servicio
+COMP_0865,industria,producto
+COMP_0866,mayorista / distribución,mixto
+COMP_0867,holding / tesorería,producto
+COMP_0868,servicios profesionales,servicio
+COMP_0869,comercio minorista,producto
+COMP_0870,hostelería,servicio
+COMP_0871,servicios profesionales,servicio
+COMP_0872,holding / tesorería,servicio
+COMP_0873,mayorista / distribución,mixto
+COMP_0874,mayorista / distribución,producto
+COMP_0875,hostelería,servicio
+COMP_0876,comercio minorista,producto
+COMP_0877,comercio minorista,producto
+COMP_0878,hostelería,mixto
+COMP_0879,comercio minorista,producto
+COMP_0880,comercio minorista,mixto
+COMP_0881,servicios profesionales,mixto
+COMP_0882,servicios profesionales,servicio
+COMP_0883,comercio minorista,producto
+COMP_0884,comercio minorista,producto
+COMP_0885,comercio minorista,servicio
+COMP_0886,servicios profesionales,servicio
+COMP_0887,holding / tesorería,producto
+COMP_0888,hostelería,producto
+COMP_0889,servicios profesionales,servicio
+COMP_0890,hostelería,servicio
+COMP_0891,comercio minorista,producto
+COMP_0892,servicios profesionales,servicio
+COMP_0893,comercio minorista,mixto
+COMP_0894,holding / tesorería,producto
+COMP_0895,construcción,producto
+COMP_0896,comercio minorista,servicio
+COMP_0897,comercio minorista,producto
+COMP_0898,comercio minorista,mixto
+COMP_0899,software / suscripción,servicio
+COMP_0900,mayorista / distribución,producto
+COMP_0901,comercio minorista,producto
+COMP_0902,construcción,producto
+COMP_0903,alquiler / inmobiliario,mixto
+COMP_0904,comercio minorista,producto
+COMP_0905,mayorista / distribución,producto
+COMP_0906,comercio minorista,producto
+COMP_0907,construcción,producto
+COMP_0908,alquiler / inmobiliario,mixto
+COMP_0909,mayorista / distribución,producto
+COMP_0910,holding / tesorería,servicio
+COMP_0911,comercio minorista,producto
+COMP_0912,comercio minorista,producto
+COMP_0913,holding / tesorería,producto
+COMP_0914,servicios profesionales,servicio
+COMP_0915,holding / tesorería,servicio
+COMP_0916,,insuficiente
+COMP_0917,,insuficiente
+COMP_0918,servicios profesionales,mixto
+COMP_0919,mayorista / distribución,mixto
+COMP_0920,hostelería,producto
+COMP_0921,construcción,producto
+COMP_0922,mayorista / distribución,producto
+COMP_0923,comercio minorista,producto
+COMP_0924,comercio minorista,producto
+COMP_0925,construcción,producto
+COMP_0926,servicios profesionales,servicio
+COMP_0927,comercio minorista,producto
+COMP_0928,servicios profesionales,servicio
+COMP_0929,hostelería,servicio
+COMP_0930,mayorista / distribución,mixto
+COMP_0931,mayorista / distribución,mixto
+COMP_0932,hostelería,servicio
+COMP_0933,,mixto
+COMP_0934,holding / tesorería,producto
+COMP_0935,alquiler / inmobiliario,mixto
+COMP_0936,construcción,mixto
+COMP_0937,comercio minorista,producto
+COMP_0938,servicios profesionales,mixto
+COMP_0939,mayorista / distribución,producto
+COMP_0940,alquiler / inmobiliario,servicio
+COMP_0941,comercio minorista,producto
+COMP_0942,servicios profesionales,servicio
+COMP_0943,comercio minorista,producto
+COMP_0944,mayorista / distribución,producto
+COMP_0945,mayorista / distribución,mixto
+COMP_0946,mayorista / distribución,mixto
+COMP_0947,holding / tesorería,mixto
+COMP_0948,comercio minorista,producto
+COMP_0949,,insuficiente
+COMP_0950,industria,producto
+COMP_0951,hostelería,mixto
+COMP_0952,mayorista / distribución,mixto
+COMP_0953,,insuficiente
+COMP_0954,comercio minorista,mixto
+COMP_0955,mayorista / distribución,mixto
+COMP_0956,software / suscripción,servicio
+COMP_0957,servicios profesionales,servicio
+COMP_0958,construcción,producto
+COMP_0959,construcción,producto
+COMP_0960,holding / tesorería,servicio
+COMP_0961,,insuficiente
+COMP_0962,,insuficiente
+COMP_0963,mayorista / distribución,producto
+COMP_0964,comercio minorista,mixto
+COMP_0965,holding / tesorería,mixto
+COMP_0966,comercio minorista,mixto
+COMP_0967,mayorista / distribución,mixto
+COMP_0968,hostelería,servicio
+COMP_0969,holding / tesorería,mixto
+COMP_0970,comercio minorista,producto
+COMP_0971,construcción,producto
+COMP_0972,construcción,producto
+COMP_0973,comercio minorista,producto
+COMP_0974,construcción,producto
+COMP_0975,hostelería,producto
+COMP_0976,mayorista / distribución,producto
+COMP_0977,software / suscripción,servicio
+COMP_0978,comercio minorista,producto
+COMP_0979,servicios profesionales,servicio
+COMP_0980,construcción,producto
+COMP_0981,servicios profesionales,servicio
+COMP_0982,mayorista / distribución,servicio
+COMP_0983,servicios profesionales,servicio
+COMP_0984,comercio minorista,producto
+COMP_0985,software / suscripción,servicio
+COMP_0986,holding / tesorería,mixto
+COMP_0987,hostelería,mixto
+COMP_0988,servicios profesionales,servicio
+COMP_0989,mayorista / distribución,producto
+COMP_0990,servicios profesionales,mixto
+COMP_0991,holding / tesorería,producto
+COMP_0992,comercio minorista,producto
+COMP_0993,comercio minorista,producto
+COMP_0994,servicios profesionales,producto
+COMP_0995,comercio minorista,producto
+COMP_0996,hostelería,mixto
+COMP_0997,servicios profesionales,servicio
+COMP_0998,holding / tesorería,mixto
+COMP_0999,comercio minorista,producto
+COMP_1000,servicios profesionales,servicio
+COMP_1001,servicios profesionales,servicio
+COMP_1002,mayorista / distribución,producto
+COMP_1003,alquiler / inmobiliario,producto
+COMP_1004,servicios profesionales,servicio
+COMP_1005,comercio minorista,servicio
+COMP_1006,mayorista / distribución,producto
+COMP_1007,comercio minorista,producto
+COMP_1008,mayorista / distribución,producto
+COMP_1009,,insuficiente
+COMP_1010,comercio minorista,producto
+COMP_1011,transporte / logística,producto
+COMP_1012,comercio minorista,producto
+COMP_1013,comercio minorista,producto
+COMP_1014,comercio minorista,producto
+COMP_1015,comercio minorista,producto
+COMP_1016,hostelería,servicio
+COMP_1017,mayorista / distribución,producto
+COMP_1018,software / suscripción,mixto
+COMP_1019,holding / tesorería,producto
+COMP_1020,hostelería,mixto
+COMP_1021,servicios profesionales,servicio
+COMP_1022,comercio minorista,mixto
+COMP_1023,comercio minorista,producto
+COMP_1024,comercio minorista,producto
+COMP_1025,comercio minorista,producto
+COMP_1026,comercio minorista,producto
+COMP_1027,holding / tesorería,producto
+COMP_1028,software / suscripción,servicio
+COMP_1029,construcción,producto
+COMP_1030,mayorista / distribución,producto
+COMP_1031,mayorista / distribución,producto
+COMP_1032,construcción,producto
+COMP_1033,comercio minorista,producto
+COMP_1034,holding / tesorería,mixto
+COMP_1035,comercio minorista,mixto
+COMP_1036,mayorista / distribución,mixto
+COMP_1037,comercio minorista,producto
+COMP_1038,alquiler / inmobiliario,producto
+COMP_1039,hostelería,servicio
+COMP_1040,comercio minorista,producto
+COMP_1041,holding / tesorería,producto
+COMP_1042,software / suscripción,producto
+COMP_1043,servicios profesionales,producto
+COMP_1044,comercio minorista,producto
+COMP_1045,servicios profesionales,mixto
+COMP_1046,alquiler / inmobiliario,servicio
+COMP_1047,servicios profesionales,mixto
+COMP_1048,hostelería,servicio
+COMP_1049,servicios profesionales,servicio
+COMP_1050,mayorista / distribución,mixto
+COMP_1051,mayorista / distribución,producto
+COMP_1052,comercio minorista,producto
+COMP_1053,mayorista / distribución,producto
+COMP_1054,construcción,producto
+COMP_1055,,insuficiente
+COMP_1056,comercio minorista,producto
+COMP_1057,software / suscripción,servicio
+COMP_1058,hostelería,producto
+COMP_1059,servicios profesionales,servicio
+COMP_1060,holding / tesorería,servicio
+COMP_1061,comercio minorista,producto
+COMP_1062,holding / tesorería,producto
+COMP_1063,comercio minorista,producto
+COMP_1064,servicios profesionales,servicio
+COMP_1065,,insuficiente
+COMP_1066,comercio minorista,mixto
+COMP_1067,comercio minorista,producto
+COMP_1068,,insuficiente
+COMP_1069,alquiler / inmobiliario,producto
+COMP_1070,hostelería,mixto
+COMP_1071,construcción,producto
+COMP_1072,comercio minorista,producto
+COMP_1073,construcción,producto
+COMP_1074,mayorista / distribución,producto
+COMP_1075,holding / tesorería,producto
+COMP_1076,industria,mixto
+COMP_1077,software / suscripción,mixto
+COMP_1078,comercio minorista,producto
+COMP_1079,servicios profesionales,servicio
+COMP_1080,servicios profesionales,servicio
+COMP_1081,comercio minorista,producto
+COMP_1082,comercio minorista,producto
+COMP_1083,comercio minorista,producto
+COMP_1084,holding / tesorería,producto
+COMP_1085,construcción,producto
+COMP_1086,comercio minorista,servicio
+COMP_1087,servicios profesionales,servicio
+COMP_1088,construcción,producto
+COMP_1089,comercio minorista,producto
+COMP_1090,comercio minorista,producto
+COMP_1091,mayorista / distribución,mixto
+COMP_1092,servicios profesionales,servicio
+COMP_1093,construcción,producto
+COMP_1094,mayorista / distribución,mixto
+COMP_1095,servicios profesionales,servicio
+COMP_1096,holding / tesorería,servicio
+COMP_1097,servicios profesionales,servicio
+COMP_1098,comercio minorista,mixto
+COMP_1099,comercio minorista,producto
+COMP_1100,construcción,producto
+COMP_1101,comercio minorista,producto
+COMP_1102,,mixto
+COMP_1103,mayorista / distribución,producto
+COMP_1104,comercio minorista,producto
+COMP_1105,comercio minorista,producto
+COMP_1106,mayorista / distribución,producto
+COMP_1107,servicios profesionales,servicio
+COMP_1108,mayorista / distribución,producto
+COMP_1109,software / suscripción,mixto
+COMP_1110,construcción,producto
+COMP_1111,,insuficiente
+COMP_1112,,insuficiente
+COMP_1113,comercio minorista,producto
+COMP_1114,holding / tesorería,mixto
+COMP_1115,construcción,producto
+COMP_1116,,insuficiente
+COMP_1117,holding / tesorería,producto
+COMP_1118,industria,mixto
+COMP_1119,construcción,producto
+COMP_1120,mayorista / distribución,producto
+COMP_1121,comercio minorista,producto
+COMP_1122,comercio minorista,producto
+COMP_1123,comercio minorista,producto
+COMP_1124,comercio minorista,mixto
+COMP_1125,servicios profesionales,servicio
+COMP_1126,comercio minorista,producto
+COMP_1127,comercio minorista,producto
+COMP_1128,mayorista / distribución,producto
+COMP_1129,hostelería,mixto
+COMP_1130,holding / tesorería,producto
+COMP_1131,servicios profesionales,servicio
+COMP_1132,comercio minorista,mixto
+COMP_1133,comercio minorista,producto
+COMP_1134,comercio minorista,producto
+COMP_1135,comercio minorista,producto
+COMP_1136,comercio minorista,producto
+COMP_1137,holding / tesorería,producto
+COMP_1138,transporte / logística,producto
+COMP_1139,comercio minorista,mixto
+COMP_1140,comercio minorista,mixto
+COMP_1141,comercio minorista,producto
+COMP_1142,construcción,mixto
+COMP_1143,servicios profesionales,servicio
+COMP_1144,mayorista / distribución,producto
+COMP_1145,comercio minorista,producto
+COMP_1146,mayorista / distribución,mixto
+COMP_1147,hostelería,mixto
+COMP_1148,mayorista / distribución,producto
+COMP_1149,comercio minorista,producto
+COMP_1150,comercio minorista,producto
+COMP_1151,mayorista / distribución,producto
+COMP_1152,comercio minorista,producto
+COMP_1153,comercio minorista,producto
+COMP_1154,construcción,producto
+COMP_1155,construcción,producto
+COMP_1156,servicios profesionales,producto
+COMP_1157,servicios profesionales,servicio
+COMP_1158,mayorista / distribución,producto
+COMP_1159,comercio minorista,producto
+COMP_1160,comercio minorista,producto
+COMP_1161,mayorista / distribución,producto
+COMP_1162,mayorista / distribución,producto
+COMP_1163,comercio minorista,producto
+COMP_1164,servicios profesionales,servicio
+COMP_1165,comercio minorista,producto
+COMP_1166,comercio minorista,producto
+COMP_1167,holding / tesorería,producto
+COMP_1168,energía,servicio
+COMP_1169,mayorista / distribución,mixto
+COMP_1170,construcción,producto
+COMP_1171,construcción,producto
+COMP_1172,comercio minorista,mixto
+COMP_1173,alquiler / inmobiliario,mixto
+COMP_1174,hostelería,mixto
+COMP_1175,mayorista / distribución,producto
+COMP_1176,mayorista / distribución,mixto
+COMP_1177,holding / tesorería,servicio
+COMP_1178,comercio minorista,producto
+COMP_1179,comercio minorista,producto
+COMP_1180,mayorista / distribución,mixto
+COMP_1181,,mixto
+COMP_1182,hostelería,producto
+COMP_1183,alquiler / inmobiliario,mixto
+COMP_1184,hostelería,producto
+COMP_1185,transporte / logística,producto
+COMP_1186,servicios profesionales,servicio
+COMP_1187,,insuficiente
+COMP_1188,servicios profesionales,servicio
+COMP_1189,hostelería,mixto
+COMP_1190,mayorista / distribución,producto
+COMP_1191,software / suscripción,producto
+COMP_1192,comercio minorista,producto
+COMP_1193,servicios profesionales,mixto
+COMP_1194,comercio minorista,producto
+COMP_1195,mayorista / distribución,mixto
+COMP_1196,comercio minorista,producto
+COMP_1197,energía,mixto
+COMP_1198,software / suscripción,mixto
+COMP_1199,construcción,producto
+COMP_1200,holding / tesorería,mixto
+COMP_1201,mayorista / distribución,producto
+COMP_1202,hostelería,mixto
+COMP_1203,,mixto
+COMP_1204,software / suscripción,producto
+COMP_1205,comercio minorista,producto
+COMP_1206,comercio minorista,producto
+COMP_1207,construcción,producto
+COMP_1208,mayorista / distribución,mixto
+COMP_1209,hostelería,servicio
+COMP_1210,construcción,producto
+COMP_1211,comercio minorista,producto
+COMP_1212,servicios profesionales,servicio
+COMP_1213,hostelería,servicio
+COMP_1214,construcción,producto
+COMP_1215,holding / tesorería,mixto
+COMP_1216,comercio minorista,producto
+COMP_1217,servicios profesionales,mixto
+COMP_1218,mayorista / distribución,mixto
+COMP_1219,construcción,producto
+COMP_1220,,insuficiente
+COMP_1221,comercio minorista,producto
+COMP_1222,alquiler / inmobiliario,producto
+COMP_1223,servicios profesionales,servicio
+COMP_1224,servicios profesionales,servicio
+COMP_1225,comercio minorista,producto
+COMP_1226,,insuficiente
+COMP_1227,construcción,producto
+COMP_1228,servicios profesionales,servicio
+COMP_1229,,insuficiente
+COMP_1230,construcción,mixto
+COMP_1231,mayorista / distribución,mixto
+COMP_1232,hostelería,producto
+COMP_1233,comercio minorista,producto
+COMP_1234,comercio minorista,producto
+COMP_1235,software / suscripción,servicio
+COMP_1236,comercio minorista,producto
+COMP_1237,comercio minorista,producto
+COMP_1238,mayorista / distribución,producto
+COMP_1239,holding / tesorería,producto
+COMP_1240,holding / tesorería,producto
+COMP_1241,holding / tesorería,producto
+COMP_1242,construcción,mixto
+COMP_1243,construcción,producto
+COMP_1244,construcción,producto
+COMP_1245,hostelería,producto
+COMP_1246,servicios profesionales,servicio
+COMP_1247,construcción,producto
+COMP_1248,comercio minorista,mixto
+COMP_1249,comercio minorista,producto
+COMP_1250,hostelería,producto
+COMP_1251,,insuficiente
+COMP_1252,mayorista / distribución,producto
+COMP_1253,servicios profesionales,servicio
+COMP_1254,holding / tesorería,mixto
+COMP_1255,mayorista / distribución,producto
+COMP_1256,servicios profesionales,servicio
+COMP_1257,mayorista / distribución,producto
+COMP_1258,hostelería,mixto
+COMP_1259,mayorista / distribución,producto
+COMP_1260,comercio minorista,producto
+COMP_1261,comercio minorista,producto
+COMP_1262,industria,mixto
+COMP_1263,servicios profesionales,servicio
+COMP_1264,transporte / logística,producto
+COMP_1265,,insuficiente
+COMP_1266,servicios profesionales,mixto
+COMP_1267,mayorista / distribución,producto
+COMP_1268,comercio minorista,producto
+COMP_1269,mayorista / distribución,mixto
+COMP_1270,mayorista / distribución,producto
+COMP_1271,comercio minorista,producto
+COMP_1272,comercio minorista,mixto
+COMP_1273,construcción,producto
+COMP_1274,construcción,producto
+COMP_1275,comercio minorista,producto
+COMP_1276,servicios profesionales,servicio
+COMP_1277,construcción,producto
+COMP_1278,mayorista / distribución,producto
+COMP_1279,comercio minorista,producto
+COMP_1280,mayorista / distribución,producto
+COMP_1281,mayorista / distribución,producto
+COMP_1282,software / suscripción,producto
+COMP_1283,comercio minorista,producto
+COMP_1284,construcción,mixto
+COMP_1285,mayorista / distribución,producto
+COMP_1286,comercio minorista,producto
