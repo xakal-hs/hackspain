@@ -21,6 +21,15 @@
   border-right: 1px solid var(--line);
 }
 
+/* Marca y tema comparten fila: el switcher es lo único de la cabecera que no
+ * lleva a ningún sitio, así que vive en el extremo opuesto a la marca. */
+.rail__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .rail__brand {
   padding: 0 6px;
 }
@@ -45,11 +54,40 @@
 }
 
 .rail__nav {
+  position: relative;
   display: grid;
   gap: 2px;
 }
 
+.rail__nav-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--thumb-w, 0px);
+  height: var(--thumb-h, 0px);
+  border: 1px solid var(--line);
+  border-radius: var(--r-inner);
+  background: var(--panel-raised);
+  box-shadow: var(--sheen);
+  transform: translate(var(--thumb-x, 0px), var(--thumb-y, 0px));
+  pointer-events: none;
+  opacity: 0;
+}
+
+.rail__nav.is-placed .rail__nav-thumb {
+  opacity: 1;
+}
+
+.rail__nav.is-armed .rail__nav-thumb {
+  transition:
+    transform 0.32s var(--sw-ease),
+    width 0.32s var(--sw-ease),
+    height 0.32s var(--sw-ease);
+}
+
 .rail__nav a {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 11px;
@@ -59,9 +97,7 @@
   border-radius: var(--r-inner);
   font-size: var(--t-small);
   color: var(--text-muted);
-  transition:
-    background-color 0.12s var(--ease),
-    color 0.12s var(--ease);
+  transition: color 0.12s var(--ease);
 }
 
 .rail__nav svg {
@@ -70,16 +106,16 @@
 }
 
 .rail__nav a:hover {
-  background: var(--neutral-wash);
   color: var(--text);
 }
 
+.rail__nav a:hover:not(.is-here) {
+  background: var(--neutral-wash);
+}
+
 .rail__nav a.is-here {
-  background: var(--panel-raised);
-  border-color: var(--line);
   color: var(--text);
   font-weight: 500;
-  box-shadow: var(--sheen);
 }
 
 .rail__nav a.is-here svg {
@@ -91,17 +127,6 @@
   display: grid;
   gap: 14px;
   justify-items: start;
-}
-
-.rail__env {
-  font-size: var(--t-micro);
-  color: var(--text-muted);
-  padding: 0 6px;
-}
-
-.rail__env span {
-  display: block;
-  color: var(--text-dim);
 }
 
 .rail__profile {
@@ -256,6 +281,27 @@
   display: grid;
   gap: 20px;
   align-content: start;
+}
+
+.wk__pane {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.wk__pane.is-live {
+  animation: pane-in 0.32s var(--sw-ease) both;
+}
+
+@keyframes pane-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .wk__head {
@@ -574,6 +620,360 @@
   margin-bottom: 4px;
 }
 
+/* --------------------------------------------------------------------------
+   Filters and sector comparison
+   ----------------------------------------------------------------------- */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px 14px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-strong, var(--border, rgba(190, 200, 255, 0.19)));
+  border-radius: var(--r-inner, 10px);
+  background: var(--panel-raised, var(--wash, rgba(190, 200, 255, 0.07)));
+}
+
+.compare__filters {
+  margin: 0;
+}
+
+.compare__filters .compare__place {
+  margin-left: auto;
+  align-self: center;
+}
+
+.filters__field {
+  display: grid;
+  gap: 5px;
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+}
+
+.filters select {
+  min-height: 38px;
+  min-width: 11.5rem;
+  max-width: 100%;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-inner);
+  background: var(--panel);
+  color: var(--text);
+  font-size: var(--t-small);
+}
+
+.filters__clear {
+  min-height: 38px;
+  padding: 0 12px;
+  color: var(--text-muted);
+  font-size: var(--t-small);
+}
+
+.filters__clear:hover {
+  color: var(--text);
+}
+
+.seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-inner);
+  background: var(--panel-sunken);
+}
+
+.seg button {
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: var(--t-small);
+  color: var(--text-muted);
+}
+
+.seg button:hover {
+  color: var(--text);
+}
+
+.seg button.is-on {
+  background: var(--live-wash);
+  color: var(--live-ink);
+  border-color: color-mix(in srgb, var(--live) 35%, transparent);
+  box-shadow: none;
+}
+
+.compare {
+  display: grid;
+  gap: 14px;
+}
+
+.compare__place {
+  font-family: var(--font-num);
+  font-size: var(--t-h3);
+  font-weight: 300;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.compare__read {
+  font-size: var(--t-small);
+  color: var(--text-muted);
+  max-width: 68ch;
+}
+
+.compare__table table {
+  min-width: 640px;
+}
+
+.compare__table tbody th > span {
+  display: grid;
+  gap: 1px;
+}
+
+.compare__table tbody tr.is-you {
+  background: var(--live-wash);
+}
+
+.compare__table tbody tr.is-you th b {
+  color: var(--live-ink);
+}
+
+.compare__table tbody tr.is-out {
+  background: var(--neutral-wash);
+}
+
+.compare__table tfoot th,
+.compare__table tfoot td {
+  padding-top: 12px;
+  border-bottom: 0;
+  color: var(--text-muted);
+  font-size: var(--t-micro);
+}
+
+.compare__table tfoot th {
+  font-weight: 500;
+}
+
+/* La mediana no es una empresa: se lee como referencia, no como competidora. */
+.compare__table tbody tr.is-median th b,
+.compare__table tbody tr.is-gap th b {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.compare__table tbody tr.is-median td {
+  color: var(--text-muted);
+}
+
+.compare__table tbody tr.is-gap th,
+.compare__table tbody tr.is-gap td {
+  border-bottom: 0;
+}
+
+.compare__note {
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+  max-width: 68ch;
+}
+
+/* --------------------------------------------------------------------------
+   Sector benchmark chart: this company against the median of its cut
+   ----------------------------------------------------------------------- */
+
+.bench {
+  display: grid;
+  gap: 10px;
+  container-type: inline-size;
+}
+
+.bench__key {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 18px;
+  font-size: var(--t-micro);
+  color: var(--text-muted);
+}
+
+.bench__key-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+/* El trazo de la leyenda repite el del gráfico: relleno el de la empresa,
+   partido el de la mediana. */
+.bench__key-item i {
+  align-self: center;
+  width: 18px;
+  height: 0;
+  border-top: 2.5px solid currentColor;
+  border-radius: 2px;
+}
+
+.bench__key-item--you {
+  color: var(--live-ink);
+}
+
+.bench__key-item--median {
+  color: var(--text-dim);
+}
+
+.bench__key-item--median i {
+  border-top-style: dashed;
+}
+
+.bench__key-item small {
+  color: var(--text-dim);
+  font-size: var(--t-micro);
+}
+
+.bench__key-item b {
+  font-family: var(--font-num);
+  font-size: var(--t-small);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.bench__key-note {
+  margin-left: auto;
+  color: var(--text-dim);
+}
+
+@container (max-width: 520px) {
+  .bench__key-note {
+    display: none;
+  }
+}
+
+.bench__plot {
+  position: relative;
+  height: clamp(170px, 16vw, 230px);
+  border-radius: var(--r-inner);
+  overflow: hidden;
+}
+
+.bench__zone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: 5px 8px;
+  font-size: var(--t-micro);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.bench__zone[data-zone='sano'] {
+  background: var(--mint-wash);
+  color: var(--mint-ink);
+}
+
+.bench__zone[data-zone='vigilar'] {
+  background: var(--amber-wash);
+  color: var(--amber-ink);
+}
+
+.bench__zone[data-zone='riesgo'] {
+  background: var(--crimson-wash);
+  color: var(--crimson-ink);
+}
+
+.bench__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.bench__dot {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2.5px var(--panel);
+}
+
+.bench__dot--you {
+  background: var(--live);
+}
+
+.bench__dot--median {
+  background: var(--text-dim);
+}
+
+.bench__axis {
+  position: relative;
+  height: 1.1rem;
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+}
+
+.bench__axis span {
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+}
+
+.bench__axis span[data-align='center'] {
+  transform: translateX(-50%);
+}
+
+.bench__axis span[data-align='end'] {
+  transform: translateX(-100%);
+}
+
+/* En un panel estrecho las etiquetas chocan, y la única que no se puede perder
+   es "hoy": es la que separa lo medido de lo previsto. */
+@container (max-width: 460px) {
+  .bench__axis span[data-align='center']:nth-child(2),
+  .bench__axis span[data-align='end'] {
+    display: none;
+  }
+}
+
+.centinela .bench__dot {
+  box-shadow: 0 0 0 2.5px var(--card);
+}
+
+.centinela .filters {
+  background: var(--wash);
+  border-color: var(--border);
+}
+
+.centinela .filters__field {
+  color: var(--text-3);
+}
+
+.centinela .seg {
+  background: var(--bg);
+  border-color: var(--border);
+}
+
+.centinela .seg button {
+  color: var(--text-2);
+}
+
+.centinela .seg button.is-on {
+  background: var(--ok-chip);
+  color: var(--ok-strong);
+  border-color: var(--ok-border);
+}
+
+.centinela .filters select {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--text);
+}
+
 .list__foot {
   margin-top: auto;
   display: flex;
@@ -857,8 +1257,7 @@
     border-bottom: 1px solid var(--line);
   }
 
-  .rail__space,
-  .rail__env {
+  .rail__space {
     display: none;
   }
 
@@ -868,6 +1267,10 @@
     order: 3;
     width: 100%;
     overflow-x: auto;
+  }
+
+  .rail__nav a {
+    flex: none;
   }
 
   .rail__foot {
@@ -920,5 +1323,14 @@
 
   .sheet__terms {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .filters select {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .compare__place {
+    margin-left: 0;
   }
 }

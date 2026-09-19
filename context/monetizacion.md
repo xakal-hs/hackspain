@@ -14,6 +14,9 @@ El comprador es **Embat**, que incorpora el módulo a su plataforma. El usuario 
 **CFO** de la empresa conectada. Un banco, bróker o proveedor BaaS puede ejecutar determinadas
 acciones, pero no es el protagonista del pitch.
 
+El modelo que les encaja es la **suscripción** del módulo. Intermediar rieles (depósito, FX, deuda)
+cuando Embed One no cubre es un parche, no el relato. Fuente: [voz de producto](voz_embat.md).
+
 ## La cifra defendible
 
 | Escenario | Adopción supuesta | Ingreso anual sobre el dataset |
@@ -80,8 +83,13 @@ La cuña incremental es:
 1. **Comparar:** una medida común de nivel y trayectoria para ordenar una cartera completa.
 2. **Explicar:** qué señales movieron la nota y cuántos puntos aportó cada una.
 3. **Priorizar:** qué empresa requiere atención ahora y con qué confianza.
-4. **Decidir:** colchón dinámico y siguiente acción según exceso, déficit o deterioro.
+4. **Decidir:** colchón dinámico y siguiente acción según exceso, déficit o deterioro. El exceso y la
+   divisa se enseñan primero como **coste de no hacer nada**; el CFO no los siente como problema.
 5. **Aprender:** registrar qué recomendación se aceptó y qué resultado produjo.
+
+El upsell no es un SKU único: es una **mesa de opciones** que encajan. La deuda, si entra, combina
+plazos corto / medio / largo según cuándo hay que devolver. No hace falta conciliación perfecta para
+emitir el estado de solvencia: sale de planificación y previsiones.
 
 Fuentes externas: [gestión de tesorería](https://www.embat.io/es/gestion-tesoreria),
 [módulos y pricing](https://www.embat.io/pricing) y
@@ -92,9 +100,11 @@ Fuentes externas: [gestión de tesorería](https://www.embat.io/es/gestion-tesor
 **Detectar antes → explicar qué cambió → calcular colchón dinámico → recomendar una acción →
 cuantificar el resultado.**
 
-- Si el colchón es positivo, el CFO conserva la caja necesaria y evalúa poner a trabajar el resto.
-- Si es negativo, recibe fecha, importe y motivos para negociar financiación antes del agujero.
+- Si el colchón es positivo, el CFO ve cuánto le cuesta dejarlo parado y evalúa poner a trabajar el resto.
+- Si es negativo, recibe fecha, importe y una mesa de opciones (adelantar cobros, mix de deuda a
+  distintos plazos) para negociar antes del agujero.
 - Si la señal es incierta, se vigila; no se presenta una recomendación automática como certeza.
+- El agente no es el canal: el coste y las opciones viven en la ficha.
 
 El frontend Nuxt actual es una narrativa con fixtures ficticios. Solo `/api/companies` dispone de un
 adaptador opcional al backend; las fichas, señales y ofertas no son todavía un flujo integrado. En

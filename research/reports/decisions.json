@@ -1187,6 +1187,18 @@
    "chart": null,
    "alternatives": "",
    "evidence": ""
+  },
+  {
+   "id": "D28",
+   "category": "producto",
+   "title": "Voz de producto Embat: coste oculto, mesa de opciones y mix de plazos",
+   "question": "¿Cómo enseña Embat el exceso, la divisa y la deuda a un CFO que no los siente como problema?",
+   "decision": "Idle cash y FX son costes ocultos: hay que mostrarlos en la app, no en un agente (el agente no se usa). El módulo se vende como suscripción; intermediar rieles cuando Embed One no cubre es un parche. El upsell es una mesa de opciones que encajan. La deuda, un mix corto/medio/largo según el tiempo de devolución. La criticidad de la liquidez cambia con el sector. La solvencia sale de previsión y colchón, no de conciliación perfecta.",
+   "why": "Testimonio de una PM de Embat (19-09-2026). El CFO no toma el dinero parado como problema real y la operativa de divisa le parece compleja. Empujar un SKU por comisión o un agente de FX contradice cómo venden ellos. Fuente: context/voz_embat.md.",
+   "status": "decidido",
+   "chart": null,
+   "alternatives": "",
+   "evidence": ""
   }
  ]
 }

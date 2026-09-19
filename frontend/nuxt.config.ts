@@ -26,7 +26,11 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     xrayApiBase: process.env.XRAY_API_BASE || '',
+    supabaseSecretKey: process.env.SUPABASE_SECRET_KEY || '',
+    supabaseJwksUrl: process.env.SUPABASE_JWKS_URL || '',
     public: {
+      supabaseUrl: process.env.SUPABASE_URL || '',
+      supabasePublishableKey: process.env.SUPABASE_PUBLISHABLE_KEY || '',
       appName: 'X-Ray',
     },
   },
@@ -34,10 +38,10 @@ export default defineNuxtConfig({
     routeRules: {
       '/api/**': { cors: true },
       // Routes from the earlier structure now live as sections of the cockpit.
-      '/cartera': { redirect: '/dashboard/banco?section=cartera' },
-      '/monitor': { redirect: '/dashboard/banco?section=senales' },
-      '/escenarios': { redirect: '/dashboard/banco' },
-      '/empresas/**': { redirect: '/dashboard/banco?section=cartera' },
+      '/cartera': { redirect: '/dashboard/embat?section=cartera' },
+      '/monitor': { redirect: '/dashboard/embat?section=senales' },
+      '/escenarios': { redirect: '/dashboard/embat' },
+      '/empresas/**': { redirect: '/dashboard/embat?section=cartera' },
     },
   },
   typescript: {

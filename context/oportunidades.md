@@ -24,7 +24,15 @@ Lo que no entra: maximizar un Excel de take independiente (reserve a 37 M€, se
 
 > **X-Ray parte la caja en colchón, exceso y agujero, y enruta cada uno a un producto financiero: barrer, adelantar cobros o ejecutar divisa. Hoy un partner ejecuta; el score ya es la política del banco que Embat todavía no es.**
 
-El módulo de decisión es lo que se vende a Embat. Los rieles (depósito, factoring, FX, póliza) son lo que se intermedia ahora y se puede poseer después.
+El módulo de decisión es lo que se vende a Embat. Los rieles (depósito, factoring, FX, póliza) son lo que se intermedia ahora —parche, no ideal— y se puede poseer después. La suscripción del módulo es el modelo que les encaja.
+
+## El coste hay que enseñarlo, no darlo por sentido
+
+Una PM de Embat lo dijo claro: el exceso de dinero **no se toma como un problema real**. La divisa, igual: parece compleja. Son costes ocultos. Sin esa frase en la ficha (“dejar 108.000 € en corriente te cuesta X € al año”), el yield y el FX no se activan aunque el cálculo sea correcto.
+
+El agente no resuelve esto. Es una de las funcionalidades que **no se acostumbra a utilizar**. La visibilidad va en la aplicación, en euros y en lenguaje llano, antes del SKU.
+
+La solvencia tampoco espera a conciliar al céntimo. Colchón, exceso y agujero salen de **planificación y previsiones**. Fuente: [voz de producto](voz_embat.md).
 
 ## Primero el grupo mueve capital
 
@@ -43,7 +51,7 @@ El TAM casi no cambia. Cambia a quién no hay que vender un producto.
 
 ## Hay dos palos grandes
 
-El resto es timing, upsell o semilla de underwriting.
+El resto es timing, upsell o semilla de underwriting. El upsell no es un SKU empujado por comisión: es una **mesa de opciones** que encajan, para que tesorería elija.
 
 ```
 Detectar → partir caja (colchón / exceso / agujero)
@@ -65,7 +73,9 @@ Detectar → partir caja (colchón / exceso / agujero)
 
 El cliente gana más que Embat. Eso es el diseño correcto: impacto primero, spread segundo.
 
-Camino a banco: hoy un bróker o BaaS ejecuta el barrido. El día que Embat tome depósitos, **esta cola es el pasivo**. El score ya sabe quién puede sacar dinero de la cuenta sin romper el colchón.
+Camino a banco: hoy un bróker o BaaS ejecuta el barrido cuando Embed One no cubre el riel. Intermediar no es lo ideal; la suscripción del módulo sí. El día que Embat tome depósitos, **esta cola es el pasivo**. El score ya sabe quién puede sacar dinero de la cuenta sin romper el colchón.
+
+En la ficha, el primer número no es el take de Embat: es **cuánto cuesta no hacer nada** con el saldo ocioso.
 
 ### 2. Anticipar cobros — caja hoy, sin préstamo nuevo
 
@@ -85,22 +95,26 @@ Hay **110** empresas con excedente **y** AR vencido (141 M€ ociosos + 275 M€
 |---|---|---|---|
 | **Yield** | Recurring, medible, riel inexistente | 1,19 M€/año @ 35 % (neto de pooling) | Depósito propio |
 | **Factoring** | Liquidez: cientos de M€ de AR en empresas tensas | One-shot / origination; libro si sois el factor | Activo (circulante) |
-| **FX** | Ahorro = vuestro take (15 pb) | 1,11 M€/año @ 35 % | Principal. Embat **ya** cobra pagos internacionales; X-Ray aporta el *cuándo* |
+| **FX** | Ahorro = vuestro take (15 pb). Primero el coste oculto: la operación asusta y el agente no se usa | 1,11 M€/año @ 35 % | Principal. Embat **ya** cobra pagos internacionales; X-Ray aporta el *cuándo* y lo enseña en la app |
 | **Línea / reserve** | Existencial en el agujero que el grupo no tapa (8,05 M€), no un cupón | 0,01 M€ sobre el agujero neto | Licencia + underwriting; **no** lidera el P&L |
 | **Seguro** | Prima, no caja | Take pequeño y solapado con factoring | Referral; no os hace banco |
 
-FX es dinero de verdad y entra en el pitch de tesorería. Es **menos identidad**: Embat ya vende el riel. Yield y factoring sí crean un producto que el CFO no tiene delante.
+FX es dinero de verdad y entra en el pitch de tesorería. Es **menos identidad**: Embat ya vende el riel. El riel, además, asusta: la operación es compleja y el agente no se usa. X-Ray aporta el *cuándo* y el **coste de no convertir**, visible en la app. Yield y factoring sí crean un producto que el CFO no tiene delante.
 
 La cifra de crédito defendible es más pequeña todavía: **8,05 M€** tras pooling (11,38 M€ brutos en 41 agujeros). Por eso el jurado no ve un marketplace. El relato de compañía es otro: el agujero es pequeño; **el AR detrás de la tensión no lo es**; el excedente en corriente, tampoco; y parte de lo que parece crédito es un traspaso entre filiales.
 
+Cuando sí hay que aportar deuda, no se empuja una línea genérica. Con estos datos se puede (1) aportar un producto, (2) entender la necesidad y ofrecer **varios** conforme al tiempo de devolución, y (3) proponer un **mix a corto, medio y largo plazo**. La criticidad de esa liquidez no es la misma en todas: hay empresas que viven de ella y otras que no la miran.
+
 ## Secuencia
 
-**Ahora** — capa de decisión + intermediación (sin licencia bancaria)
+**Ahora** — capa de decisión + suscripción (intermediación solo si Embed One no cubre)
 
-1. Colchón explicable. Eso no lo duplica el forecast de Embat.
-2. Si el grupo tiene excedente y agujero, movimiento de capital. No un SKU.
-3. Barrido del excedente que quede, con partner.
-4. Factoring / confirming como acción por defecto cuando hay tensión, hay facturas y el grupo no cubre, no «busca un préstamo».
+1. Colchón explicable. Eso no lo duplica el forecast de Embat. No espera conciliación perfecta.
+2. Coste de no hacer nada: dinero parado y divisa sin convertir, visibles en la ficha.
+3. Si el grupo tiene excedente y agujero, movimiento de capital. No un SKU.
+4. Mesa de opciones que encajan (barrido, factoring, FX, mix de deuda), no un único producto.
+5. Factoring / confirming como acción por defecto cuando hay tensión, hay facturas y el grupo no cubre, no «busca un préstamo».
+6. Si hay deuda, combinar corto / medio / largo según el tiempo de devolución.
 
 **Después** — dueños del riel
 
@@ -114,6 +128,9 @@ La póliza y el crédito genérico salen de haber visto 24 meses de caja. Los ag
 
 - El pitch de jurado abre con el colchón, el excedente medido y la divisa. No con 8 M€ de agujero. No recomendar barrido ni crédito si hay caja hermana.
 - El pitch de compañía añade el AR de las tensas y el camino pasivo → activo.
+- Mostrar en la app el coste oculto del dinero parado y de la divisa. No depender del agente.
+- El upsell es una mesa de 2–4 opciones que encajan, no el SKU de más comisión.
+- La deuda, si entra, es un mix de plazos según cuándo tiene que volver el dinero, no una línea única.
 - No rankear la demo de Productos por comisión de la SPA (mezcla yield del CFO con take de Embat, y FX con `n_tx > 50`).
 - No originar líneas con una fórmula de gasto que explota en colas. Eso maximiza un Excel, no el impacto ni el derecho a ser el banco después.
 

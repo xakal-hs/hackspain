@@ -16,11 +16,11 @@ const selectedState = ref('bien')
 const states = ref({
   bien: {
     color: 'var(--ok)', chip: 'BIEN', dotColor: 'var(--ok)', tag: 'Oportunidad detectada',
-    bannerBg: 'var(--ok-bg)', bannerBorder: 'var(--ok-border)', iconBg: '#D0EFDD', icon: '↑',
+    bannerBg: 'var(--ok-bg)', bannerBorder: 'var(--ok-border)', iconBg: 'var(--ok-chip)', icon: '↑',
     headline: 'Puedes colocar 300k€ sin comprometer tu colchón',
     subhead: 'Excedente sostenido 2 meses · score 78 · runway h3 > 3 meses. Rendimiento estimado: +1.240 €/mes.',
     ctaLabel: 'Colocar 300k€',
-    ctaBg: 'var(--ok)', ctaText: 'var(--card)', ctaBorder: 'var(--ok)',
+    ctaBg: 'var(--ok)', ctaText: 'var(--on-status)', ctaBorder: 'var(--ok)',
     cash: '620k €',
     excedenteLabel: 'Excedente colocable', excedente: '380k €', excedenteDelta: '+120k vs. mes ant.',
     excedenteHint: 'Al ritmo del forecast h3, puedes colocar sin devolver antes de tiempo.',
@@ -37,14 +37,14 @@ const states = ref({
     autoMode: 'Colocación automática', autoBg: 'var(--ok)', autoOffset: '16px',
     autoHint: 'Activa: excedentes > 100k€ sostenidos 2m se colocan sin confirmación.',
     history: [
-      { date: '11 sep', title: 'Colocación automática 220k€', desc: '30 días · Banco Meridiano · tipo 3,1%', badge: 'Activa', badgeBg: 'var(--ok-bg)', badgeText: '#17805A' },
-      { date: '28 ago', title: 'Devolución al vencimiento', desc: 'Depósito de 180k€ recuperado en tiempo · sin ruptura', badge: 'Cerrada', badgeBg: '#EEF0F7', badgeText: 'var(--text-2)' },
-      { date: '14 ago', title: 'Colocación manual 150k€', desc: 'CFO ejecutó desde el chat del agente', badge: 'Cerrada', badgeBg: '#EEF0F7', badgeText: 'var(--text-2)' }
+      { date: '11 sep', title: 'Colocación automática 220k€', desc: 'Depósito 30 días · tipo 3,1%', badge: 'Activa', badgeBg: 'var(--ok-bg)', badgeText: 'var(--ok-strong)' },
+      { date: '28 ago', title: 'Devolución al vencimiento', desc: 'Depósito de 180k€ recuperado en tiempo · sin ruptura', badge: 'Cerrada', badgeBg: 'var(--wash)', badgeText: 'var(--text-2)' },
+      { date: '14 ago', title: 'Colocación manual 150k€', desc: 'CFO ejecutó desde el chat del agente', badge: 'Cerrada', badgeBg: 'var(--wash)', badgeText: 'var(--text-2)' }
     ]
   },
   normal: {
     color: 'var(--warn)', chip: 'NORMAL', dotColor: 'var(--warn)', tag: 'Sin acción esta semana',
-    bannerBg: 'var(--warn-bg)', bannerBorder: 'var(--warn-border)', iconBg: '#F5E4B8', icon: '→',
+    bannerBg: 'var(--warn-bg)', bannerBorder: 'var(--warn-border)', iconBg: 'var(--warn-chip)', icon: '→',
     headline: 'Excedente en observación · esperamos confirmación',
     subhead: 'El excedente es volátil este mes (±80k€). Volvemos a evaluar el 12/dic. No sugerimos colocar aún.',
     ctaLabel: 'Ajustar umbrales',
@@ -62,21 +62,21 @@ const states = ref({
       { label: 'Volatilidad de caja', value: 'Alta', color: 'var(--warn)' },
       { label: 'Próxima evaluación', value: '12 dic', color: 'var(--text)' }
     ],
-    autoMode: 'Colocación automática', autoBg: '#EEF0F7', autoOffset: '0px',
+    autoMode: 'Colocación automática', autoBg: 'var(--wash)', autoOffset: '0px',
     autoHint: 'Desactivada por volatilidad. Requiere confirmación manual del CFO.',
     history: [
-      { date: '11 sep', title: 'Excedente vuelto por bajo runway h3', desc: 'Sistema esperó y no colocó — evitó rotura de caja', badge: 'Silencio', badgeBg: 'var(--warn-bg)', badgeText: '#8A6410' },
-      { date: '04 sep', title: 'Umbral no alcanzado', desc: 'Excedente 65k€ · por debajo del mínimo de 100k€', badge: 'Sin acción', badgeBg: '#EEF0F7', badgeText: 'var(--text-2)' },
-      { date: '20 ago', title: 'Colocación anterior devuelta', desc: 'Cierre normal, sin nuevas colocaciones esperadas 2 semanas', badge: 'Cerrada', badgeBg: '#EEF0F7', badgeText: 'var(--text-2)' }
+      { date: '11 sep', title: 'Excedente vuelto por bajo runway h3', desc: 'Sistema esperó y no colocó — evitó rotura de caja', badge: 'Silencio', badgeBg: 'var(--warn-bg)', badgeText: 'var(--warn-strong)' },
+      { date: '04 sep', title: 'Umbral no alcanzado', desc: 'Excedente 65k€ · por debajo del mínimo de 100k€', badge: 'Sin acción', badgeBg: 'var(--wash)', badgeText: 'var(--text-2)' },
+      { date: '20 ago', title: 'Colocación anterior devuelta', desc: 'Cierre normal, sin nuevas colocaciones esperadas 2 semanas', badge: 'Cerrada', badgeBg: 'var(--wash)', badgeText: 'var(--text-2)' }
     ]
   },
   mal: {
     color: 'var(--bad)', chip: 'MAL', dotColor: 'var(--bad)', tag: 'Alerta anticipada',
-    bannerBg: 'var(--bad-bg)', bannerBorder: 'var(--bad-border)', iconBg: '#F7CFCC', icon: '↓',
+    bannerBg: 'var(--bad-bg)', bannerBorder: 'var(--bad-border)', iconBg: 'var(--bad-chip)', icon: '↓',
     headline: 'Prepara la devolución del depósito antes del 30/nov',
     subhead: 'Forecaster h3 predice runway 1,8 meses. Devuelve 120k€ del depósito activo o quedas por debajo del colchón.',
     ctaLabel: 'Devolver 120k€ ahora',
-    ctaBg: 'var(--bad)', ctaText: 'var(--card)', ctaBorder: 'var(--bad)',
+    ctaBg: 'var(--bad)', ctaText: 'var(--on-status)', ctaBorder: 'var(--bad)',
     cash: '285k €',
     excedenteLabel: 'Excedente colocable', excedente: '−45k €', excedenteDelta: '−165k vs. mes ant.',
     excedenteHint: 'Estás por debajo del colchón necesario. Necesitas devolver parte del depósito.',
@@ -90,12 +90,12 @@ const states = ref({
       { label: 'ap_late_share ↑', value: '+0,10 (3m)', color: 'var(--bad)' },
       { label: 'Depósito activo', value: '220k € · vence 15 dic', color: 'var(--text)' }
     ],
-    autoMode: 'Colocación automática', autoBg: '#EEF0F7', autoOffset: '0px',
+    autoMode: 'Colocación automática', autoBg: 'var(--wash)', autoOffset: '0px',
     autoHint: 'Pausada · el sistema no colocará hasta que la trayectoria se estabilice.',
     history: [
-      { date: '18 sep', title: '🔴 Alerta anticipada emitida', desc: '3 meses antes del cash-crunch previsto · chat del agente activo', badge: 'Activa', badgeBg: 'var(--bad-bg)', badgeText: '#B0322A' },
-      { date: '05 sep', title: 'Primera señal detectada', desc: 'runway h3 baja del umbral · sistema empieza vigilancia intensiva', badge: 'Detectada', badgeBg: 'var(--warn-bg)', badgeText: '#8A6410' },
-      { date: '20 ago', title: 'Última colocación exitosa', desc: '220k€ colocados · en momento aún saludable', badge: 'Cerrada', badgeBg: '#EEF0F7', badgeText: 'var(--text-2)' }
+      { date: '18 sep', title: '🔴 Alerta anticipada emitida', desc: '3 meses antes del cash-crunch previsto · chat del agente activo', badge: 'Activa', badgeBg: 'var(--bad-bg)', badgeText: 'var(--bad-strong)' },
+      { date: '05 sep', title: 'Primera señal detectada', desc: 'runway h3 baja del umbral · sistema empieza vigilancia intensiva', badge: 'Detectada', badgeBg: 'var(--warn-bg)', badgeText: 'var(--warn-strong)' },
+      { date: '20 ago', title: 'Última colocación exitosa', desc: '220k€ colocados · en momento aún saludable', badge: 'Cerrada', badgeBg: 'var(--wash)', badgeText: 'var(--text-2)' }
     ]
   }
 })
@@ -137,7 +137,7 @@ const stateOptions = computed(() =>
         <div style="width: 30px; height: 30px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center;" :style="{ background: accent }">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6V12C4 17 7.5 20.5 12 22C16.5 20.5 20 17 20 12V6L12 2Z" stroke="var(--card)" stroke-width="1.8" stroke-linejoin="round"></path></svg>
         </div>
-        <span style="font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--card);">Centinela</span>
+        <span style="font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--on-navy);">Centinela</span>
       </div>
 
       <!-- Nav items -->
@@ -149,9 +149,9 @@ const stateOptions = computed(() =>
       </a>
 
       <!-- Active -->
-      <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-sm); background: rgba(255,255,255,0.12); color: var(--card); font-size: 13.5px; font-weight: 600;" :style="{ borderLeft: `3px solid ${accent}` }">
+      <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-sm); background: rgba(255,255,255,0.12); color: var(--on-navy); font-size: 13.5px; font-weight: 600;" :style="{ borderLeft: `3px solid ${accent}` }">
         <span style="width: 16px;">◇</span> Colchón Dinámico
-        <span style="margin-left: auto; padding: 2px 7px; color: var(--card); border-radius: 999px; font-size: 10px; font-weight: 700;" :style="{ background: state.dotColor }">{{ state.chip }}</span>
+        <span style="margin-left: auto; padding: 2px 7px; color: var(--on-status); border-radius: 999px; font-size: 10px; font-weight: 700;" :style="{ background: state.dotColor }">{{ state.chip }}</span>
       </div>
 
       <a href="WebAppDivisa.dc.html" class="nav-link">
@@ -166,7 +166,7 @@ const stateOptions = computed(() =>
 
       <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 10px 8px;"></div>
 
-      <span style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6970A6; padding: 0 12px 4px;">Embat</span>
+      <span style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--on-navy-4); padding: 0 12px 4px;">Embat</span>
       <div class="nav-sub">
         <span style="width: 16px;">⇄</span> Conectividad
       </div>
@@ -179,10 +179,10 @@ const stateOptions = computed(() =>
 
       <!-- User -->
       <div style="margin-top: auto; padding: 12px; background: rgba(255,255,255,0.06); border-radius: var(--r-lg); display: flex; align-items: center; gap: 10px;">
-        <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--card); font-size: 12px; font-weight: 700; font-family: var(--font-display);" :style="{ background: accent }">CA</div>
+        <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--on-navy); font-size: 12px; font-weight: 700; font-family: var(--font-display);" :style="{ background: accent }">CA</div>
         <div style="flex-grow: 1; min-width: 0;">
-          <div style="font-size: 12.5px; font-weight: 600; color: var(--card);">César Álvarez</div>
-          <div style="font-size: 11px; color: #8990C4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Distribuciones Ibérica</div>
+          <div style="font-size: 12.5px; font-weight: 600; color: var(--on-navy);">César Álvarez</div>
+          <div style="font-size: 11px; color: var(--on-navy-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Distribuciones Ibérica</div>
         </div>
       </div>
 
@@ -198,7 +198,7 @@ const stateOptions = computed(() =>
           ? { padding: '16px 32px', background: 'var(--card)', borderBottom: '1px solid var(--border)', justifyContent: 'space-between' }
           : { padding: '22px 24px 0', justifyContent: 'flex-end' }"
       >
-        <div v-if="chrome" style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #6B7089;">
+        <div v-if="chrome" style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--meta);">
           <span>Tesorería</span>
           <span>›</span>
           <span style="color: var(--text); font-weight: 600;">Colchón Dinámico</span>
@@ -227,7 +227,7 @@ const stateOptions = computed(() =>
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
           <div>
             <h1 style="margin: 0 0 6px; font-family: var(--font-display); font-size: 26px; font-weight: 600;">Colchón Dinámico</h1>
-            <p style="margin: 0; font-size: 13.5px; color: #6B7089;">Divide tu caja en lo que necesitas y lo que no. Coloca el excedente, prevé las devoluciones.</p>
+            <p style="margin: 0; font-size: 13.5px; color: var(--meta);">Divide tu caja en lo que necesitas y lo que no. Coloca el excedente, prevé las devoluciones.</p>
           </div>
           <div style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; font-size: 12.5px; color: var(--text-2);">
             <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--ok);"></span>
@@ -244,7 +244,7 @@ const stateOptions = computed(() =>
           <div style="flex-grow: 1;">
             <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2px;" :style="{ color: state.color }">{{ state.tag }}</div>
             <div style="font-family: var(--font-display); font-size: 16.5px; font-weight: 600; margin-bottom: 3px;">{{ state.headline }}</div>
-            <div style="font-size: 13px; color: #23253F; line-height: 1.5;">{{ state.subhead }}</div>
+            <div style="font-size: 13px; color: var(--body); line-height: 1.5;">{{ state.subhead }}</div>
           </div>
           <button
             type="button"
@@ -258,7 +258,7 @@ const stateOptions = computed(() =>
 
           <div class="card" style="padding: 20px 22px;">
             <div style="display: flex; justify-content: space-between; align-items: baseline;">
-              <span style="font-size: 12.5px; color: #6B7089;">Caja actual</span>
+              <span style="font-size: 12.5px; color: var(--meta);">Caja actual</span>
               <span style="font-size: 11px; color: var(--ok); font-weight: 600;">+ 24k € esta semana</span>
             </div>
             <div style="font-family: var(--font-display); font-size: 30px; font-weight: 700; margin-top: 8px;">{{ state.cash }}</div>
@@ -269,12 +269,12 @@ const stateOptions = computed(() =>
 
           <div class="card" style="padding: 20px 22px;">
             <div style="display: flex; justify-content: space-between; align-items: baseline;">
-              <span style="font-size: 12.5px; color: #6B7089;">Colchón necesario</span>
+              <span style="font-size: 12.5px; color: var(--meta);">Colchón necesario</span>
               <span style="font-size: 11px; color: var(--text-3); font-weight: 600;">2× mediana gasto</span>
             </div>
             <div style="font-family: var(--font-display); font-size: 30px; font-weight: 700; margin-top: 8px;">240k €</div>
             <div style="margin-top: 12px;">
-              <div style="height: 6px; background: #EEF0F7; border-radius: 3px; overflow: hidden;">
+              <div style="height: 6px; background: var(--wash); border-radius: 3px; overflow: hidden;">
                 <div style="width: 72%; height: 100%; border-radius: 3px;" :style="{ background: state.color }"></div>
               </div>
               <div style="font-size: 11.5px; color: var(--text-3); margin-top: 6px;">Cubierto 72% · confianza h3 90%</div>
@@ -283,7 +283,7 @@ const stateOptions = computed(() =>
 
           <div style="border-radius: var(--r-lg); padding: 20px 22px;" :style="{ background: state.heroBg, border: `1px solid ${state.heroBorder}` }">
             <div style="display: flex; justify-content: space-between; align-items: baseline;">
-              <span style="font-size: 12.5px; color: #6B7089;">{{ state.excedenteLabel }}</span>
+              <span style="font-size: 12.5px; color: var(--meta);">{{ state.excedenteLabel }}</span>
               <span style="font-size: 11px; font-weight: 600;" :style="{ color: state.color }">{{ state.excedenteDelta }}</span>
             </div>
             <div style="font-family: var(--font-display); font-size: 32px; font-weight: 700; margin-top: 8px;" :style="{ color: state.color }">{{ state.excedente }}</div>
@@ -303,15 +303,15 @@ const stateOptions = computed(() =>
                 <div style="font-size: 11.5px; color: var(--text-3); margin-top: 2px;">Con predicción h3 · umbral de decisión en 100 k€</div>
               </div>
               <div style="display: flex; gap: 6px;">
-                <span style="padding: 4px 8px; background: #EEF0F7; color: var(--text-2); border-radius: 6px; font-size: 11.5px; font-weight: 600;">12 M</span>
+                <span style="padding: 4px 8px; background: var(--wash); color: var(--text-2); border-radius: 6px; font-size: 11.5px; font-weight: 600;">12 M</span>
                 <span style="padding: 4px 8px; color: var(--text-3); font-size: 11.5px; font-weight: 600;">24 M</span>
               </div>
             </div>
             <svg width="100%" height="220" viewBox="0 0 700 220" preserveAspectRatio="none">
-              <line x1="10" y1="180" x2="690" y2="180" stroke="#EEF0F7" stroke-width="1"></line>
-              <line x1="10" y1="130" x2="690" y2="130" stroke="#EEF0F7" stroke-width="1"></line>
-              <line x1="10" y1="80" x2="690" y2="80" stroke="#EEF0F7" stroke-width="1"></line>
-              <line x1="10" y1="30" x2="690" y2="30" stroke="#EEF0F7" stroke-width="1"></line>
+              <line x1="10" y1="180" x2="690" y2="180" stroke="var(--grid)" stroke-width="1"></line>
+              <line x1="10" y1="130" x2="690" y2="130" stroke="var(--grid)" stroke-width="1"></line>
+              <line x1="10" y1="80" x2="690" y2="80" stroke="var(--grid)" stroke-width="1"></line>
+              <line x1="10" y1="30" x2="690" y2="30" stroke="var(--grid)" stroke-width="1"></line>
               <line x1="10" y1="150" x2="690" y2="150" :stroke="accent" stroke-width="1" stroke-dasharray="4,4" opacity="0.5"></line>
               <text x="14" y="146" font-size="10" :fill="accent" style="font-family: var(--font-display);">umbral 100k€</text>
 
@@ -322,7 +322,7 @@ const stateOptions = computed(() =>
             <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3);">
               <span>oct '25</span><span>abr '26</span><span>hoy</span><span>predicción h3 →</span>
             </div>
-            <div style="display: flex; gap: 14px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #EEF0F7;">
+            <div style="display: flex; gap: 14px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--grid);">
               <div class="legend-item"><span style="width: 12px; height: 2px;" :style="{ background: state.color }"></span> Excedente real</div>
               <div class="legend-item"><span style="width: 12px; height: 2px; opacity: 0.6;" :style="{ background: state.color }"></span> Predicción h3 (banda 80%)</div>
             </div>
@@ -339,7 +339,7 @@ const stateOptions = computed(() =>
                   :key="d.label"
                   style="display: flex; justify-content: space-between; align-items: center; font-size: 12.5px;"
                 >
-                  <span style="color: #23253F;">{{ d.label }}</span>
+                  <span style="color: var(--body);">{{ d.label }}</span>
                   <span style="font-weight: 600; font-family: var(--font-display);" :style="{ color: d.color }">{{ d.value }}</span>
                 </div>
               </div>
@@ -348,12 +348,12 @@ const stateOptions = computed(() =>
             <div class="card" style="padding: 18px 20px;">
               <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px;">Modo de operación</div>
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                <span style="font-size: 13px; color: #23253F;">{{ state.autoMode }}</span>
+                <span style="font-size: 13px; color: var(--body);">{{ state.autoMode }}</span>
                 <div style="width: 38px; height: 22px; border-radius: 999px; padding: 3px; box-sizing: border-box;" :style="{ background: state.autoBg }">
                   <div style="width: 16px; height: 16px; background: var(--card); border-radius: 50%;" :style="{ marginLeft: state.autoOffset }"></div>
                 </div>
               </div>
-              <div style="font-size: 11.5px; color: #6B7089; line-height: 1.4;">{{ state.autoHint }}</div>
+              <div style="font-size: 11.5px; color: var(--meta); line-height: 1.4;">{{ state.autoHint }}</div>
             </div>
 
           </div>
@@ -370,12 +370,12 @@ const stateOptions = computed(() =>
             <div
               v-for="h in state.history"
               :key="h.date"
-              style="display: grid; grid-template-columns: 90px 1fr auto; gap: 14px; align-items: center; padding: 10px 0; border-top: 1px solid #F1F2F7;"
+              style="display: grid; grid-template-columns: 90px 1fr auto; gap: 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--grid);"
             >
               <span style="font-size: 11.5px; color: var(--text-3);">{{ h.date }}</span>
               <div>
                 <div style="font-size: 13px; font-weight: 600;">{{ h.title }}</div>
-                <div style="font-size: 11.5px; color: #6B7089; margin-top: 2px;">{{ h.desc }}</div>
+                <div style="font-size: 11.5px; color: var(--meta); margin-top: 2px;">{{ h.desc }}</div>
               </div>
               <span style="padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600;" :style="{ background: h.badgeBg, color: h.badgeText }">{{ h.badge }}</span>
             </div>
@@ -396,7 +396,7 @@ const stateOptions = computed(() =>
   gap: 10px;
   padding: 10px 12px;
   border-radius: var(--r-sm);
-  color: #8990C4;
+  color: var(--on-navy-3);
   font-size: 13.5px;
   text-decoration: none;
 }
@@ -407,7 +407,7 @@ const stateOptions = computed(() =>
   gap: 10px;
   padding: 8px 12px;
   border-radius: var(--r-sm);
-  color: #8990C4;
+  color: var(--on-navy-3);
   font-size: 13px;
 }
 

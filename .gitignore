@@ -4,3 +4,11 @@ __pycache__/
 analysis/cash.duckdb
 output_hackspain_data.zip
 output/
+
+# Local environment credentials, at any depth.
+.env
+.env.*
+!.env.example
+
+# Machine-local Claude permissions and authentication preferences.
+.claude/settings.local.json

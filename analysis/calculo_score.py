@@ -1,0 +1,1039 @@
+#!/usr/bin/env python3
+"""Explica cómo se calcula el X-Ray score y genera un HTML autocontenido.
+
+Fuente de verdad del cálculo: ``research/src/xray.py`` (HealthScorer) y
+``research/src/features.py``. Pesos y métricas: ``research/reports/metrics_v7.json``.
+Escala publicada (P5→15, P95→85): ``research/DECISIONS.md`` D18.
+
+Genera ``analysis/calculo_score.html``.
+"""
+from __future__ import annotations
+
+import json
+from datetime import datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+OUTPUT = ROOT / "analysis" / "calculo_score.html"
+METRICS = ROOT / "research" / "reports" / "metrics_v7.json"
+
+# Escala lineal congelada en train (D18). a + b·compuesto lleva P5→15 y P95→85.
+SCALE_A = -71.6
+SCALE_B = 2.21
+SMOOTH = 0.5
+DORMANT_CAP = 30.0
+PRIOR_SUM = 17.5  # suma de PRIOR_W en xray.py
+
+FEATURES = [
+    {
+        "id": "runway",
+        "pillar": "liquidez",
+        "dir": +1,
+        "zero_best": False,
+        "label": "Meses de caja",
+        "plain": "El dinero que le queda en la cuenta, medido en meses de gasto",
+        "formula": "signo(caja) × log(1 + |caja| / gasto)",
+        "detail": "gasto = máx(media 3m, media 12m). Encogerse no infla el runway (D09).",
+        "prior": 3.0,
+        "crit": "crítica",
+        "consumer": "¿Se le acaba el dinero de la cuenta?",
+    },
+    {
+        "id": "lc_util",
+        "pillar": "liquidez",
+        "dir": -1,
+        "zero_best": True,
+        "label": "Uso de líneas de crédito",
+        "plain": "Cuánto tiene dispuesto de su póliza",
+        "formula": "dispuesto / límite",
+        "detail": "Solo si hay límite > 0. Cero = no está usando la tarjeta (D10, D11).",
+        "prior": 1.0,
+        "crit": "alta",
+        "consumer": "¿Vive al límite de la tarjeta?",
+    },
+    {
+        "id": "net_margin_6m",
+        "pillar": "rentabilidad",
+        "dir": +1,
+        "zero_best": False,
+        "label": "Margen de caja 6m",
+        "plain": "Si cobra más de lo que gasta, en seis meses",
+        "formula": "(entradas − salidas) / (entradas + salidas), 6m",
+        "detail": "Ventana larga para no confundir impuestos trimestrales con deterioro (D08).",
+        "prior": 1.5,
+        "crit": "media",
+        "consumer": "¿Le entra más de lo que sale?",
+    },
+    {
+        "id": "growth_vs_12m",
+        "pillar": "rentabilidad",
+        "dir": +1,
+        "zero_best": False,
+        "label": "Tendencia de cobros",
+        "plain": "Si factura más que su media anual",
+        "formula": "log(entradas 3m / entradas 12m)",
+        "detail": "A partir del tercer mes de historia. Compara el trimestre con el año.",
+        "prior": 1.5,
+        "crit": "media",
+        "consumer": "¿El sueldo de la empresa sube o baja?",
+    },
+    {
+        "id": "debt_burden",
+        "pillar": "solvencia",
+        "dir": -1,
+        "zero_best": True,
+        "label": "Carga de deuda",
+        "plain": "Cuánto de lo que ingresa se va en cuotas e intereses",
+        "formula": "(cuotas + intereses 3m) / entradas 3m",
+        "detail": "Cero = no tiene servicio de deuda, y eso es bueno (two-part).",
+        "prior": 1.0,
+        "crit": "alta",
+        "consumer": "¿Pide un préstamo para tapar el agujero?",
+    },
+    {
+        "id": "payroll_burden",
+        "pillar": "solvencia",
+        "dir": -1,
+        "zero_best": False,
+        "label": "Peso de nóminas",
+        "plain": "Cuánto de lo que ingresa se va en sueldos y SS",
+        "formula": "(nóminas + SS 3m) / entradas 3m",
+        "detail": "Sin nóminas = no aplica (NaN), no un 100. El peso calibrado quedó en 0 (D12).",
+        "prior": 0.5,
+        "crit": "alta",
+        "consumer": "¿La plantilla se come los cobros?",
+    },
+    {
+        "id": "ap_late_share",
+        "pillar": "disciplina",
+        "dir": -1,
+        "zero_best": True,
+        "label": "Pagos tardíos a proveedores",
+        "plain": "Cuánto tarda en pagar a quien le fía (DPO)",
+        "formula": "% facturas AP vencidas >15 días, ventana 3m",
+        "detail": "Se arrastra hasta 3 meses si no vencen facturas (D15). Impagada = pending ≠ 0 (D05).",
+        "prior": 1.5,
+        "crit": "media",
+        "consumer": "¿Paga cada vez más tarde a quien le fía?",
+    },
+    {
+        "id": "ar_late_share",
+        "pillar": "disciplina",
+        "dir": -1,
+        "zero_best": True,
+        "label": "Cobros tardíos de clientes",
+        "plain": "Cuánto tarda en cobrar de clientes (DSO)",
+        "formula": "% facturas AR cobradas >15 días tarde o impagadas, 3m",
+        "detail": "Misma regla de arrastre. payment_date del fichero no es fiable en vencidas.",
+        "prior": 1.0,
+        "crit": "media",
+        "consumer": "¿Cobra tarde o deja de cobrar?",
+    },
+    {
+        "id": "ap_overdue_ratio",
+        "pillar": "disciplina",
+        "dir": -1,
+        "zero_best": True,
+        "label": "Deuda vencida con proveedores",
+        "plain": "Lo que debe a proveedores y ya venció, en meses de pagos",
+        "formula": "saldo AP vencido / salidas mensuales",
+        "detail": "Stock de mora, no solo el ritmo. Cero es lo mejor.",
+        "prior": 1.0,
+        "crit": "media",
+        "consumer": "¿Deja facturas de proveedores sin pagar?",
+    },
+    {
+        "id": "ar_overdue_90_ratio",
+        "pillar": "disciplina",
+        "dir": -1,
+        "zero_best": True,
+        "label": "Clientes morosos >60 días",
+        "plain": "Lo que le deben y lleva más de dos meses vencido",
+        "formula": "saldo AR vencido >60 días / entradas mensuales",
+        "detail": "Separa mora reciente de un stock que ya no se cobra.",
+        "prior": 0.5,
+        "crit": "alta",
+        "consumer": "¿Hay clientes que ya no pagan?",
+    },
+    {
+        "id": "refund_rate",
+        "pillar": "disciplina",
+        "dir": -1,
+        "zero_best": True,
+        "label": "Devoluciones de cobros",
+        "plain": "Devoluciones sobre cobros operativos",
+        "formula": "devoluciones 3m / cobros operativos 3m",
+        "detail": "El 88 % de las filas vale 0. Un reembolso pequeño no puede hundir 90 puntos (D10).",
+        "prior": 0.5,
+        "crit": "bache",
+        "consumer": "¿Le devuelven los cobros?",
+    },
+    {
+        "id": "activity_trend",
+        "pillar": "estabilidad",
+        "dir": +1,
+        "zero_best": False,
+        "label": "Tendencia de actividad",
+        "plain": "Si se mueve menos dinero que antes",
+        "formula": "log(nº movimientos 3m / media 12m)",
+        "detail": "Peso calibrado más alto (~20 %). Revierte a la media: es la señal más ruidosa (review v6).",
+        "prior": 1.5,
+        "crit": "alta",
+        "consumer": "¿La cuenta se está quedando quieta?",
+    },
+    {
+        "id": "transfer_dep",
+        "pillar": "estabilidad",
+        "dir": -1,
+        "zero_best": True,
+        "label": "Dependencia de transferencias",
+        "plain": "Si vive de que le transfieran dinero, no de cobrar",
+        "formula": "transferencias no operativas 3m / entradas 3m",
+        "detail": "Sin categoría '-' (eso es cobertura). Intragrupo ya está fuera del flujo (D04).",
+        "prior": 0.5,
+        "crit": "bache",
+        "consumer": "¿Le sostienen desde fuera, o cobra de clientes?",
+    },
+    {
+        "id": "hhi_ar_6m",
+        "pillar": "estabilidad",
+        "dir": -1,
+        "zero_best": False,
+        "label": "Concentración de clientes",
+        "plain": "Si depende de pocos clientes",
+        "formula": "HHI de facturación AR a 6 meses",
+        "detail": "1 = un solo cliente. Se arrastra 3 meses sin facturas (D15).",
+        "prior": 0.5,
+        "crit": "alta",
+        "consumer": "¿Si se va un cliente, se cae el negocio?",
+    },
+    {
+        "id": "net_vol_6m",
+        "pillar": "estabilidad",
+        "dir": -1,
+        "zero_best": False,
+        "label": "Volatilidad a la baja",
+        "plain": "Cuánto se le hunde la caja en los meses malos",
+        "formula": "semidesviación de flujos netos negativos / gasto, 6m",
+        "detail": "Solo la cola negativa. La volatilidad al alza no es riesgo (D11, D25).",
+        "prior": 0.5,
+        "crit": "media",
+        "consumer": "¿Los meses malos son un bache o un agujero?",
+    },
+    {
+        "id": "cust_trend",
+        "pillar": "estabilidad",
+        "dir": +1,
+        "zero_best": False,
+        "label": "Amplitud de clientes",
+        "plain": "Si factura a más o menos clientes que en el año",
+        "formula": "log((clientes 3m + 1) / (clientes 12m + 1))",
+        "detail": "Señal temprana de apagado junto con lost_share (D11).",
+        "prior": 1.0,
+        "crit": "alta",
+        "consumer": "¿Gana o pierde clientela?",
+    },
+    {
+        "id": "lost_share",
+        "pillar": "estabilidad",
+        "dir": -1,
+        "zero_best": True,
+        "label": "Facturación de clientes perdidos",
+        "plain": "La facturación de hace 3-12 meses de clientes a los que ya no factura",
+        "formula": "facturación de clientes sin factura en 3m / facturación 3-12m",
+        "detail": "Solo si había ≥ 3 clientes previos. La señal más temprana de apagado (AUC 0,72).",
+        "prior": 1.0,
+        "crit": "alta",
+        "consumer": "¿Se le están yendo los clientes que le pagaban?",
+    },
+]
+
+PILLARS = {
+    "liquidez": "Liquidez",
+    "rentabilidad": "Rentabilidad",
+    "solvencia": "Solvencia",
+    "disciplina": "Disciplina",
+    "estabilidad": "Estabilidad",
+}
+
+CRIT_LABEL = {
+    "crítica": "Crítica",
+    "alta": "Alta",
+    "media": "Media",
+    "bache": "Bache",
+}
+
+
+def load_metrics() -> dict:
+    if METRICS.exists():
+        return json.loads(METRICS.read_text(encoding="utf-8"))
+    return {}
+
+
+def enrich(metrics: dict) -> list[dict]:
+    weights = metrics.get("weights_mean", {})
+    stds = metrics.get("weights_std", {})
+    rows = []
+    for feat in FEATURES:
+        w = float(weights.get(feat["id"], feat["prior"] / PRIOR_SUM))
+        rows.append(
+            {
+                **feat,
+                "w": w,
+                "w_std": float(stds.get(feat["id"], 0.0)),
+                "prior_n": feat["prior"] / PRIOR_SUM,
+            }
+        )
+    return rows
+
+
+def es_pct(v: float, nd: int = 1) -> str:
+    return f"{v * 100:.{nd}f}".replace(".", ",") + " %"
+
+
+def es_n(v: float, nd: int = 2) -> str:
+    s = f"{v:.{nd}f}"
+    return s.replace(".", ",")
+
+
+def weight_bars(rows: list[dict]) -> str:
+    mx = max(r["w"] for r in rows) or 1
+    parts = []
+    for r in sorted(rows, key=lambda x: -x["w"]):
+        w = r["w"]
+        width = max(2.0, 100.0 * w / mx)
+        cls = "zero" if w < 0.005 else ""
+        parts.append(
+            f"""<div class="wrow {cls}">
+              <span class="wlab">{_esc(r["label"])}</span>
+              <span class="wtrack"><i style="width:{width:.1f}%"></i></span>
+              <span class="wval">{es_pct(w)}</span>
+            </div>"""
+        )
+    return "".join(parts)
+
+
+def _esc(text: str) -> str:
+    return (
+        text.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+    )
+
+
+def feature_rows_html(rows: list[dict]) -> str:
+    body = []
+    for r in rows:
+        direction = "más es mejor" if r["dir"] > 0 else "menos es mejor"
+        zb = "cero = 100" if r["zero_best"] else "—"
+        body.append(
+            f"""<tr>
+              <td><b>{_esc(r["id"])}</b><small>{_esc(r["plain"])}</small></td>
+              <td>{_esc(PILLARS[r["pillar"]])}</td>
+              <td><span class="crit {r["crit"]}">{_esc(CRIT_LABEL[r["crit"]])}</span></td>
+              <td class="mono">{_esc(r["formula"])}</td>
+              <td>{direction}<small>{zb}</small></td>
+              <td class="num">{es_pct(r["prior_n"])}</td>
+              <td class="num wcell">{es_pct(r["w"])}<small>± {es_pct(r["w_std"])}</small></td>
+            </tr>"""
+        )
+    return "".join(body)
+
+
+def pillar_weights(rows: list[dict]) -> str:
+    acc: dict[str, float] = {p: 0.0 for p in PILLARS}
+    for r in rows:
+        acc[r["pillar"]] += r["w"]
+    cards = []
+    for key, name in PILLARS.items():
+        cards.append(
+            f"""<div class="pcard">
+              <strong>{es_pct(acc[key], 0)}</strong>
+              <span>{_esc(name)}</span>
+            </div>"""
+        )
+    return "".join(cards)
+
+
+def build_html(rows: list[dict], metrics: dict) -> str:
+    feat_json = json.dumps(
+        [
+            {
+                "id": r["id"],
+                "label": r["label"],
+                "w": round(r["w"], 4),
+                "dir": r["dir"],
+                "zero_best": r["zero_best"],
+                "pillar": r["pillar"],
+            }
+            for r in rows
+        ],
+        ensure_ascii=False,
+    )
+    now = datetime.now().strftime("%Y-%m-%d")
+    auc_t = metrics.get("auc_level_vs_tension_6m")
+    auc_d = metrics.get("auc_deterioro")
+    auc_m = metrics.get("auc_mejora")
+    mae = metrics.get("mae_h3")
+    skill = metrics.get("skill_vs_ar1_h3")
+
+    def m(key: str, nd: int = 3) -> str:
+        v = metrics.get(key)
+        if v is None:
+            return "—"
+        if isinstance(v, float):
+            return es_n(v, nd)
+        return str(v)
+
+    return f"""<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cómo se calcula el X-Ray score</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>{CSS}</style>
+</head>
+<body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+<aside class="nav" aria-label="Secciones">
+  <p class="brand">X-Ray <span>v7</span></p>
+  <nav>
+    <a href="#formula">La fórmula</a>
+    <a href="#prestamista">Por qué así</a>
+    <a href="#pipeline">De CSV a nota</a>
+    <a href="#datos">Los datos</a>
+    <a href="#features">17 señales</a>
+    <a href="#percentil">Del valor al sub-score</a>
+    <a href="#pesos">Los pesos</a>
+    <a href="#escala">Escala 0–100</a>
+    <a href="#huecos">Sin dato y dormida</a>
+    <a href="#ewma">Suavizado y el porqué</a>
+    <a href="#calculadora">Calculadora</a>
+    <a href="#eventos">Ancla a hechos</a>
+    <a href="#monitor">Bandas y monitor</a>
+    <a href="#preguntas">Seis preguntas</a>
+    <a href="#limites">Lo que no resuelve</a>
+  </nav>
+</aside>
+
+<main id="contenido">
+  <header class="hero" id="formula">
+    <p class="kicker">Embat · HackSpain 2026 · HealthScorer</p>
+    <h1>Cómo se calcula el score</h1>
+    <p class="lede">No es un modelo que predice un número opaco. Es una suma de 17 juicios de prestamista, cada uno en percentil, ponderado con hechos futuros observables, abierto a 0–100 y suavizado. La explicación cuadra al céntimo porque cada paso es lineal.</p>
+    <div class="eq" role="img" aria-label="Fórmula del score publicado">
+      <div class="eq-line">
+        <span class="eq-lhs">score<sub>t</sub></span>
+        <span class="eq-op">=</span>
+        <span class="eq-rhs">Σ<sub>f</sub> EWMA<sub>α=0,5</sub>( c<sub>f,t</sub> )</span>
+      </div>
+      <div class="eq-line sub">
+        <span class="eq-lhs">c<sub>f,t</sub></span>
+        <span class="eq-op">=</span>
+        <span class="eq-rhs"><i>a</i> w<sub>f</sub> + <i>b</i> w<sub>f</sub> s<sub>f,t</sub></span>
+      </div>
+      <p class="eq-note"><i>s</i> es el percentil orientado, congelado en train. Si falta el dato, <i>s</i> = 50. <i>a</i> = {es_n(SCALE_A, 1)}, <i>b</i> = {es_n(SCALE_B, 2)}. Tras sumar: recorte a [0, 100] y tope 30 si no hay movimientos.</p>
+    </div>
+    <ul class="facts">
+      <li><b>17</b> features adimensionales</li>
+      <li><b>5</b> pilares</li>
+      <li>Pesos calibrados out-of-group</li>
+      <li>Explicación exacta, también tras el EWMA</li>
+    </ul>
+  </header>
+
+  <section id="prestamista">
+    <h2>La prueba de los 100.000 €</h2>
+    <p>El leaderboard pide un número. El producto no puede acabarse ahí. El diseño parte de una pregunta de consumidor: si tuvieras 100.000 € y tuvieras que prestarlos, ¿qué te preocuparía? El scoring de una persona y el de una empresa identifican la misma naturaleza de riesgo. Cambia el tipo de dato, no la pregunta.</p>
+    <div class="map">
+      <div><span>Se le acaba el dinero de la cuenta</span><b>Meses de caja</b></div>
+      <div><span>Cobra tarde o deja de cobrar</span><b>DSO / clientes perdidos</b></div>
+      <div><span>Paga cada vez más tarde a quien le fía</span><b>DPO / AP vencido</b></div>
+      <div><span>Vive al límite de la tarjeta</span><b>Uso de póliza</b></div>
+      <div><span>Pide un préstamo para tapar el agujero</span><b>Carga de deuda</b></div>
+      <div><span>No te enseña la cuenta</span><b>Cobertura, no salud</b></div>
+    </div>
+    <p>No todas las señales pesan igual. Una empresa que vacía la caja en pocas semanas tiene que mover el score mucho más que un DSO que empeora tres días. Por eso el prior de runway es 3 y el de un retraso puntual es 0,5; y por eso los pesos finales se anclan a eventos, no a un promedio plano.</p>
+  </section>
+
+  <section id="pipeline">
+    <h2>De los CSV a la nota, en siete pasos</h2>
+    <p>Cada paso está en código. El score de una empresa nueva recorre exactamente esta cadena, con percentiles y pesos congelados en train.</p>
+    <ol class="steps">
+      <li>
+        <h3>Limpiar sin reescribir</h3>
+        <p>Los CSV crudos no se tocan. DuckDB aplica un mapeo de suciedad categórica y referencial (<code>src/mapping/</code>). País a ISO-2, categorías canonizadas. Las filas sucias siguen visibles en vistas <code>*_raw</code>.</p>
+      </li>
+      <li>
+        <h3>Reconstruir el rastro mensual</h3>
+        <p><code>research/src/panel.py</code> arma una rejilla empresa × mes (sep-2024 a ago-2026). Convierte a la moneda de la empresa con tipos reales (BCE + currency-api) cuando el fx del fichero se desvía más de un 10 %. Saca los traspasos internos e intragrupo. La caja y las pólizas se proyectan hacia atrás desde la foto final de <code>balances.csv</code>: saldo de fin de mes = ancla − flujos posteriores, redondeado a céntimos.</p>
+      </li>
+      <li>
+        <h3>Calcular 17 ratios</h3>
+        <p><code>features.py</code> no recorta. Produce ratios adimensionales (independientes de moneda y tamaño) con un suelo EPS = 0,1 % del volumen mensual de esa empresa. Multiplicar todos los importes por 1e-6 o 1e6 no mueve el score más de 1 punto.</p>
+      </li>
+      <li>
+        <h3>Pasar cada ratio a un sub-score 0–100</h3>
+        <p>Percentil contra la distribución de train, congelada. Dirección económica: si “más es peor”, se invierte. Features con masa en cero (deuda, retrasos, devoluciones) dan 100 al cero y ordenan solo los positivos.</p>
+      </li>
+      <li>
+        <h3>Ponderar</h3>
+        <p>Media ponderada de sub-scores. Los pesos salen de una logística con signo restringido (<i>w</i> ≥ 0) calibrada contra tensión de liquidez, incumplimiento, caída estructural y expansión a 6 meses. Si los datos contradicen la dirección económica, el peso queda en 0.</p>
+      </li>
+      <li>
+        <h3>Abrir la escala y aplicar reglas</h3>
+        <p>El compuesto se concentra entre ~39 y ~71. Una recta lleva el P5 a 15 y el P95 a 85, se recorta a [0, 100] y, si no hay movimientos en el mes, no puede pasar de 30.</p>
+      </li>
+      <li>
+        <h3>Suavizar sin romper la suma</h3>
+        <p>EWMA con α = 0,5 sobre cada contribución. El score publicado es la suma de contribuciones suavizadas, así que <code>explain()</code> cuadra después del suavizado. Confianza = cobertura × (1 − OOD) × min(1, meses/6).</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="datos">
+    <h2>Qué entra en el panel, y qué se deja fuera</h2>
+    <p>El score no ve los CSV. Ve un panel mensual ya interpretado. Varias trampas del dataset, si se ignoran, invierten el ranking.</p>
+    <div class="grid2">
+      <article>
+        <h3>Caja histórica</h3>
+        <p><code>balances.csv</code> es solo la foto del 1-sep-2026. El histórico se reconstruye hacia atrás por producto y moneda. Caja = checking + saving + wallet. Saldos y movimientos por encima de 100 M€ son centinelas del generador, no tesorería de pyme. Series que exigen más de un mes de pagos en descubierto se marcan <code>has_drift</code> y salen de los agregados de cohorte.</p>
+      </article>
+      <article>
+        <h3>Flujos que no son negocio</h3>
+        <p>El 26,8 % del volumen bruto son traspasos internos o intragrupo. Se excluyen de entradas y salidas, igual que investment_deployment/return. Si no, inflan denominadores y hacen pasar tesorería de grupo por “dependencia de transferencias”.</p>
+      </article>
+      <article>
+        <h3>Facturas impagadas</h3>
+        <p>En vencidas, <code>payment_date</code> es igual a <code>due_date</code> el 96 % de las veces. Impagada = <code>pending_amount ≠ 0</code> y status ≠ paid. Si hoy está impagada, lo estuvo en todos los cierres anteriores (sin fuga al futuro).</p>
+      </article>
+      <article>
+        <h3>Meses muertos</h3>
+        <p>Las empresas que dejan de operar siguen en el panel hasta ago-2026, con flujos a 0 y un contador <em>causal</em> de meses sin movimientos. El apagado definitivo (<code>months_since_final_tx</code>) mira el futuro: es etiqueta, nunca feature. El 52 % de los “apagados” v1 son desconexiones de plataforma, no cierres; por eso ya no calibran.</p>
+      </article>
+    </div>
+    <p class="note">Observabilidad (ERP ausente, categoría “-”, mes truncado, conciliación) baja la <em>confianza</em>. No imputa salud. Una empresa nueva sin facturas no es más sana: es menos visible.</p>
+  </section>
+
+  <section id="features">
+    <h2>Las 17 señales</h2>
+    <p>Cada una responde a una pregunta de prestamista. La criticidad sale de <code>context/scoring.md</code>: primero la caja que se evapora, después cobros, pagos y deuda. El lenguaje llano es el que tiene que poder repetir el jurado.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Pilar</th>
+            <th>Criticidad</th>
+            <th>Fórmula</th>
+            <th>Dirección</th>
+            <th>Prior</th>
+            <th>Peso v7</th>
+          </tr>
+        </thead>
+        <tbody>
+          {feature_rows_html(rows)}
+        </tbody>
+      </table>
+    </div>
+    <p class="note">El prior es la hipótesis del prestamista (normalizado). El peso v7 es la media out-of-fold de 5 grupos × 3 cortes. La ± es la desviación entre folds.</p>
+    <h3>Lo que no puntúa</h3>
+    <p><code>log_scale</code>, <code>fx_share</code>, <code>uncat_share</code>, <code>activity_log</code> y <code>months_since_last_tx</code> son contexto. Alimentan el detector fuera de distribución, la confianza y el forecaster. Nunca entran en la suma. El tamaño en EUR se convierte con el tipo real; el score tiene que ser el mismo en COP y en EUR.</p>
+  </section>
+
+  <section id="percentil">
+    <h2>Del valor crudo al sub-score</h2>
+    <p>Una feature en unidades distintas (meses de caja, % de retraso, HHI) no se puede sumar. El scorer las pone en la misma escala: el percentil de esa empresa-mes respecto a todas las de train.</p>
+    <div class="eq">
+      <div class="eq-line">
+        <span class="eq-lhs">pct</span>
+        <span class="eq-op">=</span>
+        <span class="eq-rhs">(rango medio en ref<sub>f</sub>) / |ref<sub>f</sub>| × 100</span>
+      </div>
+      <div class="eq-line sub">
+        <span class="eq-lhs">s<sub>f</sub></span>
+        <span class="eq-op">=</span>
+        <span class="eq-rhs">pct si más es mejor; 100 − pct si más es peor</span>
+      </div>
+    </div>
+    <ul class="bullets">
+      <li><b>ref<sub>f</sub> se congela en fit.</b> Una empresa del test oculto no mueve los umbrales. Valores fuera de rango saturan en 0 o 100: no se extrapola.</li>
+      <li><b>Empates al rango medio.</b> <code>searchsorted</code> izquierdo y derecho, promedio. Evita que una masa de ceros mande a todo el mundo al percentil 0.</li>
+      <li><b>Two-part (cero = lo mejor).</b> En lc_util, debt_burden, retrasos, vencidos, refund_rate, transfer_dep y lost_share: si el valor es ≤ 0, s = 100. Los positivos se ordenan solo entre sí. Sin esto, un reembolso del 0,1 % hundía el score 90 puntos porque el 88 % de las filas vale exactamente 0.</li>
+      <li><b>Nóminas = 0 es “no aplica”, no “sano”.</b> <code>payroll_burden</code> pasa a NaN cuando no hay masa salarial. Una holding sin empleados no gana puntos por eso.</li>
+    </ul>
+    <p>El sub-score nunca se recorta sobre el valor crudo. El indicador OOD mira el crudo contra los cuantiles 0,5 %–99,5 % de train, más el contexto (tamaño, actividad, % en divisa). Un outlier se ve; no se esconde en el percentil 100.</p>
+  </section>
+
+  <section id="pesos">
+    <h2>Los pesos: hipótesis, luego hechos</h2>
+    <p>El prior refleja criticidad de prestamista. Calibrar no es sustituirlo por una caja negra: es preguntar a los datos si cada señal, en la dirección que dicta la economía, anticipa un hecho observable a 6 meses.</p>
+    <div class="pillars">{pillar_weights(rows)}</div>
+    <div class="weights">{weight_bars(rows)}</div>
+    <h3>Cómo se calibra (D12)</h3>
+    <p>Para cada evento se ajusta</p>
+    <div class="eq">
+      <div class="eq-line">
+        <span class="eq-lhs">P(evento)</span>
+        <span class="eq-op">=</span>
+        <span class="eq-rhs">σ( β + signo · Σ w<sub>f</sub> · s<sub>f</sub>/100 )</span>
+      </div>
+    </div>
+    <p>con <i>w<sub>f</sub> ≥ 0</i>. El signo es negativo para eventos adversos (tensión, incumplimiento, caída) y positivo para expansión. Mejorar una señal nunca puede bajar el score. Los pesos normalizados de los cuatro eventos se promedian: el declive no se come a la tensión, ni al revés.</p>
+    <p>Las etiquetas solo cuentan si el evento a 6 meses ya era observable en el corte de validación (mes ≤ corte − 6). No hay fuga. Validación: GroupKFold(5) por <code>group_id</code> × cortes nov-25, feb-26 y may-26. Ningún grupo está a la vez en train y test.</p>
+    <div class="callout">
+      <p><b>payroll_burden = 0 %.</b> Los datos no respaldan que un mayor peso de nóminas, en esta muestra, anticipe los eventos en la dirección esperada. El peso se apaga. No se fuerza la hipótesis contra la evidencia.</p>
+      <p><b>net_margin_6m ≈ 0,1 %.</b> El margen de caja, una vez están runway y actividad, casi no añade discriminación. Se queda en el score por transparencia, con peso casi nulo.</p>
+      <p><b>activity_trend ≈ 20 %.</b> Es el peso más alto y también el más ruidoso: un ratio 3m/12m del número de movimientos revierte a la media y protagoniza la mayoría de las explicaciones de movimientos grandes. El review de v6 lo documenta. Se mantiene porque anticipa caída de cobros (AUC 0,64 frente a E3), no porque sea elegante.</p>
+    </div>
+  </section>
+
+  <section id="escala">
+    <h2>De un compuesto apretado a una nota 0–100</h2>
+    <p>La media ponderada de percentiles, con 50 para lo desconocido, se concentra entre el 39 y el 71. Una nota que vive entre 40 y 60 no se parece a los ejemplos del enunciado (45 → 65, 82 → 68). Se abre con una recta, no con un percentil del compuesto: una transformación no lineal rompería la suma exacta.</p>
+    <div class="eq">
+      <div class="eq-line">
+        <span class="eq-lhs">publicado</span>
+        <span class="eq-op">=</span>
+        <span class="eq-rhs">clip<sub>[0,100]</sub>( {es_n(SCALE_A, 1)} + {es_n(SCALE_B, 2)} · compuesto )</span>
+      </div>
+    </div>
+    <p>Calibrado en train para que el P5 del compuesto (empresas activas) salga 15 y el P95 salga 85. La constante <i>a</i> se reparte entre features según los pesos: c<sub>f</sub> = a w<sub>f</sub> + b w<sub>f</sub> s<sub>f</sub>. Por eso Σ c<sub>f</sub> = a + b · compuesto, y el recorte a 0 o 100 aparece como un término explícito (<code>c_limite_0_100</code>) en la explicación.</p>
+    <div class="scale-table">
+      <div><small>Compuesto P5</small><b>39,2 → 15</b></div>
+      <div><small>P25</small><b>48,1 → 34,5</b></div>
+      <div><small>P50</small><b>54,8 → 49,4</b></div>
+      <div><small>P75</small><b>61,5 → 64,2</b></div>
+      <div><small>P95</small><b>70,9 → 85</b></div>
+    </div>
+    <p>Al lado de la nota se publica una probabilidad de cada evento a 6 meses: una logística de un parámetro P = σ(α + β · score/100), ajustada en train. No cambia la nota ni su explicación. Es la escala absoluta: un 30 no significa lo mismo en dos carteras distintas, pero P(tensión) sí se puede comparar.</p>
+  </section>
+
+  <section id="huecos">
+    <h2>Sin dato = 50. Sin movimientos, techo 30</h2>
+    <p>Renormalizar los pesos cuando falta una feature hace dos daños. Primero, una empresa con dos meses de historia se puntúa casi solo por su caja y sale más sana que la media (sesgo de arranque, grave para el test oculto). Segundo, el score salta cuando aparece el ERP. Medido: |Δ| de 8,9 puntos con cambio de disponibilidad frente a 4,7 sin él.</p>
+    <div class="grid2">
+      <article>
+        <h3>Neutro, no redistribuir (D17)</h3>
+        <p>s<sub>f</sub> ausente se rellena con 50. El peso no se reparte. Lo que no sabemos tira al centro. La cobertura (fracción del peso con dato) baja la confianza, no infla la nota. Mediana del score bruto en el mes 0: 51,8 con neutro, 71,5 renormalizando.</p>
+      </article>
+      <article>
+        <h3>Inactividad (D07, D15)</h3>
+        <p>Si <code>months_since_last_tx &gt; 0</code>, el score bruto se recorta a 30. Sin movimientos no puede ser “sano”. El recorte es un término más de la suma (<code>c_regla_inactividad</code>). El monitor no duplica esa caída como bache: emite una alerta de inactividad.</p>
+      </article>
+    </div>
+    <p>Las features de facturas (<code>late_share_*</code>, <code>hhi_ar_6m</code>) arrastran el último valor hasta 3 meses. Un trimestre sin vencimientos no es un salto de disciplina; es el mismo comportamiento, todavía vigente.</p>
+  </section>
+
+  <section id="ewma">
+    <h2>Suavizar un bache, no esconder una caída</h2>
+    <p>El enunciado pide distinguir un mal mes de un deterioro. El EWMA con α = 0,5 es el único parámetro de memoria del nivel: un golpe de un mes pesa la mitad; una caída que dura tres meses se refleja al 87,5 %.</p>
+    <div class="eq">
+      <div class="eq-line">
+        <span class="eq-lhs">score<sub>t</sub></span>
+        <span class="eq-op">=</span>
+        <span class="eq-rhs">0,5 · bruto<sub>t</sub> + 0,5 · score<sub>t−1</sub></span>
+      </div>
+      <div class="eq-line sub">
+        <span class="eq-lhs">=</span>
+        <span class="eq-op"></span>
+        <span class="eq-rhs">Σ<sub>f</sub> ( 0,5 · c<sub>f,t</sub> + 0,5 · ec<sub>f,t−1</sub> )</span>
+      </div>
+    </div>
+    <p>Como el EWMA es lineal, se aplica a cada contribución y el score sigue siendo la suma. <code>explain()</code> compara <code>ec_*</code> entre el mes y el anterior: el Δ publicado es exactamente la suma de los Δ por feature.</p>
+    <h3>Velasco, en números</h3>
+    <p>El enunciado pone a Velasco Industrial en 82 → 68. Esa caída de 14 puntos publicados, con α = 0,5, implica una caída de 28 puntos en el bruto de ese mes:</p>
+    <div class="eq">
+      <div class="eq-line">
+        <span class="eq-lhs">68</span>
+        <span class="eq-op">=</span>
+        <span class="eq-rhs">0,5 · bruto + 0,5 · 82  ⇒  bruto = 54</span>
+      </div>
+    </div>
+    <p>Un bruto de 54, con <i>b</i> = 2,21, es un compuesto que ha bajado ~12,7 puntos de percentil ponderado. Eso no lo causa un DSO que empeora tres días. Lo causa, por criticidad, caja que se evapora o actividad que se apaga. Northbrook (45 → 65) es la simétrica: el bruto de ese mes tuvo que subir a 85 para que el publicado subiera 20.</p>
+    <p class="note">α se eligió midiendo |Δ| medio y la proporción de movimientos ≥ 10 a 3 meses. α = 0,3 era demasiado inerte (24 % de movimientos grandes); α = 1,0 era el bruto ruidoso (46 %). 0,5 deja el 35 %.</p>
+  </section>
+
+  <section id="calculadora">
+    <h2>Calculadora: mueve los sub-scores</h2>
+    <p>Los sliders son el percentil ya orientado (s<sub>f</sub>), no el valor crudo. El peso es el de v7. “Sin dato” fuerza s = 50. El mes anterior alimenta el EWMA. Esto es exactamente lo que hace <code>HealthScorer.transform</code> + <code>score_panel</code>, con la escala D18.</p>
+    <div class="calc">
+      <div class="calc-controls">
+        <label>Score publicado del mes anterior
+          <input id="prev" type="number" min="0" max="100" step="0.1" value="72">
+        </label>
+        <label class="check"><input id="dormant" type="checkbox"> Sin movimientos este mes (tope 30)</label>
+        <button type="button" id="reset" class="btn">Volver a neutro (50)</button>
+        <button type="button" id="velasco" class="btn ghost">Escena Velasco (82 → ~68)</button>
+      </div>
+      <div id="sliders" class="sliders"></div>
+      <div class="calc-out">
+        <div class="kpi"><small>Compuesto</small><strong id="out-comp">—</strong></div>
+        <div class="kpi"><small>Bruto (escala)</small><strong id="out-raw">—</strong></div>
+        <div class="kpi"><small>Publicado (EWMA)</small><strong id="out-pub">—</strong></div>
+        <div class="kpi"><small>Banda</small><strong id="out-band">—</strong></div>
+        <div class="kpi"><small>Δ vs mes anterior</small><strong id="out-delta">—</strong></div>
+        <div class="kpi"><small>Cobertura</small><strong id="out-cov">—</strong></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Feature</th><th>s<sub>f</sub></th><th>w<sub>f</sub></th><th>Contribución c<sub>f</sub></th></tr></thead>
+          <tbody id="contrib-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="eventos">
+    <h2>El ancla: hechos a 6 meses, no etiquetas de quiebra</h2>
+    <p>El dataset no trae impagos ni ratings. Un score sin ancla externa puede estar al revés: nos pasó en v1 (AUC 0,37 frente al apagado). Los pesos se calibran contra cuatro eventos observables, definidos para no ser circularidad disfrazada.</p>
+    <div class="grid2">
+      <article>
+        <h3>Tensión de liquidez</h3>
+        <p>Caja + póliza disponible &lt; 0, o runway de liquidez &lt; 0,25 meses, en ≥ 2 de 3 meses seguidos. Excluye cash pooling del grupo y saldos centinela. Calibra la nota: estar ya en tensión y seguir en ella es riesgo de prestamista. AUC del score v7: <b>{m("auc_level_vs_tension_6m")}</b>.</p>
+      </article>
+      <article>
+        <h3>Incumplimiento estricto</h3>
+        <p>Una obligación recurrente deja de pagarse: nómina o cuota regulares que faltan 2 meses seguidos con el feed activo, o IVA que falta 2 trimestres. Solo se define si la empresa tiene esa obligación; si no, la etiqueta premiaría no tener deuda. AUC: <b>{m("auc_level_vs_incumplimiento_6m")}</b>.</p>
+      </article>
+      <article>
+        <h3>Caída estructural de cobros</h3>
+        <p>Mediana de cobros de los 6 meses siguientes &lt; 50 % de la mediana de los 12 anteriores, sin apagado y sin rebote en la segunda mitad de la ventana. No se compara con el trimestre actual: eso era regresión a la media. AUC: <b>{m("auc_level_vs_caida_6m")}</b>.</p>
+      </article>
+      <article>
+        <h3>Expansión autofinanciada</h3>
+        <p>Cobros operativos medios a 6 meses &gt; 130 % de la base, caja al alza, sin disponer póliza para financiarlo y sin un mes puntual que explique el salto. La cara positiva: el score también tiene que subir. AUC: <b>{m("auc_level_vs_expansion_6m")}</b>.</p>
+      </article>
+    </div>
+    <p class="note">El apagado (<code>churn_6m</code>) se sigue midiendo para comparar, pero ya no calibra. En esta muestra, más de la mitad son bajas de Embat, no cierres.</p>
+  </section>
+
+  <section id="monitor">
+    <h2>Bandas, trayectoria y alertas</h2>
+    <p>El nivel es el score. La trayectoria es otro modelo: LightGBM cuantílico (q10 / q50 / q90) a 1, 2 y 3 meses, con seis exógenas retardadas exactamente h meses (sin fuga) y calibración conformal del intervalo. No entra en la nota. Sirve para anticipar.</p>
+    <div class="bands">
+      <div class="riesgo"><b>0 – 35</b><span>Riesgo · no prestar</span></div>
+      <div class="vigilar"><b>35 – 65</b><span>Vigilar</span></div>
+      <div class="sano"><b>65 – 100</b><span>Sano · prestar</span></div>
+    </div>
+    <p>Las bandas son aproximadamente los cuartiles de la escala publicada. El monitor alerta si la mediana prevista a 3 meses se mueve ≥ 10 puntos. Severidad alta si todavía parece sana (≥ 65) o si todo el intervalo 80 % está del mismo lado. Tras una caída publicada ≥ 10 en el mes: bache si se espera recuperar al menos la mitad; si no, caída estructural. Inactividad: alerta inmediata, sin duplicar.</p>
+    <div class="metrics">
+      <div><small>AUC caída ≥ 15 a 3m</small><b>{m("auc_deterioro")}</b><span>AR(1) {m("auc_deterioro_ar1")}</span></div>
+      <div><small>AUC subida ≥ 15 a 3m</small><b>{m("auc_mejora")}</b><span>AR(1) {m("auc_mejora_ar1")}</span></div>
+      <div><small>Aún sana y se tuerce</small><b>{m("auc_deterioro_top_quintil")}</b><span>quintil alto</span></div>
+      <div><small>MAE a 3 meses</small><b>{m("mae_h3", 2)}</b><span>skill vs AR(1) {es_pct(skill or 0)}</span></div>
+    </div>
+    <p>La ganancia frente al AR(1) es modesta en el promedio ({es_pct(skill or 0)} de MAE) y más clara en la cola y en las que aún parecen sanas. Es la clase de señal que pide el enunciado, no un milagro de ajuste.</p>
+  </section>
+
+  <section id="preguntas">
+    <h2>Cómo responde a las seis preguntas</h2>
+    <div class="qlist">
+      <article>
+        <h3>1. ¿Quién está sano?</h3>
+        <p>La nota y la banda. Sano ≥ 65 no es un umbral clínico: es el cuartil alto de una escala abierta. Se valida contra tensión, incumplimiento, caída y expansión a 6 meses (AUC 0,66 / 0,60 / 0,59 / 0,61). Persistencia: el {es_pct(metrics.get("p_sigue_sano_3m") or 0, 0)} de las que están sanas siguen ahí a 3 meses.</p>
+      </article>
+      <article>
+        <h3>2. ¿Quién está mejorando?</h3>
+        <p>Δ publicado y q50 a 3 meses al alza, simétrico al deterioro. AUC de subida ≥ 15: {m("auc_mejora")} frente a {m("auc_mejora_ar1")} del AR(1). Desde el quintil bajo: {m("auc_mejora_bottom_quintil")}.</p>
+      </article>
+      <article>
+        <h3>3. ¿Quién empieza a torcerse?</h3>
+        <p>Caída prevista ≥ 10 (alerta) o ≥ 15 (métrica del reto), sobre todo si el nivel actual ≥ 65. AUC en el quintil alto: {m("auc_deterioro_top_quintil")} frente a 0,54 del AR(1). Ahí está Velasco: 82 que ya no lo es.</p>
+      </article>
+      <article>
+        <h3>4. ¿Bache o caída?</h3>
+        <p>Regla: tras un −10 publicado, si q50 recupera la mitad → bache; si no → estructural. <b>No está resuelto.</b> El 84 % de esas caídas persisten y el modelo casi no distingue las que rebotan (AUC 0,53 en v5/v6). Hacen falta señales de recuperación que hoy no están en el panel (cobros post-bache, caja mínima intramensual).</p>
+      </article>
+      <article>
+        <h3>5. ¿Por qué ha cambiado?</h3>
+        <p><code>explain()</code> descompone el Δ en contribuciones suavizadas. Cada línea es “meses de caja: 4,2 → 3,1 (−4,2 pts)” en lenguaje llano. Cuadra al céntimo porque score = Σ ec<sub>f</sub>.</p>
+      </article>
+      <article>
+        <h3>6. ¿Cuándo se vio venir?</h3>
+        <p>En 229 caídas estructurales (v5/v6, origen móvil out-of-fold), el 48 % tuvo alerta antes de cruzar a riesgo. Antelación mediana: 3 meses (hasta 11). El 23 % de las alertas de deterioro se apagan al mes siguiente.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="limites">
+    <h2>Lo que hay que decir en voz alta</h2>
+    <ul class="bullets">
+      <li><b>El nivel discrimina de forma moderada.</b> AUC ~0,6 frente a proxies, no frente a quiebra. Sin etiquetas de impago, esto es lo que hay. Un 72 no es un rating de S&amp;P.</li>
+      <li><b>activity_trend pesa demasiado y revierte.</b> Explica una fracción desproporcionada de los movimientos grandes. Un cambio de +1 % a −0 % no debería narrar una empresa.</li>
+      <li><b>Agosto de 2026 tiene el doble de caídas</b> y un 25 % menos de facturas sincronizadas: posible efecto de borde del dataset.</li>
+      <li><b>La criticidad de liquidez no se modula por sector.</b> El marco lo pide (un mayorista a 90 días no es un negocio de cobro recurrente). Hoy runway es un percentil global.</li>
+      <li><b>El score es por company_id.</b> Un grupo con 24 filiales mezcla negocios distintos. La validación sí separa por grupo, para no fugar. Si el leaderboard pide grupo, se agrega después.</li>
+      <li><b>No hay un 72 universal.</b> Banco, aseguradora, CFO y Embat no deberían ver los mismos pesos. Esta nota es la del prestamista con 100.000 €. El producto puede reponderar.</li>
+    </ul>
+    <h3>Dónde está cada pieza</h3>
+    <p class="codeblock">
+      research/src/features.py     17 ratios<br>
+      research/src/xray.py         HealthScorer, explain, bandas, alertas<br>
+      research/src/targets.py      eventos a 6 meses<br>
+      research/src/evaluate.py     GroupKFold × 3 cortes<br>
+      research/reports/metrics_v7.json<br>
+      research/DECISIONS.md        D01–D28
+    </p>
+    <p>Reproducir este HTML: <code>python analysis/calculo_score.py</code>. Entrena el modelo: <code>cd research && uv run python src/service.py</code>.</p>
+  </section>
+
+  <footer>
+    <p>Generado el {now} a partir de <code>research/src/xray.py</code> y <code>research/reports/metrics_v7.json</code>. AUC deterioro {es_n(auc_d or 0, 3)} · AUC mejora {es_n(auc_m or 0, 3)} · MAE h3 {es_n(mae or 0, 2)} · tensión 6m {es_n(auc_t or 0, 3)}.</p>
+  </footer>
+</main>
+<script>
+const FEATURES = {feat_json};
+const A = {SCALE_A};
+const B = {SCALE_B};
+const ALPHA = {SMOOTH};
+const CAP = {DORMANT_CAP};
+
+function bandOf(s) {{
+  if (s < 35) return ["riesgo", "Riesgo"];
+  if (s < 65) return ["vigilar", "Vigilar"];
+  return ["sano", "Sano"];
+}}
+
+function fmt(n, d=1) {{
+  return n.toLocaleString("es-ES", {{minimumFractionDigits: d, maximumFractionDigits: d}});
+}}
+
+function buildSliders() {{
+  const box = document.getElementById("sliders");
+  box.innerHTML = FEATURES.map(f => `
+    <div class="srow" data-id="${{f.id}}">
+      <div class="smeta">
+        <b>${{f.label}}</b>
+        <span>${{(f.w*100).toFixed(1).replace(".", ",")}} %</span>
+      </div>
+      <input type="range" min="0" max="100" step="1" value="50" aria-label="${{f.label}}">
+      <output>50</output>
+      <label class="check tiny"><input type="checkbox" class="miss"> Sin dato</label>
+    </div>`).join("");
+  box.querySelectorAll("input").forEach(el => el.addEventListener("input", recalc));
+  box.querySelectorAll("input").forEach(el => el.addEventListener("change", recalc));
+}}
+
+function sceneVelasco() {{
+  const map = {{
+    runway: 50, activity_trend: 48, lost_share: 45, lc_util: 58,
+    growth_vs_12m: 55, cust_trend: 58, ar_late_share: 60, refund_rate: 90,
+  }};
+  const rest = 62;
+  document.getElementById("prev").value = 82;
+  document.getElementById("dormant").checked = false;
+  document.querySelectorAll(".srow").forEach(row => {{
+    const id = row.dataset.id;
+    const sl = row.querySelector("input[type=range]");
+    const miss = row.querySelector(".miss");
+    miss.checked = false;
+    sl.disabled = false;
+    sl.value = map[id] ?? rest;
+    row.querySelector("output").textContent = sl.value;
+  }});
+  recalc();
+}}
+
+function recalc() {{
+  const prev = Number(document.getElementById("prev").value) || 0;
+  const dormant = document.getElementById("dormant").checked;
+  let comp = 0, cov = 0;
+  const contribs = [];
+  document.querySelectorAll(".srow").forEach((row, i) => {{
+    const f = FEATURES[i];
+    const miss = row.querySelector(".miss").checked;
+    const sl = row.querySelector("input[type=range]");
+    sl.disabled = miss;
+    let s = miss ? 50 : Number(sl.value);
+    row.querySelector("output").textContent = miss ? "50" : String(s);
+    if (!miss) cov += f.w;
+    const c = A * f.w + B * f.w * s;
+    comp += f.w * s;
+    contribs.push({{...f, s, c, miss}});
+  }});
+  let raw = A + B * comp;
+  let clip = Math.min(100, Math.max(0, raw));
+  if (dormant) clip = Math.min(clip, CAP);
+  const pub = ALPHA * clip + (1 - ALPHA) * prev;
+  const [bcls, blab] = bandOf(pub);
+  document.getElementById("out-comp").textContent = fmt(comp);
+  document.getElementById("out-raw").textContent = fmt(clip);
+  document.getElementById("out-pub").textContent = fmt(pub);
+  const bandEl = document.getElementById("out-band");
+  bandEl.textContent = blab;
+  bandEl.className = bcls;
+  const d = pub - prev;
+  const dEl = document.getElementById("out-delta");
+  dEl.textContent = (d>=0?"+":"") + fmt(d);
+  dEl.className = d>=0 ? "up" : "down";
+  document.getElementById("out-cov").textContent = fmt(cov*100, 0) + " %";
+  const body = document.getElementById("contrib-body");
+  const sorted = [...contribs].sort((a,b) => Math.abs(b.c) - Math.abs(a.c));
+  body.innerHTML = sorted.map(r => `
+    <tr>
+      <td>${{r.label}}${{r.miss ? " <small>neutro</small>" : ""}}</td>
+      <td class="num">${{fmt(r.s, 0)}}</td>
+      <td class="num">${{fmt(r.w*100)}} %</td>
+      <td class="num">${{fmt(r.c)}}</td>
+    </tr>`).join("");
+}}
+
+document.getElementById("reset").addEventListener("click", () => {{
+  document.getElementById("prev").value = 72;
+  document.getElementById("dormant").checked = false;
+  document.querySelectorAll(".srow").forEach(row => {{
+    row.querySelector(".miss").checked = false;
+    const sl = row.querySelector("input[type=range]");
+    sl.disabled = false;
+    sl.value = 50;
+    row.querySelector("output").textContent = "50";
+  }});
+  recalc();
+}});
+document.getElementById("velasco").addEventListener("click", sceneVelasco);
+document.getElementById("prev").addEventListener("input", recalc);
+document.getElementById("dormant").addEventListener("change", recalc);
+buildSliders();
+recalc();
+</script>
+</body>
+</html>"""
+
+
+CSS = r"""
+:root{
+  --ink:#122033; --muted:#5c6b80; --line:#d8dee8; --paper:#f4f6fa; --card:#fff;
+  --violet:#6c47ff; --violet-soft:#ece7ff; --sano:#1b8a5a; --vigilar:#c47a05; --riesgo:#c42b32;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 var(--sans)}
+.skip{position:absolute;left:-999px;top:auto}
+.skip:focus{left:12px;top:12px;background:#fff;padding:8px 12px;z-index:9}
+a{color:var(--violet)}
+code, .mono{font-family:var(--mono);font-size:.86em}
+.nav{position:fixed;inset:0 auto 0 0;width:228px;padding:28px 18px;background:#101826;color:#e8ecf4;overflow:auto}
+.brand{margin:0 0 28px;font-weight:700;letter-spacing:-.02em}
+.brand span{color:#a78bfa;font-weight:500;margin-left:6px}
+.nav nav{display:grid;gap:2px}
+.nav a{color:#c5cedb;text-decoration:none;padding:7px 10px;border-radius:6px;font-size:13.5px}
+.nav a:hover,.nav a:focus{background:#1c2738;color:#fff;outline:2px solid var(--violet)}
+main{margin-left:228px;max-width:920px;padding:48px 40px 80px}
+.hero h1{font-size:clamp(32px,5vw,52px);line-height:1.08;letter-spacing:-.03em;margin:8px 0 16px;font-weight:700}
+.kicker{color:var(--violet);font-weight:600;margin:0}
+.lede{font-size:18px;color:var(--muted);max-width:40em}
+.eq{background:#fff;border-left:4px solid var(--violet);padding:18px 22px;margin:28px 0;box-shadow:0 1px 0 var(--line)}
+.eq-line{display:flex;gap:12px;align-items:baseline;font-family:var(--mono);font-size:15.5px;flex-wrap:wrap}
+.eq-line.sub{margin-top:10px;color:#3d4d63}
+.eq-lhs{min-width:92px;font-weight:600}
+.eq-note{margin:12px 0 0;color:var(--muted);font-size:13.5px;max-width:46em}
+.facts{display:flex;flex-wrap:wrap;gap:10px;padding:0;list-style:none}
+.facts li{background:#fff;border:1px solid var(--line);padding:8px 12px;font-size:13.5px}
+.facts b{color:var(--violet)}
+section{margin:56px 0}
+h2{font-size:28px;letter-spacing:-.025em;margin:0 0 12px}
+h3{font-size:17px;margin:22px 0 8px}
+p{max-width:46em}
+.map{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin:22px 0}
+.map div{background:#fff;padding:14px 16px}
+.map span{display:block;color:var(--muted);font-size:13px}
+.map b{font-size:14.5px}
+.steps{padding:0;margin:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;padding:16px 0 16px 52px;position:relative;border-bottom:1px solid var(--line)}
+.steps li:before{content:counter(s);position:absolute;left:0;top:16px;width:32px;height:32px;border-radius:50%;background:var(--violet-soft);color:var(--violet);display:grid;place-items:center;font-weight:700;font-size:13px}
+.steps h3{margin:0 0 4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid2 article{background:#fff;padding:16px 18px;border:1px solid var(--line)}
+.grid2 h3{margin-top:0}
+.note{background:var(--violet-soft);padding:12px 16px;border-radius:2px;font-size:14.5px}
+.table-wrap{overflow-x:auto;margin:18px 0;border:1px solid var(--line);background:#fff}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;padding:10px 12px;background:#eef1f6;font-size:11.5px;font-weight:600;color:#3d4d63}
+td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+td small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap;font-family:var(--mono);font-size:12.5px}
+.wcell{font-weight:600}
+.crit{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 8px;border:1px solid currentColor}
+.crit.crítica{color:var(--riesgo)} .crit.alta{color:#b45309} .crit.media{color:#3451b2} .crit.bache{color:#0f766e}
+.bullets{max-width:46em} .bullets li{margin:8px 0}
+.pillars{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:18px 0}
+.pcard{background:#fff;border:1px solid var(--line);padding:14px;text-align:center}
+.pcard strong{display:block;font-size:22px;letter-spacing:-.03em}
+.pcard span{color:var(--muted);font-size:12.5px}
+.weights{background:#fff;border:1px solid var(--line);padding:12px 16px}
+.wrow{display:grid;grid-template-columns:200px 1fr 64px;gap:10px;align-items:center;margin:6px 0}
+.wlab{font-size:13px}
+.wtrack{height:8px;background:#eef1f6}
+.wtrack i{display:block;height:100%;background:var(--violet)}
+.wrow.zero .wtrack i{background:#c5cedb}
+.wval{font-family:var(--mono);font-size:12px;text-align:right}
+.callout{background:#fff;border:1px solid var(--line);padding:8px 18px;margin:18px 0}
+.callout p{margin:12px 0}
+.scale-table{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:18px 0}
+.scale-table div{background:#fff;border:1px solid var(--line);padding:12px}
+.scale-table small{display:block;color:var(--muted);font-size:12px}
+.calc{background:#fff;border:1px solid var(--line);padding:18px}
+.calc-controls{display:flex;flex-wrap:wrap;gap:14px;align-items:end;margin-bottom:16px}
+.calc-controls label{display:grid;gap:4px;font-size:13.5px}
+.calc-controls input[type=number]{width:120px;padding:8px;border:1px solid var(--line);font:inherit}
+.check{display:flex;gap:8px;align-items:center}
+.btn{background:var(--violet);color:#fff;border:0;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover,.btn:focus{filter:brightness(1.08);outline:2px solid var(--ink);outline-offset:2px}
+.btn.ghost{background:#fff;color:var(--violet);border:1px solid var(--violet)}
+.sliders{display:grid;gap:6px;max-height:420px;overflow:auto;padding-right:6px}
+.srow{display:grid;grid-template-columns:minmax(140px,1fr) 1fr 40px auto;gap:8px;align-items:center}
+.smeta{display:flex;flex-direction:column;font-size:13px}
+.smeta span{color:var(--muted);font-family:var(--mono);font-size:11px}
+.srow input[type=range]{width:100%;accent-color:var(--violet)}
+.srow output{font-family:var(--mono);font-size:12.5px}
+.tiny{font-size:12px;color:var(--muted)}
+.calc-out{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.kpi{background:var(--paper);padding:12px 14px}
+.kpi small{display:block;color:var(--muted);font-size:12px}
+.kpi strong{font-size:24px;letter-spacing:-.03em}
+.kpi strong.sano{color:var(--sano)} .kpi strong.vigilar{color:var(--vigilar)} .kpi strong.riesgo{color:var(--riesgo)}
+.up{color:var(--sano)} .down{color:var(--riesgo)}
+.bands{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;margin:18px 0;overflow:hidden;border:1px solid var(--line)}
+.bands div{padding:16px;color:#fff}
+.bands .riesgo{background:var(--riesgo)} .bands .vigilar{background:var(--vigilar)} .bands .sano{background:var(--sano)}
+.bands b{display:block;font-size:20px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0}
+.metrics div{background:#fff;border:1px solid var(--line);padding:12px}
+.metrics small{display:block;color:var(--muted);font-size:12px}
+.metrics b{font-size:22px;letter-spacing:-.03em}
+.metrics span{display:block;color:var(--muted);font-size:12.5px}
+.qlist{display:grid;gap:12px}
+.qlist article{background:#fff;border:1px solid var(--line);padding:14px 18px}
+.qlist h3{margin:0 0 6px}
+.codeblock{font-family:var(--mono);font-size:13px;background:#101826;color:#e8ecf4;padding:16px 18px;line-height:1.7}
+footer{margin-top:48px;color:var(--muted);font-size:13.5px;border-top:1px solid var(--line);padding-top:18px}
+@media (max-width:900px){
+  .nav{position:static;width:auto;inset:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:14px 16px}
+  .brand{margin:0 8px 0 0}
+  .nav nav{display:flex;flex-wrap:wrap;gap:4px}
+  .nav a{padding:6px 8px;font-size:12.5px}
+  main{margin:0;padding:24px 16px 64px}
+  .map,.grid2,.pillars,.scale-table,.calc-out,.bands,.metrics,.srow{grid-template-columns:1fr}
+  .wrow{grid-template-columns:1fr}
+  .eq-lhs{min-width:0}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{transition:none !important}}
+"""
+
+
+def main() -> None:
+    metrics = load_metrics()
+    rows = enrich(metrics)
+    OUTPUT.write_text(build_html(rows, metrics), encoding="utf-8")
+    print(f"Escrito {OUTPUT.relative_to(ROOT)} ({OUTPUT.stat().st_size / 1000:.1f} KB, {len(rows)} features)")
+
+
+if __name__ == "__main__":
+    main()

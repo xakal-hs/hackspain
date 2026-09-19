@@ -15,6 +15,7 @@
 - Score-model experiments, the research API, and the demo SPA live under `research/`.
 - The autoresearch workflow lives in `.devin/workflows/autoresearch/`: fase1 (política de préstamo), fase2 (consejo → `salida/premisas.jsonl`), fase3 (bucle sobre `premisas.py`), fase4 (sala de situaciones en la SPA + demo proactiva de factoring/refi). `premisas.py` (`build`/`run`/`export`) evalúa premisas contra `research/data/panel.parquet` + `features.py` + `targets.py` and exports `salida/situaciones.json` for the UI; `premisas.seed.jsonl` es la semilla. `salida/` no se versiona. The repo-restructuring workflow is in `.devin/workflows/reestructura/`.
 - The visual language of the demo SPA is defined in `research/app/DESIGN.md`; follow it when touching `research/app/static/index.html`.
+- Qualitative product voice from an Embat PM (19 Sep 2026) lives in `context/voz_embat.md` (readable page: `context/voz_embat.html`). Idle cash and FX are hidden costs to show in the app; the agent is unused; subscription is the preferred model and intermediation is a fallback; liquidity criticality is sector-dependent; upsell is a table of fitting options; debt is a short/medium/long mix matched to repayment time.
 
 ## Project Context
 
@@ -36,15 +37,16 @@ The most obvious buyer is Embat or the company contributing its own treasury dat
 
 ## Scoring Philosophy
 
-Operational frame: [`context/scoring.md`](context/scoring.md) (readable page: [`context/scoring.html`](context/scoring.html)). The CFO product row — what is sold and what it is worth on this portfolio — is in [`context/monetizacion.md`](context/monetizacion.md) (readable page: [`context/monetizacion.html`](context/monetizacion.html)).
+Operational frame: [`context/scoring.md`](context/scoring.md) (readable page: [`context/scoring.html`](context/scoring.html)). The CFO product row — what is sold and what it is worth on this portfolio — is in [`context/monetizacion.md`](context/monetizacion.md) (readable page: [`context/monetizacion.html`](context/monetizacion.html)). Product placement (cushion / excess / hole, group pooling, yield vs factoring vs FX) is in [`context/oportunidades.md`](context/oportunidades.md). Qualitative voice from Embat product is in [`context/voz_embat.md`](context/voz_embat.md).
 
 - Design the score as a lender with €100,000 to place. Start from consumer credit questions, then map them onto company cash, invoices and debt. The nature of the risk is the same; the data type is not.
-- **Criticality is not uniform.** Cash available that evaporates quickly must move the score far more than a mild shift in collection days (DSO) or payment days (DPO). Do not give every feature the same weight.
+- **Criticality is not uniform.** Cash available that evaporates quickly must move the score far more than a mild shift in collection days (DSO) or payment days (DPO). Do not give every feature the same weight. Liquidity criticality is also sector-dependent: some firms die without cash; others barely watch it. Do not treat a global runway threshold as universal.
 - Translate jargon into consumer language in every explanation: available cash is “the money left in the account”; DSO is “how long they take to get paid”; DPO is “how long they take to pay”.
-- The deliverable is not only a number for ranking A against B. For each company and month, expose level, trajectory, signal criticality, a plain-language why, dip vs structural drop, and a lender action (lend / watch / do not lend).
-- Observability gaps (missing ERP, truncated month, uncategorized flows) are coverage, not health.
+- The deliverable is not only a number for ranking A against B. For each company and month, expose level, trajectory, signal criticality, a plain-language why, dip vs structural drop, a lender action (lend / watch / do not lend), and the **cost of doing nothing** (idle cash, unconverted FX). Those costs are hidden: show them in the app; do not rely on the agent.
+- Observability gaps (missing ERP, truncated month, uncategorized flows) are coverage, not health. Solvency does not wait for perfect reconciliation: it comes from planning and forecasts.
 - Embat’s wedge versus banks is treasury data banks do not have (live cash, ERP invoices, reconciliation, connected debt). Pitch banks hard; do not treat the annual rating as the competitor.
 - Do not ship one universal metric. The score, weights and decision change with the product being sold (working-capital line, policy, marketplace, agent) and with the viewer (bank, insurer, CFO, Embat), because their objectives differ.
+- Upsell is a table of fitting options, not a single SKU ranked by commission. Debt, when offered, is a short / medium / long mix matched to repayment time. The module sells as a subscription; intermediation is the fallback when Embed One does not cover the rail.
 
 ## Delivery Requirements
 
