@@ -805,8 +805,12 @@ tbody tr:last-child > * {
   transform: rotate(90deg);
 }
 
-/* Barra abajo y centrada, como en Embat. No flota sobre la tabla: taparía la tesorería final. */
+/* Barra flotante abajo y centrada, como en Embat: siempre a la vista y, al llegar al final,
+ * en su sitio bajo la tabla, sin tapar la tesorería final. */
 .eb__dock {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1004,6 +1008,7 @@ tbody tr:last-child > * {
   }
 
   .eb__dock {
+    position: static;
     flex-direction: column;
     align-items: stretch;
     padding-bottom: 24px;

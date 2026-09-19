@@ -2,7 +2,8 @@ import { useQuery } from '@tanstack/vue-query'
 import type { CompanyIdentity, CompanyDetail } from '../../shared/types/company'
 
 export function useSelectedCompany() {
-  const cookie = useCookie<string>('xray-company', { default: () => 'COMP_0864', sameSite: 'lax' })
+  // Sin elección previa, la demo abre en el caso del excedente de caja (shared/demoCases.ts).
+  const cookie = useCookie<string>('xray-company', { default: () => 'COMP_0835', sameSite: 'lax' })
   const selectedId = useState<string>('selected-company-id', () => cookie.value)
   watch(selectedId, value => { cookie.value = value })
   const directory = useQuery({
