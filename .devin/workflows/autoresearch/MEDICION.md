@@ -179,7 +179,39 @@ típico**. **Meseta = 4 candidatos independientes sin mejora material**, nunca a
 
 ---
 
-## 6 · Estado y deudas
+## 6 · Conclusiones (debates cerrados) y plan
+
+### 6.1 Lo que decidió el consejo (Q1-Q12 + R1-R8)
+
+1. **La métrica es interna, no la nota del jurado.** Verificado en `context/challenge.md`: la
+   evaluación son tres bloques **cualitativos**. El AUC/PM sirve para **decidir internamente** y para
+   **sostener conclusiones en la demo** — no para maximizar un promedio.
+2. **Tres cifras con nombre** (no una): **estado** (0,70), **anticipación desde sana** (0,55-0,59, con
+   `n` y adelanto) y **cobertura**. Se **retira** «anticipación 0,70» y `tension_entrada_6m` (39 empresas).
+3. **Dos capas**: política de **vetos auditable** (C1/C5/C4) **encima** del ranking de supervivientes;
+   cada capa contra **su** evento (banda→tensión, veto→impago). Aporta Δ pérdida **+0,278** sobre lo que
+   la nota sola rechazaba. C5 exige `regular(payroll)`, no duración.
+4. **No promediar los pesos por evento** (`xray.py:101`): notas por evento con signo restringido =
+   **+0,095** en tensión. Es Q4, Byte_Me y el re-weight a la vez.
+5. **El radar no cambia el diagnóstico**: unidad = entidad legal; anclas E1-E4 para el nivel; el evento
+   de Elkano (D1-D4) es, en nuestros datos, `ap_overdue_ratio` re-umbralizada (estado crónico, cura 2,8 %).
+
+### 6.2 El plan, en orden (fase 3 y producto)
+
+| # | qué | por qué primero | estado |
+|---|---|---|---|
+| **A** | **Instrumentar** en el derivado: `D1`, `D1_estricto`, `default_6m`, `knockout_mes`/`_6m`, `entrada_estres_6m_desde_sana`, `nomina_mensual`, `perdida_6m`, `mirror2`/`nm`, `mc`, `mc_grupo`, `cash_share_g`, `rotura_covenant_mes`, `arcov_3m`, `episodio_<evento>`, `libro_no_nulo` | sin ellas, **12 de las 19 premisas nuevas son `no_verificable`** | pendiente |
+| **B** | **Notas por evento** (no promediar `xray.py:101`) | el remedio **más barato**: +0,095, sin romper monotonicidad | pendiente |
+| **C** | **Etiquetas limpias**: `tension_nopol`, `tension_raw_6m`, `group_funded → null` (+0,05), `rompe_caja_2m`, `cura_3m`, variantes cortas | sin diana limpia no se puede verificar nada más | pendiente |
+| **D** | **Capa de vetos publicada** (C1/C5/C4 con `regular()` e histéresis) + traducción a producto (colateral, importe ≤ 0,25 m, revisión 30 d) | +0,278 de pérdida; auditable ante Embat | pendiente |
+| **E** | **Declarar las tres cifras** en documento y demo; PM congelada con etiqueta o retirada | honestidad + lo que juzga el jurado | pendiente |
+
+### 6.3 Las dos preguntas que quedan para el dueño
+
+1. **¿`group_funded → null` entra ya?** (medido: +0,05; es el primer candidato del debate anterior).
+2. **¿PM congelada con etiqueta o retirada?** (decisión del consejo, no de datos).
+
+## 7 · Estado y deudas
 
 - **Premisas**: 270 en `salida/premisas.jsonl`, todas con `evidencia`.
 - **Medido y en pie**: aditividad exacta (`Σec = nota`, max 0,0), sin sobreajuste de grupo, neutralidad al
