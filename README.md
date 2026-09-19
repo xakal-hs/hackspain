@@ -105,6 +105,8 @@ FastAPI mediante `XRAY_API_BASE`:
 
 ```bash
 cd frontend
+nvm install && nvm use       # Node 22.22 (fijado en frontend/.nvmrc)
+corepack enable
 pnpm install
 pnpm dev
 ```
