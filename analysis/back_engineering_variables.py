@@ -116,7 +116,7 @@ AUC = {
     "lc_util":              [0.30, 0.40, 0.48, 0.44, 0.46, 0.30],
     "net_margin_6m":        [0.51, 0.49, 0.52, 0.52, 0.47, 0.48],
     "growth_vs_12m":        [0.46, 0.43, 0.52, 0.41, 0.59, 0.48],
-    "debt_burden":          [0.48, 0.49, 0.56, 0.47, 0.47, 0.45],
+    "debt_service_burden":  [0.48, 0.49, 0.56, 0.47, 0.47, 0.45],
     "payroll_burden":       [0.48, 0.55, 0.47, 0.47, 0.52, 0.44],
     "ap_late_share":        [0.49, 0.45, 0.61, 0.52, 0.50, 0.70],
     "ar_late_share":        [0.54, 0.50, 0.57, 0.55, 0.48, 0.62],
@@ -150,12 +150,33 @@ IN_RISK_E1 = {
 }
 
 # Persistencia lag-1 (fuente: research/reports/eda.md). Alta = estructural; baja = cambia mes a mes.
+# Las claves son los nombres del EDA. Las que no coinciden con el nombre canónico del score se
+# resuelven en PERSISTENCE_ALIAS; las que no aparecen quedan neutras (no se penaliza no tener dato).
 PERSISTENCE = {
     "runway": 0.87, "cash_negative": 0.77, "net_margin_6m": 0.51, "growth_3m": 0.57,
-    "debt_burden": 0.93, "payroll_burden": 0.95, "refund_rate": 0.82, "oper_share": 0.85,
+    "debt_service_burden": 0.93, "payroll_burden": 0.95, "refund_rate": 0.82, "oper_share": 0.85,
     "ap_late_share": 0.65, "ar_late_share": 0.67, "ap_overdue_ratio": 0.83,
     "ar_overdue_ratio": 0.82, "top_client_share": 0.69, "net_vol_6m": 0.93, "activity_log": 0.97,
 }
+
+# Solo renombres del mismo concepto (el EDA usó otra ventana o abreviatura). No se mapea
+# activity_log -> activity_trend ni top_client_share -> hhi_ar_6m: nivel y tendencia, o máximo y
+# HHI, son medidas distintas y su persistencia no se hereda.
+PERSISTENCE_ALIAS = {
+    "ar_overdue_90_ratio": "ar_overdue_ratio",
+}
+
+# Factor suave: centrado en la media del conjunto y con amplitud ±10 %, para que ordene sin
+# imponerse a la evidencia. Sin persistencia medida el factor es neutro (1,00).
+PERSISTENCE_MEAN = sum(PERSISTENCE.values()) / len(PERSISTENCE)
+PERSISTENCE_SLOPE = 0.5
+
+
+def persistence_of(var: str) -> float | None:
+    """Persistencia lag-1 de una variable del score, o None si no hay medida."""
+    key = PERSISTENCE_ALIAS.get(var, var)
+    return PERSISTENCE.get(key)
+
 
 # ---------------------------------------------------------------------------
 # 3. Pilares (grupos) y banda de peso sugerida para v8.
@@ -186,7 +207,7 @@ PILLARS = [
         "id": "CF",
         "name": "Generación de caja / actividad operativa",
         "weight": "12 – 16 %",
-        "why": "La tendencia de actividad es la señal más 'en tiempo real' (persistencia lag-1 0,97 es nivel, pero su caída precede al apagado). El margen neto, en cambio, revierte a la media: mucho peso ahí es ruido.",
+        "why": "La tendencia de actividad es la señal más 'en tiempo real': el nivel de actividad es muy persistente (0,97) y, cuando cae, precede al apagado. El margen neto, en cambio, revierte a la media (persistencia 0,51): mucho peso ahí es ruido.",
         "items": "oper_in, flujo neto, nº de movimientos, tendencia de actividad, persistencia operativa, crecimiento vs 12m",
     },
     {
@@ -339,7 +360,7 @@ ITEMS = [
     dict(var="debt_service_burden", pillar="DEBT", item="debt_repayment + interest_charge / inflow",
          plain="Lo que paga de cuotas sobre lo que ingresa", dir="↓ sano", tier="P1", cov="tx_debt",
          ev="AUC 0,56 vs E2. Pagar deuda con deuda nueva es la tarjeta que tapa el agujero.",
-         note="718 empresas pagando deuda por categoría."),
+         note="718 empresas pagando deuda por categoría. En el score es debt_burden (research/src/features.py)."),
     dict(var="lc_util", pillar="DEBT", item="debt_products.outstanding / granted (lineofcredit)",
          plain="Cuánto tiene dispuesto de su póliza", dir="↓ sano", tier="P1", cov="debt_lc",
          ev="AUC 0,30 vs E1: usarla protege. Para nivel, dispuesto cerca del concedido = ahogo.",
@@ -522,7 +543,7 @@ PILLAR_NON_SCORING = {"GRP": "overlay", "OBS": "cobertura"}
 STRENGTH_OVERRIDE = {
     "cash_end": 0.65, "cash_negative": 0.70, "burn_rate": 0.50, "cash_trend_3m": 0.60,
     "liquidity_available": 0.42, "oper_share": 0.45, "overdue_ar": 0.30,
-    "debt_service_burden": 0.30, "debt_utilization": 0.25, "factoring_confirming": 0.20,
+    "debt_utilization": 0.25, "factoring_confirming": 0.20,
     "schedule_pressure": 0.45, "interest_rate": 0.20,
     "impago_nomina / ss / iva / cuota": 0.75, "new_debt_vs_cash": 0.40,
     "interest_coverage": 0.15, "self_funding": 0.25, "shock_vs_usual": 0.30,
@@ -601,10 +622,11 @@ def compute_coverage() -> dict[str, int]:
 
 
 def priority(item: dict, cov: dict[str, int]) -> tuple[int, dict]:
-    """Prioridad transparente: criticidad base x evidencia x cobertura.
+    """Prioridad transparente: criticidad base x evidencia x cobertura x persistencia.
 
     La evidencia es la mayor |AUC-0,5| medida entre eventos (con la corrección en riesgo
     para E1). Si la variable no tiene AUC propia, se usa una fuerza de marco declarada.
+    La persistencia entra como factor suave (±10 %), centrado en la media del conjunto.
     """
     base = PRIORITY_BASE[item["tier"]]
     n = cov.get("companies_total") or 1286
@@ -623,12 +645,16 @@ def priority(item: dict, cov: dict[str, int]) -> tuple[int, dict]:
     else:
         strength = 0.0
         src = "marco"
-    value = round(100 * base * (0.55 + 0.45 * strength) * cov_factor)
+    p = persistence_of(item["var"])
+    persist_factor = 1.0 if p is None else 1 + PERSISTENCE_SLOPE * (p - PERSISTENCE_MEAN)
+    value = round(100 * base * (0.55 + 0.45 * strength) * cov_factor * persist_factor)
     return value, {
         "base": base,
         "strength": strength,
         "cov_frac": cov_frac,
         "cov_factor": cov_factor,
+        "persistence": p,
+        "persist_factor": persist_factor,
         "src": src,
     }
 
@@ -754,6 +780,15 @@ def build_html(cov: dict[str, int]) -> str:
                 w_cell = f'<td class="num wt noW">—<small>{PILLAR_NON_SCORING[p["id"]]}</small></td>'
             else:
                 w_cell = f'<td class="num wt"><b>{fmt_weight(w)}</b><small>del score total</small></td>'
+            if comp["persistence"] is None:
+                per_cell = '<td class="num per nd">n/d<small>sin medida</small></td>'
+            else:
+                pf = comp["persist_factor"]
+                # El color marca la magnitud del ajuste, no el lado del que cae: un factor de
+                # ×0,99 no merece alarma visual.
+                tone = "per hi" if pf >= 1.02 else ("per lo" if pf <= 0.97 else "per mid")
+                per_cell = (f'<td class="num {tone}">{comp["persistence"]:.2f}'
+                            f'<small>×{pf:.2f}</small></td>')
             rows.append(
                 f"""<tr>
                   <td><b>{html.escape(it['var'])}</b><small>{html.escape(it['plain'])}</small></td>
@@ -762,6 +797,7 @@ def build_html(cov: dict[str, int]) -> str:
                   {w_cell}
                   <td class="dir">{html.escape(it['dir'])}</td>
                   <td class="num">{fmt_int(cov_n)}<small>{cov_frac*100:.0f} % empresas</small></td>
+                  {per_cell}
                   <td class="num prio"><b>{prio}</b><small>{src_tag}</small></td>
                   <td class="ev">{html.escape(it['ev'])}<small class="note">{html.escape(it['note'])}</small></td>
                 </tr>"""
@@ -781,7 +817,7 @@ def build_html(cov: dict[str, int]) -> str:
               </div>
               <p class="pwhy">{html.escape(p['why'])}</p>
               <div class="table-wrap"><table>
-                <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Peso</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
+                <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Peso</th><th>Dirección</th><th>Cobertura</th><th>Persist.</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
                 <tbody>{''.join(rows)}</tbody>
               </table></div>
             </section>"""
@@ -829,6 +865,7 @@ def build_html(cov: dict[str, int]) -> str:
         src_tag = '<span class="srcmark">medida</span>' if comp["src"] == "medida" else '<span class="srcmark marco">marco</span>'
         w = var_w.get(it["var"], 0.0)
         w_txt = "—" if it["pillar"] in PILLAR_NON_SCORING else fmt_weight(w)
+        per_txt = "n/d" if comp["persistence"] is None else f"{comp['persistence']:.2f}"
         rank_rows += (
             f"<tr><td class='num'>{i}</td>"
             f"<td><b>{html.escape(it['var'])}</b><small>{html.escape(it['plain'])}</small></td>"
@@ -837,6 +874,7 @@ def build_html(cov: dict[str, int]) -> str:
             f"<td class='num prio'>{prio}</td>"
             f"<td class='num small'>{comp['strength']:.2f}{src_tag}</td>"
             f"<td class='num small'>{comp['cov_factor']:.2f}</td>"
+            f"<td class='num small'>{per_txt}</td>"
             f"<td class='ev'>{html.escape(it['ev'][:120])}…</td></tr>"
         )
 
@@ -883,7 +921,7 @@ def build_html(cov: dict[str, int]) -> str:
 
   <section class="block">
     <h2>3 · Back-engineering ítem → variable → pilar → prioridad</h2>
-    <p class="lead">Cada fila parte del ítem crudo de <code>data/</code> y llega a la variable, con <b>peso</b> (reparto de arranque dentro de su pilar), <b>prioridad</b>, <b>cobertura</b> y evidencia. La columna Score combina criticidad base, evidencia y cobertura: <code>100 × base × (0,55 + 0,45·evidencia) × (0,5 + 0,5·√cobertura)</code>. La evidencia es la mayor |AUC−0,5| medida (<span class="srcmark">medida</span>); cuando la variable no tiene AUC propia se usa la criticidad de marco (<span class="srcmark marco">marco</span>), porque el marco manda aunque no haya evento medible. Ni el peso ni el score son el peso final: se calibran con signo restringido (D12).</p>
+    <p class="lead">Cada fila parte del ítem crudo de <code>data/</code> y llega a la variable, con <b>peso</b> (reparto de arranque dentro de su pilar), <b>prioridad</b>, <b>cobertura</b>, <b>persistencia</b> y evidencia. La columna Score combina criticidad base, evidencia, cobertura y persistencia: <code>100 × base × (0,55 + 0,45·evidencia) × (0,5 + 0,5·√cobertura) × (1 + 0,5·(persistencia − 0,789))</code>. La persistencia se centra en la media del conjunto y mueve como mucho ±10 %: ordena sin imponerse. La evidencia es la mayor |AUC−0,5| medida (<span class="srcmark">medida</span>); cuando la variable no tiene AUC propia se usa la criticidad de marco (<span class="srcmark marco">marco</span>), porque el marco manda aunque no haya evento medible. Ni el peso ni el score son el peso final: se calibran con signo restringido (D12).</p>
     {''.join(pillar_blocks)}
   </section>
 
@@ -910,7 +948,7 @@ def build_html(cov: dict[str, int]) -> str:
     <h2>6 · Ranking de variables por prioridad</h2>
     <p class="lead">Las 22 primeras según el score transparente. Las que suben con los findings nuevos son, sobre todo, <code>lost_accel</code>, <code>payroll_cv</code>, <code>payee_concentration</code> e <code>hhi_ap_6m</code>; las que bajan, <code>net_margin_6m</code>, <code>refund_rate</code>, <code>tax_miss</code> y <code>billing_to_cash</code>.</p>
     <div class="table-wrap"><table>
-      <thead><tr><th>#</th><th>Variable</th><th>Prioridad</th><th>Peso</th><th>Score</th><th>Fuerza</th><th>Cobertura</th><th>Nota</th></tr></thead>
+      <thead><tr><th>#</th><th>Variable</th><th>Prioridad</th><th>Peso</th><th>Score</th><th>Fuerza</th><th>Cobertura</th><th>Persist.</th><th>Nota</th></tr></thead>
       <tbody>{rank_rows}</tbody>
     </table></div>
   </section>
@@ -948,7 +986,7 @@ def build_html(cov: dict[str, int]) -> str:
           <li><code>net_margin_6m</code>: AUC ≈ 0,50, persistencia 0,51 (revierte).</li>
           <li><code>refund_rate</code>: 88 % ceros, AUC ≈ 0,50.</li>
           <li><code>tax_miss</code> y <code>billing_to_cash</code>: se debilitan al controlar por apagado.</li>
-          <li><code>debt_burden</code>: solo separa E2 (0,56) y E2 está contaminado.</li>
+          <li><code>debt_service_burden</code>: solo separa E2 (0,56) y E2 está contaminado.</li>
           <li>El nivel de caja como único motor de Q3: dentro del conjunto en riesgo no predice.</li>
         </ul>
       </div>
@@ -1019,7 +1057,7 @@ main{max-width:1240px;margin:0 auto;padding:8px clamp(16px,4vw,40px) 60px}
 .pweight b{color:var(--pc);font-size:15px}
 .pwhy{color:#486581;font-size:13.5px;max-width:1000px;margin:0 0 12px}
 .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin-top:10px}
-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:900px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:980px}
 thead th{background:#f1f5fb;text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#486581;border-bottom:1px solid var(--line)}
 td{padding:11px 12px;border-bottom:1px solid #eef2f7;vertical-align:top}
 tbody tr:last-child td{border-bottom:0}
@@ -1048,6 +1086,11 @@ td.auc.flat{color:var(--slate)}
 td.num.wt{white-space:nowrap}
 td.num.wt b{color:#0b3a6b;font-size:14px}
 td.num.wt.noW{color:#8a97a8}
+td.per{white-space:nowrap;font-weight:600}
+td.per.hi{color:#16794c}
+td.per.lo{color:#b4530a}
+td.per.mid{color:#486581}
+td.per.nd{color:#8a97a8;font-weight:400}
 .wchip{display:inline-block;background:#e7f0fb;color:#1a4f86;border-radius:999px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:4px}
 .caveat-note{color:#6b7c93;font-size:13px;margin-top:12px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}

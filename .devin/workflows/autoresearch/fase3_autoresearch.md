@@ -9,9 +9,10 @@ Entrada: `salida/premisas.jsonl` (fase 2). El runner es `.devin/workflows/autore
 ## Preparación
 
 1. Comprueba que el árbol está limpio salvo `salida/`. Crea la rama `autoresearch/<fecha>` desde `main`.
-2. `cd research && uv run python ../.devin/workflows/autoresearch/premisas.py build` (cachea features+eventos).
-3. Captura la **línea base**: `premisas.py run` y `cd src && uv run python evaluate.py v7 --small`. Guarda en `salida/iteraciones/iter_000/`.
+2. `cd research && uv run python ../.devin/workflows/autoresearch/premisas.py build --oof` (cachea features+eventos+score y el **score fuera de grupo** `score_oof`).
+3. Captura la **línea base** con **etiquetas propias**, para no pisar los resultados versionados: `premisas.py run` y `cd src && uv run python evaluate.py ar000 --small`. Guarda la salida en `salida/iteraciones/iter_000/` y anota su **PM** (`puntuacion.py reports/metrics_ar000.json`). **No uses `v7`**: `evaluate.py v7` sobrescribe `reports/metrics_v7.json`, que está versionado.
 4. Lee la lista de premisas **centrales** que dejó el consejo (fase 2). Una premisa central que falle es prioridad máxima.
+5. Verifica sobre `score_oof`, no sobre `score`: el score en muestra sobreestima la separación. Las premisas de score del consejo deberían referenciar `score_oof`; si referencian `score`, anótalo como limitación en el informe.
 
 ## El bucle (una iteración = un cambio)
 
@@ -29,9 +30,10 @@ Para cada premisa que falla, decide **de quién es la culpa** y escríbelo en `s
 
 ### 3 · Proponer un cambio mínimo
 Un solo cambio por iteración, el más pequeño que pueda hacer pasar la premisa. Fuentes de cambio, en orden de preferencia:
+0. **Actuar sobre `salida/consejo/debate_veredicto.md`**: si el consejo aprobó un remedio (arreglar una etiqueta circular, poner `tension_6m = null` en `group_funded`, separar la nota de expansión), esa es la primera candidata, porque ataca la base.
 1. Corregir la **dirección o el signo** de una feature (si los datos la contradicen, el peso debería ser 0, D12).
 2. Añadir una **feature del brainstorming** con señal ya medida (`payee_concentration`, `lost_accel`, `payroll_cv`, `hhi_ap_6m`, `oper_persistence_6m`; R07).
-3. Ajustar una **definición de evento** (`src/targets.py`) si la premisa la delata como mal definida.
+3. Ajustar una **definición de evento** (`src/targets.py`) si la premisa la delata como mal definida o circular.
 4. Cambiar un **umbral** (bandas, histéresis R12, criterio de bache R11).
 
 Prohibido: dar más peso a una feature solo porque sí; romper la **explicación aditiva exacta** (`explain()` debe seguir sumando al céntimo); introducir no linealidad por feature (R09: no aporta); meter el apagado en la calibración (R06).
@@ -39,16 +41,27 @@ Prohibido: dar más peso a una feature solo porque sí; romper la **explicación
 ### 4 · Implementar y medir
 Implementa el cambio en `src/` (nunca en `data/`). Vuelve a correr, en este orden:
 1. `premisas.py run` → ¿pasa la premisa objetivo?
-2. `cd research/src && uv run python evaluate.py v<N> --small` → AUC del nivel frente a E1-E4.
+2. `cd research/src && uv run python evaluate.py ar<N> --small` → AUC del nivel frente a E1-E4 (etiqueta propia, nunca `v7`).
 3. `cd research && uv run pytest -q tests` → verde.
 4. `explain()` cuadra (test de explicación exacta).
 
-### 5 · Aceptar o descartar
+### 5 · Aceptar o descartar (objetivo **por evento**, no el promedio)
+El **promedio** de cuatro eventos (PM) **diluye** cada uno (D12/R10): `runway` tiene coeficiente 3,414 para tensión y 0,000 para expansión, así que promediar castiga un cambio que mejora la anticipación porque empeora la expansión. **Se reporta la PM, pero no decide.** El objetivo es **por evento**: la **nota adversa** (tensión + incumplimiento + caída) y, si el debate aprobó separarlas, la **nota de expansión**.
+
 Acepta el cambio solo si **todas** se cumplen:
 - La premisa objetivo pasa.
+- La **nota del evento objetivo mejora** (AUC fuera de grupo, `score_oof`), no el promedio.
+- **Ningún evento empeora por encima de un error típico** del instrumento (±0,012-0,025 según evento, ±0,006-0,014 en todas las filas). Un evento que empeora **dentro** del error no bloquea; **fuera** del error, sí.
 - Ninguna premisa **central** que pasaba antes deja de pasar.
-- El AUC del nivel no baja más de 0,01 en ningún evento E1-E4 y sube en al menos uno.
+- Los **guardarraíles** de `puntuacion.py` no empeoran más allá del error típico (deterioro, mejora, `skill_vs_ar1_h3`, cobertura 80 %).
+- La **separación del ranking** no empeora: la tasa de tensión del 20 % mejor por score no sube, y la del 20 % peor no baja.
 - Los tests siguen verdes.
+
+Compárala así, con etiquetas propias:
+```bash
+cd research/src && uv run python evaluate.py ar<N> --small
+cd research && uv run python ../.devin/workflows/autoresearch/puntuacion.py reports/metrics_ar000.json reports/metrics_ar<N>.json
+```
 
 Si no, revierte (`git checkout -- src/`) y anota por qué en `decision.md`. Un cambio descartado con su porqué vale tanto como uno aceptado.
 
@@ -58,7 +71,7 @@ Escribe `salida/iteraciones/iter_NNN/` con: `diagnostico.md`, `cambio.md` (el di
 ## Criterios de parada
 
 - No queda ninguna premisa central en `falla` y las verificables pasan o están justificadas.
-- Dos iteraciones seguidas sin mejora del AUC (meseta): para y documenta el techo.
+- **Cuatro** iteraciones seguidas sin mejora de la **nota del evento objetivo** (meseta real): para y documenta el techo. **Dos no es una meseta**: con el margen de error declarado (±0,012-0,025 por evento), dos iteraciones sin mejora son indistinguibles del ruido. Antes de declarar meseta, comprueba que **no queda ningún cambio candidato sin probar** (features del brainstorming, remedios del `debate_veredicto.md`, umbrales).
 - Presupuesto de iteraciones agotado (por defecto 12).
 
 ## Cierre
@@ -70,7 +83,9 @@ Escribe `salida/iteraciones/iter_NNN/` con: `diagnostico.md`, `cambio.md` (el di
 
 ## Reglas
 
-- Solo tocas `research/src/`, `research/tests/` y `.devin/workflows/autoresearch/salida/`. No toques `data/`, ni los CSV, ni `analysis/`.
+- Solo tocas `research/src/`, `research/tests/`, `research/ESTADO.md`, `research/REFLEXIONES.md` y `.devin/workflows/autoresearch/salida/`. No toques `data/`, ni los CSV, ni `analysis/`.
+- **`DECISIONS.md` no se edita a mano**: se regenera con `uv run python src/decisions.py`. Si el cambio introduce una decisión nueva, añádela a la fuente de `decisions.py` y regenéralo.
+- Los informes de métricas usan etiquetas propias (`ar000`, `ar001`…), nunca sobrescriben `reports/metrics_v<N>.json`.
 - Nada de secretos en ficheros.
 - Escribe en español. Cada afirmación sobre el código o los datos lleva su referencia (`file:line`).
 - Termina con: nº de iteraciones, cambios aceptados, AUC por evento frente a la base, premisas que resultaron incorrectas y el estado final del PR.

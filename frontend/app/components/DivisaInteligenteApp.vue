@@ -15,90 +15,83 @@ const selectedState = ref('bien')
 // TODO: sustituir por fetch a /api/... cuando el endpoint esté listo
 const states = ref({
   bien: {
-    color: 'var(--ok)', chip: 'BIEN', dotColor: 'var(--ok)', tag: 'Oportunidad de hedge',
-    bannerBg: 'var(--ok-bg)', bannerBorder: 'var(--ok-border)', iconBg: 'var(--ok-chip)', icon: '↓',
+    // El semáforo solo sobrevive en los puntos de pago de la gráfica; el resto
+    // de la vista va en el color primario.
+    chartColor: 'var(--ok)', chip: 'BIEN', tag: 'Oportunidad de hedge', icon: '↓',
     headline: 'Cubre 45k USD ahora y ahorra 900 € vs. el tipo esperado',
     subhead: 'Δ tipo hoy vs previsto ≥ 2 % · volatilidad alta · pago previsto el 15/nov confirmado en el ERP.',
-    ctaLabel: 'Ejecutar cobertura',
-    ctaBg: 'var(--ok)', ctaText: 'var(--on-status)', ctaBorder: 'var(--ok)',
+    ctaLabel: 'Ejecutar cobertura', ctaFilled: true,
     exposure: '340k €',
     coverage: '68 %', coverageDelta: '+3 pp esta semana', coverageBar: '68%',
     savingsLabel: 'Ahorro estimado', savings: '+900 €', savingsDelta: 'sobre este pago',
     savingsHint: 'Ahorro acumulado del trimestre: 12.400 € vs. tipos de mercado en la fecha real.',
-    heroBg: 'var(--ok-bg)', heroBorder: 'var(--ok-border)',
     spotHistory: '20,110 60,118 100,112 140,108 180,102 220,100 260,105 300,110 340,115 380,120 420,125 460,130',
     spotForecast: '460,130 490,135 520,145 550,150',
     payments: [
-      { x: 260, y: 105, color: 'var(--ok)' },
-      { x: 380, y: 120, color: 'var(--ok)' },
-      { x: 490, y: 135, color: 'var(--ok)' }
+      { x: 260, y: 105 },
+      { x: 380, y: 120 },
+      { x: 490, y: 135 }
     ],
     upcomingPayments: [
-      { amount: '45.000 USD', date: '15 nov', counterparty: 'Global Supplies Inc.', status: 'Cubrir hoy · ahorra 900€', bg: 'var(--ok-bg)', border: 'var(--ok-border)', statusBg: 'var(--ok-chip)', statusText: 'var(--ok-strong)' },
-      { amount: '18.500 GBP', date: '22 nov', counterparty: 'London Freight Ltd.', status: 'Cubrir esta semana', bg: 'var(--card)', border: 'var(--border)', statusBg: 'var(--warn-bg)', statusText: 'var(--warn-strong)' },
-      { amount: '620.000 JPY', date: '01 dic', counterparty: 'Sakura Materials', status: 'Sin urgencia', bg: 'var(--card)', border: 'var(--border)', statusBg: 'var(--wash)', statusText: 'var(--text-2)' }
+      { amount: '45.000 USD', date: '15 nov', counterparty: 'Global Supplies Inc.', status: 'Cubrir hoy · ahorra 900€', tone: 'var(--accent)' },
+      { amount: '18.500 GBP', date: '22 nov', counterparty: 'London Freight Ltd.', status: 'Cubrir esta semana', tone: null },
+      { amount: '620.000 JPY', date: '01 dic', counterparty: 'Sakura Materials', status: 'Sin urgencia', tone: null }
     ],
     history: [
-      { date: '05 sep', title: 'Cobertura 32k USD · ahorro 640 €', desc: 'Ejecutada 8 días antes del pago · tipo 0,915', badge: 'Cerrada', badgeBg: 'var(--ok-bg)', badgeText: 'var(--ok-strong)' },
-      { date: '22 ago', title: 'Cobertura 15k GBP · ahorro 320 €', desc: 'Modo auto activado por < 20k€', badge: 'Cerrada', badgeBg: 'var(--ok-bg)', badgeText: 'var(--ok-strong)' },
-      { date: '10 ago', title: 'Cobertura 60k USD · ahorro 1.240 €', desc: 'Trimestre anterior · efecto acumulado', badge: 'Cerrada', badgeBg: 'var(--wash)', badgeText: 'var(--text-2)' }
+      { date: '05 sep', title: 'Cobertura 32k USD · ahorro 640 €', desc: 'Ejecutada 8 días antes del pago · tipo 0,915', badge: 'Cerrada', badgeTone: null },
+      { date: '22 ago', title: 'Cobertura 15k GBP · ahorro 320 €', desc: 'Modo auto activado por < 20k€', badge: 'Cerrada', badgeTone: null },
+      { date: '10 ago', title: 'Cobertura 60k USD · ahorro 1.240 €', desc: 'Trimestre anterior · efecto acumulado', badge: 'Cerrada', badgeTone: null }
     ]
   },
   normal: {
-    color: 'var(--warn)', chip: 'NORMAL', dotColor: 'var(--warn)', tag: 'Sin recomendación',
-    bannerBg: 'var(--warn-bg)', bannerBorder: 'var(--warn-border)', iconBg: 'var(--warn-chip)', icon: '→',
+    chartColor: 'var(--warn)', chip: 'NORMAL', tag: 'Sin recomendación', icon: '→',
     headline: 'Tus exposiciones están bien · sin cobertura sugerida esta semana',
     subhead: 'Los pagos previstos son pequeños o la volatilidad esperada no justifica el spread del hedge.',
-    ctaLabel: 'Ajustar sensibilidad',
-    ctaBg: 'var(--card)', ctaText: 'var(--text-2)', ctaBorder: 'var(--border)',
+    ctaLabel: 'Ajustar sensibilidad', ctaFilled: false,
     exposure: '48k €',
     coverage: '92 %', coverageDelta: 'estable', coverageBar: '92%',
     savingsLabel: 'Ahorro previsto', savings: '+120 €', savingsDelta: 'trimestre en curso',
     savingsHint: 'No hay operaciones grandes esperadas. Se ejecutará a tipo spot en la fecha.',
-    heroBg: 'var(--warn-bg)', heroBorder: 'var(--warn-border)',
     spotHistory: '20,110 60,108 100,112 140,110 180,108 220,111 260,110 300,109 340,111 380,110 420,109 460,110',
     spotForecast: '460,110 490,112 520,110 550,111',
     payments: [
-      { x: 300, y: 109, color: 'var(--warn)' },
-      { x: 490, y: 112, color: 'var(--warn)' }
+      { x: 300, y: 109 },
+      { x: 490, y: 112 }
     ],
     upcomingPayments: [
-      { amount: '4.200 USD', date: '18 nov', counterparty: 'US Design Studio', status: 'Sin urgencia', bg: 'var(--card)', border: 'var(--border)', statusBg: 'var(--wash)', statusText: 'var(--text-2)' },
-      { amount: '3.800 GBP', date: '01 dic', counterparty: 'Small Vendor UK', status: 'Sin urgencia', bg: 'var(--card)', border: 'var(--border)', statusBg: 'var(--wash)', statusText: 'var(--text-2)' },
-      { amount: '1.100 USD', date: '05 dic', counterparty: 'SaaS License', status: 'Sin urgencia', bg: 'var(--card)', border: 'var(--border)', statusBg: 'var(--wash)', statusText: 'var(--text-2)' }
+      { amount: '4.200 USD', date: '18 nov', counterparty: 'US Design Studio', status: 'Sin urgencia', tone: null },
+      { amount: '3.800 GBP', date: '01 dic', counterparty: 'Small Vendor UK', status: 'Sin urgencia', tone: null },
+      { amount: '1.100 USD', date: '05 dic', counterparty: 'SaaS License', status: 'Sin urgencia', tone: null }
     ],
     history: [
-      { date: '02 sep', title: 'Pago a tipo spot · 3.400 USD', desc: 'Sin cobertura · por debajo del umbral', badge: 'Sin acción', badgeBg: 'var(--wash)', badgeText: 'var(--text-2)' },
-      { date: '25 ago', title: 'Pago a tipo spot · 5.100 USD', desc: 'Sin cobertura · por debajo del umbral', badge: 'Sin acción', badgeBg: 'var(--wash)', badgeText: 'var(--text-2)' },
-      { date: '10 ago', title: 'Cobertura 22k USD · ahorro 380 €', desc: 'Última cobertura del ciclo', badge: 'Cerrada', badgeBg: 'var(--wash)', badgeText: 'var(--text-2)' }
+      { date: '02 sep', title: 'Pago a tipo spot · 3.400 USD', desc: 'Sin cobertura · por debajo del umbral', badge: 'Sin acción', badgeTone: null },
+      { date: '25 ago', title: 'Pago a tipo spot · 5.100 USD', desc: 'Sin cobertura · por debajo del umbral', badge: 'Sin acción', badgeTone: null },
+      { date: '10 ago', title: 'Cobertura 22k USD · ahorro 380 €', desc: 'Última cobertura del ciclo', badge: 'Cerrada', badgeTone: null }
     ]
   },
   mal: {
-    color: 'var(--bad)', chip: 'MAL', dotColor: 'var(--bad)', tag: 'Posición huérfana',
-    bannerBg: 'var(--bad-bg)', bannerBorder: 'var(--bad-border)', iconBg: 'var(--bad-chip)', icon: '!',
+    chartColor: 'var(--bad)', chip: 'MAL', tag: 'Posición huérfana', icon: '!',
     headline: 'Tienes 45k USD cubiertos sin pago que los use',
     subhead: 'El ERP canceló el pago de Global Supplies el 12/nov. Tu posición FX abierta pierde 240 €/día al ritmo actual.',
-    ctaLabel: 'Revertir posición',
-    ctaBg: 'var(--bad)', ctaText: 'var(--on-status)', ctaBorder: 'var(--bad)',
+    ctaLabel: 'Revertir posición', ctaFilled: true,
     exposure: '340k €',
     coverage: '73 %', coverageDelta: '−5 pp por posición abierta', coverageBar: '73%',
     savingsLabel: 'Coste diario abierto', savings: '−240 €', savingsDelta: '2 días abierta',
     savingsHint: 'Deshacer al tipo actual limita la pérdida a 480 €. Cada día abierta añade riesgo.',
-    heroBg: 'var(--bad-bg)', heroBorder: 'var(--bad-border)',
     spotHistory: '20,90 60,100 100,110 140,120 180,115 220,105 260,115 300,120 340,125 380,140 420,155 460,170',
     spotForecast: '460,170 490,180 520,190 550,195',
     payments: [
-      { x: 380, y: 140, color: 'var(--bad)' }
+      { x: 380, y: 140 }
     ],
     upcomingPayments: [
-      { amount: '45.000 USD', date: '12 nov · cancelado en ERP', counterparty: 'Global Supplies Inc.', status: 'Posición abierta', bg: 'var(--bad-bg)', border: 'var(--bad-border)', statusBg: 'var(--bad-chip)', statusText: 'var(--bad-strong)' },
-      { amount: '18.500 GBP', date: '22 nov', counterparty: 'London Freight Ltd.', status: 'Verificando', bg: 'var(--warn-bg)', border: 'var(--warn-border)', statusBg: 'var(--warn-chip)', statusText: 'var(--warn-strong)' },
-      { amount: '620.000 JPY', date: '01 dic', counterparty: 'Sakura Materials', status: 'Sin urgencia', bg: 'var(--card)', border: 'var(--border)', statusBg: 'var(--wash)', statusText: 'var(--text-2)' }
+      { amount: '45.000 USD', date: '12 nov · cancelado en ERP', counterparty: 'Global Supplies Inc.', status: 'Posición abierta', tone: 'var(--accent)' },
+      { amount: '18.500 GBP', date: '22 nov', counterparty: 'London Freight Ltd.', status: 'Verificando', tone: null },
+      { amount: '620.000 JPY', date: '01 dic', counterparty: 'Sakura Materials', status: 'Sin urgencia', tone: null }
     ],
     history: [
-      { date: '13 nov', title: '🔴 Posición huérfana detectada', desc: 'Pago cancelado en ERP tras hedge · aviso al CFO', badge: 'Activa', badgeBg: 'var(--bad-bg)', badgeText: 'var(--bad-strong)' },
-      { date: '10 nov', title: 'Cobertura 45k USD ejecutada', desc: 'Ahorro esperado 900 € · antes de la cancelación', badge: 'Sin uso', badgeBg: 'var(--warn-bg)', badgeText: 'var(--warn-strong)' },
-      { date: '02 nov', title: 'Cobertura 22k USD · ahorro 360 €', desc: 'Ejecutada y utilizada correctamente', badge: 'Cerrada', badgeBg: 'var(--wash)', badgeText: 'var(--text-2)' }
+      { date: '13 nov', title: 'Posición huérfana detectada', desc: 'Pago cancelado en ERP tras hedge · aviso al CFO', badge: 'Activa', badgeTone: 'var(--accent)' },
+      { date: '10 nov', title: 'Cobertura 45k USD ejecutada', desc: 'Ahorro esperado 900 € · antes de la cancelación', badge: 'Sin uso', badgeTone: null },
+      { date: '02 nov', title: 'Cobertura 22k USD · ahorro 360 €', desc: 'Ejecutada y utilizada correctamente', badge: 'Cerrada', badgeTone: null }
     ]
   }
 })
@@ -107,9 +100,9 @@ const state = computed(() => states.value[selectedState.value] || states.value.b
 
 const stateOptions = computed(() =>
   [
-    { id: 'bien', label: '🟢 BIEN' },
-    { id: 'normal', label: '🟡 NORMAL' },
-    { id: 'mal', label: '🔴 MAL' }
+    { id: 'bien', label: 'Bien' },
+    { id: 'normal', label: 'Normal' },
+    { id: 'mal', label: 'Mal' }
   ].map((s) => ({
     id: s.id,
     label: s.label,
@@ -145,7 +138,7 @@ const stateOptions = computed(() =>
       <!-- Active -->
       <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-sm); background: rgba(255,255,255,0.12); color: var(--on-navy); font-size: 13.5px; font-weight: 600;" :style="{ borderLeft: `3px solid ${accent}` }">
         <span style="width: 16px;">$</span> Divisa Inteligente
-        <span style="margin-left: auto; padding: 2px 7px; color: var(--on-status); border-radius: 999px; font-size: 10px; font-weight: 700;" :style="{ background: state.dotColor }">{{ state.chip }}</span>
+        <span style="margin-left: auto; padding: 2px 7px; color: var(--accent-on); border-radius: 999px; font-size: 10px; font-weight: 700;" :style="{ background: accent }">{{ state.chip }}</span>
       </div>
 
       <a href="Marketplace.dc.html" class="nav-link"><span style="width: 16px;">⚏</span> Contrapartes</a>
@@ -204,26 +197,33 @@ const stateOptions = computed(() =>
             <p style="margin: 0; font-size: 13.5px; color: var(--meta);">Predice tus pagos en divisa y cubre al mejor tipo antes de la fecha del cobro o pago.</p>
           </div>
           <div style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; font-size: 12.5px; color: var(--text-2);">
-            <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--ok);"></span>
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--text-3);"></span>
             Conectado con Business Central
           </div>
         </div>
 
-        <!-- BANNER -->
+        <!-- BANNER. Único bloque teñido de la página, y en primario: el
+             verde/ámbar/rojo se queda para los puntos de pago de la gráfica. -->
         <div
           style="border-radius: var(--r-lg); padding: 16px 20px; display: flex; align-items: center; gap: 16px;"
-          :style="{ background: state.bannerBg, border: `1px solid ${state.bannerBorder}`, borderLeft: `4px solid ${state.color}` }"
+          :style="{
+            background: `color-mix(in srgb, ${accent} 9%, transparent)`,
+            border: `1px solid color-mix(in srgb, ${accent} 26%, transparent)`,
+            borderLeft: `4px solid ${accent}`
+          }"
         >
-          <div style="width: 40px; height: 40px; border-radius: var(--r-lg); display: flex; align-items: center; justify-content: center; font-size: 18px;" :style="{ background: state.iconBg }">{{ state.icon }}</div>
+          <div style="width: 40px; height: 40px; border-radius: var(--r-lg); display: flex; align-items: center; justify-content: center; font-size: 18px;" :style="{ background: `color-mix(in srgb, ${accent} 16%, transparent)` }">{{ state.icon }}</div>
           <div style="flex-grow: 1;">
-            <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2px;" :style="{ color: state.color }">{{ state.tag }}</div>
+            <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2px;" :style="{ color: accent }">{{ state.tag }}</div>
             <div style="font-family: var(--font-display); font-size: 16.5px; font-weight: 600; margin-bottom: 3px;">{{ state.headline }}</div>
             <div style="font-size: 13px; color: var(--body); line-height: 1.5;">{{ state.subhead }}</div>
           </div>
           <button
             type="button"
             style="padding: 12px 22px; border-radius: var(--r-md); font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: var(--font-body); white-space: nowrap;"
-            :style="{ background: state.ctaBg, color: state.ctaText, border: `1px solid ${state.ctaBorder}` }"
+            :style="state.ctaFilled
+              ? { background: 'var(--accent-solid)', color: 'var(--accent-on)', border: '1px solid var(--accent-solid)' }
+              : { background: 'var(--card)', color: 'var(--text-2)', border: '1px solid var(--border)' }"
           >{{ state.ctaLabel }}</button>
         </div>
 
@@ -242,22 +242,22 @@ const stateOptions = computed(() =>
           <div class="card" style="padding: 20px 22px;">
             <div style="display: flex; justify-content: space-between; align-items: baseline;">
               <span style="font-size: 12.5px; color: var(--meta);">Cobertura actual</span>
-              <span style="font-size: 11px; font-weight: 600;" :style="{ color: state.color }">{{ state.coverageDelta }}</span>
+              <span style="font-size: 11px; font-weight: 600;" :style="{ color: accent }">{{ state.coverageDelta }}</span>
             </div>
             <div style="font-family: var(--font-display); font-size: 30px; font-weight: 700; margin-top: 8px;">{{ state.coverage }}</div>
             <div style="margin-top: 10px;">
               <div style="height: 6px; background: var(--wash); border-radius: 3px; overflow: hidden;">
-                <div style="height: 100%; border-radius: 3px;" :style="{ width: state.coverageBar, background: state.color }"></div>
+                <div style="height: 100%; border-radius: 3px;" :style="{ width: state.coverageBar, background: accent }"></div>
               </div>
             </div>
           </div>
 
-          <div style="border-radius: var(--r-lg); padding: 20px 22px;" :style="{ background: state.heroBg, border: `1px solid ${state.heroBorder}` }">
+          <div class="card" style="padding: 20px 22px;">
             <div style="display: flex; justify-content: space-between; align-items: baseline;">
               <span style="font-size: 12.5px; color: var(--meta);">{{ state.savingsLabel }}</span>
-              <span style="font-size: 11px; font-weight: 600;" :style="{ color: state.color }">{{ state.savingsDelta }}</span>
+              <span style="font-size: 11px; font-weight: 600;" :style="{ color: accent }">{{ state.savingsDelta }}</span>
             </div>
-            <div style="font-family: var(--font-display); font-size: 32px; font-weight: 700; margin-top: 8px;" :style="{ color: state.color }">{{ state.savings }}</div>
+            <div style="font-family: var(--font-display); font-size: 32px; font-weight: 700; margin-top: 8px;" :style="{ color: accent }">{{ state.savings }}</div>
             <div style="font-size: 12px; color: var(--text-2); margin-top: 8px; line-height: 1.4;">{{ state.savingsHint }}</div>
           </div>
 
@@ -283,7 +283,7 @@ const stateOptions = computed(() =>
               <polyline :points="state.spotHistory" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"></polyline>
               <polyline :points="state.spotForecast" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-dasharray="5,5" opacity="0.5"></polyline>
 
-              <circle v-for="(p, i) in state.payments" :key="i" :cx="p.x" :cy="p.y" r="7" :fill="p.color" stroke="var(--card)" stroke-width="2"></circle>
+              <circle v-for="(p, i) in state.payments" :key="i" :cx="p.x" :cy="p.y" r="7" :fill="state.chartColor" stroke="var(--card)" stroke-width="2"></circle>
             </svg>
             <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3);">
               <span>oct '25</span><span>ene '26</span><span>hoy</span><span>h3 →</span>
@@ -291,7 +291,7 @@ const stateOptions = computed(() =>
             <div style="display: flex; gap: 14px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--grid);">
               <div class="legend-item"><span style="width: 12px; height: 2px; background: var(--text);"></span> Tipo real</div>
               <div class="legend-item"><span style="width: 12px; height: 2px; background: var(--text); opacity: 0.5;"></span> Predicción h3</div>
-              <div class="legend-item"><span style="width: 10px; height: 10px; border-radius: 50%;" :style="{ background: state.color }"></span> Pago FX previsto</div>
+              <div class="legend-item"><span style="width: 10px; height: 10px; border-radius: 50%;" :style="{ background: state.chartColor }"></span> Pago FX previsto</div>
             </div>
           </div>
 
@@ -299,19 +299,27 @@ const stateOptions = computed(() =>
           <div class="card" style="padding: 18px 20px;">
             <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px;">Próximos pagos en divisa</div>
             <div style="display: flex; flex-direction: column; gap: 10px;">
+              <!-- La cola de pagos es casi toda rutina. Las tarjetas son
+                   neutras y solo el pago que pide una decisión hoy lleva el
+                   filete lateral y el chip con color. -->
               <div
                 v-for="pay in state.upcomingPayments"
                 :key="pay.amount"
-                style="border-radius: var(--r-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px;"
-                :style="{ border: `1px solid ${pay.border}`, background: pay.bg }"
+                style="border-radius: var(--r-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; background: var(--card); border: 1px solid var(--border);"
+                :style="pay.tone ? { borderLeft: `3px solid ${pay.tone}` } : null"
               >
                 <div style="display: flex; justify-content: space-between; align-items: baseline;">
                   <span style="font-size: 13px; font-weight: 600;">{{ pay.amount }}</span>
                   <span style="font-size: 11.5px; color: var(--meta);">{{ pay.date }}</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
                   <span style="font-size: 11.5px; color: var(--meta);">{{ pay.counterparty }}</span>
-                  <span style="padding: 3px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 600;" :style="{ background: pay.statusBg, color: pay.statusText }">{{ pay.status }}</span>
+                  <span
+                    style="padding: 3px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 600; white-space: nowrap;"
+                    :style="pay.tone
+                      ? { background: `color-mix(in srgb, ${pay.tone} 16%, transparent)`, color: pay.tone }
+                      : { background: 'var(--wash)', color: 'var(--text-2)' }"
+                  >{{ pay.status }}</span>
                 </div>
               </div>
             </div>
@@ -323,7 +331,7 @@ const stateOptions = computed(() =>
         <div class="card" style="padding: 18px 22px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <div style="font-size: 13.5px; font-weight: 600;">Coberturas recientes</div>
-            <span style="font-size: 12px; font-weight: 600;" :style="{ color: accent }">Ver todo →</span>
+            <span style="font-size: 12px; font-weight: 600; color: var(--text-2);">Ver todo →</span>
           </div>
           <div>
             <div
@@ -336,7 +344,14 @@ const stateOptions = computed(() =>
                 <div style="font-size: 13px; font-weight: 600;">{{ h.title }}</div>
                 <div style="font-size: 11.5px; color: var(--meta); margin-top: 2px;">{{ h.desc }}</div>
               </div>
-              <span style="padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600;" :style="{ background: h.badgeBg, color: h.badgeText }">{{ h.badge }}</span>
+              <!-- Mismo criterio que en la cola de pagos: gris lo cerrado,
+                   contorno con color lo que sigue abierto. -->
+              <span
+                style="padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600;"
+                :style="h.badgeTone
+                  ? { background: 'transparent', border: `1px solid color-mix(in srgb, ${h.badgeTone} 45%, transparent)`, color: h.badgeTone }
+                  : { background: 'var(--wash)', border: '1px solid transparent', color: 'var(--text-2)' }"
+              >{{ h.badge }}</span>
             </div>
           </div>
         </div>

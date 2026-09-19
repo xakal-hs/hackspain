@@ -16,6 +16,8 @@ acciones, pero no es el protagonista del pitch.
 
 El modelo que les encaja es la **suscripción** del módulo. Intermediar rieles (depósito, FX, deuda)
 cuando Embed One no cubre es un parche, no el relato. Fuente: [voz de producto](voz_embat.md).
+Ejecutar ese riel no exige que Embat sea banco: se apalanca la licencia de un partner. Fuente:
+[voz de Capchase](voz_capchase.md).
 
 ## La cifra defendible
 
@@ -87,9 +89,11 @@ La cuña incremental es:
    divisa se enseñan primero como **coste de no hacer nada**; el CFO no los siente como problema.
 5. **Aprender:** registrar qué recomendación se aceptó y qué resultado produjo.
 
-El upsell no es un SKU único: es una **mesa de opciones** que encajan. La deuda, si entra, combina
-plazos corto / medio / largo según cuándo hay que devolver. No hace falta conciliación perfecta para
-emitir el estado de solvencia: sale de planificación y previsiones.
+El upsell no es un SKU único: es una **mesa de opciones** que encajan. La deuda, si entra, es una
+rejilla **sector × tenor** (días / 6 meses / 12 meses / largo): no el mismo préstamo con otro
+vencimiento. Quien tiene caja también pide; el depósito en el partner es colateral y retención, no
+solo yield. No hace falta conciliación perfecta para emitir el estado de solvencia: sale de
+planificación y previsiones. Tampoco hace falta licencia propia para mover el dinero.
 
 Fuentes externas: [gestión de tesorería](https://www.embat.io/es/gestion-tesoreria),
 [módulos y pricing](https://www.embat.io/pricing) y

@@ -20,6 +20,9 @@ uv run uvicorn app.server:app --port 8080   # abrir http://localhost:8080
 Otros comandos:
 
 ```bash
+uv run pytest -q tests                              # 17 tests: API sklearn, OOD, escala, monotonía, explicación exacta, escenarios, motor proactivo (incl. empresas nuevas vía CSV) y endpoints
+uv run python src/proactive.py validate             # precisión a 2 meses sobre empresas held-out -> ../.devin/workflows/autoresearch/salida/demo/validacion_proactiva.json
+cd src && uv run python evaluate.py v6 --small      # validación GroupKFold × 3 cortes (~5 min)
 uv run pytest -q tests                              # 9 tests: API sklearn, OOD, escala, monotonía, explicación exacta, escenarios
 cd src && uv run python evaluate.py v7 --small      # validación GroupKFold × 3 cortes (~5 min)
 cd src && uv run python anticipation.py             # antelación, bache frente a caída y alertas out-of-fold (~20 min; --from-cache reutiliza las alertas)
@@ -35,7 +38,8 @@ uv run python src/predict_submission.py --csv-dir <carpeta_test> --out submissio
 | Eventos ancla | `src/targets.py` | Tensión de liquidez, incumplimiento estricto, caída estructural de cobros y expansión autofinanciada a 6 meses. Son proxies observables para calibrar y validar; apagado ya no calibra |
 | **API sklearn** | `src/xray.py` | `HealthScorer.fit(X, y)/transform/score_panel` y `TrajectoryForecaster.fit/predict` (mlforecast + LightGBM cuantílico q10/q50/q90 + CQR), más `explain`, `alerts_for` y `fmt_feature` |
 | Servicio | `src/service.py`, `app/server.py` | Modelo en memoria, simulador de escenarios (`apply_scenario`) y API FastAPI según `app/API_CONTRACT.md` |
-| SPA | `app/static/index.html` | Cartera, ficha de empresa con abanico de previsión, tesorería por empresa (flujo de caja, liquidez, deuda y facturas), «por qué cambió», simulador de escenarios, monitor, métricas y decisiones. Lenguaje visual (tokens, superficies, elevación): `app/DESIGN.md` |
+| **Proactivo** | `src/proactive.py` | Proyección de tesorería **aritmética** (caja + facturas emitidas/recibidas pendientes no vencidas − nóminas − cuotas; sin forecaster), decisión y producto según la política de la fase 1 (factoring solo sobre facturas emitidas **no vencidas**), y `validate`: precisión a 2 meses sobre empresas held-out por `group_id`. `recommend COMP_0004 2026-06`, `validate` |
+| SPA | `app/static/index.html` | Cartera, ficha de empresa con abanico de previsión, tesorería por empresa (flujo de caja, liquidez, deuda y facturas), «por qué cambió», simulador de escenarios, monitor, **Proactivo** (empresa real dos meses antes: panel en T → recomendación → desenlace real), **Situaciones** (las premisas del consejo evaluadas contra el dato), métricas y decisiones. Lenguaje visual (tokens, superficies, elevación): `app/DESIGN.md` |
 | Validación | `src/evaluate.py`, `src/anticipation.py` | GroupKFold(5) por `group_id` × cortes nov-25, feb-26 y may-26. Referencias: naive, AR(1) agrupado y arrastre del EWMA |
 
 ## Cómo funciona (en una frase por pieza)

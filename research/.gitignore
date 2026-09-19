@@ -1,4 +1,9 @@
-data/
+# Los datos derivados no van al repo (los regenera src/panel.py), salvo el export de eventos:
+# 17 KB que la vista «Eventos» necesita para funcionar nada más clonar, sin reconstruir el panel.
+# Tiene que ser `data/*` y no `data/`: git no puede re-incluir un fichero si su directorio
+# padre está excluido, así que la negación de abajo no haría nada.
+data/*
+!data/events_export.parquet
 .venv/
 reports/*.parquet
 __pycache__/

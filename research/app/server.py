@@ -13,11 +13,14 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+import pandas as pd
 from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from service import XRayService, SCENARIO_DRIVERS  # noqa: E402
+
+from export_events import TEXTS as EVENT_TEXTS, month_label as _month_label  # noqa: E402
 
 app = FastAPI(title="X-Ray API", version="1.0")
 svc: XRayService | None = None
@@ -30,9 +33,8 @@ def service() -> XRayService:
     return svc
 
 
-@app.on_event("startup")
-def _warm():
-    service()
+# Sin precalentado al arrancar: `service()` entrena el modelo si no hay artifacts/xray.joblib y eso
+# tarda minutos. Cada endpoint que lo necesita lo pide y lo cachea; /api/events no lo toca.
 
 
 class ScenarioIn(BaseModel):
@@ -82,6 +84,82 @@ def scenario(body: ScenarioIn):
         return service().scenario(body.company_id, body.months, body.drivers)
     except KeyError:
         raise HTTPException(404, f"Empresa {body.company_id} no encontrada")
+
+
+EVENTS_PARQUET = ROOT / "data" / "events_export.parquet"
+EVENTS_JSON = "eventos_export.json"
+_events_cache: "pd.DataFrame | None" = None
+
+
+def _events_df():
+    """Tabla de eventos (empresa-mes). Se lee una vez y se cachea; puede tener miles de filas."""
+    global _events_cache
+    if _events_cache is None:
+        if not EVENTS_PARQUET.exists():
+            raise HTTPException(503, "Faltan los eventos: ejecuta `uv run python src/export_events.py`")
+        _events_cache = pd.read_parquet(EVENTS_PARQUET)
+    return _events_cache
+
+
+@app.get("/api/events")
+def events(company_id: str | None = None, group_id: str | None = None, month: str | None = None):
+    """Eventos v2 para la vista «Eventos».
+
+    Sin parámetros devuelve el último mes completo (el último en que todas las etiquetas son
+    observables; las de 6 meses se censuran al final del panel). Con `company_id` devuelve toda
+    la historia de esa empresa, que es lo que interesa en su ficha; con `group_id`, la de todas
+    las empresas del grupo, porque las hermanas se miran juntas. `month` fuerza un mes concreto.
+    """
+    meta = _read_json(EVENTS_JSON)
+    if not meta:
+        raise HTTPException(503, "Falta reports/eventos_export.json: ejecuta `uv run python src/export_events.py`")
+    df = _events_df()
+    catalog = meta.get("catalog", [])
+    types = [c["type"] for c in catalog]
+
+    if company_id:
+        # empresa sin eventos no es un 404: simplemente no tiene nada que contar
+        sel, scope, ref_month = df[df.company_id == company_id], "empresa", None
+    elif group_id:
+        sel, scope, ref_month = df[df.group_id == group_id], "grupo", None
+    else:
+        ref_month = month or meta.get("month")
+        sel = df[df.month == ref_month]
+        scope = "mes"
+    if month and scope != "mes":
+        sel = sel[sel.month == month]
+
+    texts = {c["type"]: c for c in catalog}
+    out = []
+    for r in sel.itertuples(index=False):
+        for t in types:
+            if t in df.columns and int(getattr(r, t, 0)) > 0:
+                out.append({
+                    "company_id": r.company_id,
+                    "group_id": getattr(r, "group_id", None),
+                    "month": r.month,
+                    "type": t,
+                    "text": EVENT_TEXTS.get(t, "{c}: evento {t}").format(c=r.company_id, t=t),
+                    "month_label": _month_label(r.month),
+                    "severity": texts.get(t, {}).get("severity", "riesgo"),
+                    "label": texts.get(t, {}).get("label", t),
+                })
+    out.sort(key=lambda e: (e["month"], e["company_id"], e["type"]), reverse=scope in ("empresa", "grupo"))
+
+    counts = {t: 0 for t in types}
+    for e in out:
+        counts[e["type"]] += 1
+    return {
+        "month": ref_month, "month_label": _month_label(ref_month) if ref_month else None,
+        "scope": scope, "company_id": company_id, "group_id": group_id,
+        "companies": sorted({e["company_id"] for e in out}),
+        "summary": meta.get("summary", {}), "rates_6m": meta.get("rates_6m", {}),
+        "last_observable": meta.get("last_observable", {}),
+        "last_month_panel": meta.get("last_month_panel"),
+        "censura": meta.get("censura"),
+        "counts": counts, "total": len(out),
+        "catalog": catalog, "events": out,
+    }
 
 
 @app.get("/api/monitor")
@@ -220,6 +298,61 @@ def product_adoption():
                           for pid, data in product_totals.items()},
         "total_companies": len(set(scored.company_id.unique()) & set(comp.index)),
     }
+
+
+# ------------------------------------------------------------ sala de situaciones (fase 4 del autoresearch)
+SITUACIONES = ROOT.parent / ".devin" / "workflows" / "autoresearch" / "salida" / "situaciones.json"
+SITUACIONES_HINT = "cd research && uv run python ../.devin/workflows/autoresearch/premisas.py export"
+
+
+def _situaciones() -> list[dict]:
+    if not SITUACIONES.exists():
+        return []
+    try:
+        data = json.loads(SITUACIONES.read_text())
+    except json.JSONDecodeError:
+        return []
+    return data if isinstance(data, list) else data.get("situaciones", [])
+
+
+@app.get("/api/situaciones")
+def situaciones():
+    items = _situaciones()
+    n = lambda pred: sum(1 for s in items if pred(s))
+    resumen = {"total": len(items), "pasan": n(lambda s: s.get("estado") == "pasa"), "fallan": n(lambda s: s.get("estado") == "falla"),
+               "no_verificables": n(lambda s: s.get("estado") == "no_verificable" or not s.get("verificable", True)),
+               "centrales": n(lambda s: s.get("central")), "centrales_fallan": n(lambda s: s.get("central") and s.get("estado") == "falla")}
+    out = {"situaciones": items, "resumen": resumen, "fuente": str(SITUACIONES.relative_to(ROOT.parent))}
+    if not items:
+        out["aviso"] = f"No hay situaciones exportadas. Genera el fichero con: {SITUACIONES_HINT}"
+    return out
+
+
+@app.get("/api/situaciones/{sid}")
+def situacion(sid: str):
+    for s in _situaciones():
+        if s.get("id") == sid:
+            return s
+    raise HTTPException(404, f"Situación {sid} no encontrada")
+
+
+# ------------------------------------------------------------ motor proactivo (proyección aritmética, sin forecaster)
+@app.get("/api/proactive")
+def proactive(company_id: str, month: str | None = None, horizon: int = 6):
+    if not 1 <= horizon <= 12:
+        raise HTTPException(422, "horizon debe estar entre 1 y 12")
+    try:
+        return service().proactive(company_id, month, horizon)
+    except KeyError as e:
+        raise HTTPException(404, str(e.args[0]) if e.args else f"Empresa {company_id} no encontrada")
+
+
+@app.get("/api/proactive/validation")
+def proactive_validation():
+    p = ROOT.parent / ".devin" / "workflows" / "autoresearch" / "salida" / "demo" / "validacion_proactiva.json"
+    if not p.exists():
+        return {"casos": [], "metricas": {}, "aviso": "Sin validación exportada. Ejecuta: cd research && uv run python src/proactive.py validate"}
+    return json.loads(p.read_text())
 
 
 STATIC = ROOT / "app" / "static"

@@ -1,6 +1,6 @@
 ---
 name: riesgo-modelo
-description: Consejero del agent council que valida el modelo como un revisor de riesgo de modelo (estilo Basilea): explicabilidad, estabilidad, OOD, monotonicidad, sesgos. Opus 5.
+description: "Consejero del agent council que valida el modelo como un revisor de riesgo de modelo (estilo Basilea): explicabilidad, estabilidad, OOD, monotonicidad, sesgos. Opus 5."
 model: claude-opus-5-high
 allowed-tools:
   - read

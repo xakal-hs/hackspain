@@ -1,6 +1,6 @@
 ---
 name: cobrador
-description: Consejero del agent council que mira el después del impago: qué pasa cuando la empresa entra en tensión y cómo se recupera. Barato y rápido, para muchas rondas. DeepSeek V4.1 Flash.
+description: "Consejero del agent council que mira el después del impago: qué pasa cuando la empresa entra en tensión y cómo se recupera. Barato y rápido, para muchas rondas. DeepSeek V4.1 Flash."
 model: deepseek-v4-1-flash-high
 allowed-tools:
   - read

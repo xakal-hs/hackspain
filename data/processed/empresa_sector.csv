@@ -1,0 +1,1287 @@
+company_id,group_id,sector,tipo,sector_set,n_sectors,top_sector_score,tenor,product_fit,confidence
+COMP_0001,GROUP_0147,servicios profesionales,servicio,servicios profesionales,1,0.645768,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.206691
+COMP_0002,GROUP_0125,servicios profesionales,servicio,servicios profesionales,1,0.556566,6 meses,Yield · barrido | Reserve · póliza,0.185594
+COMP_0003,GROUP_0044,holding / tesorería,mixto,holding / tesorería,1,0.90563,largo,Reserve · póliza | FX Shield | Yield · barrido,0.141189
+COMP_0004,GROUP_0058,mayorista / distribución,producto,mayorista / distribución | holding / tesorería,2,0.671241,12 meses,Reserve · póliza | Factoring | FX Shield | Confirming,0.0613179
+COMP_0005,GROUP_0092,comercio minorista,producto,comercio minorista,1,0.931079,días,Yield · barrido | Reserve · póliza | FX Shield,0.047882
+COMP_0006,GROUP_0195,holding / tesorería,producto,holding / tesorería | comercio minorista | hostelería,3,0.606907,largo,Reserve · póliza | Yield · barrido | FX Shield,0.10626
+COMP_0007,GROUP_0064,mayorista / distribución,producto,mayorista / distribución | comercio minorista,2,0.7035,12 meses,Reserve · póliza | FX Shield | Yield · barrido,0.0862857
+COMP_0008,GROUP_0195,comercio minorista,mixto,comercio minorista,1,0.753629,días,Reserve · póliza | FX Shield | Yield · barrido,0.105785
+COMP_0009,GROUP_0225,comercio minorista,producto,comercio minorista,1,0.608657,días,Reserve · póliza | FX Shield | Yield · barrido,0.0425927
+COMP_0010,GROUP_0013,servicios profesionales,mixto,servicios profesionales | mayorista / distribución,2,0.53722,6 meses,Factoring | Reserve · póliza | Confirming | Yield · barrido,0.00428423
+COMP_0011,GROUP_0234,servicios profesionales,servicio,servicios profesionales,1,0.58943,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.0198839
+COMP_0012,GROUP_0087,,insuficiente,,0,,,,
+COMP_0013,GROUP_0203,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.64197,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.13497
+COMP_0014,GROUP_0173,software / suscripción,servicio,software / suscripción | transporte / logística | construcción,3,0.78,largo,Reserve · póliza | Factoring | FX Shield | Yield · barrido,0.198042
+COMP_0015,GROUP_0068,mayorista / distribución,producto,mayorista / distribución,1,0.485116,12 meses,Factoring | Confirming | Yield · barrido | Reserve · póliza,0.180962
+COMP_0016,GROUP_0070,holding / tesorería,producto,holding / tesorería,1,0.963302,largo,Yield · barrido | FX Shield | Reserve · póliza,0.214375
+COMP_0017,GROUP_0073,comercio minorista,producto,comercio minorista,1,0.845744,días,Yield · barrido | Reserve · póliza | FX Shield,0.0943378
+COMP_0018,GROUP_0250,mayorista / distribución,producto,mayorista / distribución,1,0.47107,12 meses,Factoring | Confirming | Yield · barrido | Reserve · póliza,0.29427
+COMP_0019,GROUP_0212,servicios profesionales,servicio,servicios profesionales,1,0.496085,6 meses,Reserve · póliza | Yield · barrido,0.0642103
+COMP_0020,GROUP_0007,holding / tesorería,servicio,holding / tesorería,1,0.794428,largo,Yield · barrido | FX Shield | Reserve · póliza,0.157486
+COMP_0021,GROUP_0023,servicios profesionales,servicio,servicios profesionales,1,0.603153,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.0265898
+COMP_0022,GROUP_0065,hostelería,servicio,hostelería,1,0.78,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0470948
+COMP_0023,GROUP_0237,hostelería,servicio,hostelería | transporte / logística | construcción,3,0.78,6 meses,Reserve · póliza | Factoring | FX Shield | Confirming,0.0460963
+COMP_0024,GROUP_0222,comercio minorista,mixto,comercio minorista,1,0.68283,días,Yield · barrido | Reserve · póliza | FX Shield,0.0836994
+COMP_0025,GROUP_0211,servicios profesionales,servicio,servicios profesionales,1,0.757655,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.303406
+COMP_0026,GROUP_0236,servicios profesionales,servicio,servicios profesionales,1,0.581007,6 meses,Reserve · póliza | Yield · barrido,0.0079105
+COMP_0027,GROUP_0241,transporte / logística,servicio,transporte / logística,1,0.78,días,Factoring | Reserve · póliza | Confirming,0.0717224
+COMP_0028,GROUP_0218,construcción,mixto,construcción,1,0.504741,6 meses,Reserve · póliza | Yield · barrido,0.258791
+COMP_0029,GROUP_0013,,mixto,,0,,,,0.313274
+COMP_0030,GROUP_0126,comercio minorista,producto,comercio minorista,1,0.830416,días,Yield · barrido | Reserve · póliza | FX Shield,0.037669
+COMP_0031,GROUP_0035,comercio minorista,mixto,comercio minorista | hostelería,2,0.668444,días,Reserve · póliza | Yield · barrido | FX Shield,0.0348056
+COMP_0032,GROUP_0094,,insuficiente,,0,,,,
+COMP_0033,GROUP_0130,servicios profesionales,servicio,servicios profesionales,1,0.510446,6 meses,Yield · barrido | Reserve · póliza,0.0740476
+COMP_0034,GROUP_0172,comercio minorista,servicio,comercio minorista | holding / tesorería,2,0.575611,días,Reserve · póliza | Yield · barrido | FX Shield,0.216654
+COMP_0035,GROUP_0115,holding / tesorería,producto,holding / tesorería | mayorista / distribución,2,0.734983,largo,Yield · barrido | Reserve · póliza | FX Shield,0.226472
+COMP_0036,GROUP_0103,servicios profesionales,servicio,servicios profesionales,1,0.543586,6 meses,Yield · barrido | Reserve · póliza,0.0469681
+COMP_0037,GROUP_0222,comercio minorista,mixto,comercio minorista,1,0.691672,días,Reserve · póliza | FX Shield | Yield · barrido,0.117966
+COMP_0038,GROUP_0104,holding / tesorería,servicio,holding / tesorería,1,0.736542,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0916562
+COMP_0039,GROUP_0225,servicios profesionales,servicio,servicios profesionales,1,0.523742,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.012661
+COMP_0040,GROUP_0178,servicios profesionales,servicio,servicios profesionales,1,0.541515,6 meses,Reserve · póliza | Yield · barrido,0.185224
+COMP_0041,GROUP_0149,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.636658,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.215858
+COMP_0042,GROUP_0162,comercio minorista,servicio,comercio minorista,1,0.553366,días,Reserve · póliza | Yield · barrido | FX Shield,0.111306
+COMP_0043,GROUP_0185,holding / tesorería,producto,holding / tesorería,1,0.687148,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0844568
+COMP_0044,GROUP_0241,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.763863,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.0675482
+COMP_0045,GROUP_0242,,insuficiente,,0,,,,
+COMP_0046,GROUP_0062,comercio minorista,producto,comercio minorista,1,0.838287,días,Reserve · póliza | Yield · barrido | FX Shield,0.0198609
+COMP_0047,GROUP_0018,software / suscripción,producto,software / suscripción | alquiler / inmobiliario | energía,3,0.78,largo,Yield · barrido | FX Shield | Reserve · póliza | Factoring,0.0223779
+COMP_0048,GROUP_0241,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.598266,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.0884058
+COMP_0049,GROUP_0180,servicios profesionales,servicio,servicios profesionales,1,0.685032,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.196685
+COMP_0050,GROUP_0230,,insuficiente,,0,,,,
+COMP_0051,GROUP_0163,comercio minorista,mixto,comercio minorista | holding / tesorería,2,0.719566,días,Reserve · póliza | Yield · barrido | FX Shield,0.174633
+COMP_0052,GROUP_0142,comercio minorista,producto,comercio minorista,1,0.799045,días,Reserve · póliza | Yield · barrido | FX Shield,0.0450096
+COMP_0053,GROUP_0174,servicios profesionales,servicio,servicios profesionales,1,0.598657,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.0761853
+COMP_0054,GROUP_0217,holding / tesorería,servicio,holding / tesorería,1,0.944616,largo,Yield · barrido | FX Shield | Reserve · póliza,0.267839
+COMP_0055,GROUP_0131,alquiler / inmobiliario,servicio,alquiler / inmobiliario,1,0.78,largo,Yield · barrido | Reserve · póliza | Seguro de cobro,0.17249
+COMP_0056,GROUP_0234,comercio minorista,producto,comercio minorista,1,0.778425,días,Reserve · póliza | FX Shield | Yield · barrido,0.102909
+COMP_0057,GROUP_0122,servicios profesionales,servicio,servicios profesionales,1,0.750985,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.216889
+COMP_0058,GROUP_0104,industria,producto,industria | holding / tesorería | mayorista / distribución,3,0.75,12 meses,Factoring | Reserve · póliza | Confirming | FX Shield,0.121161
+COMP_0059,GROUP_0101,transporte / logística,servicio,transporte / logística,1,0.78,días,Factoring | Reserve · póliza | Confirming,0.161221
+COMP_0060,GROUP_0112,comercio minorista,mixto,comercio minorista,1,0.749203,días,Reserve · póliza | Yield · barrido | FX Shield,0.0432871
+COMP_0061,GROUP_0022,comercio minorista,mixto,comercio minorista,1,0.72559,días,Reserve · póliza | FX Shield | Yield · barrido,0.0143935
+COMP_0062,GROUP_0165,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.571341,6 meses,Yield · barrido | Reserve · póliza | FX Shield,0.228067
+COMP_0063,GROUP_0011,comercio minorista,servicio,comercio minorista,1,0.592595,días,Reserve · póliza | FX Shield | Yield · barrido,0.196302
+COMP_0064,GROUP_0174,comercio minorista,mixto,comercio minorista,1,0.647639,días,Reserve · póliza | FX Shield | Yield · barrido,0.0454972
+COMP_0065,GROUP_0139,construcción,servicio,construcción | servicios profesionales,2,0.75,6 meses,Factoring | Reserve · póliza | Seguro de cobro | Yield · barrido,0.183298
+COMP_0066,GROUP_0115,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.655434,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.221215
+COMP_0067,GROUP_0064,holding / tesorería,mixto,holding / tesorería,1,0.829432,largo,Yield · barrido | FX Shield | Reserve · póliza,0.338234
+COMP_0068,GROUP_0142,comercio minorista,servicio,comercio minorista | hostelería,2,0.574684,días,Reserve · póliza | Yield · barrido | FX Shield,0.0334074
+COMP_0069,GROUP_0175,servicios profesionales,mixto,servicios profesionales,1,0.688303,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.193498
+COMP_0070,GROUP_0230,comercio minorista,mixto,comercio minorista,1,0.525982,días,Yield · barrido | Reserve · póliza | FX Shield,0.114788
+COMP_0071,GROUP_0102,holding / tesorería,mixto,holding / tesorería | hostelería,2,0.628457,largo,Yield · barrido | Reserve · póliza | FX Shield,0.0158475
+COMP_0072,GROUP_0003,,insuficiente,,0,,,,
+COMP_0073,GROUP_0101,transporte / logística,servicio,transporte / logística,1,0.78,días,Factoring | Reserve · póliza | Yield · barrido | Confirming,0.108578
+COMP_0074,GROUP_0088,holding / tesorería,servicio,holding / tesorería,1,0.729071,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0204157
+COMP_0075,GROUP_0115,hostelería,servicio,hostelería,1,0.500994,6 meses,Reserve · póliza | FX Shield | Yield · barrido,0.037129
+COMP_0076,GROUP_0146,comercio minorista,producto,comercio minorista,1,0.714841,días,Reserve · póliza | FX Shield | Yield · barrido,0.156148
+COMP_0077,GROUP_0213,holding / tesorería,mixto,holding / tesorería,1,0.719415,largo,Yield · barrido | FX Shield | Reserve · póliza,0.024745
+COMP_0078,GROUP_0246,holding / tesorería,servicio,holding / tesorería,1,0.814151,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0638302
+COMP_0079,GROUP_0203,servicios profesionales,servicio,servicios profesionales,1,0.637347,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.0816734
+COMP_0080,GROUP_0112,construcción,producto,construcción | mayorista / distribución,2,0.586216,6 meses,Reserve · póliza,0.404607
+COMP_0081,GROUP_0217,alquiler / inmobiliario,servicio,alquiler / inmobiliario | holding / tesorería | servicios profesionales,3,0.78,largo,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.0832174
+COMP_0082,GROUP_0172,holding / tesorería,servicio,holding / tesorería,1,0.605116,largo,Reserve · póliza | FX Shield | Yield · barrido,0.113852
+COMP_0083,GROUP_0133,holding / tesorería,servicio,holding / tesorería | comercio minorista,2,0.716418,largo,Reserve · póliza | Yield · barrido | FX Shield,0.095387
+COMP_0084,GROUP_0138,servicios profesionales,servicio,servicios profesionales,1,0.543172,6 meses,Reserve · póliza | Yield · barrido,0.165474
+COMP_0085,GROUP_0155,alquiler / inmobiliario,servicio,alquiler / inmobiliario,1,0.78,largo,Reserve · póliza | Yield · barrido | Seguro de cobro,0.00345707
+COMP_0086,GROUP_0168,servicios profesionales,servicio,servicios profesionales | hostelería,2,0.543724,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.129739
+COMP_0087,GROUP_0065,comercio minorista,producto,comercio minorista | construcción | holding / tesorería,3,0.627434,días,Reserve · póliza | Yield · barrido | FX Shield,0.0422928
+COMP_0088,GROUP_0172,holding / tesorería,servicio,holding / tesorería,1,0.770609,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0476705
+COMP_0089,GROUP_0153,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.672873,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.294116
+COMP_0090,GROUP_0116,,mixto,,0,,,,0.32753
+COMP_0091,GROUP_0237,hostelería,servicio,hostelería,1,0.78,6 meses,Reserve · póliza | FX Shield | Yield · barrido,0.132745
+COMP_0092,GROUP_0159,comercio minorista,mixto,comercio minorista | mayorista / distribución,2,0.632177,días,Reserve · póliza | FX Shield | Yield · barrido,0.110928
+COMP_0093,GROUP_0149,servicios profesionales,servicio,servicios profesionales,1,0.486114,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.292935
+COMP_0094,GROUP_0021,holding / tesorería,servicio,holding / tesorería,1,0.675468,largo,Yield · barrido | FX Shield | Reserve · póliza,0.111686
+COMP_0095,GROUP_0240,,insuficiente,,0,,,,
+COMP_0096,GROUP_0217,holding / tesorería,servicio,holding / tesorería,1,0.947916,largo,Reserve · póliza | FX Shield | Yield · barrido,0.268498
+COMP_0097,GROUP_0170,construcción,mixto,construcción,1,0.461508,6 meses,Reserve · póliza | Yield · barrido,0.403613
+COMP_0098,GROUP_0132,servicios profesionales,servicio,servicios profesionales,1,0.68,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.167609
+COMP_0099,GROUP_0238,holding / tesorería,mixto,holding / tesorería | hostelería,2,0.588505,largo,Reserve · póliza | Yield · barrido | FX Shield,0.193207
+COMP_0100,GROUP_0129,comercio minorista,mixto,comercio minorista | holding / tesorería,2,0.609664,días,Yield · barrido | Reserve · póliza | FX Shield,0.17934
+COMP_0101,GROUP_0108,servicios profesionales,servicio,servicios profesionales,1,0.776486,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.208191
+COMP_0102,GROUP_0158,holding / tesorería,servicio,holding / tesorería,1,0.861537,largo,Reserve · póliza | FX Shield | Yield · barrido,0.233734
+COMP_0103,GROUP_0170,holding / tesorería,mixto,holding / tesorería,1,0.535729,largo,Yield · barrido | FX Shield | Reserve · póliza,0.13344
+COMP_0104,GROUP_0173,transporte / logística,servicio,transporte / logística | holding / tesorería,2,0.78,días,Reserve · póliza | Factoring | FX Shield | Yield · barrido,0.245945
+COMP_0105,GROUP_0079,servicios profesionales,servicio,servicios profesionales | hostelería | software / suscripción,3,0.8263,6 meses,Reserve · póliza | Yield · barrido | FX Shield | Factoring,0.249342
+COMP_0106,GROUP_0022,mayorista / distribución,producto,mayorista / distribución,1,0.504255,12 meses,Factoring | Confirming | Yield · barrido | Reserve · póliza,0.193665
+COMP_0107,GROUP_0094,comercio minorista,producto,comercio minorista | servicios profesionales,2,0.676629,días,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.122854
+COMP_0108,GROUP_0179,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.574862,12 meses,Reserve · póliza,0.31399
+COMP_0109,GROUP_0170,comercio minorista,servicio,comercio minorista,1,0.600259,días,Reserve · póliza | Yield · barrido | FX Shield,0.118961
+COMP_0110,GROUP_0008,servicios profesionales,servicio,servicios profesionales,1,0.594969,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.385671
+COMP_0111,GROUP_0243,servicios profesionales,servicio,servicios profesionales,1,0.559328,6 meses,Reserve · póliza | Yield · barrido,0.120097
+COMP_0112,GROUP_0222,comercio minorista,mixto,comercio minorista,1,0.653517,días,Yield · barrido | Reserve · póliza | FX Shield,0.0666014
+COMP_0113,GROUP_0070,mayorista / distribución,mixto,mayorista / distribución | servicios profesionales,2,0.539727,12 meses,Factoring | Yield · barrido | Reserve · póliza | Confirming,0.08944
+COMP_0114,GROUP_0044,,insuficiente,,0,,,,
+COMP_0115,GROUP_0095,servicios profesionales,servicio,servicios profesionales,1,0.580592,6 meses,Reserve · póliza | Yield · barrido,0.0241911
+COMP_0116,GROUP_0195,comercio minorista,servicio,comercio minorista,1,0.493456,días,Reserve · póliza | Yield · barrido | FX Shield,0.0529783
+COMP_0117,GROUP_0101,servicios profesionales,servicio,servicios profesionales,1,0.811388,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.0721766
+COMP_0118,GROUP_0138,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.650048,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.290583
+COMP_0119,GROUP_0048,comercio minorista,mixto,comercio minorista,1,0.652221,días,Reserve · póliza | FX Shield | Yield · barrido,0.0963006
+COMP_0120,GROUP_0210,servicios profesionales,servicio,servicios profesionales,1,0.520186,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.144388
+COMP_0121,GROUP_0158,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.656483,largo,Reserve · póliza | Yield · barrido | FX Shield,0.252217
+COMP_0122,GROUP_0086,comercio minorista,servicio,comercio minorista,1,0.69098,días,Yield · barrido | Reserve · póliza | FX Shield,0.0863311
+COMP_0123,GROUP_0153,holding / tesorería,servicio,holding / tesorería | servicios profesionales | transporte / logística,3,0.574,largo,Factoring | Yield · barrido | Reserve · póliza | FX Shield,0.0417961
+COMP_0124,GROUP_0136,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.736638,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.206591
+COMP_0125,GROUP_0250,holding / tesorería,mixto,holding / tesorería,1,0.907422,largo,Yield · barrido | FX Shield | Reserve · póliza,0.257282
+COMP_0126,GROUP_0220,holding / tesorería,servicio,holding / tesorería,1,0.699341,largo,Yield · barrido | FX Shield | Reserve · póliza,0.222877
+COMP_0127,GROUP_0064,,insuficiente,,0,,,,
+COMP_0128,GROUP_0103,mayorista / distribución,mixto,mayorista / distribución | holding / tesorería,2,0.680841,12 meses,Yield · barrido | Reserve · póliza | FX Shield,0.239227
+COMP_0129,GROUP_0185,holding / tesorería,producto,holding / tesorería,1,0.715161,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0897335
+COMP_0130,GROUP_0079,servicios profesionales,servicio,servicios profesionales,1,0.911306,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.306821
+COMP_0131,GROUP_0070,comercio minorista,producto,comercio minorista,1,0.640897,días,Yield · barrido | Reserve · póliza | FX Shield,0.191656
+COMP_0132,GROUP_0104,holding / tesorería,mixto,holding / tesorería,1,0.67066,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0102234
+COMP_0133,GROUP_0103,holding / tesorería,producto,holding / tesorería,1,0.783658,largo,Yield · barrido | FX Shield | Reserve · póliza,0.409827
+COMP_0134,GROUP_0169,,insuficiente,,0,,,,
+COMP_0135,GROUP_0050,comercio minorista,mixto,comercio minorista,1,0.71047,días,Reserve · póliza | Yield · barrido | FX Shield,0.128032
+COMP_0136,GROUP_0142,servicios profesionales,servicio,servicios profesionales,1,0.493736,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.095118
+COMP_0137,GROUP_0217,holding / tesorería,servicio,holding / tesorería,1,0.926825,largo,Reserve · póliza | FX Shield | Yield · barrido,0.279812
+COMP_0138,GROUP_0035,comercio minorista,servicio,comercio minorista | hostelería,2,0.603549,días,Reserve · póliza | Yield · barrido | FX Shield,0.0858314
+COMP_0139,GROUP_0217,servicios profesionales,servicio,servicios profesionales,1,0.651423,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.185039
+COMP_0140,GROUP_0072,energía,servicio,energía | servicios profesionales,2,0.78,12 meses,Factoring | Yield · barrido | FX Shield | Reserve · póliza,0.0181322
+COMP_0141,GROUP_0220,comercio minorista,producto,comercio minorista,1,0.780703,días,Yield · barrido | Reserve · póliza | FX Shield,0.0392393
+COMP_0142,GROUP_0217,servicios profesionales,servicio,servicios profesionales | alquiler / inmobiliario,2,0.861875,6 meses,Reserve · póliza | Yield · barrido | Factoring | Seguro de cobro,0.153114
+COMP_0143,GROUP_0146,comercio minorista,servicio,comercio minorista,1,0.559533,días,Yield · barrido | Reserve · póliza | FX Shield,0.0622969
+COMP_0144,GROUP_0236,servicios profesionales,servicio,servicios profesionales,1,0.480482,6 meses,Yield · barrido | Reserve · póliza,0.182026
+COMP_0145,GROUP_0007,holding / tesorería,servicio,holding / tesorería,1,0.725456,largo,Yield · barrido | FX Shield | Reserve · póliza,0.117873
+COMP_0146,GROUP_0020,servicios profesionales,servicio,servicios profesionales,1,0.622017,6 meses,Reserve · póliza | Yield · barrido,0.0974539
+COMP_0147,GROUP_0227,comercio minorista,servicio,comercio minorista,1,0.581411,días,Reserve · póliza | Yield · barrido | FX Shield,0.120957
+COMP_0148,GROUP_0016,servicios profesionales,servicio,servicios profesionales,1,0.4907,6 meses,Yield · barrido | Reserve · póliza,0.393532
+COMP_0149,GROUP_0132,servicios profesionales,mixto,servicios profesionales | comercio minorista,2,0.72,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.133559
+COMP_0150,GROUP_0081,comercio minorista,mixto,comercio minorista,1,0.771013,días,Reserve · póliza | FX Shield | Yield · barrido,0.0928706
+COMP_0151,GROUP_0101,software / suscripción,mixto,software / suscripción | transporte / logística,2,0.78,largo,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.109364
+COMP_0152,GROUP_0037,servicios profesionales,servicio,servicios profesionales,1,0.53523,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.124997
+COMP_0153,GROUP_0115,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.641901,6 meses,Yield · barrido | Reserve · póliza | FX Shield,0.152669
+COMP_0154,GROUP_0003,,insuficiente,,0,,,,
+COMP_0155,GROUP_0143,holding / tesorería,producto,holding / tesorería,1,0.92086,largo,Reserve · póliza | FX Shield | Yield · barrido,0.221326
+COMP_0156,GROUP_0187,servicios profesionales,servicio,servicios profesionales,1,0.565403,6 meses,Reserve · póliza | Yield · barrido,0.26534
+COMP_0157,GROUP_0146,comercio minorista,producto,comercio minorista | construcción,2,0.630748,días,Reserve · póliza | FX Shield | Yield · barrido,0.154115
+COMP_0158,GROUP_0001,comercio minorista,producto,comercio minorista,1,0.88779,días,Reserve · póliza | FX Shield | Yield · barrido,0.174961
+COMP_0159,GROUP_0102,servicios profesionales,servicio,servicios profesionales,1,0.621228,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.220154
+COMP_0160,GROUP_0106,servicios profesionales,servicio,servicios profesionales,1,0.571341,6 meses,Yield · barrido | Reserve · póliza,0.333217
+COMP_0161,GROUP_0079,servicios profesionales,servicio,servicios profesionales,1,0.742195,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.235989
+COMP_0162,GROUP_0095,servicios profesionales,servicio,servicios profesionales | mayorista / distribución,2,0.62326,6 meses,Reserve · póliza | Yield · barrido,0.295585
+COMP_0163,GROUP_0094,servicios profesionales,servicio,servicios profesionales | mayorista / distribución,2,0.765878,6 meses,Factoring | Reserve · póliza | Confirming | Yield · barrido,0.0851583
+COMP_0164,GROUP_0154,holding / tesorería,mixto,holding / tesorería,1,0.74947,largo,Reserve · póliza | FX Shield | Yield · barrido,0.252799
+COMP_0165,GROUP_0035,servicios profesionales,servicio,servicios profesionales,1,0.490424,6 meses,Yield · barrido | Reserve · póliza,0.196012
+COMP_0166,GROUP_0149,comercio minorista,producto,comercio minorista,1,0.856307,días,Reserve · póliza | Yield · barrido | FX Shield,0.0961567
+COMP_0167,GROUP_0218,software / suscripción,servicio,software / suscripción | servicios profesionales,2,0.78,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.0991303
+COMP_0168,GROUP_0061,,insuficiente,,0,,,,
+COMP_0169,GROUP_0090,comercio minorista,servicio,comercio minorista | servicios profesionales | hostelería,3,0.611603,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.00184237
+COMP_0170,GROUP_0128,,insuficiente,,0,,,,
+COMP_0171,GROUP_0048,holding / tesorería,mixto,holding / tesorería,1,0.919836,largo,Reserve · póliza | FX Shield | Yield · barrido,0.331768
+COMP_0172,GROUP_0212,comercio minorista,producto,comercio minorista | mayorista / distribución | construcción,3,0.676937,días,Reserve · póliza | Yield · barrido | FX Shield,0.0999393
+COMP_0173,GROUP_0019,comercio minorista,mixto,comercio minorista,1,0.580549,días,Reserve · póliza | FX Shield | Yield · barrido,0.0920323
+COMP_0174,GROUP_0017,servicios profesionales,servicio,servicios profesionales,1,0.641211,6 meses,Reserve · póliza | Yield · barrido,0.372814
+COMP_0175,GROUP_0143,servicios profesionales,servicio,servicios profesionales,1,0.479377,6 meses,Reserve · póliza | Yield · barrido,0.0794853
+COMP_0176,GROUP_0225,servicios profesionales,mixto,servicios profesionales | mayorista / distribución,2,0.560392,6 meses,Factoring | Yield · barrido | Reserve · póliza | Confirming,0.232072
+COMP_0177,GROUP_0185,comercio minorista,producto,comercio minorista,1,0.721661,días,Reserve · póliza | FX Shield | Yield · barrido,0.196303
+COMP_0178,GROUP_0220,holding / tesorería,servicio,holding / tesorería,1,0.794013,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0649547
+COMP_0179,GROUP_0017,comercio minorista,producto,comercio minorista,1,0.710491,días,Reserve · póliza | FX Shield | Yield · barrido,0.161598
+COMP_0180,GROUP_0055,energía,servicio,energía | construcción | servicios profesionales,3,0.78,6 meses,Factoring | Reserve · póliza | FX Shield | Seguro de cobro,0.00464126
+COMP_0181,GROUP_0045,holding / tesorería,mixto,holding / tesorería | comercio minorista,2,0.584768,largo,Reserve · póliza | Yield · barrido | FX Shield,0.179981
+COMP_0182,GROUP_0179,comercio minorista,servicio,comercio minorista | hostelería,2,0.541228,días,Reserve · póliza | Yield · barrido | FX Shield,0.0445923
+COMP_0183,GROUP_0232,servicios profesionales,servicio,servicios profesionales,1,0.525662,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.138701
+COMP_0184,GROUP_0044,mayorista / distribución,mixto,mayorista / distribución | servicios profesionales,2,0.599288,12 meses,Factoring | Yield · barrido | Reserve · póliza | Confirming,0.0351918
+COMP_0185,GROUP_0044,hostelería,servicio,hostelería | holding / tesorería,2,0.78,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0949717
+COMP_0186,GROUP_0142,comercio minorista,mixto,comercio minorista | hostelería,2,0.557405,días,Reserve · póliza | Yield · barrido | FX Shield,0.0340749
+COMP_0187,GROUP_0044,,insuficiente,,0,,,,
+COMP_0188,GROUP_0158,comercio minorista,servicio,comercio minorista,1,0.769687,días,Reserve · póliza | Yield · barrido | FX Shield,0.123959
+COMP_0189,GROUP_0211,comercio minorista,producto,comercio minorista | holding / tesorería,2,0.748422,días,Reserve · póliza | Yield · barrido | FX Shield,0.0544918
+COMP_0190,GROUP_0182,comercio minorista,servicio,comercio minorista,1,0.628491,días,Reserve · póliza | FX Shield | Yield · barrido,0.155897
+COMP_0191,GROUP_0132,servicios profesionales,servicio,servicios profesionales,1,0.68,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.0738893
+COMP_0192,GROUP_0048,holding / tesorería,mixto,holding / tesorería,1,0.679436,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0454233
+COMP_0193,GROUP_0224,comercio minorista,mixto,comercio minorista | hostelería,2,0.703423,días,Reserve · póliza | Yield · barrido | FX Shield,0.0318279
+COMP_0194,GROUP_0035,,producto,,0,,,,0.232186
+COMP_0195,GROUP_0065,comercio minorista,producto,comercio minorista,1,0.794377,días,Reserve · póliza | FX Shield | Yield · barrido,0.135325
+COMP_0196,GROUP_0199,construcción,producto,construcción | mayorista / distribución,2,0.577235,6 meses,Reserve · póliza,0.373442
+COMP_0197,GROUP_0035,servicios profesionales,servicio,servicios profesionales,1,0.4797,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.196618
+COMP_0198,GROUP_0037,mayorista / distribución,producto,mayorista / distribución,1,0.546507,12 meses,Factoring | Confirming | Yield · barrido | Reserve · póliza,0.209414
+COMP_0199,GROUP_0179,servicios profesionales,servicio,servicios profesionales,1,0.532539,6 meses,Reserve · póliza | Yield · barrido,0.418396
+COMP_0200,GROUP_0224,comercio minorista,producto,comercio minorista | mayorista / distribución,2,0.600446,días,Reserve · póliza | Factoring | Confirming | FX Shield,0.0231172
+COMP_0201,GROUP_0101,holding / tesorería,servicio,holding / tesorería | transporte / logística,2,0.797143,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.150449
+COMP_0202,GROUP_0194,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.57141,12 meses,Reserve · póliza,0.400549
+COMP_0203,GROUP_0016,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.576013,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.0376363
+COMP_0204,GROUP_0052,servicios profesionales,servicio,servicios profesionales,1,0.609052,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.171845
+COMP_0205,GROUP_0175,comercio minorista,servicio,comercio minorista,1,0.574103,días,Yield · barrido | Reserve · póliza | FX Shield,0.00273306
+COMP_0206,GROUP_0239,comercio minorista,servicio,comercio minorista,1,0.674617,días,Reserve · póliza | Yield · barrido | FX Shield,0.0708852
+COMP_0207,GROUP_0153,servicios profesionales,servicio,servicios profesionales | holding / tesorería | transporte / logística,3,0.562294,6 meses,Factoring | Reserve · póliza | Yield · barrido | FX Shield,0.300841
+COMP_0208,GROUP_0003,mayorista / distribución,producto,mayorista / distribución,1,0.456023,12 meses,Factoring | Confirming | Reserve · póliza | Seguro de cobro,0.179227
+COMP_0209,GROUP_0221,hostelería,servicio,hostelería,1,0.546355,6 meses,Reserve · póliza | FX Shield | Yield · barrido,0.0230161
+COMP_0210,GROUP_0117,servicios profesionales,servicio,servicios profesionales,1,0.55898,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.217513
+COMP_0211,GROUP_0243,comercio minorista,mixto,comercio minorista,1,0.680023,días,Reserve · póliza | FX Shield | Yield · barrido,0.13332
+COMP_0212,GROUP_0199,,insuficiente,,0,,,,
+COMP_0213,GROUP_0170,comercio minorista,servicio,comercio minorista,1,0.557591,días,Reserve · póliza | FX Shield | Yield · barrido,0.0792037
+COMP_0214,GROUP_0112,construcción,producto,construcción | mayorista / distribución,2,0.595823,6 meses,Reserve · póliza | Yield · barrido,0.431116
+COMP_0215,GROUP_0070,servicios profesionales,servicio,servicios profesionales,1,0.621256,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.00913658
+COMP_0216,GROUP_0067,hostelería,servicio,hostelería | comercio minorista,2,0.529992,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0248558
+COMP_0217,GROUP_0087,,insuficiente,,0,,,,
+COMP_0218,GROUP_0113,holding / tesorería,mixto,holding / tesorería,1,0.814426,largo,Yield · barrido | FX Shield | Reserve · póliza,0.112417
+COMP_0219,GROUP_0132,transporte / logística,servicio,transporte / logística | alquiler / inmobiliario | servicios profesionales,3,0.78,días,Reserve · póliza | Factoring | Yield · barrido | Confirming,0.167625
+COMP_0220,GROUP_0124,mayorista / distribución,producto,mayorista / distribución | comercio minorista,2,0.649604,12 meses,Reserve · póliza | Factoring | Confirming | FX Shield,0.108888
+COMP_0221,GROUP_0138,comercio minorista,servicio,comercio minorista,1,0.545992,días,Reserve · póliza | FX Shield | Yield · barrido,0.0419041
+COMP_0222,GROUP_0064,comercio minorista,mixto,comercio minorista,1,0.589095,días,Yield · barrido | Reserve · póliza | FX Shield,0.282787
+COMP_0223,GROUP_0078,holding / tesorería,mixto,holding / tesorería,1,0.80582,largo,Yield · barrido | FX Shield | Reserve · póliza,0.223877
+COMP_0224,GROUP_0234,comercio minorista,producto,comercio minorista,1,0.817367,días,Reserve · póliza | FX Shield | Yield · barrido,0.166491
+COMP_0225,GROUP_0118,comercio minorista,producto,comercio minorista,1,0.709628,días,Reserve · póliza | FX Shield | Yield · barrido,0.149992
+COMP_0226,GROUP_0013,servicios profesionales,servicio,servicios profesionales,1,0.535697,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.173423
+COMP_0227,GROUP_0092,servicios profesionales,servicio,servicios profesionales,1,0.523978,6 meses,Yield · barrido | Reserve · póliza,0.109858
+COMP_0228,GROUP_0081,comercio minorista,producto,comercio minorista,1,0.830788,días,Reserve · póliza | FX Shield | Yield · barrido,0.0451982
+COMP_0229,GROUP_0101,servicios profesionales,servicio,servicios profesionales,1,0.626398,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.231042
+COMP_0230,GROUP_0213,holding / tesorería,mixto,holding / tesorería,1,0.711164,largo,Yield · barrido | FX Shield | Reserve · póliza,0.094198
+COMP_0231,GROUP_0108,holding / tesorería,mixto,holding / tesorería | comercio minorista,2,0.680762,largo,Reserve · póliza | Yield · barrido | FX Shield,0.0344544
+COMP_0232,GROUP_0038,mayorista / distribución,producto,mayorista / distribución,1,0.510904,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.0872707
+COMP_0233,GROUP_0150,comercio minorista,producto,comercio minorista,1,0.707591,días,Reserve · póliza | FX Shield | Yield · barrido,0.072392
+COMP_0234,GROUP_0101,hostelería,servicio,hostelería | software / suscripción | transporte / logística,3,0.78,6 meses,Reserve · póliza | Yield · barrido | FX Shield | Factoring,0.0564109
+COMP_0235,GROUP_0028,comercio minorista,producto,comercio minorista | mayorista / distribución | industria,3,0.63779,12 meses,Reserve · póliza | Yield · barrido | FX Shield,0.236465
+COMP_0236,GROUP_0243,servicios profesionales,servicio,servicios profesionales,1,0.549247,6 meses,Reserve · póliza | Yield · barrido,0.210384
+COMP_0237,GROUP_0044,servicios profesionales,servicio,servicios profesionales,1,0.721336,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.315538
+COMP_0238,GROUP_0149,servicios profesionales,servicio,servicios profesionales,1,0.636205,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.132981
+COMP_0239,GROUP_0202,servicios profesionales,servicio,servicios profesionales,1,0.877903,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.103184
+COMP_0240,GROUP_0009,,insuficiente,,0,,,,
+COMP_0241,GROUP_0050,construcción,mixto,construcción | servicios profesionales,2,0.516437,6 meses,Reserve · póliza | Yield · barrido,0.0665625
+COMP_0242,GROUP_0108,,mixto,,0,,,,0.372093
+COMP_0243,GROUP_0170,comercio minorista,servicio,comercio minorista,1,0.528594,días,Reserve · póliza | FX Shield | Yield · barrido,0.110334
+COMP_0244,GROUP_0212,servicios profesionales,servicio,servicios profesionales,1,0.548419,6 meses,Reserve · póliza | Yield · barrido,0.0361616
+COMP_0245,GROUP_0096,servicios profesionales,servicio,servicios profesionales,1,0.912926,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.253979
+COMP_0246,GROUP_0213,construcción,mixto,construcción | comercio minorista,2,0.75,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.339042
+COMP_0247,GROUP_0218,software / suscripción,producto,software / suscripción | servicios profesionales,2,0.78,largo,Yield · barrido | Factoring | Reserve · póliza | FX Shield,0.16051
+COMP_0248,GROUP_0095,hostelería,servicio,hostelería | energía | construcción,3,0.78,6 meses,Reserve · póliza | Factoring | FX Shield | Seguro de cobro,0.0741338
+COMP_0249,GROUP_0194,construcción,producto,construcción | mayorista / distribución,2,0.582247,6 meses,Reserve · póliza,0.320426
+COMP_0250,GROUP_0065,alquiler / inmobiliario,servicio,alquiler / inmobiliario,1,0.78,largo,Yield · barrido | Reserve · póliza | Seguro de cobro,0.0735712
+COMP_0251,GROUP_0170,servicios profesionales,servicio,servicios profesionales,1,0.489872,6 meses,Yield · barrido | Reserve · póliza,0.371562
+COMP_0252,GROUP_0179,,insuficiente,,0,,,,
+COMP_0253,GROUP_0055,software / suscripción,mixto,software / suscripción,1,0.78,largo,Reserve · póliza | FX Shield | Yield · barrido,0.198331
+COMP_0254,GROUP_0158,holding / tesorería,servicio,holding / tesorería,1,0.523923,largo,Reserve · póliza | FX Shield | Yield · barrido,0.116754
+COMP_0255,GROUP_0025,alquiler / inmobiliario,servicio,alquiler / inmobiliario | servicios profesionales,2,0.78,largo,Reserve · póliza | Yield · barrido | Factoring | Seguro de cobro,0.0615943
+COMP_0256,GROUP_0170,servicios profesionales,servicio,servicios profesionales,1,0.489872,6 meses,Yield · barrido | Reserve · póliza,0.453755
+COMP_0257,GROUP_0023,hostelería,servicio,hostelería,1,0.491259,6 meses,Yield · barrido | Reserve · póliza | FX Shield,0.0885621
+COMP_0258,GROUP_0078,construcción,mixto,construcción,1,0.521449,6 meses,Reserve · póliza,0.0222771
+COMP_0259,GROUP_0198,servicios profesionales,servicio,servicios profesionales,1,0.72,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.0857527
+COMP_0260,GROUP_0087,,insuficiente,,0,,,,
+COMP_0261,GROUP_0086,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.61822,12 meses,Reserve · póliza,0.0489915
+COMP_0262,GROUP_0211,comercio minorista,producto,comercio minorista,1,0.697972,días,Reserve · póliza | FX Shield | Yield · barrido,0.080173
+COMP_0263,GROUP_0250,holding / tesorería,mixto,holding / tesorería,1,0.863549,largo,Yield · barrido | FX Shield | Reserve · póliza,0.25762
+COMP_0264,GROUP_0066,servicios profesionales,servicio,servicios profesionales,1,0.475626,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.274462
+COMP_0265,GROUP_0033,servicios profesionales,servicio,servicios profesionales,1,0.762712,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.310362
+COMP_0266,GROUP_0016,comercio minorista,servicio,comercio minorista,1,0.550963,días,Reserve · póliza | FX Shield | Yield · barrido,0.189858
+COMP_0267,GROUP_0155,servicios profesionales,servicio,servicios profesionales,1,0.701801,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.223963
+COMP_0268,GROUP_0094,comercio minorista,mixto,comercio minorista,1,0.650273,días,Reserve · póliza | FX Shield | Yield · barrido,0.137319
+COMP_0269,GROUP_0156,holding / tesorería,producto,holding / tesorería | comercio minorista,2,0.758725,largo,Yield · barrido | Reserve · póliza | FX Shield,0.0389995
+COMP_0270,GROUP_0116,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.725457,largo,Yield · barrido | Factoring | Reserve · póliza | FX Shield,0.184134
+COMP_0271,GROUP_0138,comercio minorista,servicio,comercio minorista | holding / tesorería,2,0.555106,días,Reserve · póliza | Yield · barrido | FX Shield,0.171366
+COMP_0272,GROUP_0017,servicios profesionales,servicio,servicios profesionales,1,0.565403,6 meses,Reserve · póliza | Yield · barrido,0.00488337
+COMP_0273,GROUP_0155,servicios profesionales,servicio,servicios profesionales,1,0.654807,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.326517
+COMP_0274,GROUP_0097,holding / tesorería,producto,holding / tesorería,1,0.752589,largo,Yield · barrido | FX Shield | Reserve · póliza,0.226037
+COMP_0275,GROUP_0060,,insuficiente,,0,,,,
+COMP_0276,GROUP_0199,,mixto,,0,,,,0.251913
+COMP_0277,GROUP_0236,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.554992,largo,Reserve · póliza | Yield · barrido | FX Shield,0.242015
+COMP_0278,GROUP_0162,comercio minorista,mixto,comercio minorista,1,0.592121,días,Reserve · póliza | FX Shield | Yield · barrido,0.187903
+COMP_0279,GROUP_0022,holding / tesorería,mixto,holding / tesorería | alquiler / inmobiliario,2,0.848934,largo,Yield · barrido | Reserve · póliza | FX Shield | Seguro de cobro,0.276688
+COMP_0280,GROUP_0107,,mixto,,0,,,,0.339071
+COMP_0281,GROUP_0127,comercio minorista,servicio,comercio minorista,1,0.534807,días,Reserve · póliza | FX Shield | Yield · barrido,0.18315
+COMP_0282,GROUP_0187,servicios profesionales,servicio,servicios profesionales,1,0.573274,6 meses,Reserve · póliza | Yield · barrido,0.183511
+COMP_0283,GROUP_0089,servicios profesionales,servicio,servicios profesionales,1,0.516602,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.16469
+COMP_0284,GROUP_0163,servicios profesionales,mixto,servicios profesionales,1,0.460325,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.36924
+COMP_0285,GROUP_0205,mayorista / distribución,mixto,mayorista / distribución,1,0.525552,12 meses,Reserve · póliza,0.39623
+COMP_0286,GROUP_0203,comercio minorista,mixto,comercio minorista,1,0.518258,días,Reserve · póliza | FX Shield | Yield · barrido,0.101798
+COMP_0287,GROUP_0231,software / suscripción,servicio,software / suscripción | servicios profesionales,2,0.78,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.354178
+COMP_0288,GROUP_0075,comercio minorista,mixto,comercio minorista,1,0.578324,días,Reserve · póliza | Yield · barrido | FX Shield,0.0745726
+COMP_0289,GROUP_0142,comercio minorista,producto,comercio minorista,1,0.694592,días,Yield · barrido | Reserve · póliza | FX Shield,0.18461
+COMP_0290,GROUP_0053,comercio minorista,servicio,comercio minorista,1,0.657252,días,Reserve · póliza | FX Shield | Yield · barrido,0.0299628
+COMP_0291,GROUP_0104,holding / tesorería,servicio,holding / tesorería,1,0.564149,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0736796
+COMP_0292,GROUP_0199,comercio minorista,producto,comercio minorista,1,0.835387,días,Reserve · póliza | FX Shield | Yield · barrido,0.154131
+COMP_0293,GROUP_0126,transporte / logística,producto,transporte / logística | holding / tesorería,2,0.78,días,Reserve · póliza | Factoring | FX Shield | Yield · barrido,0.0936536
+COMP_0294,GROUP_0217,mayorista / distribución,producto,mayorista / distribución,1,0.470704,12 meses,Factoring | Confirming | Yield · barrido | Reserve · póliza,0.303678
+COMP_0295,GROUP_0039,comercio minorista,mixto,comercio minorista | hostelería,2,0.629627,días,Reserve · póliza | Yield · barrido | FX Shield,0.0724661
+COMP_0296,GROUP_0199,servicios profesionales,servicio,servicios profesionales,1,0.627679,6 meses,Yield · barrido | Reserve · póliza,0.187943
+COMP_0297,GROUP_0011,hostelería,servicio,hostelería | comercio minorista | transporte / logística,3,0.548426,días,Reserve · póliza | Yield · barrido | FX Shield,0.127605
+COMP_0298,GROUP_0063,servicios profesionales,servicio,servicios profesionales,1,0.598957,6 meses,Reserve · póliza | Yield · barrido,0.281702
+COMP_0299,GROUP_0087,servicios profesionales,servicio,servicios profesionales,1,0.550766,6 meses,Reserve · póliza | Yield · barrido,0.202885
+COMP_0300,GROUP_0144,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.675128,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.340239
+COMP_0301,GROUP_0009,comercio minorista,servicio,comercio minorista | hostelería,2,0.503324,días,Yield · barrido | Reserve · póliza | FX Shield,0.0340112
+COMP_0302,GROUP_0243,servicios profesionales,servicio,servicios profesionales,1,0.489457,6 meses,Reserve · póliza | Yield · barrido,0.421808
+COMP_0303,GROUP_0239,servicios profesionales,servicio,servicios profesionales,1,0.508375,6 meses,Reserve · póliza | Yield · barrido,0.0623925
+COMP_0304,GROUP_0127,comercio minorista,servicio,comercio minorista,1,0.552206,días,Reserve · póliza | FX Shield | Yield · barrido,0.200703
+COMP_0305,GROUP_0184,comercio minorista,servicio,comercio minorista,1,0.503117,días,Reserve · póliza | FX Shield | Yield · barrido,0.0411057
+COMP_0306,GROUP_0094,hostelería,servicio,hostelería | software / suscripción | servicios profesionales,3,0.78,6 meses,Yield · barrido | Reserve · póliza | FX Shield | Factoring,0.0374661
+COMP_0307,GROUP_0112,,insuficiente,,0,,,,
+COMP_0308,GROUP_0250,holding / tesorería,servicio,holding / tesorería,1,0.562345,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0760689
+COMP_0309,GROUP_0250,holding / tesorería,mixto,holding / tesorería,1,0.847636,largo,Yield · barrido | FX Shield | Reserve · póliza,0.252471
+COMP_0310,GROUP_0158,holding / tesorería,servicio,holding / tesorería,1,0.714064,largo,Reserve · póliza | FX Shield | Yield · barrido,0.259581
+COMP_0311,GROUP_0175,holding / tesorería,servicio,holding / tesorería | hostelería | software / suscripción,3,0.81416,largo,Yield · barrido | FX Shield | Reserve · póliza,0.181403
+COMP_0312,GROUP_0194,comercio minorista,servicio,comercio minorista,1,0.64127,días,Reserve · póliza | Yield · barrido | FX Shield,0.274243
+COMP_0313,GROUP_0094,servicios profesionales,mixto,servicios profesionales,1,0.562064,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.107816
+COMP_0314,GROUP_0101,servicios profesionales,servicio,servicios profesionales,1,0.63692,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.193007
+COMP_0315,GROUP_0064,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.573619,12 meses,Reserve · póliza,0.415666
+COMP_0316,GROUP_0150,holding / tesorería,mixto,holding / tesorería | hostelería,2,0.550935,largo,Reserve · póliza | Yield · barrido | FX Shield,0.119182
+COMP_0317,GROUP_0170,servicios profesionales,servicio,servicios profesionales,1,0.602962,6 meses,Yield · barrido | Reserve · póliza,0.0430144
+COMP_0318,GROUP_0226,servicios profesionales,servicio,servicios profesionales,1,0.622765,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.333849
+COMP_0319,GROUP_0184,comercio minorista,servicio,comercio minorista,1,0.551377,días,Reserve · póliza | FX Shield | Yield · barrido,0.093131
+COMP_0320,GROUP_0246,mayorista / distribución,producto,mayorista / distribución,1,0.528542,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.0582087
+COMP_0321,GROUP_0159,mayorista / distribución,mixto,mayorista / distribución | comercio minorista | hostelería,3,0.599234,12 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0953881
+COMP_0322,GROUP_0108,comercio minorista,producto,comercio minorista,1,0.75779,días,Reserve · póliza | FX Shield | Yield · barrido,0.200488
+COMP_0323,GROUP_0122,hostelería,servicio,hostelería | servicios profesionales,2,0.78,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.0332772
+COMP_0324,GROUP_0138,comercio minorista,servicio,comercio minorista,1,0.539571,días,Reserve · póliza | FX Shield | Yield · barrido,0.166838
+COMP_0325,GROUP_0101,,insuficiente,,0,,,,
+COMP_0326,GROUP_0018,energía,mixto,energía,1,0.78,12 meses,FX Shield | Factoring | Reserve · póliza,0.217153
+COMP_0327,GROUP_0130,construcción,mixto,construcción,1,0.457331,6 meses,Reserve · póliza,0.367855
+COMP_0328,GROUP_0136,servicios profesionales,servicio,servicios profesionales,1,0.827886,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.230064
+COMP_0329,GROUP_0161,comercio minorista,producto,comercio minorista | construcción,2,0.635304,días,Reserve · póliza | Yield · barrido | FX Shield,0.0877963
+COMP_0330,GROUP_0088,holding / tesorería,mixto,holding / tesorería,1,0.876261,largo,Yield · barrido | FX Shield | Reserve · póliza,0.164287
+COMP_0331,GROUP_0096,servicios profesionales,servicio,servicios profesionales,1,0.851468,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.050974
+COMP_0332,GROUP_0149,holding / tesorería,servicio,holding / tesorería,1,0.787148,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0444977
+COMP_0333,GROUP_0217,holding / tesorería,producto,holding / tesorería,1,0.861171,largo,Yield · barrido | FX Shield | Reserve · póliza,0.351613
+COMP_0334,GROUP_0159,comercio minorista,mixto,comercio minorista | hostelería,2,0.647918,días,Yield · barrido | Reserve · póliza | FX Shield,0.20571
+COMP_0335,GROUP_0214,servicios profesionales,servicio,servicios profesionales,1,0.488491,6 meses,Yield · barrido | Reserve · póliza,0.373242
+COMP_0336,GROUP_0211,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.68,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.181846
+COMP_0337,GROUP_0022,,insuficiente,,0,,,,
+COMP_0338,GROUP_0088,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.640534,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.387696
+COMP_0339,GROUP_0188,,insuficiente,,0,,,,
+COMP_0340,GROUP_0116,servicios profesionales,servicio,servicios profesionales,1,0.589199,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.299875
+COMP_0341,GROUP_0150,comercio minorista,mixto,comercio minorista,1,0.503921,días,Reserve · póliza | FX Shield | Yield · barrido,0.0866351
+COMP_0342,GROUP_0079,servicios profesionales,servicio,servicios profesionales | alquiler / inmobiliario,2,0.785812,6 meses,Yield · barrido | Reserve · póliza | Factoring | Seguro de cobro,0.24172
+COMP_0343,GROUP_0167,hostelería,mixto,hostelería,1,0.568123,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.101119
+COMP_0344,GROUP_0211,comercio minorista,producto,comercio minorista | holding / tesorería,2,0.737139,días,Yield · barrido | Reserve · póliza | FX Shield,0.117879
+COMP_0345,GROUP_0069,servicios profesionales,servicio,servicios profesionales,1,0.849807,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.286796
+COMP_0346,GROUP_0097,mayorista / distribución,producto,mayorista / distribución,1,0.471429,12 meses,Factoring | Confirming | Yield · barrido | Reserve · póliza,0.27003
+COMP_0347,GROUP_0117,servicios profesionales,servicio,servicios profesionales,1,0.61913,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.268938
+COMP_0348,GROUP_0138,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.637345,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.393025
+COMP_0349,GROUP_0101,comercio minorista,mixto,comercio minorista,1,0.763498,días,Reserve · póliza | FX Shield | Yield · barrido,0.0218013
+COMP_0350,GROUP_0189,servicios profesionales,servicio,servicios profesionales,1,0.583834,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.0305429
+COMP_0351,GROUP_0223,comercio minorista,producto,comercio minorista,1,0.753366,días,Reserve · póliza | FX Shield | Yield · barrido,0.171217
+COMP_0352,GROUP_0044,holding / tesorería,producto,holding / tesorería,1,0.754909,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0731156
+COMP_0353,GROUP_0073,comercio minorista,producto,comercio minorista,1,0.845329,días,Reserve · póliza | FX Shield | Yield · barrido,0.0828342
+COMP_0354,GROUP_0220,mayorista / distribución,mixto,mayorista / distribución | holding / tesorería,2,0.611648,12 meses,Yield · barrido | Factoring | Reserve · póliza | FX Shield,0.0498989
+COMP_0355,GROUP_0049,,insuficiente,,0,,,,
+COMP_0356,GROUP_0172,holding / tesorería,servicio,holding / tesorería,1,0.705779,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0619903
+COMP_0357,GROUP_0036,servicios profesionales,servicio,servicios profesionales,1,0.61247,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.348394
+COMP_0358,GROUP_0127,hostelería,servicio,hostelería | comercio minorista,2,0.567274,6 meses,Yield · barrido | Reserve · póliza | FX Shield,0.16626
+COMP_0359,GROUP_0110,servicios profesionales,servicio,servicios profesionales,1,0.497641,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.12692
+COMP_0360,GROUP_0138,comercio minorista,servicio,comercio minorista,1,0.493175,días,Reserve · póliza | FX Shield | Yield · barrido,0.0275977
+COMP_0361,GROUP_0116,holding / tesorería,producto,holding / tesorería | comercio minorista,2,0.654849,largo,Yield · barrido | Reserve · póliza | FX Shield,0.0588375
+COMP_0362,GROUP_0142,comercio minorista,producto,comercio minorista,1,0.740993,días,Reserve · póliza | FX Shield | Yield · barrido,0.242149
+COMP_0363,GROUP_0250,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.618874,6 meses,Yield · barrido | Factoring | Reserve · póliza | FX Shield,0.358592
+COMP_0364,GROUP_0195,comercio minorista,mixto,comercio minorista | hostelería,2,0.644556,días,Yield · barrido | Reserve · póliza | FX Shield,0.100913
+COMP_0365,GROUP_0122,hostelería,servicio,hostelería | servicios profesionales,2,0.78,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.185831
+COMP_0366,GROUP_0119,servicios profesionales,servicio,servicios profesionales,1,0.609261,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.132153
+COMP_0367,GROUP_0187,comercio minorista,producto,comercio minorista | mayorista / distribución | construcción,3,0.647939,días,Reserve · póliza | Yield · barrido | FX Shield,0.049873
+COMP_0368,GROUP_0016,hostelería,servicio,hostelería | servicios profesionales,2,0.533099,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.166647
+COMP_0369,GROUP_0246,mayorista / distribución,mixto,mayorista / distribución | industria | transporte / logística,3,0.57964,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.113081
+COMP_0370,GROUP_0164,mayorista / distribución,producto,mayorista / distribución,1,0.474211,12 meses,Factoring | Confirming | Yield · barrido | Reserve · póliza,0.272639
+COMP_0371,GROUP_0122,,insuficiente,,0,,,,
+COMP_0372,GROUP_0144,servicios profesionales,servicio,servicios profesionales,1,0.77715,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.220613
+COMP_0373,GROUP_0192,comercio minorista,servicio,comercio minorista,1,0.530251,días,Yield · barrido | Reserve · póliza | FX Shield,0.140161
+COMP_0374,GROUP_0020,mayorista / distribución,mixto,mayorista / distribución | servicios profesionales,2,0.518096,12 meses,Yield · barrido | Reserve · póliza,0.28384
+COMP_0375,GROUP_0143,servicios profesionales,servicio,servicios profesionales,1,0.607795,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.204037
+COMP_0376,GROUP_0070,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.539522,largo,Yield · barrido | Factoring | Reserve · póliza | FX Shield,0.120263
+COMP_0377,GROUP_0009,comercio minorista,producto,comercio minorista,1,0.914095,días,Yield · barrido | Reserve · póliza | FX Shield,0.128715
+COMP_0378,GROUP_0234,servicios profesionales,servicio,servicios profesionales,1,0.613456,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.298323
+COMP_0379,GROUP_0112,comercio minorista,mixto,comercio minorista,1,0.858429,días,Reserve · póliza | Yield · barrido | FX Shield,0.167088
+COMP_0380,GROUP_0059,mayorista / distribución,producto,mayorista / distribución,1,0.54373,12 meses,Factoring | Confirming | Reserve · póliza | Seguro de cobro,0.367584
+COMP_0381,GROUP_0079,servicios profesionales,servicio,servicios profesionales,1,0.864858,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.32342
+COMP_0382,GROUP_0068,,insuficiente,,0,,,,
+COMP_0383,GROUP_0078,servicios profesionales,servicio,servicios profesionales,1,0.507684,6 meses,Yield · barrido | Reserve · póliza,0.254781
+COMP_0384,GROUP_0094,servicios profesionales,servicio,servicios profesionales,1,0.542748,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.102334
+COMP_0385,GROUP_0145,holding / tesorería,servicio,holding / tesorería,1,0.550642,largo,Reserve · póliza | FX Shield | Yield · barrido,0.102392
+COMP_0386,GROUP_0020,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.66104,largo,Yield · barrido | Reserve · póliza | FX Shield,0.263907
+COMP_0387,GROUP_0097,servicios profesionales,mixto,servicios profesionales,1,0.505153,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.178065
+COMP_0388,GROUP_0187,servicios profesionales,servicio,servicios profesionales,1,0.564713,6 meses,Yield · barrido | Reserve · póliza,0.288903
+COMP_0389,GROUP_0150,servicios profesionales,servicio,servicios profesionales,1,0.577002,6 meses,Yield · barrido | Reserve · póliza,0.342587
+COMP_0390,GROUP_0064,,insuficiente,,0,,,,
+COMP_0391,GROUP_0042,construcción,mixto,construcción,1,0.493672,6 meses,Reserve · póliza,0.0529605
+COMP_0392,GROUP_0222,comercio minorista,mixto,comercio minorista | hostelería,2,0.663461,días,Yield · barrido | Reserve · póliza | FX Shield,0.0726138
+COMP_0393,GROUP_0054,servicios profesionales,servicio,servicios profesionales,1,0.646547,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.208143
+COMP_0394,GROUP_0224,comercio minorista,servicio,comercio minorista,1,0.479298,días,Reserve · póliza | FX Shield | Yield · barrido,0.124345
+COMP_0395,GROUP_0112,servicios profesionales,servicio,servicios profesionales,1,0.593941,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.0895053
+COMP_0396,GROUP_0096,servicios profesionales,servicio,servicios profesionales,1,0.884172,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.316865
+COMP_0397,GROUP_0155,transporte / logística,servicio,transporte / logística,1,0.78,días,Factoring | Reserve · póliza | Confirming,0.0183359
+COMP_0398,GROUP_0018,holding / tesorería,mixto,holding / tesorería | servicios profesionales,2,0.625886,largo,Yield · barrido | Factoring | Reserve · póliza | FX Shield,0.330081
+COMP_0399,GROUP_0115,comercio minorista,servicio,comercio minorista | hostelería,2,0.532736,días,Reserve · póliza | Yield · barrido | FX Shield,0.18509
+COMP_0400,GROUP_0142,comercio minorista,producto,comercio minorista,1,0.673511,días,Yield · barrido | Reserve · póliza | FX Shield,0.245743
+COMP_0401,GROUP_0087,construcción,producto,construcción | mayorista / distribución,2,0.564703,6 meses,Reserve · póliza,0.299072
+COMP_0402,GROUP_0131,servicios profesionales,servicio,servicios profesionales | industria | holding / tesorería,3,0.5973,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0201324
+COMP_0403,GROUP_0201,comercio minorista,producto,comercio minorista,1,0.757966,días,Yield · barrido | Reserve · póliza | FX Shield,0.125816
+COMP_0404,GROUP_0094,servicios profesionales,servicio,servicios profesionales,1,0.578783,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.123019
+COMP_0405,GROUP_0035,hostelería,servicio,hostelería | servicios profesionales,2,0.505965,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.0179181
+COMP_0406,GROUP_0034,transporte / logística,mixto,transporte / logística,1,0.78,días,Factoring | Reserve · póliza | Confirming,0.170353
+COMP_0407,GROUP_0067,comercio minorista,mixto,comercio minorista,1,0.522815,días,Reserve · póliza | FX Shield | Yield · barrido,0.0407802
+COMP_0408,GROUP_0076,servicios profesionales,servicio,servicios profesionales,1,0.486834,6 meses,Reserve · póliza | Yield · barrido,0.2049
+COMP_0409,GROUP_0009,servicios profesionales,servicio,servicios profesionales,1,0.548833,6 meses,Reserve · póliza | Yield · barrido,0.100067
+COMP_0410,GROUP_0112,comercio minorista,producto,comercio minorista,1,0.715004,días,Reserve · póliza | FX Shield | Yield · barrido,0.114863
+COMP_0411,GROUP_0158,comercio minorista,servicio,comercio minorista | holding / tesorería,2,0.561734,días,Reserve · póliza | Yield · barrido | FX Shield,0.221678
+COMP_0412,GROUP_0016,holding / tesorería,mixto,holding / tesorería | comercio minorista,2,0.619319,largo,Reserve · póliza | Yield · barrido | FX Shield,0.115171
+COMP_0413,GROUP_0130,comercio minorista,mixto,comercio minorista,1,0.777372,días,Reserve · póliza | FX Shield | Yield · barrido,0.205284
+COMP_0414,GROUP_0217,alquiler / inmobiliario,servicio,alquiler / inmobiliario,1,0.78,largo,Reserve · póliza | Yield · barrido | Seguro de cobro,0.0919295
+COMP_0415,GROUP_0204,alquiler / inmobiliario,servicio,alquiler / inmobiliario | energía | servicios profesionales,3,0.78,largo,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.00458728
+COMP_0416,GROUP_0040,comercio minorista,mixto,comercio minorista | hostelería,2,0.585371,días,Reserve · póliza | Yield · barrido | FX Shield,0.258027
+COMP_0417,GROUP_0092,servicios profesionales,servicio,servicios profesionales,1,0.501194,6 meses,Yield · barrido | Reserve · póliza,0.0462453
+COMP_0418,GROUP_0070,holding / tesorería,mixto,holding / tesorería,1,0.658575,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0229532
+COMP_0419,GROUP_0152,,insuficiente,,0,,,,
+COMP_0420,GROUP_0104,comercio minorista,producto,comercio minorista,1,0.710424,días,Reserve · póliza | FX Shield | Yield · barrido,0.0478803
+COMP_0421,GROUP_0230,,insuficiente,,0,,,,
+COMP_0422,GROUP_0018,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.713875,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.3552
+COMP_0423,GROUP_0162,mayorista / distribución,producto,mayorista / distribución,1,0.530368,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.154502
+COMP_0424,GROUP_0097,hostelería,mixto,hostelería,1,0.511371,6 meses,Reserve · póliza | FX Shield | Yield · barrido,0.247615
+COMP_0425,GROUP_0097,construcción,producto,construcción | mayorista / distribución,2,0.568254,6 meses,Reserve · póliza | Yield · barrido,0.246481
+COMP_0426,GROUP_0003,,insuficiente,,0,,,,
+COMP_0427,GROUP_0214,servicios profesionales,servicio,servicios profesionales | hostelería,2,0.591595,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.126154
+COMP_0428,GROUP_0213,holding / tesorería,mixto,holding / tesorería | comercio minorista,2,0.547616,largo,Yield · barrido | Reserve · póliza | FX Shield,0.106736
+COMP_0429,GROUP_0170,,mixto,,0,,,,0.445841
+COMP_0430,GROUP_0182,servicios profesionales,servicio,servicios profesionales,1,0.573466,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.471238
+COMP_0431,GROUP_0102,servicios profesionales,servicio,servicios profesionales,1,0.506713,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.134769
+COMP_0432,GROUP_0095,servicios profesionales,servicio,servicios profesionales,1,0.62616,6 meses,Yield · barrido | Reserve · póliza,0.421278
+COMP_0433,GROUP_0023,comercio minorista,producto,comercio minorista,1,0.813783,días,Reserve · póliza | FX Shield | Yield · barrido,0.221327
+COMP_0434,GROUP_0134,holding / tesorería,mixto,holding / tesorería,1,0.627883,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0282247
+COMP_0435,GROUP_0048,holding / tesorería,producto,holding / tesorería | comercio minorista,2,0.671666,largo,Reserve · póliza | Yield · barrido | FX Shield,0.108681
+COMP_0436,GROUP_0048,holding / tesorería,producto,holding / tesorería | comercio minorista,2,0.720419,largo,Reserve · póliza | Yield · barrido | FX Shield,0.0708183
+COMP_0437,GROUP_0199,servicios profesionales,mixto,servicios profesionales,1,0.488063,6 meses,Reserve · póliza | Yield · barrido,0.223536
+COMP_0438,GROUP_0150,servicios profesionales,servicio,servicios profesionales,1,0.585329,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.117052
+COMP_0439,GROUP_0236,comercio minorista,mixto,comercio minorista,1,0.701771,días,Yield · barrido | Reserve · póliza | FX Shield,0.139158
+COMP_0440,GROUP_0162,comercio minorista,producto,comercio minorista | mayorista / distribución,2,0.638826,días,Reserve · póliza | Factoring | Yield · barrido | Confirming,0.146732
+COMP_0441,GROUP_0217,holding / tesorería,servicio,holding / tesorería,1,0.706572,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0331166
+COMP_0442,GROUP_0158,comercio minorista,producto,comercio minorista,1,0.749845,días,Reserve · póliza | FX Shield | Yield · barrido,0.258915
+COMP_0443,GROUP_0143,servicios profesionales,servicio,servicios profesionales,1,0.553804,6 meses,Reserve · póliza | Yield · barrido,0.16172
+COMP_0444,GROUP_0042,mayorista / distribución,mixto,mayorista / distribución | comercio minorista | hostelería,3,0.625193,12 meses,Reserve · póliza | Yield · barrido | FX Shield,0.270607
+COMP_0445,GROUP_0199,,insuficiente,,0,,,,
+COMP_0446,GROUP_0182,mayorista / distribución,mixto,mayorista / distribución | holding / tesorería,2,0.673108,12 meses,Reserve · póliza | FX Shield | Yield · barrido,0.295622
+COMP_0447,GROUP_0190,comercio minorista,producto,comercio minorista,1,0.686732,días,Reserve · póliza | FX Shield | Yield · barrido,0.0119276
+COMP_0448,GROUP_0158,holding / tesorería,mixto,holding / tesorería,1,0.712821,largo,Reserve · póliza | FX Shield | Yield · barrido,0.22672
+COMP_0449,GROUP_0017,comercio minorista,producto,comercio minorista,1,0.75813,días,Reserve · póliza | FX Shield | Yield · barrido,0.232443
+COMP_0450,GROUP_0202,servicios profesionales,servicio,servicios profesionales,1,0.717209,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.104013
+COMP_0451,GROUP_0158,holding / tesorería,producto,holding / tesorería,1,0.798571,largo,Reserve · póliza | FX Shield | Yield · barrido,0.354551
+COMP_0452,GROUP_0103,mayorista / distribución,producto,mayorista / distribución | comercio minorista,2,0.688864,12 meses,Reserve · póliza | FX Shield | Yield · barrido,0.0368579
+COMP_0453,GROUP_0023,servicios profesionales,servicio,servicios profesionales,1,0.592345,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.147583
+COMP_0454,GROUP_0112,servicios profesionales,servicio,servicios profesionales,1,0.546432,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.343824
+COMP_0455,GROUP_0222,comercio minorista,producto,comercio minorista,1,0.72429,días,Yield · barrido | Reserve · póliza | FX Shield,0.0908543
+COMP_0456,GROUP_0131,servicios profesionales,servicio,servicios profesionales,1,0.558913,6 meses,Reserve · póliza | Yield · barrido,0.172225
+COMP_0457,GROUP_0129,servicios profesionales,servicio,servicios profesionales,1,0.554742,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.12435
+COMP_0458,GROUP_0212,holding / tesorería,producto,holding / tesorería,1,0.795671,largo,Reserve · póliza | FX Shield | Yield · barrido,0.206663
+COMP_0459,GROUP_0051,comercio minorista,producto,comercio minorista,1,0.874534,días,Reserve · póliza | FX Shield | Yield · barrido,0.362436
+COMP_0460,GROUP_0116,servicios profesionales,servicio,servicios profesionales,1,0.54445,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.137363
+COMP_0461,GROUP_0070,comercio minorista,producto,comercio minorista,1,0.794541,días,Yield · barrido | Reserve · póliza | FX Shield,0.0790699
+COMP_0462,GROUP_0194,comercio minorista,producto,comercio minorista,1,0.908295,días,Reserve · póliza | FX Shield | Yield · barrido,0.108987
+COMP_0463,GROUP_0086,comercio minorista,producto,comercio minorista,1,0.869149,días,Reserve · póliza | Yield · barrido | FX Shield,0.236361
+COMP_0464,GROUP_0008,,insuficiente,,0,,,,
+COMP_0465,GROUP_0246,hostelería,mixto,hostelería | comercio minorista,2,0.613484,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0452639
+COMP_0466,GROUP_0200,hostelería,servicio,hostelería | energía | servicios profesionales,3,0.78,6 meses,Reserve · póliza | Factoring | FX Shield | Yield · barrido,0.0630059
+COMP_0467,GROUP_0172,holding / tesorería,servicio,holding / tesorería | comercio minorista | transporte / logística,3,0.591653,días,Reserve · póliza | Yield · barrido | FX Shield,0.288844
+COMP_0468,GROUP_0138,servicios profesionales,servicio,servicios profesionales,1,0.508789,6 meses,Reserve · póliza | Yield · barrido,0.118122
+COMP_0469,GROUP_0149,comercio minorista,producto,comercio minorista,1,0.855129,días,Reserve · póliza | FX Shield | Yield · barrido,0.327345
+COMP_0470,GROUP_0236,servicios profesionales,servicio,servicios profesionales,1,0.482139,6 meses,Reserve · póliza | Yield · barrido,0.0535267
+COMP_0471,GROUP_0162,comercio minorista,producto,comercio minorista,1,0.694282,días,Yield · barrido | Reserve · póliza | FX Shield,0.030406
+COMP_0472,GROUP_0044,holding / tesorería,mixto,holding / tesorería,1,0.791694,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0529729
+COMP_0473,GROUP_0185,holding / tesorería,producto,holding / tesorería | mayorista / distribución | comercio minorista,3,0.607017,largo,Reserve · póliza | Yield · barrido | FX Shield | Factoring,0.0450417
+COMP_0474,GROUP_0141,software / suscripción,servicio,software / suscripción | transporte / logística | alquiler / inmobiliario,3,0.78,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.144425
+COMP_0475,GROUP_0015,,insuficiente,,0,,,,
+COMP_0476,GROUP_0111,servicios profesionales,servicio,servicios profesionales,1,0.536048,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.0257056
+COMP_0477,GROUP_0232,comercio minorista,producto,comercio minorista,1,0.768095,días,Reserve · póliza | FX Shield | Yield · barrido,0.344239
+COMP_0478,GROUP_0131,servicios profesionales,servicio,servicios profesionales | hostelería,2,0.549662,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.096211
+COMP_0479,GROUP_0170,comercio minorista,mixto,comercio minorista,1,0.6997,días,Reserve · póliza | FX Shield | Yield · barrido,0.24293
+COMP_0480,GROUP_0112,comercio minorista,mixto,comercio minorista,1,0.716576,días,Reserve · póliza | Yield · barrido | FX Shield,0.340926
+COMP_0481,GROUP_0225,servicios profesionales,servicio,servicios profesionales,1,0.489872,6 meses,Reserve · póliza | Yield · barrido,0.0176827
+COMP_0482,GROUP_0211,comercio minorista,producto,comercio minorista,1,0.833564,días,Yield · barrido | Reserve · póliza | FX Shield,0.0770101
+COMP_0483,GROUP_0063,servicios profesionales,servicio,servicios profesionales,1,0.526188,6 meses,Reserve · póliza | Yield · barrido,0.00852089
+COMP_0484,GROUP_0138,servicios profesionales,servicio,servicios profesionales,1,0.514865,6 meses,Reserve · póliza | Yield · barrido,0.0242022
+COMP_0485,GROUP_0052,holding / tesorería,mixto,holding / tesorería | servicios profesionales | mayorista / distribución,3,0.579116,largo,Factoring | Reserve · póliza | Yield · barrido | FX Shield,0.373559
+COMP_0486,GROUP_0132,alquiler / inmobiliario,producto,alquiler / inmobiliario,1,0.78,largo,Reserve · póliza | Yield · barrido | Seguro de cobro,0.176729
+COMP_0487,GROUP_0170,comercio minorista,producto,comercio minorista,1,0.748188,días,Reserve · póliza | FX Shield | Yield · barrido,0.276491
+COMP_0488,GROUP_0060,,insuficiente,,0,,,,
+COMP_0489,GROUP_0175,,insuficiente,,0,,,,
+COMP_0490,GROUP_0138,servicios profesionales,servicio,servicios profesionales,1,0.529502,6 meses,Reserve · póliza | Yield · barrido,0.203119
+COMP_0491,GROUP_0146,hostelería,mixto,hostelería | mayorista / distribución | industria,3,0.611205,12 meses,Reserve · póliza | Factoring | Confirming | FX Shield,0.22656
+COMP_0492,GROUP_0150,holding / tesorería,producto,holding / tesorería,1,0.817133,largo,Yield · barrido | FX Shield | Reserve · póliza,0.17042
+COMP_0493,GROUP_0126,servicios profesionales,servicio,servicios profesionales,1,0.486972,6 meses,Yield · barrido | Reserve · póliza,0.262287
+COMP_0494,GROUP_0142,comercio minorista,mixto,comercio minorista | hostelería,2,0.612453,días,Reserve · póliza | Yield · barrido | FX Shield,0.0758844
+COMP_0495,GROUP_0124,mayorista / distribución,producto,mayorista / distribución | hostelería,2,0.663895,12 meses,Reserve · póliza | Factoring | Confirming | FX Shield,0.257177
+COMP_0496,GROUP_0137,comercio minorista,producto,comercio minorista,1,0.753107,días,Yield · barrido | Reserve · póliza | FX Shield,0.071681
+COMP_0497,GROUP_0185,,insuficiente,,0,,,,
+COMP_0498,GROUP_0153,mayorista / distribución,producto,mayorista / distribución,1,0.579341,12 meses,Factoring | Confirming | Reserve · póliza | Seguro de cobro,0.284561
+COMP_0499,GROUP_0241,hostelería,servicio,hostelería | servicios profesionales,2,0.78,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.0775619
+COMP_0500,GROUP_0079,servicios profesionales,servicio,servicios profesionales | energía,2,0.849939,6 meses,Factoring | Yield · barrido | FX Shield | Reserve · póliza,0.328319
+COMP_0501,GROUP_0138,servicios profesionales,servicio,servicios profesionales,1,0.60241,6 meses,Yield · barrido | Reserve · póliza,0.216285
+COMP_0502,GROUP_0098,comercio minorista,producto,comercio minorista,1,0.747359,días,Yield · barrido | Reserve · póliza | FX Shield,0.00780255
+COMP_0503,GROUP_0134,comercio minorista,producto,comercio minorista,1,0.706214,días,Reserve · póliza | Yield · barrido | FX Shield,0.0437908
+COMP_0504,GROUP_0013,mayorista / distribución,producto,mayorista / distribución | comercio minorista,2,0.581294,12 meses,Reserve · póliza | Yield · barrido | Factoring | Confirming,0.07369
+COMP_0505,GROUP_0092,comercio minorista,producto,comercio minorista,1,0.680043,días,Yield · barrido | Reserve · póliza | FX Shield,0.00548687
+COMP_0506,GROUP_0217,software / suscripción,servicio,software / suscripción | alquiler / inmobiliario | servicios profesionales,3,0.78,largo,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.211331
+COMP_0507,GROUP_0023,servicios profesionales,servicio,servicios profesionales,1,0.599054,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.407372
+COMP_0508,GROUP_0070,mayorista / distribución,mixto,mayorista / distribución,1,0.481636,12 meses,Factoring | Confirming | Yield · barrido | Reserve · póliza,0.032756
+COMP_0509,GROUP_0055,hostelería,servicio,hostelería,1,0.78,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.290033
+COMP_0510,GROUP_0079,servicios profesionales,servicio,servicios profesionales,1,0.581679,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.356056
+COMP_0511,GROUP_0202,servicios profesionales,servicio,servicios profesionales | software / suscripción | construcción,3,0.782737,6 meses,Factoring | Yield · barrido | Reserve · póliza | FX Shield,0.164943
+COMP_0512,GROUP_0217,software / suscripción,servicio,software / suscripción | alquiler / inmobiliario,2,0.78,largo,Reserve · póliza | Yield · barrido | FX Shield | Seguro de cobro,0.212225
+COMP_0513,GROUP_0142,servicios profesionales,servicio,servicios profesionales,1,0.521747,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.255514
+COMP_0514,GROUP_0008,,insuficiente,,0,,,,
+COMP_0515,GROUP_0117,comercio minorista,producto,comercio minorista | industria | mayorista / distribución,3,0.62122,12 meses,Factoring | Reserve · póliza | Confirming | Yield · barrido,0.136326
+COMP_0516,GROUP_0192,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.513567,largo,Yield · barrido | Reserve · póliza | FX Shield,0.0581678
+COMP_0517,GROUP_0165,mayorista / distribución,mixto,mayorista / distribución | holding / tesorería,2,0.58653,12 meses,Reserve · póliza | FX Shield | Yield · barrido,0.335468
+COMP_0518,GROUP_0101,servicios profesionales,servicio,servicios profesionales,1,0.68,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.0567605
+COMP_0519,GROUP_0233,industria,mixto,industria | mayorista / distribución | transporte / logística,3,0.534773,12 meses,Factoring | Confirming | Reserve · póliza | Yield · barrido,0.110683
+COMP_0520,GROUP_0020,mayorista / distribución,mixto,mayorista / distribución,1,0.535771,12 meses,Reserve · póliza,0.178471
+COMP_0521,GROUP_0073,construcción,producto,construcción | comercio minorista,2,0.762178,6 meses,Reserve · póliza | Factoring | FX Shield | Seguro de cobro,0.261533
+COMP_0522,GROUP_0066,transporte / logística,servicio,transporte / logística | alquiler / inmobiliario,2,0.78,días,Reserve · póliza | Factoring | Yield · barrido | Confirming,0.122073
+COMP_0523,GROUP_0122,hostelería,servicio,hostelería | servicios profesionales,2,0.78,6 meses,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.10895
+COMP_0524,GROUP_0006,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.589374,largo,Reserve · póliza | Yield · barrido | FX Shield,0.315685
+COMP_0525,GROUP_0202,servicios profesionales,servicio,servicios profesionales,1,0.588844,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.0627748
+COMP_0526,GROUP_0172,holding / tesorería,producto,holding / tesorería | comercio minorista | construcción,3,0.650062,largo,Reserve · póliza | Yield · barrido | FX Shield,0.0625142
+COMP_0527,GROUP_0108,holding / tesorería,mixto,holding / tesorería,1,0.629719,largo,Yield · barrido | FX Shield | Reserve · póliza,0.143287
+COMP_0528,GROUP_0192,comercio minorista,producto,comercio minorista,1,0.884062,días,Reserve · póliza | Yield · barrido | FX Shield,0.162073
+COMP_0529,GROUP_0095,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.570443,12 meses,Reserve · póliza,0.410243
+COMP_0530,GROUP_0017,comercio minorista,mixto,comercio minorista,1,0.56424,días,Yield · barrido | Reserve · póliza | FX Shield,0.0183728
+COMP_0531,GROUP_0214,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.631641,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.294872
+COMP_0532,GROUP_0017,mayorista / distribución,producto,mayorista / distribución,1,0.679253,12 meses,Reserve · póliza,0.210532
+COMP_0533,GROUP_0079,servicios profesionales,servicio,servicios profesionales,1,0.826834,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.275168
+COMP_0534,GROUP_0184,hostelería,servicio,hostelería,1,0.495402,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0764748
+COMP_0535,GROUP_0130,servicios profesionales,servicio,servicios profesionales,1,0.485591,6 meses,Reserve · póliza | Yield · barrido,0.290445
+COMP_0536,GROUP_0039,hostelería,mixto,hostelería,1,0.553625,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.169397
+COMP_0537,GROUP_0172,comercio minorista,producto,comercio minorista | holding / tesorería,2,0.704484,días,Reserve · póliza | Yield · barrido | FX Shield,0.221848
+COMP_0538,GROUP_0065,comercio minorista,producto,comercio minorista,1,0.689364,días,Reserve · póliza | FX Shield | Yield · barrido,0.0450884
+COMP_0539,GROUP_0187,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.653846,12 meses,Reserve · póliza,0.0252471
+COMP_0540,GROUP_0048,servicios profesionales,servicio,servicios profesionales | comercio minorista,2,0.536123,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.173501
+COMP_0541,GROUP_0169,construcción,mixto,construcción,1,0.486362,6 meses,Reserve · póliza,0.334797
+COMP_0542,GROUP_0023,mayorista / distribución,producto,mayorista / distribución,1,0.533786,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.00375673
+COMP_0543,GROUP_0053,comercio minorista,mixto,comercio minorista,1,0.68193,días,Reserve · póliza | Yield · barrido | FX Shield,0.0513217
+COMP_0544,GROUP_0208,servicios profesionales,servicio,servicios profesionales,1,0.48421,6 meses,Reserve · póliza | Yield · barrido,0.193359
+COMP_0545,GROUP_0015,servicios profesionales,servicio,servicios profesionales,1,0.586516,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.318272
+COMP_0546,GROUP_0095,mayorista / distribución,mixto,mayorista / distribución,1,0.535494,12 meses,Reserve · póliza,0.214351
+COMP_0547,GROUP_0023,comercio minorista,producto,comercio minorista,1,0.74232,días,Reserve · póliza | FX Shield | Yield · barrido,0.325475
+COMP_0548,GROUP_0217,energía,servicio,energía | holding / tesorería,2,0.78,12 meses,FX Shield | Yield · barrido | Reserve · póliza | Factoring,0.169204
+COMP_0549,GROUP_0065,comercio minorista,producto,comercio minorista,1,0.834352,días,Reserve · póliza | FX Shield | Yield · barrido,0.0328159
+COMP_0550,GROUP_0246,holding / tesorería,producto,holding / tesorería | mayorista / distribución,2,0.657723,largo,Reserve · póliza | Factoring | FX Shield | Confirming,0.267985
+COMP_0551,GROUP_0184,mayorista / distribución,mixto,mayorista / distribución,1,0.538532,12 meses,Yield · barrido | Reserve · póliza,0.249188
+COMP_0552,GROUP_0126,holding / tesorería,producto,holding / tesorería,1,0.818739,largo,Reserve · póliza | FX Shield | Yield · barrido,0.163732
+COMP_0553,GROUP_0217,energía,servicio,energía,1,0.78,12 meses,FX Shield | Factoring | Yield · barrido | Reserve · póliza,0.208268
+COMP_0554,GROUP_0184,servicios profesionales,servicio,servicios profesionales,1,0.471506,6 meses,Reserve · póliza | Yield · barrido,0.0356246
+COMP_0555,GROUP_0106,holding / tesorería,mixto,holding / tesorería | industria,2,0.627278,largo,Yield · barrido | Reserve · póliza | FX Shield,0.0310627
+COMP_0556,GROUP_0237,hostelería,producto,hostelería,1,0.78,6 meses,Reserve · póliza | FX Shield | Yield · barrido,0.145623
+COMP_0557,GROUP_0023,,insuficiente,,0,,,,
+COMP_0558,GROUP_0026,comercio minorista,servicio,comercio minorista | hostelería,2,0.607213,días,Reserve · póliza | Yield · barrido | FX Shield,0.0734169
+COMP_0559,GROUP_0188,,insuficiente,,0,,,,
+COMP_0560,GROUP_0097,comercio minorista,producto,comercio minorista | holding / tesorería,2,0.678594,días,Yield · barrido | Reserve · póliza | FX Shield,0.059477
+COMP_0561,GROUP_0063,servicios profesionales,servicio,servicios profesionales,1,0.538891,6 meses,Reserve · póliza | Yield · barrido,0.12424
+COMP_0562,GROUP_0218,software / suscripción,servicio,software / suscripción | servicios profesionales,2,0.78,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.0587537
+COMP_0563,GROUP_0200,holding / tesorería,producto,holding / tesorería | comercio minorista,2,0.676218,largo,Yield · barrido | Reserve · póliza | FX Shield,0.0832301
+COMP_0564,GROUP_0212,servicios profesionales,servicio,servicios profesionales,1,0.499952,6 meses,Reserve · póliza | Yield · barrido,0.175943
+COMP_0565,GROUP_0018,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.585623,6 meses,Yield · barrido | Factoring | Reserve · póliza | FX Shield,0.38376
+COMP_0566,GROUP_0119,mayorista / distribución,mixto,mayorista / distribución,1,0.55575,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.062195
+COMP_0567,GROUP_0194,servicios profesionales,servicio,servicios profesionales,1,0.618841,6 meses,Reserve · póliza | Yield · barrido,0.351595
+COMP_0568,GROUP_0150,mayorista / distribución,mixto,mayorista / distribución,1,0.669979,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.171047
+COMP_0569,GROUP_0094,servicios profesionales,servicio,servicios profesionales,1,0.752478,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.0378273
+COMP_0570,GROUP_0123,mayorista / distribución,producto,mayorista / distribución,1,0.634243,12 meses,Factoring | Confirming | Yield · barrido | Reserve · póliza,0.113719
+COMP_0571,GROUP_0101,servicios profesionales,mixto,servicios profesionales,1,0.528117,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.207219
+COMP_0572,GROUP_0064,,insuficiente,,0,,,,
+COMP_0573,GROUP_0132,alquiler / inmobiliario,mixto,alquiler / inmobiliario | servicios profesionales,2,0.78,largo,Yield · barrido | Reserve · póliza | Factoring | Seguro de cobro,0.100218
+COMP_0574,GROUP_0197,comercio minorista,servicio,comercio minorista | hostelería | servicios profesionales,3,0.613736,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.0832398
+COMP_0575,GROUP_0079,servicios profesionales,servicio,servicios profesionales,1,0.820344,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.124952
+COMP_0576,GROUP_0044,holding / tesorería,mixto,holding / tesorería | mayorista / distribución,2,0.704143,largo,Reserve · póliza | Factoring | FX Shield | Confirming,0.0591316
+COMP_0577,GROUP_0172,holding / tesorería,servicio,holding / tesorería,1,0.756524,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0853373
+COMP_0578,GROUP_0162,comercio minorista,producto,comercio minorista,1,0.734175,días,Yield · barrido | Reserve · póliza | FX Shield,0.153959
+COMP_0579,GROUP_0132,,insuficiente,,0,,,,
+COMP_0580,GROUP_0008,mayorista / distribución,producto,mayorista / distribución,1,0.481271,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.109271
+COMP_0581,GROUP_0191,servicios profesionales,servicio,servicios profesionales,1,0.485177,6 meses,Yield · barrido | Reserve · póliza,0.135377
+COMP_0582,GROUP_0159,mayorista / distribución,mixto,mayorista / distribución,1,0.493103,12 meses,Yield · barrido | Reserve · póliza,0.136226
+COMP_0583,GROUP_0143,mayorista / distribución,producto,mayorista / distribución | industria,2,0.645699,12 meses,Reserve · póliza,0.189628
+COMP_0584,GROUP_0117,servicios profesionales,servicio,servicios profesionales,1,0.553528,6 meses,Yield · barrido | Reserve · póliza,0.250565
+COMP_0585,GROUP_0004,,insuficiente,,0,,,,
+COMP_0586,GROUP_0047,holding / tesorería,producto,holding / tesorería | mayorista / distribución,2,0.653013,largo,Reserve · póliza | Factoring | FX Shield | Confirming,0.113354
+COMP_0587,GROUP_0108,comercio minorista,producto,comercio minorista,1,0.729322,días,Yield · barrido | Reserve · póliza | FX Shield,0.00651791
+COMP_0588,GROUP_0218,software / suscripción,servicio,software / suscripción | servicios profesionales,2,0.78,largo,Yield · barrido | Factoring | Reserve · póliza | FX Shield,0.0276712
+COMP_0589,GROUP_0138,servicios profesionales,servicio,servicios profesionales,1,0.607104,6 meses,Yield · barrido | Reserve · póliza,0.320745
+COMP_0590,GROUP_0222,comercio minorista,producto,comercio minorista,1,0.758847,días,Reserve · póliza | FX Shield | Yield · barrido,0.111152
+COMP_0591,GROUP_0185,mayorista / distribución,producto,mayorista / distribución | holding / tesorería | construcción,3,0.58246,12 meses,Factoring | Reserve · póliza | FX Shield | Confirming,0.0323294
+COMP_0592,GROUP_0185,comercio minorista,producto,comercio minorista,1,0.663065,días,Reserve · póliza | FX Shield | Yield · barrido,0.133778
+COMP_0593,GROUP_0053,mayorista / distribución,producto,mayorista / distribución,1,0.521486,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.10295
+COMP_0594,GROUP_0090,hostelería,producto,hostelería | alquiler / inmobiliario | comercio minorista,3,0.78,6 meses,Reserve · póliza | Yield · barrido | FX Shield | Seguro de cobro,0.0492847
+COMP_0595,GROUP_0065,comercio minorista,producto,comercio minorista,1,0.80929,días,Reserve · póliza | FX Shield | Yield · barrido,0.189377
+COMP_0596,GROUP_0212,holding / tesorería,producto,holding / tesorería,1,0.743061,largo,Yield · barrido | FX Shield | Reserve · póliza,0.172226
+COMP_0597,GROUP_0029,comercio minorista,mixto,comercio minorista | holding / tesorería | servicios profesionales,3,0.637797,días,Reserve · póliza | Yield · barrido | FX Shield | Factoring,0.104759
+COMP_0598,GROUP_0200,hostelería,mixto,hostelería | energía | construcción,3,0.78,6 meses,Reserve · póliza | Factoring | FX Shield | Yield · barrido,0.00789037
+COMP_0599,GROUP_0018,,insuficiente,,0,,,,
+COMP_0600,GROUP_0113,comercio minorista,producto,comercio minorista,1,0.793704,días,Reserve · póliza | FX Shield | Yield · barrido,0.0909467
+COMP_0601,GROUP_0070,construcción,producto,construcción | holding / tesorería,2,0.672662,6 meses,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.061655
+COMP_0602,GROUP_0103,mayorista / distribución,producto,mayorista / distribución,1,0.652741,12 meses,Reserve · póliza,0.0509296
+COMP_0603,GROUP_0239,servicios profesionales,servicio,servicios profesionales,1,0.49788,6 meses,Reserve · póliza | Yield · barrido,0.16085
+COMP_0604,GROUP_0065,comercio minorista,producto,comercio minorista,1,0.785263,días,Reserve · póliza | FX Shield | Yield · barrido,0.207359
+COMP_0605,GROUP_0051,comercio minorista,producto,comercio minorista,1,0.778428,días,Reserve · póliza | FX Shield | Yield · barrido,0.231472
+COMP_0606,GROUP_0083,servicios profesionales,servicio,servicios profesionales,1,0.539105,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.185307
+COMP_0607,GROUP_0023,mayorista / distribución,producto,mayorista / distribución,1,0.567938,12 meses,Factoring | Confirming | Yield · barrido | Reserve · póliza,0.114098
+COMP_0608,GROUP_0174,comercio minorista,producto,comercio minorista,1,0.711212,días,Reserve · póliza | FX Shield | Yield · barrido,0.0672484
+COMP_0609,GROUP_0129,construcción,mixto,construcción,1,0.611694,6 meses,Factoring | Reserve · póliza | Seguro de cobro,0.118436
+COMP_0610,GROUP_0112,comercio minorista,mixto,comercio minorista,1,0.738736,días,Yield · barrido | Reserve · póliza | FX Shield,0.121746
+COMP_0611,GROUP_0099,construcción,producto,construcción,1,0.633636,6 meses,Factoring | Reserve · póliza | Seguro de cobro,0.236417
+COMP_0612,GROUP_0218,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.554163,largo,Yield · barrido | Reserve · póliza | FX Shield,0.175115
+COMP_0613,GROUP_0158,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.552713,largo,Reserve · póliza | Yield · barrido | FX Shield,0.0855612
+COMP_0614,GROUP_0218,software / suscripción,servicio,software / suscripción | servicios profesionales,2,0.78,largo,Yield · barrido | Factoring | Reserve · póliza | FX Shield,0.0724161
+COMP_0615,GROUP_0079,servicios profesionales,servicio,servicios profesionales,1,0.829873,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.248619
+COMP_0616,GROUP_0017,comercio minorista,mixto,comercio minorista | mayorista / distribución | holding / tesorería,3,0.634662,días,Reserve · póliza | Yield · barrido | FX Shield,0.368035
+COMP_0617,GROUP_0212,comercio minorista,mixto,comercio minorista | construcción,2,0.542906,días,Reserve · póliza | FX Shield | Yield · barrido,0.104024
+COMP_0618,GROUP_0013,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.60985,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.124394
+COMP_0619,GROUP_0039,comercio minorista,servicio,comercio minorista | servicios profesionales,2,0.568907,días,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.0553821
+COMP_0620,GROUP_0082,servicios profesionales,servicio,servicios profesionales,1,0.546804,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.181567
+COMP_0621,GROUP_0211,comercio minorista,producto,comercio minorista | construcción,2,0.650864,días,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.10378
+COMP_0622,GROUP_0130,servicios profesionales,servicio,servicios profesionales,1,0.484901,6 meses,Reserve · póliza | Yield · barrido,0.195176
+COMP_0623,GROUP_0063,comercio minorista,mixto,comercio minorista | hostelería | transporte / logística,3,0.594273,días,Reserve · póliza | Yield · barrido | FX Shield,0.305829
+COMP_0624,GROUP_0154,comercio minorista,producto,comercio minorista,1,0.745288,días,Reserve · póliza | Yield · barrido | FX Shield,0.266261
+COMP_0625,GROUP_0159,servicios profesionales,mixto,servicios profesionales | construcción | mayorista / distribución,3,0.552824,6 meses,Reserve · póliza | Yield · barrido,0.295221
+COMP_0626,GROUP_0070,comercio minorista,producto,comercio minorista,1,0.827517,días,Reserve · póliza | Yield · barrido | FX Shield,0.134824
+COMP_0627,GROUP_0115,comercio minorista,servicio,comercio minorista,1,0.496489,días,Reserve · póliza | FX Shield | Yield · barrido,0.308029
+COMP_0628,GROUP_0013,comercio minorista,producto,comercio minorista | construcción,2,0.662688,días,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.226609
+COMP_0629,GROUP_0132,comercio minorista,mixto,comercio minorista | servicios profesionales | hostelería,3,0.572231,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.223251
+COMP_0630,GROUP_0247,mayorista / distribución,producto,mayorista / distribución,1,0.669946,12 meses,Reserve · póliza,0.459448
+COMP_0631,GROUP_0222,comercio minorista,producto,comercio minorista,1,0.703519,días,Yield · barrido | Reserve · póliza | FX Shield,0.0117181
+COMP_0632,GROUP_0172,comercio minorista,producto,comercio minorista,1,0.820889,días,Reserve · póliza | FX Shield | Yield · barrido,0.25376
+COMP_0633,GROUP_0130,comercio minorista,producto,comercio minorista,1,0.848022,días,Reserve · póliza | FX Shield | Yield · barrido,0.152253
+COMP_0634,GROUP_0022,holding / tesorería,servicio,holding / tesorería,1,0.698322,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0134031
+COMP_0635,GROUP_0127,mayorista / distribución,servicio,mayorista / distribución | servicios profesionales,2,0.566908,12 meses,Reserve · póliza | Yield · barrido,0.205736
+COMP_0636,GROUP_0037,hostelería,mixto,hostelería | construcción,2,0.589457,6 meses,Reserve · póliza | Factoring | FX Shield | Seguro de cobro,0.0658586
+COMP_0637,GROUP_0132,servicios profesionales,servicio,servicios profesionales,1,0.68,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.0413443
+COMP_0638,GROUP_0108,comercio minorista,producto,comercio minorista,1,0.682174,días,Reserve · póliza | FX Shield | Yield · barrido,0.0778319
+COMP_0639,GROUP_0115,comercio minorista,mixto,comercio minorista | hostelería,2,0.605872,días,Yield · barrido | Reserve · póliza | FX Shield,0.374019
+COMP_0640,GROUP_0022,servicios profesionales,servicio,servicios profesionales,1,0.756163,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.0939338
+COMP_0641,GROUP_0132,servicios profesionales,mixto,servicios profesionales | construcción,2,0.633832,6 meses,Factoring | Yield · barrido | Reserve · póliza | Seguro de cobro,0.256725
+COMP_0642,GROUP_0072,construcción,producto,construcción | industria | mayorista / distribución,3,0.719565,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.0352518
+COMP_0643,GROUP_0008,construcción,servicio,construcción,1,0.75,6 meses,Factoring | Reserve · póliza | Seguro de cobro,0.323205
+COMP_0644,GROUP_0236,holding / tesorería,mixto,holding / tesorería,1,0.565348,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0728427
+COMP_0645,GROUP_0217,holding / tesorería,mixto,holding / tesorería,1,0.767393,largo,Reserve · póliza | FX Shield | Yield · barrido,0.204327
+COMP_0646,GROUP_0118,servicios profesionales,servicio,servicios profesionales,1,0.512567,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.0136334
+COMP_0647,GROUP_0126,transporte / logística,producto,transporte / logística,1,0.78,días,Factoring | Reserve · póliza | Confirming,0.087366
+COMP_0648,GROUP_0053,comercio minorista,mixto,comercio minorista | hostelería,2,0.679205,días,Reserve · póliza | Yield · barrido | FX Shield,0.111107
+COMP_0649,GROUP_0153,holding / tesorería,producto,holding / tesorería | mayorista / distribución,2,0.673882,largo,Reserve · póliza | Factoring | FX Shield | Confirming,0.0475144
+COMP_0650,GROUP_0038,mayorista / distribución,producto,mayorista / distribución,1,0.572581,12 meses,Factoring | Confirming | Yield · barrido | Reserve · póliza,0.0713016
+COMP_0651,GROUP_0081,comercio minorista,producto,comercio minorista,1,0.813664,días,Reserve · póliza | FX Shield | Yield · barrido,0.195921
+COMP_0652,GROUP_0222,comercio minorista,producto,comercio minorista,1,0.741946,días,Yield · barrido | Reserve · póliza | FX Shield,0.0160915
+COMP_0653,GROUP_0128,mayorista / distribución,producto,mayorista / distribución,1,0.571962,12 meses,Yield · barrido | Reserve · póliza,0.193457
+COMP_0654,GROUP_0053,comercio minorista,producto,comercio minorista,1,0.776116,días,Reserve · póliza | FX Shield | Yield · barrido,0.174298
+COMP_0655,GROUP_0172,comercio minorista,producto,comercio minorista | holding / tesorería,2,0.715876,días,Reserve · póliza | Yield · barrido | FX Shield,0.238112
+COMP_0656,GROUP_0087,mayorista / distribución,mixto,mayorista / distribución | comercio minorista,2,0.512572,12 meses,Reserve · póliza | FX Shield | Yield · barrido,0.136815
+COMP_0657,GROUP_0222,comercio minorista,producto,comercio minorista,1,0.65631,días,Yield · barrido | Reserve · póliza | FX Shield,0.03248
+COMP_0658,GROUP_0132,transporte / logística,mixto,transporte / logística | holding / tesorería,2,0.78,días,Reserve · póliza | Factoring | FX Shield | Yield · barrido,0.170971
+COMP_0659,GROUP_0035,comercio minorista,servicio,comercio minorista | hostelería,2,0.582736,días,Reserve · póliza | Yield · barrido | FX Shield,0.258243
+COMP_0660,GROUP_0175,construcción,producto,construcción | mayorista / distribución,2,0.584336,6 meses,Reserve · póliza | Yield · barrido,0.300532
+COMP_0661,GROUP_0222,comercio minorista,mixto,comercio minorista | hostelería,2,0.662319,días,Yield · barrido | Reserve · póliza | FX Shield,0.0612903
+COMP_0662,GROUP_0054,construcción,servicio,construcción | servicios profesionales,2,0.75,6 meses,Factoring | Reserve · póliza | Seguro de cobro | Yield · barrido,0.0224571
+COMP_0663,GROUP_0143,servicios profesionales,servicio,servicios profesionales,1,0.554218,6 meses,Reserve · póliza | Yield · barrido,0.0681966
+COMP_0664,GROUP_0058,comercio minorista,producto,comercio minorista,1,0.699316,días,Reserve · póliza | FX Shield | Yield · barrido,0.124017
+COMP_0665,GROUP_0150,construcción,producto,construcción | holding / tesorería | mayorista / distribución,3,0.545685,6 meses,Factoring | Reserve · póliza | FX Shield | Confirming,0.0576776
+COMP_0666,GROUP_0013,hostelería,mixto,hostelería | construcción,2,0.585729,6 meses,Reserve · póliza | Factoring | FX Shield | Seguro de cobro,0.0493278
+COMP_0667,GROUP_0068,hostelería,mixto,hostelería | construcción,2,0.632125,6 meses,Reserve · póliza | Factoring | FX Shield | Seguro de cobro,0.0301488
+COMP_0668,GROUP_0048,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.606304,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.118453
+COMP_0669,GROUP_0007,hostelería,servicio,hostelería | comercio minorista,2,0.546147,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.128236
+COMP_0670,GROUP_0101,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.636257,largo,Yield · barrido | Factoring | Reserve · póliza | FX Shield,0.1042
+COMP_0671,GROUP_0250,servicios profesionales,servicio,servicios profesionales,1,0.554098,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.302173
+COMP_0672,GROUP_0184,,insuficiente,,0,,,,
+COMP_0673,GROUP_0203,hostelería,mixto,hostelería | comercio minorista,2,0.529184,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0417898
+COMP_0674,GROUP_0112,software / suscripción,servicio,software / suscripción | alquiler / inmobiliario | servicios profesionales,3,0.78,largo,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.189104
+COMP_0675,GROUP_0023,servicios profesionales,servicio,servicios profesionales,1,0.530262,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.0178922
+COMP_0676,GROUP_0104,servicios profesionales,servicio,servicios profesionales | mayorista / distribución,2,0.582734,6 meses,Factoring | Reserve · póliza | Yield · barrido | Confirming,0.111062
+COMP_0677,GROUP_0138,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.599372,6 meses,Yield · barrido | Reserve · póliza | FX Shield,0.281961
+COMP_0678,GROUP_0154,holding / tesorería,producto,holding / tesorería,1,0.70819,largo,Reserve · póliza | FX Shield | Yield · barrido,0.129004
+COMP_0679,GROUP_0172,holding / tesorería,producto,holding / tesorería,1,0.745961,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0182965
+COMP_0680,GROUP_0089,comercio minorista,producto,comercio minorista,1,0.761116,días,Reserve · póliza | FX Shield | Yield · barrido,0.154035
+COMP_0681,GROUP_0176,mayorista / distribución,mixto,mayorista / distribución | comercio minorista,2,0.517958,12 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0906733
+COMP_0682,GROUP_0200,energía,mixto,energía | servicios profesionales,2,0.78,12 meses,Factoring | Yield · barrido | FX Shield | Reserve · póliza,0.0843914
+COMP_0683,GROUP_0239,holding / tesorería,servicio,holding / tesorería,1,0.702672,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0457459
+COMP_0684,GROUP_0236,servicios profesionales,servicio,servicios profesionales,1,0.519145,6 meses,Reserve · póliza | Yield · barrido,0.0321773
+COMP_0685,GROUP_0035,comercio minorista,mixto,comercio minorista | hostelería,2,0.649153,días,Reserve · póliza | Yield · barrido | FX Shield,0.274367
+COMP_0686,GROUP_0139,software / suscripción,mixto,software / suscripción | energía | servicios profesionales,3,0.78,largo,Factoring | Reserve · póliza | FX Shield | Yield · barrido,0.343845
+COMP_0687,GROUP_0212,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.543586,6 meses,Yield · barrido | Reserve · póliza | FX Shield,0.0565553
+COMP_0688,GROUP_0241,holding / tesorería,producto,holding / tesorería,1,0.772173,largo,Reserve · póliza | FX Shield | Yield · barrido,0.229368
+COMP_0689,GROUP_0200,hostelería,servicio,hostelería | servicios profesionales,2,0.78,6 meses,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.15365
+COMP_0690,GROUP_0009,,insuficiente,,0,,,,
+COMP_0691,GROUP_0010,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.68,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.102441
+COMP_0692,GROUP_0108,holding / tesorería,producto,holding / tesorería,1,0.641922,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0515803
+COMP_0693,GROUP_0116,holding / tesorería,servicio,holding / tesorería,1,0.68693,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0186169
+COMP_0694,GROUP_0162,construcción,producto,construcción | mayorista / distribución,2,0.587789,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.101585
+COMP_0695,GROUP_0084,transporte / logística,producto,transporte / logística | comercio minorista,2,0.78,días,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.0182143
+COMP_0696,GROUP_0017,mayorista / distribución,mixto,mayorista / distribución,1,0.684017,12 meses,Reserve · póliza,0.40724
+COMP_0697,GROUP_0132,alquiler / inmobiliario,servicio,alquiler / inmobiliario | servicios profesionales,2,0.78,largo,Reserve · póliza | Yield · barrido | Factoring | Seguro de cobro,0.00954044
+COMP_0698,GROUP_0241,holding / tesorería,mixto,holding / tesorería | mayorista / distribución | construcción,3,0.585071,largo,Factoring | Reserve · póliza | FX Shield | Confirming,0.288661
+COMP_0699,GROUP_0158,holding / tesorería,mixto,holding / tesorería | mayorista / distribución | servicios profesionales,3,0.634321,largo,Reserve · póliza | Yield · barrido | FX Shield,0.150627
+COMP_0700,GROUP_0103,mayorista / distribución,mixto,mayorista / distribución | comercio minorista | holding / tesorería,3,0.603514,12 meses,Reserve · póliza | Yield · barrido | FX Shield,0.457936
+COMP_0701,GROUP_0211,,insuficiente,,0,,,,
+COMP_0702,GROUP_0236,,insuficiente,,0,,,,
+COMP_0703,GROUP_0115,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.565141,largo,Reserve · póliza | Yield · barrido | FX Shield,0.239092
+COMP_0704,GROUP_0131,,insuficiente,,0,,,,
+COMP_0705,GROUP_0067,servicios profesionales,servicio,servicios profesionales,1,0.594539,6 meses,Yield · barrido | Reserve · póliza,0.237639
+COMP_0706,GROUP_0212,servicios profesionales,servicio,servicios profesionales,1,0.510446,6 meses,Reserve · póliza | Yield · barrido,0.0970121
+COMP_0707,GROUP_0035,comercio minorista,servicio,comercio minorista | hostelería,2,0.559885,días,Reserve · póliza | Yield · barrido | FX Shield,0.249417
+COMP_0708,GROUP_0196,hostelería,producto,hostelería,1,0.78,6 meses,Reserve · póliza | FX Shield | Yield · barrido,0.116723
+COMP_0709,GROUP_0040,comercio minorista,producto,comercio minorista | mayorista / distribución | construcción,3,0.608516,días,Reserve · póliza | Factoring | Yield · barrido | Confirming,0.0553757
+COMP_0710,GROUP_0146,servicios profesionales,servicio,servicios profesionales,1,0.549109,6 meses,Reserve · póliza | Yield · barrido,0.196315
+COMP_0711,GROUP_0219,holding / tesorería,mixto,holding / tesorería | comercio minorista | servicios profesionales,3,0.602372,largo,Reserve · póliza | Yield · barrido | FX Shield | Factoring,0.111219
+COMP_0712,GROUP_0155,,insuficiente,,0,,,,
+COMP_0713,GROUP_0023,comercio minorista,producto,comercio minorista,1,0.768399,días,Reserve · póliza | FX Shield | Yield · barrido,0.184322
+COMP_0714,GROUP_0172,holding / tesorería,producto,holding / tesorería,1,0.773716,largo,Reserve · póliza | FX Shield | Yield · barrido,0.115685
+COMP_0715,GROUP_0177,,insuficiente,,0,,,,
+COMP_0716,GROUP_0178,comercio minorista,producto,comercio minorista | holding / tesorería,2,0.637997,días,Yield · barrido | Reserve · póliza | FX Shield,0.0162327
+COMP_0717,GROUP_0020,holding / tesorería,producto,holding / tesorería,1,0.737676,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0867105
+COMP_0718,GROUP_0138,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.601581,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.137767
+COMP_0719,GROUP_0068,mayorista / distribución,producto,mayorista / distribución | industria | construcción,3,0.632587,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.178713
+COMP_0720,GROUP_0130,comercio minorista,producto,comercio minorista,1,0.802662,días,Reserve · póliza | Yield · barrido | FX Shield,0.162444
+COMP_0721,GROUP_0113,comercio minorista,producto,comercio minorista,1,0.782023,días,Reserve · póliza | Yield · barrido | FX Shield,0.0628041
+COMP_0722,GROUP_0064,,insuficiente,,0,,,,
+COMP_0723,GROUP_0230,mayorista / distribución,mixto,mayorista / distribución | holding / tesorería | servicios profesionales,3,0.593172,12 meses,Yield · barrido | Factoring | Reserve · póliza | FX Shield,0.170432
+COMP_0724,GROUP_0236,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.621327,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.282566
+COMP_0725,GROUP_0222,comercio minorista,producto,comercio minorista,1,0.728194,días,Yield · barrido | Reserve · póliza | FX Shield,0.036408
+COMP_0726,GROUP_0055,servicios profesionales,servicio,servicios profesionales,1,0.585227,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.219294
+COMP_0727,GROUP_0009,servicios profesionales,servicio,servicios profesionales,1,0.544276,6 meses,Yield · barrido | Reserve · póliza,0.0490782
+COMP_0728,GROUP_0183,mayorista / distribución,mixto,mayorista / distribución,1,0.562543,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.0753091
+COMP_0729,GROUP_0018,holding / tesorería,mixto,holding / tesorería | construcción,2,0.609761,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.214974
+COMP_0730,GROUP_0041,comercio minorista,producto,comercio minorista,1,0.895868,días,Reserve · póliza | Yield · barrido | FX Shield,0.197371
+COMP_0731,GROUP_0149,mayorista / distribución,mixto,mayorista / distribución,1,0.493405,12 meses,Factoring | Confirming | Yield · barrido | Reserve · póliza,0.0220485
+COMP_0732,GROUP_0022,servicios profesionales,mixto,servicios profesionales,1,0.72,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.125331
+COMP_0733,GROUP_0129,comercio minorista,producto,comercio minorista,1,0.702984,días,Reserve · póliza | Yield · barrido | FX Shield,0.0369643
+COMP_0734,GROUP_0041,,insuficiente,,0,,,,
+COMP_0735,GROUP_0200,,insuficiente,,0,,,,
+COMP_0736,GROUP_0184,holding / tesorería,producto,holding / tesorería,1,0.755075,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0577449
+COMP_0737,GROUP_0205,servicios profesionales,servicio,servicios profesionales,1,0.572215,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.165435
+COMP_0738,GROUP_0064,hostelería,mixto,hostelería | servicios profesionales,2,0.510957,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.144264
+COMP_0739,GROUP_0187,servicios profesionales,servicio,servicios profesionales,1,0.621741,6 meses,Yield · barrido | Reserve · póliza,0.338261
+COMP_0740,GROUP_0044,comercio minorista,mixto,comercio minorista | construcción | servicios profesionales,3,0.552192,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.00616518
+COMP_0741,GROUP_0013,comercio minorista,mixto,comercio minorista,1,0.571741,días,Reserve · póliza | Yield · barrido | FX Shield,0.145118
+COMP_0742,GROUP_0047,holding / tesorería,mixto,holding / tesorería,1,0.674317,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0693997
+COMP_0743,GROUP_0033,software / suscripción,servicio,software / suscripción | alquiler / inmobiliario | servicios profesionales,3,0.78,largo,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.201296
+COMP_0744,GROUP_0032,comercio minorista,producto,comercio minorista,1,0.893382,días,Reserve · póliza | Yield · barrido | FX Shield,0.297857
+COMP_0745,GROUP_0058,comercio minorista,producto,comercio minorista | software / suscripción,2,0.812234,días,Reserve · póliza | Yield · barrido | FX Shield,0.0233813
+COMP_0746,GROUP_0222,comercio minorista,producto,comercio minorista,1,0.710359,días,Yield · barrido | Reserve · póliza | FX Shield,0.120964
+COMP_0747,GROUP_0172,comercio minorista,mixto,comercio minorista,1,0.682715,días,Reserve · póliza | FX Shield | Yield · barrido,0.0107655
+COMP_0748,GROUP_0074,comercio minorista,producto,comercio minorista | mayorista / distribución,2,0.611692,días,Reserve · póliza | Yield · barrido | FX Shield,0.10205
+COMP_0749,GROUP_0243,servicios profesionales,servicio,servicios profesionales,1,0.482691,6 meses,Reserve · póliza | Yield · barrido,0.224281
+COMP_0750,GROUP_0172,comercio minorista,producto,comercio minorista,1,0.708627,días,Reserve · póliza | FX Shield | Yield · barrido,0.0122356
+COMP_0751,GROUP_0142,comercio minorista,mixto,comercio minorista | hostelería,2,0.606079,días,Reserve · póliza | Yield · barrido | FX Shield,0.167612
+COMP_0752,GROUP_0236,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.528811,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0289794
+COMP_0753,GROUP_0170,holding / tesorería,mixto,holding / tesorería,1,0.733948,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0701844
+COMP_0754,GROUP_0211,comercio minorista,producto,comercio minorista | construcción,2,0.661402,días,Reserve · póliza | FX Shield | Yield · barrido,0.0243382
+COMP_0755,GROUP_0103,comercio minorista,mixto,comercio minorista,1,0.654961,días,Reserve · póliza | FX Shield | Yield · barrido,0.198253
+COMP_0756,GROUP_0104,comercio minorista,producto,comercio minorista | construcción | mayorista / distribución,3,0.620977,días,Reserve · póliza | Factoring | Confirming | Seguro de cobro,0.218479
+COMP_0757,GROUP_0133,servicios profesionales,mixto,servicios profesionales | holding / tesorería | mayorista / distribución,3,0.679071,6 meses,Factoring | Reserve · póliza | Yield · barrido | FX Shield,0.0658192
+COMP_0758,GROUP_0169,,insuficiente,,0,,,,
+COMP_0759,GROUP_0094,comercio minorista,servicio,comercio minorista,1,0.688396,días,Reserve · póliza | FX Shield | Yield · barrido,0.146131
+COMP_0760,GROUP_0249,hostelería,servicio,hostelería | comercio minorista,2,0.570174,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.292225
+COMP_0761,GROUP_0199,holding / tesorería,producto,holding / tesorería | comercio minorista,2,0.677196,largo,Reserve · póliza | Yield · barrido | FX Shield,0.0918338
+COMP_0762,GROUP_0051,comercio minorista,producto,comercio minorista,1,0.844294,días,Reserve · póliza | FX Shield | Yield · barrido,0.0417739
+COMP_0763,GROUP_0095,servicios profesionales,servicio,servicios profesionales,1,0.511551,6 meses,Reserve · póliza | Yield · barrido,0.03135
+COMP_0764,GROUP_0022,servicios profesionales,mixto,servicios profesionales | holding / tesorería,2,0.72,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.0196911
+COMP_0765,GROUP_0016,comercio minorista,producto,comercio minorista,1,0.776669,días,Reserve · póliza | FX Shield | Yield · barrido,0.126806
+COMP_0766,GROUP_0212,comercio minorista,mixto,comercio minorista | hostelería,2,0.525093,días,Reserve · póliza | Yield · barrido | FX Shield,0.335554
+COMP_0767,GROUP_0054,servicios profesionales,servicio,servicios profesionales,1,0.530882,6 meses,Reserve · póliza | Yield · barrido,0.00637891
+COMP_0768,GROUP_0127,servicios profesionales,servicio,servicios profesionales,1,0.482829,6 meses,Yield · barrido | Reserve · póliza,0.0165528
+COMP_0769,GROUP_0114,servicios profesionales,servicio,servicios profesionales,1,0.5498,6 meses,Reserve · póliza | Yield · barrido,0.229961
+COMP_0770,GROUP_0082,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.54664,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.0763166
+COMP_0771,GROUP_0175,,insuficiente,,0,,,,
+COMP_0772,GROUP_0023,comercio minorista,producto,comercio minorista | construcción | mayorista / distribución,3,0.568321,días,Reserve · póliza | Factoring | Yield · barrido | Confirming,0.152177
+COMP_0773,GROUP_0112,servicios profesionales,servicio,servicios profesionales,1,0.72,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.279438
+COMP_0774,GROUP_0103,holding / tesorería,producto,holding / tesorería | mayorista / distribución,2,0.652755,largo,Reserve · póliza | FX Shield | Yield · barrido,0.149554
+COMP_0775,GROUP_0211,comercio minorista,producto,comercio minorista | construcción,2,0.685881,días,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.0985989
+COMP_0776,GROUP_0158,holding / tesorería,mixto,holding / tesorería,1,0.658347,largo,Reserve · póliza | FX Shield | Yield · barrido,0.165481
+COMP_0777,GROUP_0179,,mixto,,0,,,,0.202992
+COMP_0778,GROUP_0238,mayorista / distribución,mixto,mayorista / distribución,1,0.540083,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.108496
+COMP_0779,GROUP_0108,holding / tesorería,producto,holding / tesorería,1,0.680889,largo,Yield · barrido | FX Shield | Reserve · póliza,0.048132
+COMP_0780,GROUP_0065,comercio minorista,mixto,comercio minorista | hostelería,2,0.619922,días,Yield · barrido | Reserve · póliza | FX Shield,0.208768
+COMP_0781,GROUP_0170,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.567405,12 meses,Reserve · póliza,0.23033
+COMP_0782,GROUP_0130,servicios profesionales,servicio,servicios profesionales,1,0.482277,6 meses,Reserve · póliza | Yield · barrido,0.0870506
+COMP_0783,GROUP_0122,servicios profesionales,servicio,servicios profesionales,1,0.55653,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.142877
+COMP_0784,GROUP_0149,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.595992,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.203992
+COMP_0785,GROUP_0140,servicios profesionales,servicio,servicios profesionales,1,0.575898,6 meses,Reserve · póliza | Yield · barrido,0.103245
+COMP_0786,GROUP_0017,servicios profesionales,servicio,servicios profesionales,1,0.496914,6 meses,Reserve · póliza | Yield · barrido,0.101918
+COMP_0787,GROUP_0008,construcción,mixto,construcción,1,0.51852,6 meses,Factoring | Reserve · póliza | Seguro de cobro,0.239301
+COMP_0788,GROUP_0045,comercio minorista,mixto,comercio minorista | hostelería,2,0.679146,días,Reserve · póliza | Yield · barrido | FX Shield,0.226299
+COMP_0789,GROUP_0115,comercio minorista,producto,comercio minorista,1,0.884269,días,Reserve · póliza | FX Shield | Yield · barrido,0.181883
+COMP_0790,GROUP_0210,hostelería,producto,hostelería,1,0.78,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.107824
+COMP_0791,GROUP_0065,comercio minorista,producto,comercio minorista | mayorista / distribución,2,0.646282,días,Reserve · póliza | Yield · barrido | FX Shield,0.0379753
+COMP_0792,GROUP_0070,comercio minorista,producto,comercio minorista,1,0.846572,días,Yield · barrido | Reserve · póliza | FX Shield,0.085186
+COMP_0793,GROUP_0147,hostelería,mixto,hostelería | comercio minorista,2,0.536226,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.38777
+COMP_0794,GROUP_0035,comercio minorista,producto,comercio minorista | hostelería,2,0.59339,días,Reserve · póliza | Yield · barrido | FX Shield,0.258552
+COMP_0795,GROUP_0039,comercio minorista,servicio,comercio minorista | servicios profesionales,2,0.532244,días,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.0678762
+COMP_0796,GROUP_0160,hostelería,producto,hostelería | alquiler / inmobiliario | comercio minorista,3,0.78,6 meses,Yield · barrido | Reserve · póliza | FX Shield | Seguro de cobro,0.0854089
+COMP_0797,GROUP_0081,comercio minorista,mixto,comercio minorista,1,0.670319,días,Reserve · póliza | FX Shield | Yield · barrido,0.0719468
+COMP_0798,GROUP_0057,industria,mixto,industria | hostelería | transporte / logística,3,0.586755,12 meses,Reserve · póliza | Factoring | Confirming | Yield · barrido,0.0943199
+COMP_0799,GROUP_0183,comercio minorista,mixto,comercio minorista,1,0.532695,días,Reserve · póliza | FX Shield | Yield · barrido,0.124123
+COMP_0800,GROUP_0149,comercio minorista,producto,comercio minorista,1,0.637526,días,Reserve · póliza | Yield · barrido | FX Shield,0.0304955
+COMP_0801,GROUP_0023,mayorista / distribución,mixto,mayorista / distribución,1,0.503269,12 meses,Factoring | Confirming | Reserve · póliza | Seguro de cobro,0.264808
+COMP_0802,GROUP_0117,construcción,producto,construcción | mayorista / distribución,2,0.614405,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.0196961
+COMP_0803,GROUP_0231,software / suscripción,servicio,software / suscripción | servicios profesionales,2,0.78,largo,Yield · barrido | Factoring | Reserve · póliza | FX Shield,0.302568
+COMP_0804,GROUP_0077,,insuficiente,,0,,,,
+COMP_0805,GROUP_0213,holding / tesorería,producto,holding / tesorería | mayorista / distribución | construcción,3,0.633225,largo,Factoring | Reserve · póliza | Yield · barrido | FX Shield,0.079203
+COMP_0806,GROUP_0177,mayorista / distribución,producto,mayorista / distribución | comercio minorista,2,0.69632,12 meses,Reserve · póliza | Yield · barrido | FX Shield,0.374997
+COMP_0807,GROUP_0101,,insuficiente,,0,,,,
+COMP_0808,GROUP_0015,servicios profesionales,servicio,servicios profesionales,1,0.562702,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.211821
+COMP_0809,GROUP_0250,mayorista / distribución,mixto,mayorista / distribución | construcción | industria,3,0.608704,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.151304
+COMP_0810,GROUP_0016,construcción,mixto,construcción,1,0.550253,6 meses,Factoring | Reserve · póliza | Seguro de cobro,0.104944
+COMP_0811,GROUP_0155,alquiler / inmobiliario,mixto,alquiler / inmobiliario,1,0.78,largo,Reserve · póliza | Yield · barrido | Seguro de cobro,0.0986781
+COMP_0812,GROUP_0160,hostelería,servicio,hostelería | alquiler / inmobiliario,2,0.78,6 meses,Yield · barrido | Reserve · póliza | FX Shield | Seguro de cobro,0.154357
+COMP_0813,GROUP_0155,mayorista / distribución,mixto,mayorista / distribución,1,0.585893,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.305506
+COMP_0814,GROUP_0016,construcción,mixto,construcción | hostelería,2,0.547276,6 meses,Reserve · póliza | Factoring | FX Shield | Seguro de cobro,0.159055
+COMP_0815,GROUP_0250,holding / tesorería,producto,holding / tesorería,1,0.692267,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0849515
+COMP_0816,GROUP_0158,comercio minorista,mixto,comercio minorista | hostelería | holding / tesorería,3,0.586816,días,Reserve · póliza | Yield · barrido | FX Shield,0.263731
+COMP_0817,GROUP_0070,comercio minorista,producto,comercio minorista | holding / tesorería,2,0.658134,días,Yield · barrido | Reserve · póliza | FX Shield,0.066497
+COMP_0818,GROUP_0115,,insuficiente,,0,,,,
+COMP_0819,GROUP_0250,servicios profesionales,servicio,servicios profesionales,1,0.495338,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.0975381
+COMP_0820,GROUP_0158,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.538891,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.102225
+COMP_0821,GROUP_0070,holding / tesorería,mixto,holding / tesorería,1,0.637823,largo,Reserve · póliza | FX Shield | Yield · barrido,0.251897
+COMP_0822,GROUP_0116,comercio minorista,mixto,comercio minorista,1,0.569211,días,Reserve · póliza | Yield · barrido | FX Shield,0.0332003
+COMP_0823,GROUP_0115,,mixto,,0,,,,0.037168
+COMP_0824,GROUP_0159,servicios profesionales,servicio,servicios profesionales | holding / tesorería | mayorista / distribución,3,0.534611,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.237474
+COMP_0825,GROUP_0043,comercio minorista,producto,comercio minorista,1,0.869977,días,Yield · barrido | Reserve · póliza | FX Shield,0.0814374
+COMP_0826,GROUP_0250,holding / tesorería,producto,holding / tesorería,1,0.690719,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0798613
+COMP_0827,GROUP_0078,construcción,producto,construcción,1,0.587051,6 meses,Reserve · póliza,0.0194335
+COMP_0828,GROUP_0016,construcción,producto,construcción,1,0.614198,6 meses,Factoring | Reserve · póliza | Seguro de cobro,0.108712
+COMP_0829,GROUP_0153,industria,mixto,industria | holding / tesorería | mayorista / distribución,3,0.59578,12 meses,Factoring | Reserve · póliza | Confirming | FX Shield,0.083103
+COMP_0830,GROUP_0016,comercio minorista,producto,comercio minorista,1,0.752952,días,Reserve · póliza | Yield · barrido | FX Shield,0.0188926
+COMP_0831,GROUP_0250,comercio minorista,producto,comercio minorista,1,0.806989,días,Yield · barrido | Reserve · póliza | FX Shield,0.092683
+COMP_0832,GROUP_0014,comercio minorista,producto,comercio minorista,1,0.666946,días,Reserve · póliza | Yield · barrido | FX Shield,0.311317
+COMP_0833,GROUP_0158,comercio minorista,producto,comercio minorista,1,0.779464,días,Reserve · póliza | FX Shield | Yield · barrido,0.0833005
+COMP_0834,GROUP_0096,servicios profesionales,servicio,servicios profesionales,1,0.642598,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.0119621
+COMP_0835,GROUP_0250,hostelería,mixto,hostelería,1,0.65263,6 meses,Yield · barrido | Reserve · póliza | FX Shield,0.0980833
+COMP_0836,GROUP_0189,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.60631,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.136768
+COMP_0837,GROUP_0070,comercio minorista,producto,comercio minorista,1,0.779671,días,Yield · barrido | Reserve · póliza | FX Shield,0.220401
+COMP_0838,GROUP_0250,holding / tesorería,producto,holding / tesorería,1,0.686796,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0658206
+COMP_0839,GROUP_0250,holding / tesorería,producto,holding / tesorería,1,0.686875,largo,Yield · barrido | FX Shield | Reserve · póliza,0.057256
+COMP_0840,GROUP_0248,comercio minorista,mixto,comercio minorista | hostelería,2,0.615193,días,Reserve · póliza | Yield · barrido | FX Shield,0.329772
+COMP_0841,GROUP_0005,hostelería,servicio,hostelería,1,0.520878,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.225132
+COMP_0842,GROUP_0053,construcción,producto,construcción,1,0.504889,6 meses,Factoring | Reserve · póliza | Seguro de cobro,0.0377955
+COMP_0843,GROUP_0218,software / suscripción,servicio,software / suscripción | servicios profesionales,2,0.78,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.299128
+COMP_0844,GROUP_0088,holding / tesorería,producto,holding / tesorería | construcción,2,0.716317,largo,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.0383929
+COMP_0845,GROUP_0222,comercio minorista,producto,comercio minorista,1,0.699981,días,Yield · barrido | Reserve · póliza | FX Shield,0.185382
+COMP_0846,GROUP_0141,hostelería,servicio,hostelería | alquiler / inmobiliario | industria,3,0.78,6 meses,Reserve · póliza | Yield · barrido | Factoring | Confirming,0.198809
+COMP_0847,GROUP_0037,servicios profesionales,mixto,servicios profesionales | mayorista / distribución | construcción,3,0.581331,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.0778655
+COMP_0848,GROUP_0126,comercio minorista,mixto,comercio minorista,1,0.588681,días,Reserve · póliza | FX Shield | Yield · barrido,0.131817
+COMP_0849,GROUP_0246,mayorista / distribución,mixto,mayorista / distribución,1,0.536246,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.139198
+COMP_0850,GROUP_0114,comercio minorista,mixto,comercio minorista | hostelería | mayorista / distribución,3,0.615193,días,Reserve · póliza | Yield · barrido | FX Shield,0.389391
+COMP_0851,GROUP_0211,,insuficiente,,0,,,,
+COMP_0852,GROUP_0090,comercio minorista,mixto,comercio minorista | hostelería,2,0.658901,días,Reserve · póliza | Yield · barrido | FX Shield,0.175752
+COMP_0853,GROUP_0001,construcción,producto,construcción,1,0.475,6 meses,Reserve · póliza,0.0621724
+COMP_0854,GROUP_0131,software / suscripción,servicio,software / suscripción | servicios profesionales,2,0.78,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.28283
+COMP_0855,GROUP_0006,holding / tesorería,servicio,holding / tesorería | servicios profesionales | mayorista / distribución,3,0.509838,largo,Reserve · póliza | Yield · barrido | FX Shield,0.379065
+COMP_0856,GROUP_0101,transporte / logística,mixto,transporte / logística,1,0.78,días,Factoring | Reserve · póliza | Confirming,0.109106
+COMP_0857,GROUP_0097,construcción,producto,construcción | mayorista / distribución | industria,3,0.606166,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.0685162
+COMP_0858,GROUP_0048,holding / tesorería,producto,holding / tesorería | mayorista / distribución,2,0.658827,largo,Reserve · póliza | Factoring | FX Shield | Confirming,0.0636766
+COMP_0859,GROUP_0150,holding / tesorería,mixto,holding / tesorería,1,0.546292,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0907198
+COMP_0860,GROUP_0199,comercio minorista,producto,comercio minorista,1,0.81861,días,Reserve · póliza | FX Shield | Yield · barrido,0.176912
+COMP_0861,GROUP_0226,comercio minorista,producto,comercio minorista,1,0.721281,días,Yield · barrido | Reserve · póliza | FX Shield,0.366966
+COMP_0862,GROUP_0132,servicios profesionales,mixto,servicios profesionales | comercio minorista,2,0.582855,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.0470111
+COMP_0863,GROUP_0142,comercio minorista,producto,comercio minorista | mayorista / distribución | construcción,3,0.591187,días,Reserve · póliza | FX Shield | Yield · barrido,0.0888065
+COMP_0864,GROUP_0218,software / suscripción,servicio,software / suscripción | servicios profesionales,2,0.78,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.0836949
+COMP_0865,GROUP_0230,industria,producto,industria | mayorista / distribución | holding / tesorería,3,0.545755,12 meses,Factoring | Reserve · póliza | Confirming | FX Shield,0.121878
+COMP_0866,GROUP_0102,mayorista / distribución,mixto,mayorista / distribución,1,0.465416,12 meses,Factoring | Confirming | Reserve · póliza | Seguro de cobro,0.126642
+COMP_0867,GROUP_0103,holding / tesorería,producto,holding / tesorería,1,0.712407,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0891131
+COMP_0868,GROUP_0096,servicios profesionales,servicio,servicios profesionales,1,0.793382,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.0657078
+COMP_0869,GROUP_0228,comercio minorista,producto,comercio minorista | mayorista / distribución | construcción,3,0.613289,días,Reserve · póliza | Factoring | Yield · barrido | Confirming,0.107725
+COMP_0870,GROUP_0142,hostelería,servicio,hostelería,1,0.539312,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.2506
+COMP_0871,GROUP_0021,servicios profesionales,servicio,servicios profesionales | mayorista / distribución,2,0.558608,6 meses,Factoring | Reserve · póliza | Confirming | Yield · barrido,0.0382619
+COMP_0872,GROUP_0236,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.638463,largo,Reserve · póliza | Yield · barrido | FX Shield,0.0144951
+COMP_0873,GROUP_0023,mayorista / distribución,mixto,mayorista / distribución | hostelería,2,0.538868,12 meses,Reserve · póliza | Factoring | Confirming | FX Shield,0.28896
+COMP_0874,GROUP_0185,mayorista / distribución,producto,mayorista / distribución | comercio minorista | construcción,3,0.606032,12 meses,Reserve · póliza | Factoring | Confirming | Seguro de cobro,0.133457
+COMP_0875,GROUP_0141,hostelería,servicio,hostelería | software / suscripción | energía,3,0.78,6 meses,FX Shield | Reserve · póliza | Yield · barrido | Factoring,0.343146
+COMP_0876,GROUP_0189,comercio minorista,producto,comercio minorista,1,0.726172,días,Reserve · póliza | FX Shield | Yield · barrido,0.0135457
+COMP_0877,GROUP_0127,comercio minorista,producto,comercio minorista | mayorista / distribución,2,0.740938,días,Reserve · póliza | FX Shield | Yield · barrido,0.38116
+COMP_0878,GROUP_0147,hostelería,mixto,hostelería | comercio minorista,2,0.616591,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.225008
+COMP_0879,GROUP_0108,comercio minorista,producto,comercio minorista | hostelería,2,0.693007,días,Reserve · póliza | Yield · barrido | FX Shield,0.031719
+COMP_0880,GROUP_0218,comercio minorista,mixto,comercio minorista,1,0.633064,días,Reserve · póliza | FX Shield | Yield · barrido,0.0487032
+COMP_0881,GROUP_0071,servicios profesionales,mixto,servicios profesionales,1,0.478535,6 meses,Yield · barrido | Reserve · póliza,0.0876437
+COMP_0882,GROUP_0101,servicios profesionales,servicio,servicios profesionales,1,0.533248,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.0136782
+COMP_0883,GROUP_0194,comercio minorista,producto,comercio minorista,1,0.837251,días,Yield · barrido | Reserve · póliza | FX Shield,0.0362065
+COMP_0884,GROUP_0222,comercio minorista,producto,comercio minorista,1,0.696019,días,Yield · barrido | Reserve · póliza | FX Shield,0.151181
+COMP_0885,GROUP_0158,comercio minorista,servicio,comercio minorista,1,0.518859,días,Reserve · póliza | FX Shield | Yield · barrido,0.295739
+COMP_0886,GROUP_0161,servicios profesionales,servicio,servicios profesionales,1,0.541791,6 meses,Reserve · póliza | Yield · barrido,0.230606
+COMP_0887,GROUP_0048,holding / tesorería,producto,holding / tesorería | mayorista / distribución,2,0.649225,largo,Reserve · póliza | Factoring | FX Shield | Confirming,0.175098
+COMP_0888,GROUP_0142,hostelería,producto,hostelería | comercio minorista | construcción,3,0.590079,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.265901
+COMP_0889,GROUP_0130,servicios profesionales,servicio,servicios profesionales,1,0.482139,6 meses,Yield · barrido | Reserve · póliza,0.021001
+COMP_0890,GROUP_0245,hostelería,servicio,hostelería | alquiler / inmobiliario | energía,3,0.78,6 meses,Reserve · póliza | FX Shield | Yield · barrido | Factoring,0.123844
+COMP_0891,GROUP_0081,comercio minorista,producto,comercio minorista,1,0.80204,días,Reserve · póliza | Yield · barrido | FX Shield,0.0241051
+COMP_0892,GROUP_0142,servicios profesionales,servicio,servicios profesionales,1,0.568261,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.200955
+COMP_0893,GROUP_0011,comercio minorista,mixto,comercio minorista | hostelería | mayorista / distribución,3,0.628034,días,Reserve · póliza | Yield · barrido | FX Shield,0.313991
+COMP_0894,GROUP_0172,holding / tesorería,producto,holding / tesorería,1,0.731462,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0160818
+COMP_0895,GROUP_0016,construcción,producto,construcción | comercio minorista | hostelería,3,0.589572,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.155004
+COMP_0896,GROUP_0114,comercio minorista,servicio,comercio minorista | hostelería,2,0.567119,días,Reserve · póliza | Yield · barrido | FX Shield,0.300058
+COMP_0897,GROUP_0081,comercio minorista,producto,comercio minorista,1,0.789553,días,Reserve · póliza | FX Shield | Yield · barrido,0.239685
+COMP_0898,GROUP_0011,comercio minorista,mixto,comercio minorista | hostelería,2,0.675466,días,Reserve · póliza | Yield · barrido | FX Shield,0.236169
+COMP_0899,GROUP_0093,software / suscripción,servicio,software / suscripción,1,0.78,largo,Yield · barrido | FX Shield | Reserve · póliza,0.149024
+COMP_0900,GROUP_0199,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.60455,12 meses,Reserve · póliza,0.00844531
+COMP_0901,GROUP_0017,comercio minorista,producto,comercio minorista,1,0.826481,días,Reserve · póliza | FX Shield | Yield · barrido,0.0635043
+COMP_0902,GROUP_0217,construcción,producto,construcción | mayorista / distribución,2,0.634347,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.0656087
+COMP_0903,GROUP_0079,alquiler / inmobiliario,mixto,alquiler / inmobiliario,1,0.78,largo,Yield · barrido | Reserve · póliza | Seguro de cobro,0.145983
+COMP_0904,GROUP_0129,comercio minorista,producto,comercio minorista,1,0.772628,días,Reserve · póliza | Yield · barrido | FX Shield,0.088093
+COMP_0905,GROUP_0065,mayorista / distribución,producto,mayorista / distribución | comercio minorista,2,0.623882,12 meses,Reserve · póliza | Yield · barrido | FX Shield,0.230947
+COMP_0906,GROUP_0238,comercio minorista,producto,comercio minorista | construcción | hostelería,3,0.635109,6 meses,Reserve · póliza | Yield · barrido | FX Shield | Factoring,0.223062
+COMP_0907,GROUP_0022,construcción,producto,construcción | mayorista / distribución,2,0.630466,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.119244
+COMP_0908,GROUP_0022,alquiler / inmobiliario,mixto,alquiler / inmobiliario | servicios profesionales,2,0.78,largo,Reserve · póliza | Yield · barrido | Factoring | Seguro de cobro,0.15609
+COMP_0909,GROUP_0220,mayorista / distribución,producto,mayorista / distribución,1,0.722078,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.360454
+COMP_0910,GROUP_0172,holding / tesorería,servicio,holding / tesorería,1,0.731048,largo,Reserve · póliza | FX Shield | Yield · barrido,0.151475
+COMP_0911,GROUP_0172,comercio minorista,producto,comercio minorista | holding / tesorería,2,0.661195,días,Reserve · póliza | Yield · barrido | FX Shield,0.0337829
+COMP_0912,GROUP_0185,comercio minorista,producto,comercio minorista | mayorista / distribución | construcción,3,0.650383,días,Reserve · póliza | Factoring | Confirming | Seguro de cobro,0.291961
+COMP_0913,GROUP_0108,holding / tesorería,producto,holding / tesorería | mayorista / distribución,2,0.603394,largo,Reserve · póliza | Factoring | FX Shield | Confirming,0.120566
+COMP_0914,GROUP_0244,servicios profesionales,servicio,servicios profesionales,1,0.512086,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.263257
+COMP_0915,GROUP_0088,holding / tesorería,servicio,holding / tesorería,1,0.509725,largo,Reserve · póliza | FX Shield | Yield · barrido,0.257003
+COMP_0916,GROUP_0150,,insuficiente,,0,,,,
+COMP_0917,GROUP_0217,,insuficiente,,0,,,,
+COMP_0918,GROUP_0179,servicios profesionales,mixto,servicios profesionales | construcción,2,0.537082,6 meses,Reserve · póliza | Yield · barrido,0.0270471
+COMP_0919,GROUP_0230,mayorista / distribución,mixto,mayorista / distribución,1,0.685227,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.310395
+COMP_0920,GROUP_0122,hostelería,producto,hostelería | comercio minorista,2,0.78,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0281566
+COMP_0921,GROUP_0183,construcción,producto,construcción | comercio minorista,2,0.608132,6 meses,Reserve · póliza | Factoring | FX Shield | Seguro de cobro,0.070026
+COMP_0922,GROUP_0096,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.634931,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.0232367
+COMP_0923,GROUP_0126,comercio minorista,producto,comercio minorista | construcción,2,0.68813,días,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.0142172
+COMP_0924,GROUP_0065,comercio minorista,producto,comercio minorista,1,0.731618,días,Yield · barrido | Reserve · póliza | FX Shield,0.316131
+COMP_0925,GROUP_0021,construcción,producto,construcción,1,0.553425,6 meses,Reserve · póliza | Yield · barrido,0.022414
+COMP_0926,GROUP_0217,servicios profesionales,servicio,servicios profesionales,1,0.68,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.174978
+COMP_0927,GROUP_0108,comercio minorista,producto,comercio minorista,1,0.702241,días,Reserve · póliza | FX Shield | Yield · barrido,0.237248
+COMP_0928,GROUP_0131,servicios profesionales,servicio,servicios profesionales | industria | transporte / logística,3,0.564575,6 meses,Reserve · póliza | Yield · barrido,0.32622
+COMP_0929,GROUP_0067,hostelería,servicio,hostelería,1,0.543662,6 meses,Yield · barrido | Reserve · póliza | FX Shield,0.388988
+COMP_0930,GROUP_0246,mayorista / distribución,mixto,mayorista / distribución,1,0.578782,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.131758
+COMP_0931,GROUP_0084,mayorista / distribución,mixto,mayorista / distribución,1,0.603056,12 meses,Factoring | Confirming | Reserve · póliza | Seguro de cobro,0.252605
+COMP_0932,GROUP_0081,hostelería,servicio,hostelería | alquiler / inmobiliario,2,0.78,6 meses,Reserve · póliza | Yield · barrido | FX Shield | Seguro de cobro,0.0887179
+COMP_0933,GROUP_0152,,mixto,,0,,,,0.0262529
+COMP_0934,GROUP_0184,holding / tesorería,producto,holding / tesorería,1,0.727527,largo,Yield · barrido | FX Shield | Reserve · póliza,0.132551
+COMP_0935,GROUP_0018,alquiler / inmobiliario,mixto,alquiler / inmobiliario | construcción | mayorista / distribución,3,0.78,largo,Reserve · póliza | Factoring | Seguro de cobro | Confirming,0.285604
+COMP_0936,GROUP_0046,construcción,mixto,construcción | industria,2,0.525366,6 meses,Factoring | Reserve · póliza | Confirming | Yield · barrido,0.0658177
+COMP_0937,GROUP_0172,comercio minorista,producto,comercio minorista | holding / tesorería,2,0.682115,días,Reserve · póliza | Yield · barrido | FX Shield,0.119707
+COMP_0938,GROUP_0050,servicios profesionales,mixto,servicios profesionales,1,0.471907,6 meses,Yield · barrido | Reserve · póliza,0.0503782
+COMP_0939,GROUP_0001,mayorista / distribución,producto,mayorista / distribución,1,0.490355,12 meses,Reserve · póliza,0.0708282
+COMP_0940,GROUP_0217,alquiler / inmobiliario,servicio,alquiler / inmobiliario,1,0.78,largo,Yield · barrido | Reserve · póliza | Seguro de cobro,0.205027
+COMP_0941,GROUP_0158,comercio minorista,producto,comercio minorista,1,0.715048,días,Reserve · póliza | FX Shield | Yield · barrido,0.286741
+COMP_0942,GROUP_0016,servicios profesionales,servicio,servicios profesionales,1,0.530475,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.124917
+COMP_0943,GROUP_0173,comercio minorista,producto,comercio minorista | software / suscripción | transporte / logística,3,0.870291,días,Reserve · póliza | Yield · barrido | FX Shield | Factoring,0.0374922
+COMP_0944,GROUP_0104,mayorista / distribución,producto,mayorista / distribución | comercio minorista | industria,3,0.600844,12 meses,Reserve · póliza | Factoring | Confirming | FX Shield,0.29665
+COMP_0945,GROUP_0162,mayorista / distribución,mixto,mayorista / distribución | hostelería,2,0.566513,12 meses,Reserve · póliza | Factoring | Confirming | FX Shield,0.372703
+COMP_0946,GROUP_0143,mayorista / distribución,mixto,mayorista / distribución,1,0.570844,12 meses,Reserve · póliza,0.389976
+COMP_0947,GROUP_0158,holding / tesorería,mixto,holding / tesorería,1,0.546914,largo,Reserve · póliza | FX Shield | Yield · barrido,0.352647
+COMP_0948,GROUP_0189,comercio minorista,producto,comercio minorista,1,0.713759,días,Reserve · póliza | FX Shield | Yield · barrido,0.051444
+COMP_0949,GROUP_0064,,insuficiente,,0,,,,
+COMP_0950,GROUP_0082,industria,producto,industria | mayorista / distribución | construcción,3,0.65679,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.295445
+COMP_0951,GROUP_0218,hostelería,mixto,hostelería | software / suscripción,2,0.78,6 meses,Yield · barrido | Reserve · póliza | FX Shield,0.289085
+COMP_0952,GROUP_0103,mayorista / distribución,mixto,mayorista / distribución | hostelería | servicios profesionales,3,0.631407,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.368762
+COMP_0953,GROUP_0070,,insuficiente,,0,,,,
+COMP_0954,GROUP_0011,comercio minorista,mixto,comercio minorista | hostelería,2,0.651647,días,Reserve · póliza | Yield · barrido | FX Shield,0.240226
+COMP_0955,GROUP_0035,mayorista / distribución,mixto,mayorista / distribución,1,0.566244,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.168331
+COMP_0956,GROUP_0166,software / suscripción,servicio,software / suscripción,1,0.78,largo,Yield · barrido | FX Shield | Reserve · póliza,0.276511
+COMP_0957,GROUP_0006,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.51086,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.300359
+COMP_0958,GROUP_0200,construcción,producto,construcción,1,0.75,6 meses,Factoring | Reserve · póliza | Yield · barrido | Seguro de cobro,0.32786
+COMP_0959,GROUP_0013,construcción,producto,construcción | comercio minorista | mayorista / distribución,3,0.658365,6 meses,Reserve · póliza | Factoring | Yield · barrido | Confirming,0.14052
+COMP_0960,GROUP_0137,holding / tesorería,servicio,holding / tesorería,1,0.648948,largo,Yield · barrido | FX Shield | Reserve · póliza,0.158803
+COMP_0961,GROUP_0101,,insuficiente,,0,,,,
+COMP_0962,GROUP_0154,,insuficiente,,0,,,,
+COMP_0963,GROUP_0159,mayorista / distribución,producto,mayorista / distribución,1,0.592813,12 meses,Yield · barrido | Reserve · póliza,0.108373
+COMP_0964,GROUP_0039,comercio minorista,mixto,comercio minorista | hostelería,2,0.574696,días,Reserve · póliza | Yield · barrido | FX Shield,0.14944
+COMP_0965,GROUP_0229,holding / tesorería,mixto,holding / tesorería | comercio minorista | transporte / logística,3,0.57674,días,Reserve · póliza | Yield · barrido | FX Shield,0.264115
+COMP_0966,GROUP_0094,comercio minorista,mixto,comercio minorista | construcción | hostelería,3,0.596837,6 meses,Reserve · póliza | Yield · barrido | FX Shield | Factoring,0.10547
+COMP_0967,GROUP_0142,mayorista / distribución,mixto,mayorista / distribución | industria,2,0.591159,12 meses,Factoring | Confirming | Reserve · póliza | Seguro de cobro,0.146342
+COMP_0968,GROUP_0129,hostelería,servicio,hostelería,1,0.530199,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.147046
+COMP_0969,GROUP_0158,holding / tesorería,mixto,holding / tesorería,1,0.684859,largo,Reserve · póliza | FX Shield | Yield · barrido,0.283094
+COMP_0970,GROUP_0011,comercio minorista,producto,comercio minorista | mayorista / distribución,2,0.702206,días,Reserve · póliza | FX Shield | Yield · barrido,0.337444
+COMP_0971,GROUP_0152,construcción,producto,construcción,1,0.475,6 meses,Reserve · póliza | Yield · barrido,0.0564298
+COMP_0972,GROUP_0170,construcción,producto,construcción,1,0.588722,6 meses,Reserve · póliza | Yield · barrido,0.157512
+COMP_0973,GROUP_0013,comercio minorista,producto,comercio minorista | construcción,2,0.664014,días,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.130386
+COMP_0974,GROUP_0195,construcción,producto,construcción | comercio minorista,2,0.641339,6 meses,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.210302
+COMP_0975,GROUP_0237,hostelería,producto,hostelería,1,0.78,6 meses,Reserve · póliza | FX Shield | Yield · barrido,0.00134999
+COMP_0976,GROUP_0149,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.669995,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.0142173
+COMP_0977,GROUP_0080,software / suscripción,servicio,software / suscripción | alquiler / inmobiliario | servicios profesionales,3,0.78,largo,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.168533
+COMP_0978,GROUP_0142,comercio minorista,producto,comercio minorista | mayorista / distribución,2,0.630215,días,Reserve · póliza | Factoring | Confirming | FX Shield,0.310602
+COMP_0979,GROUP_0018,servicios profesionales,servicio,servicios profesionales,1,0.595031,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.103189
+COMP_0980,GROUP_0118,construcción,producto,construcción,1,0.576817,6 meses,Reserve · póliza,0.0160237
+COMP_0981,GROUP_0118,servicios profesionales,servicio,servicios profesionales,1,0.480896,6 meses,Yield · barrido | Reserve · póliza,0.0728856
+COMP_0982,GROUP_0207,mayorista / distribución,servicio,mayorista / distribución | servicios profesionales,2,0.597563,12 meses,Reserve · póliza | Yield · barrido,0.35535
+COMP_0983,GROUP_0118,servicios profesionales,servicio,servicios profesionales,1,0.537234,6 meses,Reserve · póliza | Yield · barrido,0.264702
+COMP_0984,GROUP_0218,comercio minorista,producto,comercio minorista | construcción | mayorista / distribución,3,0.61884,días,Reserve · póliza | Factoring | Confirming | Seguro de cobro,0.282654
+COMP_0985,GROUP_0141,software / suscripción,servicio,software / suscripción | alquiler / inmobiliario | servicios profesionales,3,0.78,largo,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.388399
+COMP_0986,GROUP_0044,holding / tesorería,mixto,holding / tesorería | construcción,2,0.664347,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.159477
+COMP_0987,GROUP_0035,hostelería,mixto,hostelería,1,0.501222,6 meses,Reserve · póliza | FX Shield | Yield · barrido,0.349296
+COMP_0988,GROUP_0236,servicios profesionales,servicio,servicios profesionales,1,0.567613,6 meses,Reserve · póliza | Yield · barrido,0.21907
+COMP_0989,GROUP_0038,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.597597,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.0944482
+COMP_0990,GROUP_0211,servicios profesionales,mixto,servicios profesionales | construcción | comercio minorista,3,0.535519,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.017529
+COMP_0991,GROUP_0127,holding / tesorería,producto,holding / tesorería,1,0.727941,largo,Reserve · póliza | FX Shield | Yield · barrido,0.0906962
+COMP_0992,GROUP_0185,comercio minorista,producto,comercio minorista | construcción | mayorista / distribución,3,0.657509,días,Reserve · póliza | Factoring | Confirming | Seguro de cobro,0.231785
+COMP_0993,GROUP_0226,comercio minorista,producto,comercio minorista,1,0.703356,días,Reserve · póliza | Yield · barrido | FX Shield,0.451961
+COMP_0994,GROUP_0037,servicios profesionales,producto,servicios profesionales | comercio minorista,2,0.72,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.177923
+COMP_0995,GROUP_0113,comercio minorista,producto,comercio minorista,1,0.720917,días,Reserve · póliza | FX Shield | Yield · barrido,0.325466
+COMP_0996,GROUP_0203,hostelería,mixto,hostelería | comercio minorista,2,0.531048,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.23848
+COMP_0997,GROUP_0117,servicios profesionales,servicio,servicios profesionales | mayorista / distribución,2,0.525913,6 meses,Factoring | Yield · barrido | Reserve · póliza | Confirming,0.0887087
+COMP_0998,GROUP_0192,holding / tesorería,mixto,holding / tesorería | comercio minorista,2,0.533658,largo,Reserve · póliza | Yield · barrido | FX Shield,0.42257
+COMP_0999,GROUP_0222,comercio minorista,producto,comercio minorista,1,0.716371,días,Yield · barrido | Reserve · póliza | FX Shield,0.212366
+COMP_1000,GROUP_0105,servicios profesionales,servicio,servicios profesionales,1,0.68,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.0680107
+COMP_1001,GROUP_0143,servicios profesionales,servicio,servicios profesionales,1,0.524254,6 meses,Reserve · póliza | Yield · barrido,0.457353
+COMP_1002,GROUP_0185,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.656006,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.313928
+COMP_1003,GROUP_0132,alquiler / inmobiliario,producto,alquiler / inmobiliario | servicios profesionales,2,0.78,largo,Yield · barrido | Reserve · póliza | Factoring | Seguro de cobro,0.21069
+COMP_1004,GROUP_0109,servicios profesionales,servicio,servicios profesionales,1,0.68,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.170055
+COMP_1005,GROUP_0172,comercio minorista,servicio,comercio minorista | holding / tesorería | transporte / logística,3,0.574161,días,Reserve · póliza | Yield · barrido | FX Shield,0.295206
+COMP_1006,GROUP_0163,mayorista / distribución,producto,mayorista / distribución | construcción | industria,3,0.553402,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.282766
+COMP_1007,GROUP_0159,comercio minorista,producto,comercio minorista | construcción,2,0.635512,días,Reserve · póliza | FX Shield | Yield · barrido,0.360348
+COMP_1008,GROUP_0220,mayorista / distribución,producto,mayorista / distribución | construcción | comercio minorista,3,0.613314,12 meses,Reserve · póliza | Factoring | Yield · barrido | Confirming,0.101083
+COMP_1009,GROUP_0059,,insuficiente,,0,,,,
+COMP_1010,GROUP_0138,comercio minorista,producto,comercio minorista | mayorista / distribución | construcción,3,0.557011,días,Reserve · póliza | FX Shield | Yield · barrido,0.429038
+COMP_1011,GROUP_0155,transporte / logística,producto,transporte / logística,1,0.78,días,Factoring | Reserve · póliza | Confirming,0.0213699
+COMP_1012,GROUP_0032,comercio minorista,producto,comercio minorista | holding / tesorería,2,0.633647,días,Yield · barrido | Reserve · póliza | FX Shield,0.356357
+COMP_1013,GROUP_0108,comercio minorista,producto,comercio minorista | mayorista / distribución | holding / tesorería,3,0.606376,días,Reserve · póliza | Yield · barrido | FX Shield | Factoring,0.279596
+COMP_1014,GROUP_0132,comercio minorista,producto,comercio minorista,1,0.664923,días,Reserve · póliza | Yield · barrido | FX Shield,0.249584
+COMP_1015,GROUP_0132,comercio minorista,producto,comercio minorista,1,0.83373,días,Reserve · póliza | FX Shield | Yield · barrido,0.137677
+COMP_1016,GROUP_0069,hostelería,servicio,hostelería | software / suscripción | transporte / logística,3,0.78,6 meses,Reserve · póliza | Yield · barrido | FX Shield | Factoring,0.281293
+COMP_1017,GROUP_0108,mayorista / distribución,producto,mayorista / distribución | construcción | holding / tesorería,3,0.575231,12 meses,Factoring | Reserve · póliza | Yield · barrido | FX Shield,0.170691
+COMP_1018,GROUP_0060,software / suscripción,mixto,software / suscripción,1,0.78,largo,Reserve · póliza | FX Shield | Yield · barrido,0.133471
+COMP_1019,GROUP_0118,holding / tesorería,producto,holding / tesorería | construcción,2,0.632741,largo,Reserve · póliza | Factoring | FX Shield | Yield · barrido,0.102184
+COMP_1020,GROUP_0195,hostelería,mixto,hostelería | mayorista / distribución,2,0.535398,6 meses,Reserve · póliza | Factoring | Confirming | FX Shield,0.2868
+COMP_1021,GROUP_0236,servicios profesionales,servicio,servicios profesionales,1,0.581421,6 meses,Reserve · póliza | Yield · barrido,0.0593522
+COMP_1022,GROUP_0126,comercio minorista,mixto,comercio minorista | hostelería,2,0.652889,días,Yield · barrido | Reserve · póliza | FX Shield,0.133809
+COMP_1023,GROUP_0119,comercio minorista,producto,comercio minorista,1,0.780499,días,Reserve · póliza | FX Shield | Yield · barrido,0.11069
+COMP_1024,GROUP_0226,comercio minorista,producto,comercio minorista,1,0.786221,días,Yield · barrido | Reserve · póliza | FX Shield,0.346711
+COMP_1025,GROUP_0032,comercio minorista,producto,comercio minorista,1,0.720433,días,Reserve · póliza | FX Shield | Yield · barrido,0.395843
+COMP_1026,GROUP_0186,comercio minorista,producto,comercio minorista | construcción,2,0.690303,días,Reserve · póliza | Factoring | FX Shield | Seguro de cobro,0.154312
+COMP_1027,GROUP_0095,holding / tesorería,producto,holding / tesorería,1,0.685481,largo,Reserve · póliza | FX Shield | Yield · barrido,0.255494
+COMP_1028,GROUP_0069,software / suscripción,servicio,software / suscripción | servicios profesionales,2,0.78,largo,Yield · barrido | Factoring | Reserve · póliza | FX Shield,0.249584
+COMP_1029,GROUP_0016,construcción,producto,construcción | comercio minorista,2,0.715143,6 meses,Reserve · póliza | Factoring | FX Shield | Seguro de cobro,0.11482
+COMP_1030,GROUP_0108,mayorista / distribución,producto,mayorista / distribución | industria | holding / tesorería,3,0.593363,12 meses,Factoring | Reserve · póliza | Confirming | FX Shield,0.267332
+COMP_1031,GROUP_0187,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.584942,12 meses,Reserve · póliza | Yield · barrido,0.154214
+COMP_1032,GROUP_0023,construcción,producto,construcción | mayorista / distribución,2,0.572523,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.155302
+COMP_1033,GROUP_0142,comercio minorista,producto,comercio minorista,1,0.695641,días,Reserve · póliza | FX Shield | Yield · barrido,0.160088
+COMP_1034,GROUP_0128,holding / tesorería,mixto,holding / tesorería,1,0.693144,largo,Reserve · póliza | FX Shield | Yield · barrido,0.101698
+COMP_1035,GROUP_0148,comercio minorista,mixto,comercio minorista | hostelería,2,0.674448,días,Reserve · póliza | Yield · barrido | FX Shield,0.408358
+COMP_1036,GROUP_0121,mayorista / distribución,mixto,mayorista / distribución | holding / tesorería,2,0.6535,12 meses,Yield · barrido | Reserve · póliza | FX Shield,0.460203
+COMP_1037,GROUP_0081,comercio minorista,producto,comercio minorista | alquiler / inmobiliario,2,0.781464,días,Reserve · póliza | Yield · barrido | FX Shield | Seguro de cobro,0.325605
+COMP_1038,GROUP_0018,alquiler / inmobiliario,producto,alquiler / inmobiliario | energía | mayorista / distribución,3,0.78,12 meses,Factoring | Reserve · póliza | Yield · barrido | FX Shield,0.361854
+COMP_1039,GROUP_0146,hostelería,servicio,hostelería,1,0.5157,6 meses,Reserve · póliza | FX Shield | Yield · barrido,0.427098
+COMP_1040,GROUP_0056,comercio minorista,producto,comercio minorista,1,0.737484,días,Reserve · póliza | Yield · barrido | FX Shield,0.226845
+COMP_1041,GROUP_0007,holding / tesorería,producto,holding / tesorería | mayorista / distribución | construcción,3,0.669325,largo,Reserve · póliza | Yield · barrido | FX Shield,0.0676017
+COMP_1042,GROUP_0012,software / suscripción,producto,software / suscripción,1,0.78,largo,Yield · barrido | FX Shield | Reserve · póliza,0.0106167
+COMP_1043,GROUP_0047,servicios profesionales,producto,servicios profesionales | mayorista / distribución,2,0.72,6 meses,Factoring | Reserve · póliza | Confirming | Yield · barrido,0.173305
+COMP_1044,GROUP_0076,comercio minorista,producto,comercio minorista | mayorista / distribución,2,0.598436,días,Reserve · póliza | FX Shield | Yield · barrido,0.152382
+COMP_1045,GROUP_0141,servicios profesionales,mixto,servicios profesionales | comercio minorista,2,0.562597,6 meses,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.274164
+COMP_1046,GROUP_0079,alquiler / inmobiliario,servicio,alquiler / inmobiliario | servicios profesionales,2,0.78,largo,Yield · barrido | Reserve · póliza | Factoring | Seguro de cobro,0.227722
+COMP_1047,GROUP_0092,servicios profesionales,mixto,servicios profesionales,1,0.495105,6 meses,Yield · barrido | Reserve · póliza,0.143427
+COMP_1048,GROUP_0067,hostelería,servicio,hostelería | servicios profesionales,2,0.533513,6 meses,Yield · barrido | Reserve · póliza | FX Shield,0.456697
+COMP_1049,GROUP_0025,servicios profesionales,servicio,servicios profesionales | mayorista / distribución,2,0.715986,6 meses,Factoring | Reserve · póliza | Confirming | Yield · barrido,0.31246
+COMP_1050,GROUP_0047,mayorista / distribución,mixto,mayorista / distribución | industria,2,0.562372,12 meses,Factoring | Confirming | Reserve · póliza | Seguro de cobro,0.279944
+COMP_1051,GROUP_0095,mayorista / distribución,producto,mayorista / distribución,1,0.605931,12 meses,Yield · barrido | Reserve · póliza,0.0783188
+COMP_1052,GROUP_0222,comercio minorista,producto,comercio minorista | mayorista / distribución,2,0.653812,días,Reserve · póliza | Factoring | Confirming | FX Shield,0.184696
+COMP_1053,GROUP_0002,mayorista / distribución,producto,mayorista / distribución,1,0.713995,12 meses,Reserve · póliza,0.445064
+COMP_1054,GROUP_0159,construcción,producto,construcción | mayorista / distribución,2,0.598956,6 meses,Reserve · póliza | Yield · barrido,0.108708
+COMP_1055,GROUP_0087,,insuficiente,,0,,,,
+COMP_1056,GROUP_0152,comercio minorista,producto,comercio minorista,1,0.717119,días,Reserve · póliza | FX Shield | Yield · barrido,0.0900932
+COMP_1057,GROUP_0218,software / suscripción,servicio,software / suscripción | servicios profesionales,2,0.78,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.241312
+COMP_1058,GROUP_0124,hostelería,producto,hostelería | construcción | comercio minorista,3,0.606442,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.277297
+COMP_1059,GROUP_0131,servicios profesionales,servicio,servicios profesionales,1,0.573688,6 meses,Reserve · póliza | Yield · barrido,0.335176
+COMP_1060,GROUP_0138,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.572597,largo,Reserve · póliza | Yield · barrido | FX Shield,0.275209
+COMP_1061,GROUP_0111,comercio minorista,producto,comercio minorista,1,0.730562,días,Reserve · póliza | Yield · barrido | FX Shield,0.214673
+COMP_1062,GROUP_0048,holding / tesorería,producto,holding / tesorería | mayorista / distribución | construcción,3,0.59218,largo,Factoring | Reserve · póliza | FX Shield | Confirming,0.209395
+COMP_1063,GROUP_0222,comercio minorista,producto,comercio minorista,1,0.715709,días,Yield · barrido | Reserve · póliza | FX Shield,0.288638
+COMP_1064,GROUP_0056,servicios profesionales,servicio,servicios profesionales,1,0.517591,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.290685
+COMP_1065,GROUP_0215,,insuficiente,,0,,,,
+COMP_1066,GROUP_0051,comercio minorista,mixto,comercio minorista | hostelería | mayorista / distribución,3,0.642533,días,Reserve · póliza | Yield · barrido | FX Shield,0.412322
+COMP_1067,GROUP_0211,comercio minorista,producto,comercio minorista,1,0.715277,días,Reserve · póliza | FX Shield | Yield · barrido,0.0947285
+COMP_1068,GROUP_0209,,insuficiente,,0,,,,
+COMP_1069,GROUP_0155,alquiler / inmobiliario,producto,alquiler / inmobiliario,1,0.78,largo,Reserve · póliza | Yield · barrido | Seguro de cobro,0.223319
+COMP_1070,GROUP_0031,hostelería,mixto,hostelería | software / suscripción | alquiler / inmobiliario,3,0.78,largo,Yield · barrido | Reserve · póliza | FX Shield | Seguro de cobro,0.296514
+COMP_1071,GROUP_0164,construcción,producto,construcción,1,0.664726,6 meses,Factoring | Reserve · póliza | Seguro de cobro,0.103111
+COMP_1072,GROUP_0081,comercio minorista,producto,comercio minorista,1,0.779506,días,Reserve · póliza | FX Shield | Yield · barrido,0.308241
+COMP_1073,GROUP_0142,construcción,producto,construcción | mayorista / distribución,2,0.663934,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.16754
+COMP_1074,GROUP_0238,mayorista / distribución,producto,mayorista / distribución | construcción | industria,3,0.61742,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.244791
+COMP_1075,GROUP_0022,holding / tesorería,producto,holding / tesorería,1,0.68693,largo,Reserve · póliza | FX Shield | Yield · barrido,0.226473
+COMP_1076,GROUP_0131,industria,mixto,industria | servicios profesionales | holding / tesorería,3,0.626443,12 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0671836
+COMP_1077,GROUP_0081,software / suscripción,mixto,software / suscripción | alquiler / inmobiliario,2,0.78,largo,Reserve · póliza | Yield · barrido | FX Shield | Seguro de cobro,0.343855
+COMP_1078,GROUP_0013,comercio minorista,producto,comercio minorista | construcción,2,0.733903,días,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.105863
+COMP_1079,GROUP_0141,servicios profesionales,servicio,servicios profesionales,1,0.72,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.385307
+COMP_1080,GROUP_0007,servicios profesionales,servicio,servicios profesionales,1,0.602133,6 meses,Yield · barrido | Reserve · póliza,0.169885
+COMP_1081,GROUP_0108,comercio minorista,producto,comercio minorista | industria | construcción,3,0.594115,días,Reserve · póliza | Factoring | Confirming | FX Shield,0.383707
+COMP_1082,GROUP_0142,comercio minorista,producto,comercio minorista | construcción,2,0.654668,días,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.240374
+COMP_1083,GROUP_0199,comercio minorista,producto,comercio minorista,1,0.817575,días,Yield · barrido | Reserve · póliza | FX Shield,0.0151983
+COMP_1084,GROUP_0172,holding / tesorería,producto,holding / tesorería,1,0.728563,largo,Reserve · póliza | FX Shield | Yield · barrido,0.06891
+COMP_1085,GROUP_0137,construcción,producto,construcción,1,0.533954,6 meses,Factoring | Reserve · póliza | Seguro de cobro,0.132698
+COMP_1086,GROUP_0193,comercio minorista,servicio,comercio minorista | holding / tesorería,2,0.573126,días,Yield · barrido | Reserve · póliza | FX Shield,0.312316
+COMP_1087,GROUP_0182,servicios profesionales,servicio,servicios profesionales,1,0.48062,6 meses,Reserve · póliza | Yield · barrido,0.111254
+COMP_1088,GROUP_0234,construcción,producto,construcción,1,0.584754,6 meses,Reserve · póliza,0.0903245
+COMP_1089,GROUP_0108,comercio minorista,producto,comercio minorista,1,0.8472,días,Reserve · póliza | FX Shield | Yield · barrido,0.0702161
+COMP_1090,GROUP_0070,comercio minorista,producto,comercio minorista,1,0.779464,días,Yield · barrido | Reserve · póliza | FX Shield,0.287253
+COMP_1091,GROUP_0103,mayorista / distribución,mixto,mayorista / distribución | comercio minorista | hostelería,3,0.605447,12 meses,Reserve · póliza | Yield · barrido | FX Shield,0.486098
+COMP_1092,GROUP_0236,servicios profesionales,servicio,servicios profesionales | holding / tesorería,2,0.600338,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0498326
+COMP_1093,GROUP_0200,construcción,producto,construcción | holding / tesorería | mayorista / distribución,3,0.680163,6 meses,Factoring | Reserve · póliza | FX Shield | Confirming,0.184392
+COMP_1094,GROUP_0017,mayorista / distribución,mixto,mayorista / distribución,1,0.470457,12 meses,Reserve · póliza,0.245033
+COMP_1095,GROUP_0118,servicios profesionales,servicio,servicios profesionales,1,0.511609,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.252369
+COMP_1096,GROUP_0125,holding / tesorería,servicio,holding / tesorería | servicios profesionales,2,0.598488,largo,Yield · barrido | Reserve · póliza | FX Shield,0.207486
+COMP_1097,GROUP_0044,servicios profesionales,servicio,servicios profesionales,1,0.68,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.157322
+COMP_1098,GROUP_0103,comercio minorista,mixto,comercio minorista,1,0.591787,días,Yield · barrido | Reserve · póliza | FX Shield,0.340846
+COMP_1099,GROUP_0125,comercio minorista,producto,comercio minorista,1,0.741145,días,Reserve · póliza | Yield · barrido | FX Shield,0.0460586
+COMP_1100,GROUP_0070,construcción,producto,construcción | mayorista / distribución | holding / tesorería,3,0.669626,6 meses,Factoring | Reserve · póliza | FX Shield | Confirming,0.090565
+COMP_1101,GROUP_0236,comercio minorista,producto,comercio minorista,1,0.729961,días,Yield · barrido | Reserve · póliza | FX Shield,0.249075
+COMP_1102,GROUP_0087,,mixto,,0,,,,0.203437
+COMP_1103,GROUP_0236,mayorista / distribución,producto,mayorista / distribución,1,0.60745,12 meses,Reserve · póliza,0.0654365
+COMP_1104,GROUP_0107,comercio minorista,producto,comercio minorista | mayorista / distribución,2,0.690931,días,Reserve · póliza | Factoring | Confirming | FX Shield,0.0584367
+COMP_1105,GROUP_0094,comercio minorista,producto,comercio minorista,1,0.71009,días,Reserve · póliza | Yield · barrido | FX Shield,0.115371
+COMP_1106,GROUP_0056,mayorista / distribución,producto,mayorista / distribución,1,0.736181,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.370894
+COMP_1107,GROUP_0103,servicios profesionales,servicio,servicios profesionales,1,0.501471,6 meses,Yield · barrido | Reserve · póliza,0.388365
+COMP_1108,GROUP_0119,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.620594,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.133438
+COMP_1109,GROUP_0205,software / suscripción,mixto,software / suscripción,1,0.78,largo,Yield · barrido | FX Shield | Reserve · póliza,0.338046
+COMP_1110,GROUP_0182,construcción,producto,construcción,1,0.668429,6 meses,Factoring | Reserve · póliza | Seguro de cobro,0.238822
+COMP_1111,GROUP_0169,,insuficiente,,0,,,,
+COMP_1112,GROUP_0170,,insuficiente,,0,,,,
+COMP_1113,GROUP_0018,comercio minorista,producto,comercio minorista,1,0.688545,días,Reserve · póliza | Yield · barrido | FX Shield,0.220927
+COMP_1114,GROUP_0236,holding / tesorería,mixto,holding / tesorería,1,0.674917,largo,Yield · barrido | FX Shield | Reserve · póliza,0.282475
+COMP_1115,GROUP_0064,construcción,producto,construcción | mayorista / distribución | hostelería,3,0.584545,6 meses,Reserve · póliza | FX Shield | Yield · barrido,0.226871
+COMP_1116,GROUP_0169,,insuficiente,,0,,,,
+COMP_1117,GROUP_0139,holding / tesorería,producto,holding / tesorería,1,0.678438,largo,Yield · barrido | FX Shield | Reserve · póliza,0.243932
+COMP_1118,GROUP_0023,industria,mixto,industria,1,0.554386,12 meses,Factoring | Reserve · póliza | Confirming,0.0699735
+COMP_1119,GROUP_0187,construcción,producto,construcción | mayorista / distribución | industria,3,0.567001,12 meses,Reserve · póliza,0.135862
+COMP_1120,GROUP_0250,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.551489,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.231027
+COMP_1121,GROUP_0165,comercio minorista,producto,comercio minorista,1,0.848643,días,Reserve · póliza | Yield · barrido | FX Shield,0.164903
+COMP_1122,GROUP_0132,comercio minorista,producto,comercio minorista | construcción,2,0.666327,días,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.0694417
+COMP_1123,GROUP_0126,comercio minorista,producto,comercio minorista | transporte / logística,2,0.806229,días,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.0849664
+COMP_1124,GROUP_0148,comercio minorista,mixto,comercio minorista | hostelería,2,0.662157,días,Reserve · póliza | Yield · barrido | FX Shield,0.410096
+COMP_1125,GROUP_0063,servicios profesionales,servicio,servicios profesionales,1,0.527568,6 meses,Reserve · póliza | Yield · barrido,0.367555
+COMP_1126,GROUP_0149,comercio minorista,producto,comercio minorista | mayorista / distribución | construcción,3,0.62253,días,Reserve · póliza | Factoring | Confirming | Seguro de cobro,0.272683
+COMP_1127,GROUP_0108,comercio minorista,producto,comercio minorista,1,0.747373,días,Reserve · póliza | Yield · barrido | FX Shield,0.299957
+COMP_1128,GROUP_0085,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.618634,12 meses,Reserve · póliza | Yield · barrido,0.225605
+COMP_1129,GROUP_0024,hostelería,mixto,hostelería | servicios profesionales,2,0.55321,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.309151
+COMP_1130,GROUP_0126,holding / tesorería,producto,holding / tesorería | comercio minorista | construcción,3,0.664354,largo,Reserve · póliza | Yield · barrido | FX Shield,0.259116
+COMP_1131,GROUP_0143,servicios profesionales,servicio,servicios profesionales,1,0.554357,6 meses,Reserve · póliza | Yield · barrido,0.345103
+COMP_1132,GROUP_0114,comercio minorista,mixto,comercio minorista | hostelería,2,0.638184,días,Reserve · póliza | Yield · barrido | FX Shield,0.372539
+COMP_1133,GROUP_0086,comercio minorista,producto,comercio minorista,1,0.829795,días,Reserve · póliza | FX Shield | Yield · barrido,0.159487
+COMP_1134,GROUP_0035,comercio minorista,producto,comercio minorista,1,0.732403,días,Reserve · póliza | FX Shield | Yield · barrido,0.390041
+COMP_1135,GROUP_0081,comercio minorista,producto,comercio minorista,1,0.78157,días,Reserve · póliza | FX Shield | Yield · barrido,0.324331
+COMP_1136,GROUP_0222,comercio minorista,producto,comercio minorista,1,0.684106,días,Yield · barrido | Reserve · póliza | FX Shield,0.26315
+COMP_1137,GROUP_0159,holding / tesorería,producto,holding / tesorería | mayorista / distribución | construcción,3,0.656483,largo,Reserve · póliza | Yield · barrido | FX Shield,0.314162
+COMP_1138,GROUP_0155,transporte / logística,producto,transporte / logística | comercio minorista,2,0.78,días,Reserve · póliza | Factoring | FX Shield | Confirming,0.131221
+COMP_1139,GROUP_0197,comercio minorista,mixto,comercio minorista | hostelería,2,0.660259,días,Reserve · póliza | Yield · barrido | FX Shield,0.34553
+COMP_1140,GROUP_0011,comercio minorista,mixto,comercio minorista | hostelería,2,0.566725,días,Reserve · póliza | Yield · barrido | FX Shield,0.324654
+COMP_1141,GROUP_0009,comercio minorista,producto,comercio minorista,1,0.584145,días,Yield · barrido | Reserve · póliza | FX Shield,0.363398
+COMP_1142,GROUP_0202,construcción,mixto,construcción | mayorista / distribución | servicios profesionales,3,0.585247,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.202826
+COMP_1143,GROUP_0079,servicios profesionales,servicio,servicios profesionales | industria,2,0.736711,6 meses,Factoring | Reserve · póliza | Yield · barrido | Confirming,0.24268
+COMP_1144,GROUP_0064,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.606069,12 meses,Reserve · póliza | Yield · barrido,0.134602
+COMP_1145,GROUP_0092,comercio minorista,producto,comercio minorista,1,0.761858,días,Yield · barrido | Reserve · póliza | FX Shield,0.266091
+COMP_1146,GROUP_0032,mayorista / distribución,mixto,mayorista / distribución,1,0.557864,12 meses,Reserve · póliza,0.1886
+COMP_1147,GROUP_0181,hostelería,mixto,hostelería,1,0.498944,6 meses,Yield · barrido | Reserve · póliza | FX Shield,0.260416
+COMP_1148,GROUP_0165,mayorista / distribución,producto,mayorista / distribución | comercio minorista | construcción,3,0.586047,12 meses,Reserve · póliza | Yield · barrido | FX Shield,0.0856727
+COMP_1149,GROUP_0057,comercio minorista,producto,comercio minorista | industria | hostelería,3,0.63694,días,Reserve · póliza | Yield · barrido | FX Shield | Factoring,0.378863
+COMP_1150,GROUP_0106,comercio minorista,producto,comercio minorista,1,0.7747,días,Yield · barrido | Reserve · póliza | FX Shield,0.272906
+COMP_1151,GROUP_0016,mayorista / distribución,producto,mayorista / distribución,1,0.530537,12 meses,Reserve · póliza,0.237287
+COMP_1152,GROUP_0128,comercio minorista,producto,comercio minorista,1,0.813639,días,Reserve · póliza | Yield · barrido | FX Shield,0.215411
+COMP_1153,GROUP_0150,comercio minorista,producto,comercio minorista | construcción,2,0.671137,días,Reserve · póliza | Yield · barrido | FX Shield,0.132165
+COMP_1154,GROUP_0023,construcción,producto,construcción | mayorista / distribución,2,0.593943,6 meses,Reserve · póliza | Yield · barrido,0.177556
+COMP_1155,GROUP_0150,construcción,producto,construcción | mayorista / distribución | industria,3,0.611052,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.235444
+COMP_1156,GROUP_0141,servicios profesionales,producto,servicios profesionales | mayorista / distribución,2,0.72,6 meses,Factoring | Reserve · póliza | Yield · barrido | Confirming,0.333654
+COMP_1157,GROUP_0150,servicios profesionales,servicio,servicios profesionales,1,0.564575,6 meses,Reserve · póliza | Yield · barrido,0.359555
+COMP_1158,GROUP_0222,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.690663,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.208915
+COMP_1159,GROUP_0235,comercio minorista,producto,comercio minorista | hostelería | mayorista / distribución,3,0.626769,días,Reserve · póliza | Yield · barrido | FX Shield | Factoring,0.35185
+COMP_1160,GROUP_0158,comercio minorista,producto,comercio minorista,1,0.700756,días,Reserve · póliza | FX Shield | Yield · barrido,0.463056
+COMP_1161,GROUP_0047,mayorista / distribución,producto,mayorista / distribución,1,0.719617,12 meses,Factoring | Confirming | Reserve · póliza | Seguro de cobro,0.310796
+COMP_1162,GROUP_0116,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.591026,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.181346
+COMP_1163,GROUP_0101,comercio minorista,producto,comercio minorista | construcción,2,0.660999,días,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.283024
+COMP_1164,GROUP_0095,servicios profesionales,servicio,servicios profesionales | mayorista / distribución,2,0.600753,6 meses,Reserve · póliza | Yield · barrido,0.203885
+COMP_1165,GROUP_0108,comercio minorista,producto,comercio minorista,1,0.713721,días,Reserve · póliza | FX Shield | Yield · barrido,0.329814
+COMP_1166,GROUP_0086,comercio minorista,producto,comercio minorista,1,0.749016,días,Reserve · póliza | FX Shield | Yield · barrido,0.161324
+COMP_1167,GROUP_0212,holding / tesorería,producto,holding / tesorería | mayorista / distribución,2,0.639085,largo,Reserve · póliza | FX Shield | Yield · barrido,0.319906
+COMP_1168,GROUP_0037,energía,servicio,energía | servicios profesionales,2,0.78,12 meses,Factoring | Reserve · póliza | FX Shield | Yield · barrido,0.38614
+COMP_1169,GROUP_0095,mayorista / distribución,mixto,mayorista / distribución | industria,2,0.677549,12 meses,Factoring | Confirming | Reserve · póliza | Seguro de cobro,0.397542
+COMP_1170,GROUP_0090,construcción,producto,construcción | mayorista / distribución | comercio minorista,3,0.6527,6 meses,Reserve · póliza | Factoring | Confirming | Seguro de cobro,0.216141
+COMP_1171,GROUP_0139,construcción,producto,construcción | energía | mayorista / distribución,3,0.790709,12 meses,Factoring | Reserve · póliza | FX Shield | Confirming,0.41405
+COMP_1172,GROUP_0053,comercio minorista,mixto,comercio minorista | hostelería,2,0.668996,días,Reserve · póliza | Yield · barrido | FX Shield,0.291137
+COMP_1173,GROUP_0202,alquiler / inmobiliario,mixto,alquiler / inmobiliario,1,0.78,largo,Reserve · póliza | Yield · barrido | Seguro de cobro,0.288792
+COMP_1174,GROUP_0148,hostelería,mixto,hostelería | comercio minorista | construcción,3,0.607684,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.407056
+COMP_1175,GROUP_0196,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.714656,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.134615
+COMP_1176,GROUP_0184,mayorista / distribución,mixto,mayorista / distribución,1,0.594342,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.3592
+COMP_1177,GROUP_0120,holding / tesorería,servicio,holding / tesorería,1,0.469522,largo,Reserve · póliza | FX Shield | Yield · barrido,0.382767
+COMP_1178,GROUP_0159,comercio minorista,producto,comercio minorista,1,0.665338,días,Reserve · póliza | FX Shield | Yield · barrido,0.484022
+COMP_1179,GROUP_0239,comercio minorista,producto,comercio minorista,1,0.777185,días,Yield · barrido | Reserve · póliza | FX Shield,0.177235
+COMP_1180,GROUP_0103,mayorista / distribución,mixto,mayorista / distribución,1,0.515748,12 meses,Reserve · póliza,0.39649
+COMP_1181,GROUP_0009,,mixto,,0,,,,0.174526
+COMP_1182,GROUP_0022,hostelería,producto,hostelería | software / suscripción | transporte / logística,3,0.78,6 meses,Yield · barrido | Reserve · póliza | FX Shield | Factoring,0.356669
+COMP_1183,GROUP_0018,alquiler / inmobiliario,mixto,alquiler / inmobiliario,1,0.78,largo,Yield · barrido | Reserve · póliza | Seguro de cobro,0.213311
+COMP_1184,GROUP_0211,hostelería,producto,hostelería | comercio minorista,2,0.78,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.194043
+COMP_1185,GROUP_0126,transporte / logística,producto,transporte / logística,1,0.78,días,Factoring | Reserve · póliza | Confirming,0.247162
+COMP_1186,GROUP_0135,servicios profesionales,servicio,servicios profesionales,1,0.48062,6 meses,Yield · barrido | Reserve · póliza,0.149475
+COMP_1187,GROUP_0179,,insuficiente,,0,,,,
+COMP_1188,GROUP_0004,servicios profesionales,servicio,servicios profesionales | construcción | mayorista / distribución,3,0.596207,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.15253
+COMP_1189,GROUP_0159,hostelería,mixto,hostelería,1,0.561703,6 meses,Yield · barrido | Reserve · póliza | FX Shield,0.297628
+COMP_1190,GROUP_0119,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.668667,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.170524
+COMP_1191,GROUP_0139,software / suscripción,producto,software / suscripción | alquiler / inmobiliario | mayorista / distribución,3,0.78,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.42356
+COMP_1192,GROUP_0094,comercio minorista,producto,comercio minorista | hostelería | software / suscripción,3,0.825238,días,Yield · barrido | Reserve · póliza | FX Shield,0.22426
+COMP_1193,GROUP_0081,servicios profesionales,mixto,servicios profesionales | comercio minorista | hostelería,3,0.60201,6 meses,Yield · barrido | Reserve · póliza | FX Shield | Factoring,0.329409
+COMP_1194,GROUP_0230,comercio minorista,producto,comercio minorista | construcción,2,0.655759,días,Reserve · póliza | Factoring | FX Shield | Seguro de cobro,0.19102
+COMP_1195,GROUP_0171,mayorista / distribución,mixto,mayorista / distribución | construcción,2,0.58101,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.345028
+COMP_1196,GROUP_0222,comercio minorista,producto,comercio minorista,1,0.71699,días,Yield · barrido | Reserve · póliza | FX Shield,0.328564
+COMP_1197,GROUP_0217,energía,mixto,energía,1,0.78,12 meses,FX Shield | Factoring | Yield · barrido | Reserve · póliza,0.3257
+COMP_1198,GROUP_0218,software / suscripción,mixto,software / suscripción,1,0.78,largo,Yield · barrido | FX Shield | Reserve · póliza,0.476278
+COMP_1199,GROUP_0016,construcción,producto,construcción | comercio minorista,2,0.69792,6 meses,Reserve · póliza | Factoring | FX Shield | Seguro de cobro,0.271104
+COMP_1200,GROUP_0138,holding / tesorería,mixto,holding / tesorería | servicios profesionales | construcción,3,0.550642,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.16755
+COMP_1201,GROUP_0211,mayorista / distribución,producto,mayorista / distribución,1,0.609659,12 meses,Yield · barrido | Reserve · póliza,0.192199
+COMP_1202,GROUP_0115,hostelería,mixto,hostelería | comercio minorista,2,0.638753,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.402419
+COMP_1203,GROUP_0216,,mixto,,0,,,,0.206761
+COMP_1204,GROUP_0100,software / suscripción,producto,software / suscripción | transporte / logística,2,0.78,largo,Yield · barrido | Reserve · póliza | Factoring | FX Shield,0.448603
+COMP_1205,GROUP_0011,comercio minorista,producto,comercio minorista,1,0.697235,días,Reserve · póliza | FX Shield | Yield · barrido,0.275664
+COMP_1206,GROUP_0084,comercio minorista,producto,comercio minorista,1,0.691704,días,Reserve · póliza | Yield · barrido | FX Shield,0.340218
+COMP_1207,GROUP_0132,construcción,producto,construcción | comercio minorista,2,0.707934,6 meses,Reserve · póliza | Factoring | FX Shield | Seguro de cobro,0.201157
+COMP_1208,GROUP_0104,mayorista / distribución,mixto,mayorista / distribución | hostelería | comercio minorista,3,0.623273,12 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.376973
+COMP_1209,GROUP_0079,hostelería,servicio,hostelería | servicios profesionales,2,0.78,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.343193
+COMP_1210,GROUP_0015,construcción,producto,construcción | mayorista / distribución,2,0.696208,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.201202
+COMP_1211,GROUP_0103,comercio minorista,producto,comercio minorista | construcción,2,0.67383,días,Reserve · póliza | Yield · barrido | FX Shield,0.329755
+COMP_1212,GROUP_0118,servicios profesionales,servicio,servicios profesionales,1,0.519088,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.258996
+COMP_1213,GROUP_0158,hostelería,servicio,hostelería,1,0.517357,6 meses,Reserve · póliza | FX Shield | Yield · barrido,0.42495
+COMP_1214,GROUP_0100,construcción,producto,construcción | holding / tesorería | mayorista / distribución,3,0.600993,6 meses,Factoring | Reserve · póliza | FX Shield | Confirming,0.157474
+COMP_1215,GROUP_0168,holding / tesorería,mixto,holding / tesorería | servicios profesionales,2,0.571769,largo,Reserve · póliza | Yield · barrido | FX Shield,0.281264
+COMP_1216,GROUP_0127,comercio minorista,producto,comercio minorista | mayorista / distribución,2,0.734725,días,Reserve · póliza | FX Shield | Yield · barrido,0.418086
+COMP_1217,GROUP_0144,servicios profesionales,mixto,servicios profesionales | mayorista / distribución | construcción,3,0.604525,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.239052
+COMP_1218,GROUP_0084,mayorista / distribución,mixto,mayorista / distribución,1,0.641179,12 meses,Factoring | Confirming | Reserve · póliza | Seguro de cobro,0.309805
+COMP_1219,GROUP_0142,construcción,producto,construcción | mayorista / distribución | comercio minorista,3,0.570757,6 meses,Reserve · póliza | Factoring | Confirming | Seguro de cobro,0.317637
+COMP_1220,GROUP_0169,,insuficiente,,0,,,,
+COMP_1221,GROUP_0169,comercio minorista,producto,comercio minorista | mayorista / distribución,2,0.598436,días,Reserve · póliza | Yield · barrido | FX Shield,0.246752
+COMP_1222,GROUP_0137,alquiler / inmobiliario,producto,alquiler / inmobiliario | comercio minorista,2,0.78,largo,Reserve · póliza | Yield · barrido | FX Shield | Seguro de cobro,0.240024
+COMP_1223,GROUP_0141,servicios profesionales,servicio,servicios profesionales,1,0.72,6 meses,Factoring | Reserve · póliza | Yield · barrido,0.33105
+COMP_1224,GROUP_0143,servicios profesionales,servicio,servicios profesionales | mayorista / distribución,2,0.509719,6 meses,Factoring | Reserve · póliza | Confirming | Yield · barrido,0.3339
+COMP_1225,GROUP_0044,comercio minorista,producto,comercio minorista | construcción,2,0.743509,días,Reserve · póliza | Factoring | FX Shield | Seguro de cobro,0.209315
+COMP_1226,GROUP_0160,,insuficiente,,0,,,,
+COMP_1227,GROUP_0244,construcción,producto,construcción | holding / tesorería | mayorista / distribución,3,0.700842,6 meses,Factoring | Reserve · póliza | FX Shield | Confirming,0.24184
+COMP_1228,GROUP_0049,servicios profesionales,servicio,servicios profesionales,1,0.597715,6 meses,Yield · barrido | Reserve · póliza,0.234495
+COMP_1229,GROUP_0009,,insuficiente,,0,,,,
+COMP_1230,GROUP_0019,construcción,mixto,construcción | mayorista / distribución,2,0.75,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.400819
+COMP_1231,GROUP_0234,mayorista / distribución,mixto,mayorista / distribución,1,0.51782,12 meses,Yield · barrido | Reserve · póliza,0.213079
+COMP_1232,GROUP_0237,hostelería,producto,hostelería | transporte / logística | mayorista / distribución,3,0.78,6 meses,Reserve · póliza | Factoring | Confirming | Yield · barrido,0.215746
+COMP_1233,GROUP_0208,comercio minorista,producto,comercio minorista,1,0.713805,días,Reserve · póliza | FX Shield | Yield · barrido,0.31636
+COMP_1234,GROUP_0142,comercio minorista,producto,comercio minorista,1,0.756099,días,Reserve · póliza | FX Shield | Yield · barrido,0.305591
+COMP_1235,GROUP_0054,software / suscripción,servicio,software / suscripción | transporte / logística | alquiler / inmobiliario,3,0.78,largo,Reserve · póliza | Yield · barrido | Factoring | FX Shield,0.270077
+COMP_1236,GROUP_0157,comercio minorista,producto,comercio minorista | hostelería | construcción,3,0.635195,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.410118
+COMP_1237,GROUP_0206,comercio minorista,producto,comercio minorista | mayorista / distribución | construcción,3,0.643331,días,Reserve · póliza | Factoring | Yield · barrido | Confirming,0.327958
+COMP_1238,GROUP_0142,mayorista / distribución,producto,mayorista / distribución | construcción | industria,3,0.648187,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.250296
+COMP_1239,GROUP_0250,holding / tesorería,producto,holding / tesorería | mayorista / distribución | construcción,3,0.56278,largo,Factoring | Reserve · póliza | Yield · barrido | FX Shield,0.281161
+COMP_1240,GROUP_0250,holding / tesorería,producto,holding / tesorería | mayorista / distribución | construcción,3,0.562652,largo,Factoring | Reserve · póliza | Yield · barrido | FX Shield,0.274948
+COMP_1241,GROUP_0250,holding / tesorería,producto,holding / tesorería | construcción | mayorista / distribución,3,0.561488,largo,Factoring | Reserve · póliza | Yield · barrido | FX Shield,0.28286
+COMP_1242,GROUP_0122,construcción,mixto,construcción | servicios profesionales | mayorista / distribución,3,0.588956,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.249002
+COMP_1243,GROUP_0104,construcción,producto,construcción | hostelería | mayorista / distribución,3,0.658568,6 meses,Reserve · póliza | Factoring | Confirming | Seguro de cobro,0.320265
+COMP_1244,GROUP_0013,construcción,producto,construcción,1,0.519658,6 meses,Factoring | Reserve · póliza | Seguro de cobro,0.26049
+COMP_1245,GROUP_0022,hostelería,producto,hostelería | mayorista / distribución | construcción,3,0.78,6 meses,Reserve · póliza | Factoring | Yield · barrido | Confirming,0.214133
+COMP_1246,GROUP_0138,servicios profesionales,servicio,servicios profesionales,1,0.593434,6 meses,Reserve · póliza | Yield · barrido,0.270552
+COMP_1247,GROUP_0217,construcción,producto,construcción | holding / tesorería,2,0.683574,6 meses,Reserve · póliza | Factoring | FX Shield | Yield · barrido,0.231176
+COMP_1248,GROUP_0066,comercio minorista,mixto,comercio minorista,1,0.546841,días,Reserve · póliza | Yield · barrido | FX Shield,0.432876
+COMP_1249,GROUP_0090,comercio minorista,producto,comercio minorista | hostelería | mayorista / distribución,3,0.666795,días,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.408945
+COMP_1250,GROUP_0065,hostelería,producto,hostelería | alquiler / inmobiliario,2,0.78,6 meses,Yield · barrido | Reserve · póliza | FX Shield | Seguro de cobro,0.306393
+COMP_1251,GROUP_0217,,insuficiente,,0,,,,
+COMP_1252,GROUP_0070,mayorista / distribución,producto,mayorista / distribución | construcción | industria,3,0.599741,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.294785
+COMP_1253,GROUP_0096,servicios profesionales,servicio,servicios profesionales,1,0.739448,6 meses,Factoring | Yield · barrido | Reserve · póliza,0.144467
+COMP_1254,GROUP_0040,holding / tesorería,mixto,holding / tesorería,1,0.67906,largo,Reserve · póliza | FX Shield | Yield · barrido,0.267468
+COMP_1255,GROUP_0194,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.606621,12 meses,Reserve · póliza,0.219481
+COMP_1256,GROUP_0079,servicios profesionales,servicio,servicios profesionales,1,0.701314,6 meses,Yield · barrido | Factoring | Reserve · póliza,0.238283
+COMP_1257,GROUP_0222,mayorista / distribución,producto,mayorista / distribución | construcción | industria,3,0.679137,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.301529
+COMP_1258,GROUP_0056,hostelería,mixto,hostelería | comercio minorista,2,0.625911,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.339056
+COMP_1259,GROUP_0151,mayorista / distribución,producto,mayorista / distribución,1,0.597646,12 meses,Reserve · póliza,0.239915
+COMP_1260,GROUP_0011,comercio minorista,producto,comercio minorista,1,0.751916,días,Reserve · póliza | FX Shield | Yield · barrido,0.358885
+COMP_1261,GROUP_0011,comercio minorista,producto,comercio minorista,1,0.735139,días,Reserve · póliza | FX Shield | Yield · barrido,0.231642
+COMP_1262,GROUP_0026,industria,mixto,industria,1,0.526618,12 meses,Factoring | Reserve · póliza | Confirming,0.299484
+COMP_1263,GROUP_0091,servicios profesionales,servicio,servicios profesionales,1,0.525221,6 meses,Reserve · póliza | Yield · barrido,0.459474
+COMP_1264,GROUP_0155,transporte / logística,producto,transporte / logística | construcción,2,0.78,días,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.309454
+COMP_1265,GROUP_0078,,insuficiente,,0,,,,
+COMP_1266,GROUP_0087,servicios profesionales,mixto,servicios profesionales,1,0.482954,6 meses,Reserve · póliza | Yield · barrido,0.293329
+COMP_1267,GROUP_0095,mayorista / distribución,producto,mayorista / distribución | industria,2,0.737072,12 meses,Factoring | Confirming | Reserve · póliza | Seguro de cobro,0.369073
+COMP_1268,GROUP_0027,comercio minorista,producto,comercio minorista,1,0.714219,días,Reserve · póliza | FX Shield | Yield · barrido,0.408855
+COMP_1269,GROUP_0019,mayorista / distribución,mixto,mayorista / distribución,1,0.681939,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.403526
+COMP_1270,GROUP_0020,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.589499,12 meses,Reserve · póliza,0.319213
+COMP_1271,GROUP_0172,comercio minorista,producto,comercio minorista,1,0.723954,días,Reserve · póliza | FX Shield | Yield · barrido,0.237594
+COMP_1272,GROUP_0077,comercio minorista,mixto,comercio minorista | industria | hostelería,3,0.524886,días,Reserve · póliza | Yield · barrido | FX Shield,0.501621
+COMP_1273,GROUP_0241,construcción,producto,construcción | mayorista / distribución,2,0.72939,6 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.245683
+COMP_1274,GROUP_0213,construcción,producto,construcción,1,0.715709,6 meses,Factoring | Reserve · póliza | Seguro de cobro,0.258975
+COMP_1275,GROUP_0067,comercio minorista,producto,comercio minorista,1,0.750673,días,Yield · barrido | Reserve · póliza | FX Shield,0.375315
+COMP_1276,GROUP_0103,servicios profesionales,servicio,servicios profesionales,1,0.520388,6 meses,Reserve · póliza | Yield · barrido,0.44067
+COMP_1277,GROUP_0200,construcción,producto,construcción | comercio minorista | mayorista / distribución,3,0.680314,6 meses,Reserve · póliza | Factoring | Yield · barrido | Confirming,0.274817
+COMP_1278,GROUP_0222,mayorista / distribución,producto,mayorista / distribución | comercio minorista | industria,3,0.638547,12 meses,Reserve · póliza | Factoring | Confirming | FX Shield,0.421004
+COMP_1279,GROUP_0035,comercio minorista,producto,comercio minorista | hostelería,2,0.699502,días,Reserve · póliza | Yield · barrido | FX Shield,0.399094
+COMP_1280,GROUP_0159,mayorista / distribución,producto,mayorista / distribución,1,0.599441,12 meses,Yield · barrido | Reserve · póliza,0.284424
+COMP_1281,GROUP_0218,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.686171,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.45401
+COMP_1282,GROUP_0218,software / suscripción,producto,software / suscripción,1,0.78,largo,Reserve · póliza | FX Shield | Yield · barrido,0.384509
+COMP_1283,GROUP_0170,comercio minorista,producto,comercio minorista | construcción | hostelería,3,0.627641,6 meses,Reserve · póliza | Yield · barrido | FX Shield,0.289572
+COMP_1284,GROUP_0149,construcción,mixto,construcción | hostelería,2,0.516319,6 meses,Reserve · póliza | Factoring | Yield · barrido | FX Shield,0.394164
+COMP_1285,GROUP_0149,mayorista / distribución,producto,mayorista / distribución | construcción,2,0.671394,12 meses,Factoring | Reserve · póliza | Confirming | Seguro de cobro,0.228252
+COMP_1286,GROUP_0030,comercio minorista,producto,comercio minorista,1,0.706141,días,Reserve · póliza | Yield · barrido | FX Shield,0.503409

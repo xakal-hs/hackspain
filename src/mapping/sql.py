@@ -5,14 +5,18 @@ from __future__ import annotations
 from mapping.catalogs import (
     AMORTISING_FREQUENCY,
     AMORTIZATION_TYPE,
+    AMOUNT_SENTINEL_EUR,
     BALANCE_SUSPECT_ABS,
     BANK_NAME,
+    CASH_LIKE_TYPES,
     COUNTERPARTY_PAD,
     COUNTRY,
+    CURRENCY_PER_EUR_APPROX,
     ERP_CODE,
     ERP_LABEL,
     INVOICE_STATUS,
     SERVICE,
+    SNAPSHOT_DATE,
     TXN_CATEGORY,
     TYPE_FAMILY,
     UNMAPPED,
@@ -87,6 +91,29 @@ def _counterparty_expr(column: str = "counterparty_id") -> str:
         f"ELSE 'COUNTERPARTY_' || lpad({digits}, {COUNTERPARTY_PAD}, '0') "
         "END"
     )
+
+
+def _per_eur_expr(currency_column: str) -> str:
+    """Unidades por EUR (orden de magnitud) para flags; moneda desconocida → 1.0."""
+    parts = ["CASE"]
+    for cur, rate in CURRENCY_PER_EUR_APPROX.items():
+        parts.append(f"WHEN upper(trim(CAST({currency_column} AS VARCHAR))) = {sql_str(cur)} THEN {rate!r}")
+    parts.append("ELSE 1.0 END")
+    return " ".join(parts)
+
+
+def _product_currency_cte() -> str:
+    return """
+    product_ccy AS (
+        SELECT product_id, any_value(type) AS type, any_value(currency) AS currency
+        FROM (
+            SELECT product_id, type, currency FROM raw_banking_products
+            UNION ALL
+            SELECT product_id, type, currency FROM raw_debt_products
+        )
+        GROUP BY 1
+    )
+    """
 
 
 def _service_clean_expr(column: str = "service") -> str:
@@ -318,24 +345,30 @@ def debt_schedule_config_mapped_sql() -> str:
 
 
 def balances_mapped_sql() -> str:
+    cash_types = ", ".join(sql_str(t) for t in CASH_LIKE_TYPES)
+    # centinela = saldo de caja > 1e8 EUR equivalentes; sin catálogo (currency/type nulos) se asume caja en EUR
+    suspect = (
+        f"(b.balance IS NOT NULL AND abs(b.balance) / {_per_eur_expr('p.currency')} > {BALANCE_SUSPECT_ABS} "
+        f"AND (p.type IS NULL OR p.type IN ({cash_types})))"
+    )
     return f"""
     CREATE OR REPLACE VIEW balances_mapped AS
+    WITH {_product_currency_cte()}
     SELECT
-        product_id,
-        company_id,
-        date,
-        balance,
-        available,
-        granted,
-        liquidity,
-        countable,
-        CASE
-            WHEN balance IS NOT NULL AND abs(balance) > {BALANCE_SUSPECT_ABS}
-            THEN 'suspect'
-            ELSE 'ok'
-        END AS balance_quality,
-        (balance IS NOT NULL AND abs(balance) > {BALANCE_SUSPECT_ABS}) AS dq_balance_suspect
-    FROM raw_balances
+        b.product_id,
+        b.company_id,
+        b.date,
+        b.balance,
+        b.available,
+        b.granted,
+        b.liquidity,
+        b.countable,
+        p.currency AS product_currency,
+        b.balance / {_per_eur_expr('p.currency')} AS balance_eur_approx,
+        CASE WHEN {suspect} THEN 'suspect' ELSE 'ok' END AS balance_quality,
+        {suspect} AS dq_balance_suspect
+    FROM raw_balances b
+    LEFT JOIN product_ccy p USING (product_id)
     """
 
 
@@ -389,7 +422,13 @@ def invoices_mapped_sql() -> str:
                 pending_amount IS NOT NULL AND amount IS NOT NULL
                 AND pending_amount <> 0 AND amount <> 0
                 AND sign(pending_amount) <> sign(amount)
-            ) AS dq_pending_sign_mismatch
+            ) AS dq_pending_sign_mismatch,
+            (amount IS NOT NULL AND abs(amount) / {_per_eur_expr('currency')} > {AMOUNT_SENTINEL_EUR})
+                AS dq_amount_sentinel,
+            (issuance_date IS NOT NULL
+                AND CAST(issuance_date AS DATE) > DATE {sql_str(SNAPSHOT_DATE)}) AS dq_issued_after_snapshot,
+            (amount IS NOT NULL AND amount = 0) AS dq_amount_zero,
+            (counterparty_id IS NULL OR trim(CAST(counterparty_id AS VARCHAR)) = '') AS dq_counterparty_missing
         FROM raw_invoices
     )
     SELECT
@@ -416,7 +455,11 @@ def invoices_mapped_sql() -> str:
         dq_due_before_issuance,
         dq_paid_before_issuance,
         dq_pending_exceeds_amount,
-        dq_pending_sign_mismatch
+        dq_pending_sign_mismatch,
+        dq_amount_sentinel,
+        dq_issued_after_snapshot,
+        dq_amount_zero,
+        dq_counterparty_missing
     FROM base
     """
 
@@ -430,10 +473,11 @@ def transactions_mapped_sql() -> str:
     )
     return f"""
     CREATE OR REPLACE VIEW transactions_mapped AS
+    WITH {_product_currency_cte()}
     SELECT
         transaction_id,
         company_id,
-        product_id,
+        t.product_id,
         date,
         value_date AS value_date_raw,
         CASE
@@ -461,8 +505,12 @@ def transactions_mapped_sql() -> str:
         {category} AS category,
         description,
         counterparty_id AS counterparty_id_raw,
-        {_counterparty_expr("counterparty_id")} AS counterparty_id
-    FROM raw_transactions
+        {_counterparty_expr("counterparty_id")} AS counterparty_id,
+        p.currency AS product_currency,
+        (amount IS NOT NULL AND abs(amount) / {_per_eur_expr('p.currency')} > {AMOUNT_SENTINEL_EUR})
+            AS dq_amount_sentinel
+    FROM raw_transactions t
+    LEFT JOIN product_ccy p USING (product_id)
     """
 
 

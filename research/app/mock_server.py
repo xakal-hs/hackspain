@@ -520,6 +520,28 @@ def decisions() -> dict:
     return {"decisions": DECISIONS}
 
 
+# fase 4: el mock no tiene panel ni facturas; responde vacío con aviso (misma forma que app/server.py)
+@app.get("/api/situaciones")
+def situaciones() -> dict:
+    return {"situaciones": [], "resumen": {"total": 0, "pasan": 0, "fallan": 0, "no_verificables": 0, "centrales": 0, "centrales_fallan": 0},
+            "aviso": "El mock no sirve situaciones: arranca app.server con el artefacto real."}
+
+
+@app.get("/api/situaciones/{sid}")
+def situacion(sid: str) -> dict:
+    raise HTTPException(404, f"Situación {sid} no encontrada")
+
+
+@app.get("/api/proactive/validation")
+def proactive_validation() -> dict:
+    return {"casos": [], "metricas": {}, "aviso": "El mock no tiene validación proactiva: arranca app.server."}
+
+
+@app.get("/api/proactive")
+def proactive(company_id: str, month: str | None = None, horizon: int = 6) -> dict:
+    raise HTTPException(404, "El mock no proyecta tesorería: arranca app.server con el panel real")
+
+
 @app.get("/", include_in_schema=False)
 def index() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html", headers={"Cache-Control": "no-store"})

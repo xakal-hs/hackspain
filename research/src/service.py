@@ -89,6 +89,20 @@ class XRayService:
         self._alert_history = self._compute_alert_history()
         self.summary = self._summary()
         self.debt = _debt_snapshot(self.comp)
+        self._proactive = None  # motor proactivo (proyección aritmética), perezoso
+
+    @property
+    def proactive_engine(self):
+        if self._proactive is None:
+            from proactive import ProactiveEngine
+            self._proactive = ProactiveEngine(self.raw, self.scorer, feats=self.feats, scored=self.scored)
+        return self._proactive
+
+    def proactive(self, cid: str, month: str | None, horizon: int) -> dict:
+        """Recomendación proactiva en el mes T con el modelo vigente, sin reentrenar ni usar el forecaster."""
+        if cid not in self.comp.index:
+            raise KeyError(f"Empresa {cid} no encontrada")
+        return self.proactive_engine.recommend(cid, month, horizon)
 
     # ------------------------------------------------------------ helpers
     def _fc_for(self, ser: pd.DataFrame) -> pd.DataFrame:

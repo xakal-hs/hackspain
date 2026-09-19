@@ -441,10 +441,72 @@ def build():
         why="Embat ya ofrece previsión, alertas, riesgo y pagos. La aportación incremental de X-Ray es comparabilidad, explicación aditiva y priorización transversal: convertir el rastro que Embat ya tiene en una cola de decisiones, no duplicar el forecast.",
         status="a confirmar con la organización")
 
+    # --- autoresearch (fase 3, rama autoresearch/2026-09-19): bucle testear→diagnosticar→cambiar sobre las premisas del consejo
+    ar = {t: load_metrics(t) or {} for t in ("ar000", "ar002b", "ar004", "ar006", "ar007")}
+    pm = lambda m: (sum(m.get(f"auc_level_vs_{e}", 0) for e in E.EVENTS) / 4) if m else float("nan")
+    add(category="features", title="La nómina puntúa por su regularidad a la baja (payroll_cv), no por su peso sobre las entradas",
+        question="¿Por qué payroll_burden tenía peso 0 y la explicación no podía nombrar la nómina ausente? (premisa P172 del consejo)",
+        decision="Se sustituye payroll_burden (nóminas/entradas 3m) por payroll_cv: semidesviación a la baja de las nóminas respecto a su media de 6 meses, dividida por esa media. Solo penaliza nóminas que faltan o bajan; contratar no resta. Sin nóminas sigue siendo «no aplica».",
+        why="Con dirección «más peso de nómina = peor», payroll_burden tenía AUC 0,41 frente a tensión y 0,43 frente a incumplimiento: quien paga más nómina relativa tiene menos eventos. Era un proxy del tamaño (rho −0,46 con log_scale) y la logística con signo restringido hacía lo correcto al darle peso 0. La señal está en la regularidad: payroll_cv separa incumplimiento (0,58) y caída (0,61) y es neutra al tamaño (−0,05).",
+        alternatives="Coeficiente de variación total (std/media): más AUC en incumplimiento (0,607) pero penaliza la expansión (−0,025), porque contratar también hace variar la nómina. payroll_continuity_6m: correlaciona con el tamaño (+0,27). payroll_gap binaria: cobertura 35 %.",
+        evidence=f"GroupKFold por grupo × 3 cortes: PM {pm(ar['ar000']):.3f} → {pm(ar['ar002b']):.3f}; incumplimiento {ar['ar000'].get('auc_level_vs_incumplimiento_6m', float('nan')):.3f} → {ar['ar002b'].get('auc_level_vs_incumplimiento_6m', float('nan')):.3f}, caída {ar['ar000'].get('auc_level_vs_caida_6m', float('nan')):.3f} → {ar['ar002b'].get('auc_level_vs_caida_6m', float('nan')):.3f}; guardarraíles de trayectoria mejoran. Peso calibrado de payroll_cv: 0,10 (tercera feature). Detalle: .devin/workflows/autoresearch/salida/iteraciones/iter_002/.")
+    add(category="features", title="El margen de caja a 6 meses sale del score (queda como contexto)",
+        question="¿Rescatar net_margin_6m o retirarla? (premisa P199)",
+        decision="Se retira del catálogo del score. Se sigue calculando como contexto para el forecaster.",
+        why="AUC 0,46-0,49 frente a los cuatro eventos (a más margen, ligeramente más eventos adversos: reversión a la media) y peso calibrado 0 en los cuatro. La explicación mostraba un «Margen de caja 6m» que nunca movía nada.",
+        evidence=f"La nota es idéntica en todas las filas (PM {pm(ar['ar002b']):.3f} = {pm(ar['ar004']):.3f}). Detalle: iter_004.")
+    add(category="features", title="Entra la persistencia de cobros operativos (oper_persistence_6m)",
+        question="¿Qué feature del brainstorming (R07) entra sin empeorar ningún evento?",
+        decision="oper_persistence_6m = meses de los últimos 6 con cobros operativos ≥ 50 % de su mediana anual (pilar estabilidad, dirección +1).",
+        why="Dirección coherente en los cuatro eventos (menos caída e incumplimiento, más expansión), neutra al tamaño (rho 0,04) y cinco veces menos ruidosa que activity_trend (2,9 frente a 13,6 puntos de percentil al mes), a la que quita peso (0,18 → 0,16) y acerca la criticidad de la caja (P173: +1,60 → +0,88).",
+        alternatives="lost_accel y yoy_inflow: ruidosas (17-25 puntos al mes) y de poca cobertura. payee_concentration y hhi_ap_6m: exigen rehacer el panel; pendientes.",
+        evidence=f"PM {pm(ar['ar004']):.3f} → {pm(ar['ar006']):.3f}: tensión {ar['ar004'].get('auc_level_vs_tension_6m', float('nan')):.3f} → {ar['ar006'].get('auc_level_vs_tension_6m', float('nan')):.3f}, caída {ar['ar004'].get('auc_level_vs_caida_6m', float('nan')):.3f} → {ar['ar006'].get('auc_level_vs_caida_6m', float('nan')):.3f}, expansión igual. Detalle: iter_006.")
+    add(category="datos", title="Con caja centinela, la liquidez es «sin dato»",
+        question="¿Qué hacer con las 9 empresas cuya caja reconstruida es un artefacto del generador (saldo o transacción > 1e8 €)?",
+        decision="runway pasa a nulo cuando dq_cash_sentinel: la nota va al neutro en liquidez y la confianza baja. La caja implausible por riqueza real (dq_cash_implausible: holdings con mucha caja y poco flujo, eventos a la mitad) no se toca.",
+        why="La caja falsa movía la nota ±20-30 puntos en las dos direcciones (COMP_1068: 83,7 «sano» con 87 000 M€ falsos; COMP_0420: 25,3 con −2 000 M€). Marcar no bastaba: el sub-score de runway era alto o bajo, no neutro. La deriva de reconstrucción (has_drift) queda pendiente de un flag por fila y de la exclusión simétrica en los eventos.",
+        evidence=f"PM idéntica fuera de las filas centinela (0,6143 = 0,6143 en todas las filas OOF); en cortes {pm(ar['ar006']):.3f} → {pm(ar['ar007']):.3f} (ruido). Detalle: iter_007 y salida/datos_limpieza.md A02/A16.")
+
+    # --- autoresearch, ronda 2 (rama autoresearch/2026-09-19-r2): remedios del consejo (Q2, Q4, Q8, Q11) medidos por evento, no por la PM
+    r2 = {t: load_metrics(t) or {} for t in ("ar100", "ar101", "ar102", "ar104", "ar105", "ar107")}
+    g = lambda m, k: m.get(k, float("nan"))
+    add(category="eventos", title="La financiación del grupo no censura la tensión: la fila financiada queda sin etiqueta (null), no como 0",
+        question="¿Por qué la etiqueta de tensión declaraba sanas a 2 513 filas (22 %) cuya caja la tapaba el grupo? (Q2/Q12 del consejo, remedio 1)",
+        decision="En tension_6m un mes futuro en tensión cuenta aunque haya financiación intragrupo; la fila de hoy con > 20 % de flujo intragrupo queda sin etiqueta. La entrada (tension_entrada_6m) no se toca.",
+        why="La censura convertía en «error» ordenaciones correctas del score. Toda la subida de AUC es de la etiqueta, no del modelo: la misma nota sin recalibrar mide 0,700 contra la etiqueta vieja y 0,753 contra la nueva; recalibrar mueve −0,004. Los jueces fijos (tensión no circular, incumplimiento, caída, expansión, entrada a 2 meses) no se mueven.",
+        evidence=f"Tasa base 0,274 → 0,353 (n 11 223 → 8 710). En cortes, tensión {g(r2['ar100'], 'auc_level_vs_tension_6m'):.3f} → {g(r2['ar101'], 'auc_level_vs_tension_6m'):.3f}; resto de eventos ±0,004. Detalle: salida/iteraciones/iter_101/.")
+    add(category="calibración", title="Dos notas: la adversa calibra solo con tensión, incumplimiento y caída; la de expansión, con la expansión",
+        question="¿Puede una sola nota servir al prestamista y ordenar la expansión? (Q4 del consejo, P173/P120; R10)",
+        decision="HealthScorer(target=\"adversa\") promedia los pesos solo de E1-E3 (es la nota publicada); HealthScorer(target=\"expansion\") da la segunda nota. Mismos percentiles, misma escala, explicación aditiva exacta en las dos.",
+        why="Promediar los pesos de la tensión (runway 3,4) con los de la expansión (runway 0,0) diluía la caja: la nota universal perdía frente a una sola columna en los cuatro anclajes y la Spearman entre las dos notas recalibradas era 0,078. La nota de expansión resulta ser además la mejor para la caída de cobros (0,635): la caída es momentum, no caja.",
+        alternatives="EVENT_W (pesos por evento al promediar, ronda 1): la misma decisión con pesos escondidos. Regla de banda sola: no cambia los pesos.",
+        evidence=f"Nota adversa OOF: tensión 0,749 → 0,796 (+2,9 se), juez no circular 0,772 → 0,818, entrada en estrés a 2 m 0,576 → 0,609; nota de expansión 0,597 frente a 0,568 de la nota única. En cortes, tensión {g(r2['ar101'], 'auc_level_vs_tension_6m'):.3f} → {g(r2['ar102'], 'auc_level_vs_tension_6m'):.3f}; nota de expansión frente a expansión {g(r2['ar102'], 'auc_exp_vs_expansion_6m'):.3f}. Coste declarado: auc_deterioro −0,023 (IC [−0,047, −0,003]) con AR(1) plano: la serie tiene menos saltos (26,9 % → 21,7 %); MAE a 3 m −12 %, precisión de alerta +0,03. Detalle: iter_102/.")
+    add(category="features", title="La tendencia de cobros puntúa en euros operativos (oper_growth_12m), no en entradas totales",
+        question="¿Puede «crecimiento» probarse con apuntes o con entradas que mezclan transferencias? (Q11, P250, P330)",
+        decision="oper_growth_12m = log(cobros operativos 3m / 12m) sustituye a growth_vs_12m en el catálogo; growth_vs_12m sigue como contexto para las reglas C2/C3 y el forecaster. activity_trend no se toca (es la mejor feature para la caída).",
+        why="Por fila, los cobros operativos separan la expansión con 0,649 frente a 0,591 de las entradas totales; el gate literal de Q11 (activity_trend solo si los euros no caen) no aporta nada (0,605 = 0,605). En la nota adversa la feature pesaba 0,006: el cambio es de la nota de expansión.",
+        evidence=f"Nota de expansión OOF frente a expansión 0,597 → 0,640 (+0,043), expansión a 3 m 0,542 → 0,561; nota adversa idéntica. En cortes {g(r2['ar102'], 'auc_exp_vs_expansion_6m'):.3f} → {g(r2['ar104'], 'auc_exp_vs_expansion_6m'):.3f}. Detalle: iter_104/.")
+    add(category="eventos", title="La cuota de deuda sale del evento de incumplimiento",
+        question="¿Es verificable un «impago de cuota» sin calendario de cuotas? (Q8, R16, P152)",
+        decision="incumplimiento_6m = nómina regular que falta dos meses seguidos o IVA que falta dos trimestres; la cuota se publica aparte como impago_cuota_6m y no calibra.",
+        why="El 49 % de los positivos venían solo de la cuota, y la cuota va al revés: más caja y menos carga de deuda → más «impago» (runway 0,404, debt_burden 0,339); el 43 % vuelve a pagar en 6 meses, la caja no cae y solo el 3 % de las empresas tiene calendario. Además la etiqueta premiaba tener deuda (16,8 % vs 6,7 %) y la calibración castigaba la deuda a igual caja (P152: 1,115 → 0,971).",
+        alternatives="has_debt binaria o carga relativa a la caja (R16): la señal no existe entre quien tiene deuda (AUC 0,44-0,48).",
+        evidence=f"Nota adversa OOF frente a E2: 0,571 → 0,624 (+0,035 juez, +0,017 modelo), caída +0,020, mora AP estructural +0,053; coste: tensión −0,010, juez no circular −0,018 (1,0 se). En cortes incumplimiento {g(r2['ar104'], 'auc_level_vs_incumplimiento_6m'):.3f} → {g(r2['ar105'], 'auc_level_vs_incumplimiento_6m'):.3f}, caída {g(r2['ar104'], 'auc_level_vs_caida_6m'):.3f} → {g(r2['ar105'], 'auc_level_vs_caida_6m'):.3f}, deterioro recupera +0,020. debt_burden queda en 0,005 de peso. Detalle: iter_105/.")
+    add(category="reglas", title="Menos de medio mes de caja propia no se publica como «sano»",
+        question="¿Cómo garantizar la cota de banda que pide el prestamista (P120) sin hardcodear la etiqueta? (ronda 1, iter_008)",
+        decision="Sobre la nota suavizada, si runway < log(1,5) la nota se acota a 64,9 con una contribución aditiva ec_regla_liquidez (Σec sigue siendo la nota). Los topes duros (50 / 34,9 con liquidez < 0,25) se descartan por circulares con la etiqueta y por su coste en incumplimiento y caída.",
+        why="Con dos notas la objeción de la ronda 1 (la expansión) ya no aplica. El tope suave toca 480 de 5 436 filas sanas, no mueve ningún AUC (±0,002) y baja la tensión del 20 % mejor por nota de 10,9 % a 8,5 %.",
+        evidence=f"P120: 7,8 % → 0 % de sanas con < 0,5 meses. En cortes PM {pm(r2['ar105']):.3f} → {pm(r2['ar107']):.3f}; deterioro {g(r2['ar105'], 'auc_deterioro'):.3f} → {g(r2['ar107'], 'auc_deterioro'):.3f}. Detalle: iter_107/.")
     add(category="producto", title="Voz de producto Embat: coste oculto, mesa de opciones y mix de plazos",
         question="¿Cómo enseña Embat el exceso, la divisa y la deuda a un CFO que no los siente como problema?",
         decision="Idle cash y FX son costes ocultos: hay que mostrarlos en la app, no en un agente (el agente no se usa). El módulo se vende como suscripción; intermediar rieles cuando Embed One no cubre es un parche. El upsell es una mesa de opciones que encajan. La deuda, un mix corto/medio/largo según el tiempo de devolución. La criticidad de la liquidez cambia con el sector. La solvencia sale de previsión y colchón, no de conciliación perfecta.",
         why="Testimonio de una PM de Embat (19-09-2026). El CFO no toma el dinero parado como problema real y la operativa de divisa le parece compleja. Empujar un SKU por comisión o un agente de FX contradice cómo venden ellos. Fuente: context/voz_embat.md.",
+        status="decidido")
+
+    add(category="producto", title="Voz de Capchase: partner con licencia, sector × tenor y depósito como colateral",
+        question="¿Hace falta ser banco para mover el dinero, y cómo se diseña el préstamo?",
+        decision="No hace falta licencia bancaria propia: se apalanca la de un banco partner. El préstamo vive en una rejilla sector × tenor (días / 6 meses / 12 meses / largo); inmediato, corto y medio son productos distintos. El objetivo es retener. Quien tiene caja también pide: aparcar el depósito en el partner es colateral, baja el interés y pega al cliente. Deterioro es deuda nueva mientras la caja se evapora, no el alta de deuda sola.",
+        why="Testimonio de un cofundador de Capchase (19-09-2026). Complementa la voz de Embat: aquella enseña el coste al CFO; esta dice cómo se ejecuta el riel y cómo se parte el crédito. Fuente: context/voz_capchase.md.",
         status="decidido")
     return D, its
 
@@ -466,6 +528,19 @@ DESCS = {
     "v5d": "v5a + 6 exógenas + regularización fuerte",
     "v5e": "v5b + sin dato = neutro (sin renormalizar)",
     "v5f": "v5e + escala publicada lineal (P5→15, P95→85) y alertas Δ≥10",
+    "v6": "Final: inactividad causal, intragrupo fuera, FX en facturas, clientes perdidos, calibración 2 caras, EPS relativo",
+    "v7": "Eventos v2 (tensión, incumplimiento, caída, expansión) calibran los pesos; probabilidades publicadas",
+    "ar000": "Base del autoresearch: v7 sobre el panel con flags de calidad (fase 0)",
+    "ar002b": "+ payroll_cv (regularidad de nóminas a la baja) en lugar de payroll_burden",
+    "ar004": "− net_margin_6m (sin señal, peso 0)",
+    "ar006": "+ oper_persistence_6m (persistencia de cobros operativos)",
+    "ar007": "runway sin dato con caja centinela (final del bucle)",
+    "ar100": "Base de la ronda 2 (= ar007 con los eventos v3 publicados)",
+    "ar101": "tension_6m: la financiación del grupo deja de censurar como 0 (null)",
+    "ar102": "Dos notas: la adversa calibra solo con E1-E3; nota de expansión aparte",
+    "ar104": "oper_growth_12m (cobros operativos) sustituye a growth_vs_12m",
+    "ar105": "La cuota de deuda sale de incumplimiento_6m",
+    "ar107": "Regla de banda: menos de medio mes de caja no es sano (final de la ronda 2)",
     "v6": "Inactividad causal, intragrupo fuera, FX en facturas, clientes perdidos, calibración 2 caras, EPS relativo",
     "v7": "Eventos v2: tensión, incumplimiento, caída estructural y expansión; probabilidades a 6 meses",
 }
@@ -473,7 +548,8 @@ DESCS = {
 
 def iterations():
     out = []
-    for tag in ["v1", "v2", "v3a", "v3b", *VARIANTS, "v6", "v7"]:
+    for tag in ["v1", "v2", "v3a", "v3b", *VARIANTS, "v6", "v7", "ar000", "ar002b", "ar004", "ar006", "ar007",
+                "ar100", "ar101", "ar102", "ar104", "ar105", "ar107"]:
         m = load_metrics(tag)
         if not m:
             continue
