@@ -89,7 +89,7 @@ footer{padding:24px 6px 0;color:#6b7c93;font-size:13px;text-align:center}
   <div class="eyebrow">EMBAT X-RAY · SCORING v8 · INGENIERÍA INVERSA</div>
   <h1>De los eventos adversos<br>a la variable de ítem que los anticipa.</h1>
   <p>Los hallazgos nuevos (<code>eventos_v2</code>, EDA, crosscheck y mapeo) cambian qué señal manda. Aquí se recorre el camino inverso: qué evento importa, qué variable lo discrimina, de qué ítem crudo sale, a qué pilar pertenece y cuánta prioridad merece. La criticidad no es uniforme: la caja que se evapora pesa más que un DSO que empeora tres días.</p>
-  <div class="hero-meta"><span>Generado el 2026-09-19 15:59</span><span>Corte 2026-09-01</span><span>Sin reescribir <code>data/</code></span></div>
+  <div class="hero-meta"><span>Generado el 2026-09-19 16:03</span><span>Corte 2026-09-01</span><span>Sin reescribir <code>data/</code></span></div>
   <div class="kpis"><div class="kpi"><small>Empresas</small><strong>1.286</strong></div><div class="kpi"><small>Con facturas ERP</small><strong>785</strong></div><div class="kpi"><small>Con nóminas</small><strong>878</strong></div><div class="kpi"><small>Con deuda conectada</small><strong>378</strong></div><div class="kpi"><small>Con calendario</small><strong>40</strong></div><div class="kpi"><small>Saldo negativo</small><strong>383</strong></div></div>
 </header>
 
@@ -127,6 +127,11 @@ footer{padding:24px 6px 0;color:#6b7c93;font-size:13px;text-align:center}
           <h3>501 empresas sin facturas y 25 % de movimientos sin categoría</h3>
           <p>Solo 785 de 1.286 empresas tienen facturas ERP. 308.568 movimientos están DISCARDED, 243.028 tienen fecha de apunte posterior a la de valor, 77 con tipo de cambio 0, y en vencidas payment_date es un alias de due_date (~186.638). Historia por empresa: de 1 a 25 meses.</p>
           <div class="impact"><b>Qué prioriza</b>Las features de disciplina (AR/AP) tienen cobertura estructural baja y no pueden ser el motor del score para todos. Percentiles congelados + confianza publicada.</div>
+        </article><article class="finding">
+          <span class="ftag">Voz Embat · régimen</span>
+          <h3>El mismo runway no significa lo mismo en todo negocio</h3>
+          <p>La PM de Embat (context/voz_embat.md) señala que la criticidad de la liquidez depende del sector: hay empresas que viven de la liquidez y otras para las que no es la prioridad. Un mayorista que cobra a 90 días y un negocio de cobro recurrente no deberían compartir el mismo umbral de meses de caja. La conciliación perfecta no hace falta para leer solvencia: bastan colchón y previsión.</p>
+          <div class="impact"><b>Qué prioriza</b>Modular el umbral de runway por régimen inferido (huella operativa: DSO, recurrencia de cobros, estacionalidad), no por un corte global. Refuerza runway_vs_group y añade un modificador de régimen.</div>
         </article></div>
   </section>
 
@@ -203,7 +208,7 @@ footer{padding:24px 6px 0;color:#6b7c93;font-size:13px;text-align:center}
                 <div><span class="ptag">LIQ</span><h3>Liquidez y autonomía de caja</h3></div>
                 <div class="pweight">peso sugerido <b>22 – 26 %</b></div>
               </div>
-              <p class="pwhy">Es la criticidad que manda: la caja que se evapora. Pero el hallazgo nuevo obliga a separar nivel de tendencia: el nivel de caja de hoy predice mal el arranque de tensión dentro del conjunto en riesgo; el cambio y la aceleración de la caja sí.</p>
+              <p class="pwhy">Es la criticidad que manda: la caja que se evapora. Pero el hallazgo nuevo obliga a separar nivel de tendencia: el nivel de caja de hoy predice mal el arranque de tensión dentro del conjunto en riesgo; el cambio y la aceleración de la caja sí. Además, la voz de Embat avisa de que el umbral no es universal: el mismo runway no vale igual en un negocio de cobro recurrente que en un mayorista a 90 días, así que el corte se modula por régimen de negocio.</p>
               <div class="table-wrap"><table>
                 <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
                 <tbody><tr>
@@ -609,7 +614,7 @@ footer{padding:24px 6px 0;color:#6b7c93;font-size:13px;text-align:center}
                 <div><span class="ptag">GRP</span><h3>Grupo y contagio</h3></div>
                 <div class="pweight">peso sugerido <b>overlay</b></div>
               </div>
-              <p class="pwhy">El 32 % de los arranques de E1 son filiales financiadas por su grupo: entran en &#x27;tensión&#x27; sin estar en riesgo individual. El runway relativo al grupo y la dependencia intragrupo son modificadores, no features de nivel.</p>
+              <p class="pwhy">El 32 % de los arranques de E1 son filiales financiadas por su grupo: entran en &#x27;tensión&#x27; sin estar en riesgo individual. El runway relativo al grupo y la dependencia intragrupo son modificadores, no features de nivel. Aquí entra también el régimen de negocio: fija qué runway es aceptable para cada tipo de empresa.</p>
               <div class="table-wrap"><table>
                 <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
                 <tbody><tr>
@@ -636,6 +641,14 @@ footer{padding:24px 6px 0;color:#6b7c93;font-size:13px;text-align:center}
                   <td class="num">1.286<small>100 % empresas</small></td>
                   <td class="num prio"><b>32</b><small><span class="srcmark marco">marco</span></small></td>
                   <td class="ev">Diagnóstico para la decisión de crédito, aparte del score individual.<small class="note">No marcar automáticamente como sana a la empresa financiada por su grupo, ni al contrario.</small></td>
+                </tr><tr>
+                  <td><b>operating_regime</b><small>Qué régimen de negocio tiene (cobro recurrente vs ciclo largo)</small></td>
+                  <td class="item"><code>huella operativa: DSO, recurrencia de collection, estacionalidad de inflow, nº de clientes</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="dir">neutro</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>31</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">La PM de Embat: la criticidad de la liquidez depende del sector. No es señal de salud, es el contexto que fija el umbral.<small class="note">Inferir régimen (huella operativa) y modular el umbral de runway y el peso de la caja; no usarlo como nivel.</small></td>
                 </tr></tbody>
               </table></div>
             </section><section class="pblock" style="--pc:#64748b">
@@ -734,7 +747,7 @@ footer{padding:24px 6px 0;color:#6b7c93;font-size:13px;text-align:center}
         </tr><tr>
           <td><b>GRP</b><small>Grupo y contagio</small></td>
           <td class="num w">overlay</td>
-          <td>runway vs grupo, flujo intragrupo, tensión agregada del grupo, tamaño del grupo</td>
+          <td>runway vs grupo, flujo intragrupo, tensión agregada del grupo, tamaño del grupo, régimen de negocio (huella operativa)</td>
         </tr><tr>
           <td><b>OBS</b><small>Observabilidad (no es salud)</small></td>
           <td class="num w">0 % (confianza)</td>
@@ -786,6 +799,7 @@ footer{padding:24px 6px 0;color:#6b7c93;font-size:13px;text-align:center}
           <li><code>payee_concentration</code> / <code>hhi_ap_6m</code> a P1 (0,76 / 0,60 churn).</li>
           <li><code>intragroup_dependency</code> a filtro obligatorio (32 % de E1).</li>
           <li>Pilar de bache a 8-12 % (Q4).</li>
+          <li>Modular el umbral de liquidez por régimen de negocio inferido (voz Embat): el mismo runway no vale igual en todos.</li>
         </ul>
       </div>
       <div>
@@ -806,6 +820,7 @@ footer{padding:24px 6px 0;color:#6b7c93;font-size:13px;text-align:center}
       <li>Excluir flujo intragrupo antes de etiquetar y de puntuar; reportar la tensión agregada del grupo aparte.</li>
       <li>Validar con <code>GroupKFold</code> por <code>group_id</code> y comprobar que ninguna variable nueva se explica por el apagado (control de desconexión).</li>
       <li>Objetivo por evento: E1 ≥ 0,65; E3 ≥ 0,65; E2 estricto ≥ 0,70; bache vs caída ≥ 0,65. Anticipación mediana ≥ 2 meses.</li>
+      <li>Comparar el umbral de runway global contra el modulado por régimen: si no mejora E1/E3, no se añade complejidad.</li>
     </ul>
   </section>
 

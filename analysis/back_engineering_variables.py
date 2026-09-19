@@ -165,7 +165,7 @@ PILLARS = [
         "id": "LIQ",
         "name": "Liquidez y autonomía de caja",
         "weight": "22 – 26 %",
-        "why": "Es la criticidad que manda: la caja que se evapora. Pero el hallazgo nuevo obliga a separar nivel de tendencia: el nivel de caja de hoy predice mal el arranque de tensión dentro del conjunto en riesgo; el cambio y la aceleración de la caja sí.",
+        "why": "Es la criticidad que manda: la caja que se evapora. Pero el hallazgo nuevo obliga a separar nivel de tendencia: el nivel de caja de hoy predice mal el arranque de tensión dentro del conjunto en riesgo; el cambio y la aceleración de la caja sí. Además, la voz de Embat avisa de que el umbral no es universal: el mismo runway no vale igual en un negocio de cobro recurrente que en un mayorista a 90 días, así que el corte se modula por régimen de negocio.",
         "items": "caja disponible, caja negativa, burn, runway, Δcaja 3m, póliza disponible",
     },
     {
@@ -214,8 +214,8 @@ PILLARS = [
         "id": "GRP",
         "name": "Grupo y contagio",
         "weight": "overlay",
-        "why": "El 32 % de los arranques de E1 son filiales financiadas por su grupo: entran en 'tensión' sin estar en riesgo individual. El runway relativo al grupo y la dependencia intragrupo son modificadores, no features de nivel.",
-        "items": "runway vs grupo, flujo intragrupo, tensión agregada del grupo, tamaño del grupo",
+        "why": "El 32 % de los arranques de E1 son filiales financiadas por su grupo: entran en 'tensión' sin estar en riesgo individual. El runway relativo al grupo y la dependencia intragrupo son modificadores, no features de nivel. Aquí entra también el régimen de negocio: fija qué runway es aceptable para cada tipo de empresa.",
+        "items": "runway vs grupo, flujo intragrupo, tensión agregada del grupo, tamaño del grupo, régimen de negocio (huella operativa)",
     },
     {
         "id": "OBS",
@@ -411,6 +411,10 @@ ITEMS = [
          plain="Si va peor que sus empresas hermanas", dir="↑ sano", tier="P1", cov="companies_total",
          ev="AUC 0,57 vs estructural. Modificador, no feature de nivel.",
          note="Cobertura casi total (grupos de 1 a 24 empresas, mediana 2)."),
+    dict(var="operating_regime", pillar="GRP", item="huella operativa: DSO, recurrencia de collection, estacionalidad de inflow, nº de clientes",
+         plain="Qué régimen de negocio tiene (cobro recurrente vs ciclo largo)", dir="neutro", tier="P2", cov="tx_companies",
+         ev="La PM de Embat: la criticidad de la liquidez depende del sector. No es señal de salud, es el contexto que fija el umbral.",
+         note="Inferir régimen (huella operativa) y modular el umbral de runway y el peso de la caja; no usarlo como nivel."),
     dict(var="intragroup_dependency", pillar="GRP", item="pares de transactions mismo grupo/día/importe opuesto",
          plain="Si vive de que le transfiera el grupo", dir="↓ sano", tier="P1", cov="tx_companies",
          ev="El 32 % de los arranques de E1 tiene >20 % de flujo intragrupo; excluirlos deja 51 de 75.",
@@ -497,6 +501,12 @@ FINDINGS = [
         "body": "Solo 785 de 1.286 empresas tienen facturas ERP. 308.568 movimientos están DISCARDED, 243.028 tienen fecha de apunte posterior a la de valor, 77 con tipo de cambio 0, y en vencidas payment_date es un alias de due_date (~186.638). Historia por empresa: de 1 a 25 meses.",
         "impact": "Las features de disciplina (AR/AP) tienen cobertura estructural baja y no pueden ser el motor del score para todos. Percentiles congelados + confianza publicada.",
     },
+    {
+        "tag": "Voz Embat · régimen",
+        "title": "El mismo runway no significa lo mismo en todo negocio",
+        "body": "La PM de Embat (context/voz_embat.md) señala que la criticidad de la liquidez depende del sector: hay empresas que viven de la liquidez y otras para las que no es la prioridad. Un mayorista que cobra a 90 días y un negocio de cobro recurrente no deberían compartir el mismo umbral de meses de caja. La conciliación perfecta no hace falta para leer solvencia: bastan colchón y previsión.",
+        "impact": "Modular el umbral de runway por régimen inferido (huella operativa: DSO, recurrencia de cobros, estacionalidad), no por un corte global. Refuerza runway_vs_group y añade un modificador de régimen.",
+    },
 ]
 
 PRIORITY_BASE = {"P0": 1.00, "P1": 0.72, "P2": 0.45, "P3": 0.25, "COV": 0.05}
@@ -511,7 +521,7 @@ STRENGTH_OVERRIDE = {
     "impago_nomina / ss / iva / cuota": 0.75, "new_debt_vs_cash": 0.40,
     "interest_coverage": 0.15, "self_funding": 0.25, "shock_vs_usual": 0.30,
     "vol_asymmetry": 0.35, "credit_notes": 0.20, "runway_vs_group": 0.30,
-    "intragroup_dependency": 0.55, "group_stress": 0.35,
+    "intragroup_dependency": 0.55, "group_stress": 0.35, "operating_regime": 0.30,
 }
 TIER_LABEL = {
     "P0": ("P0 · núcleo", "#e5484d"),
@@ -854,6 +864,7 @@ def build_html(cov: dict[str, int]) -> str:
           <li><code>payee_concentration</code> / <code>hhi_ap_6m</code> a P1 (0,76 / 0,60 churn).</li>
           <li><code>intragroup_dependency</code> a filtro obligatorio (32 % de E1).</li>
           <li>Pilar de bache a 8-12 % (Q4).</li>
+          <li>Modular el umbral de liquidez por régimen de negocio inferido (voz Embat): el mismo runway no vale igual en todos.</li>
         </ul>
       </div>
       <div>
@@ -874,6 +885,7 @@ def build_html(cov: dict[str, int]) -> str:
       <li>Excluir flujo intragrupo antes de etiquetar y de puntuar; reportar la tensión agregada del grupo aparte.</li>
       <li>Validar con <code>GroupKFold</code> por <code>group_id</code> y comprobar que ninguna variable nueva se explica por el apagado (control de desconexión).</li>
       <li>Objetivo por evento: E1 ≥ 0,65; E3 ≥ 0,65; E2 estricto ≥ 0,70; bache vs caída ≥ 0,65. Anticipación mediana ≥ 2 meses.</li>
+      <li>Comparar el umbral de runway global contra el modulado por régimen: si no mejora E1/E3, no se añade complejidad.</li>
     </ul>
   </section>
 
