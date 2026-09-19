@@ -17,6 +17,7 @@ export interface Trace {
 const props = withDefaults(
   defineProps<{
     traces: Trace[]
+    monthLabels?: string[]
     /** Mes en el que el producto avisó, cuando lo hubo. */
     marker?: { index: number; label: string } | null
     /** Frase de la derecha de la leyenda. */
@@ -100,6 +101,12 @@ const zones = computed(() =>
  * línea que separa lo medido de lo previsto, no a un tercio del ancho. */
 const ticks = computed(() => {
   const today = Math.max(0, measured.value - 1)
+  if (props.monthLabels?.length) {
+    return [...new Set([0, Math.round(today / 2), today])].map(at => ({
+      label: props.monthLabels![at]!, at, align: at === 0 ? 'start' : at === today ? 'end' : 'center',
+      style: { left: `${scales.value.x(at)}%` },
+    }))
+  }
   return [
     { label: `hace ${measured.value} m`, at: 0, align: 'start' },
     { label: `hace ${Math.round(measured.value / 2)} m`, at: Math.round(today / 2), align: 'center' },
@@ -131,6 +138,7 @@ const { plot, active, track, clear, keys } = useChartHover(span, (index) =>
  *  su distancia a hoy. */
 const monthAt = (index: number) => {
   if (index >= measured.value) return `+${index - measured.value + 1} m · previsión`
+  if (props.monthLabels?.[index]) return props.monthLabels[index]!
   const offset = months.length - measured.value
   return months[offset + index] ?? `mes ${index + 1}`
 }

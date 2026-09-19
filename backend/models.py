@@ -103,7 +103,7 @@ class SeriesPoint(BaseModel):
 
 
 class Signal(BaseModel):
-    """Una de las 17 features en el último mes, con lo que suma o resta a la nota."""
+    """Una feature en el último mes, con lo que suma o resta a la nota."""
     feature: str
     label: str
     pillar: str

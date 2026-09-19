@@ -55,6 +55,12 @@ VETOS = {
         "El grupo también está seco",
         "La caja agregada del grupo está por debajo de 0,25 meses de su gasto: el argumento de «si pasa "
         "algo la matriz responde» no se sostiene. Diagnóstico, no sustituye a la nota de la entidad."),
+    "veto_dependencia_grupo": (
+        "Vive de la caja del grupo",
+        "Más de la mitad de su flujo es dinero que le entra de sus empresas hermanas: la liquidez que "
+        "se le ve no es suya. No protege, al revés — a igual nota, estas empresas entran en tensión el "
+        "doble (19,8 % frente a 10,1 % entre las de banda «sano»). Pide el compromiso de la matriz por "
+        "escrito o presta al grupo, no a la filial."),
 }
 # Veto que se puede levantar con un documento, frente a los que no.
 LEVANTABLES = {"veto_cuota_ausente", "veto_iva_ausente"}
@@ -63,9 +69,11 @@ LEVANTABLES = {"veto_cuota_ausente", "veto_iva_ausente"}
 # las filas vetadas / tasa base). Dos bajan a aviso — mueven a «vigilar», no bloquean:
 #   veto_grupo_en_estres  lift 1,67, pero veta el 31 % del panel; eventos.md lo llama diagnóstico
 #   veto_cuota_ausente    lift 0,98: las filas que bloquea no acaban peor que la media
+#   veto_dependencia_grupo lift 1,46 y solo 8,1 % del panel, pero es una condición del grupo,
+#                          no un impago: informa la condición del préstamo, no lo veta
 BLOQUEAN = {"veto_caja_negativa", "veto_nomina_ausente", "veto_ss_ausente",
             "veto_iva_ausente", "veto_poliza_agotada"}
-AVISAN = {"veto_grupo_en_estres", "veto_cuota_ausente"}
+AVISAN = {"veto_grupo_en_estres", "veto_cuota_ausente", "veto_dependencia_grupo"}
 
 ACCIONES = {"prestar": "Prestar", "vigilar": "Vigilar", "no_prestar": "No prestar", "sin_nota": "Sin nota"}
 MIN_TX, MAX_DORMANT, MIN_CONFIDENCE = 5, 2, 0.30

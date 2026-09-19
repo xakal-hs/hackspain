@@ -1,0 +1,221 @@
+{
+ "arm": "Aexp",
+ "desc": "17 features · nota de expansión",
+ "n_features": 17,
+ "minutos": 0.8,
+ "pm": 0.6135,
+ "auc": [
+  {
+   "evento": "tension_np_raw_6m",
+   "auc": 0.6937,
+   "se": 0.0165,
+   "ic95_lo": 0.6625,
+   "ic95_hi": 0.7227,
+   "n": 10926,
+   "positivos": 4822,
+   "grupos": 192
+  },
+  {
+   "evento": "incumplimiento_6m",
+   "auc": 0.5706,
+   "se": 0.028,
+   "ic95_lo": 0.5159,
+   "ic95_hi": 0.6152,
+   "n": 6263,
+   "positivos": 408,
+   "grupos": 149
+  },
+  {
+   "evento": "caida_6m",
+   "auc": 0.6071,
+   "se": 0.0273,
+   "ic95_lo": 0.5545,
+   "ic95_hi": 0.6608,
+   "n": 5583,
+   "positivos": 552,
+   "grupos": 142
+  },
+  {
+   "evento": "expansion_6m",
+   "auc": 0.5826,
+   "se": 0.0333,
+   "ic95_lo": 0.5078,
+   "ic95_hi": 0.6489,
+   "n": 8013,
+   "positivos": 468,
+   "grupos": 159
+  },
+  {
+   "evento": "tension_6m",
+   "auc": 0.6709,
+   "se": 0.014,
+   "ic95_lo": 0.641,
+   "ic95_hi": 0.6963,
+   "n": 8453,
+   "positivos": 3000,
+   "grupos": 192
+  },
+  {
+   "evento": "entrada_estres_2m",
+   "auc": 0.5241,
+   "se": 0.0228,
+   "ic95_lo": 0.4768,
+   "ic95_hi": 0.563,
+   "n": 9198,
+   "positivos": 550,
+   "grupos": 220
+  },
+  {
+   "evento": "rompe_caja_2m",
+   "auc": 0.5094,
+   "se": 0.0324,
+   "ic95_lo": 0.4498,
+   "ic95_hi": 0.5755,
+   "n": 9198,
+   "positivos": 62,
+   "grupos": 220
+  },
+  {
+   "evento": "tension_entrada_6m",
+   "auc": 0.6229,
+   "se": 0.0365,
+   "ic95_lo": 0.5602,
+   "ic95_hi": 0.6944,
+   "n": 5918,
+   "positivos": 130,
+   "grupos": 165
+  },
+  {
+   "evento": "impago_nomina_6m",
+   "auc": 0.4921,
+   "se": 0.0442,
+   "ic95_lo": 0.4112,
+   "ic95_hi": 0.5769,
+   "n": 3563,
+   "positivos": 347,
+   "grupos": 121
+  },
+  {
+   "evento": "impago_ss_6m",
+   "auc": 0.5732,
+   "se": 0.0439,
+   "ic95_lo": 0.4815,
+   "ic95_hi": 0.6557,
+   "n": 4400,
+   "positivos": 230,
+   "grupos": 123
+  },
+  {
+   "evento": "impago_iva_6m",
+   "auc": 0.5623,
+   "se": 0.0441,
+   "ic95_lo": 0.4843,
+   "ic95_hi": 0.65,
+   "n": 4637,
+   "positivos": 123,
+   "grupos": 129
+  },
+  {
+   "evento": "impago_cuota_6m",
+   "auc": 0.4669,
+   "se": 0.0395,
+   "ic95_lo": 0.3922,
+   "ic95_hi": 0.5398,
+   "n": 2688,
+   "positivos": 376,
+   "grupos": 116
+  },
+  {
+   "evento": "impago_ap_6m",
+   "auc": 0.5615,
+   "se": 0.022,
+   "ic95_lo": 0.5207,
+   "ic95_hi": 0.6029,
+   "n": 8595,
+   "positivos": 5106,
+   "grupos": 160
+  },
+  {
+   "evento": "cura_3m",
+   "auc": 0.4218,
+   "se": 0.0132,
+   "ic95_lo": 0.3978,
+   "ic95_hi": 0.4468,
+   "n": 16986,
+   "positivos": 442,
+   "grupos": 247
+  },
+  {
+   "evento": "recaida_6m",
+   "auc": 0.5204,
+   "se": 0.0255,
+   "ic95_lo": 0.4732,
+   "ic95_hi": 0.5715,
+   "n": 649,
+   "positivos": 494,
+   "grupos": 124
+  },
+  {
+   "evento": "caida_3m_corto",
+   "auc": 0.5668,
+   "se": 0.0121,
+   "ic95_lo": 0.5432,
+   "ic95_hi": 0.5897,
+   "n": 14260,
+   "positivos": 2513,
+   "grupos": 245
+  },
+  {
+   "evento": "expansion_3m",
+   "auc": 0.5529,
+   "se": 0.0121,
+   "ic95_lo": 0.5266,
+   "ic95_hi": 0.5748,
+   "n": 14260,
+   "positivos": 2302,
+   "grupos": 245
+  },
+  {
+   "evento": "tension_grupo_6m",
+   "auc": 0.6062,
+   "se": 0.0202,
+   "ic95_lo": 0.5663,
+   "ic95_hi": 0.6427,
+   "n": 13000,
+   "positivos": 5472,
+   "grupos": 232
+  }
+ ],
+ "anticipacion": {
+  "entradas_en_estres": 349,
+  "avisadas": 90,
+  "cobertura": 0.258,
+  "meses_mediana": 4.0,
+  "meses_media": 4.99,
+  "con_2m_o_mas": 0.811
+ },
+ "pesos": {
+  "runway": 0.2705,
+  "payroll_cv": 0.148,
+  "activity_trend": 0.1214,
+  "oper_persistence_6m": 0.1022,
+  "lost_share": 0.0723,
+  "ap_overdue_ratio": 0.0482,
+  "ar_late_share": 0.042,
+  "hhi_ar_6m": 0.0316,
+  "ap_late_share": 0.0312,
+  "debt_burden": 0.0263,
+  "lc_util": 0.0234,
+  "transfer_dep": 0.0201,
+  "net_vol_6m": 0.0188,
+  "cust_trend": 0.016,
+  "refund_rate": 0.0142,
+  "ar_overdue_90_ratio": 0.0076,
+  "oper_growth_12m": 0.0061
+ },
+ "escala": [
+  -59.803,
+  2.102
+ ],
+ "cobertura_media": 0.714
+}

@@ -1,7 +1,7 @@
 # backend · el score X-Ray
 
-Seis ficheros, y el primero es el ETL: desde los CSV del reto todo está aquí dentro.
-El modelo es un **scorecard aditivo**: media ponderada de 17 percentiles,
+Siete ficheros, y el primero es el ETL: desde los CSV del reto todo está aquí dentro.
+El modelo es un **scorecard aditivo**: media ponderada de 18 percentiles,
 suavizada con EWMA. No es una caja negra, y esa es la decisión de producto central — la nota
 se descompone al céntimo en las features que la movieron. Encima va una capa de **vetos**,
 que son hechos de hoy y mandan sobre la nota.
@@ -9,19 +9,21 @@ que son hechos de hoy y mandan sobre la nota.
 | fichero | qué hace |
 |---|---|
 | `etl.py` | CSV crudos → `data/panel.parquet`: una fila por (empresa, mes) |
-| `preprocessing.py` | panel → 17 features (polars) + eventos + vetos |
+| `preprocessing.py` | panel → 18 features (polars) + eventos + vetos |
 | `predict.py` | `fit` → percentiles → pesos → escala → EWMA. `score_panel`, `explain` |
 | `decision.py` | de la nota a prestar / vigilar / no prestar. Los vetos y su evidencia |
 | `metrics.py` | validación fuera de grupo, AUC por evento, bootstrap pareado, anticipación |
 | `main.py` | FastAPI para el frontend Nuxt |
+| `models.py` | el contrato con el frontend, espejo de `frontend/app/types/portfolio.ts` |
 
 ```bash
 cd backend
-uv run --project ../research python etl.py                # CSV → panel (12 s)
-uv run --project ../research python predict.py            # entrena e imprime pesos y bandas
-uv run --project ../research python decision.py           # informe de vetos
-uv run --project ../research python metrics.py           # validación completa (~3 min)
-uv run --project ../research uvicorn main:app --port 8000
+uv sync                          # entorno propio: pyproject.toml, sin research/
+uv run python etl.py             # CSV → panel (12 s)
+uv run python predict.py         # entrena e imprime pesos y bandas
+uv run python decision.py        # informe de vetos
+uv run python metrics.py         # validación completa (~3 min)
+uv run uvicorn main:app --port 8080
 ```
 
 ---
@@ -166,17 +168,35 @@ filas activas** puntuadas por un scorer que no vio ni el grupo ni el mes.
 
 | evento | qué significa | AUC | se | n | positivos |
 |---|---|---:|---:|---:|---:|
-| `tension_np_raw_6m` | tensión de liquidez con caja propia (< 0,25 meses de gasto, ≥2 de 3 meses) | **0,848** | 0,014 | 10.926 | 4.822 |
-| `incumplimiento_6m` | deja de pagar nómina 2 meses o IVA 2 trimestres | **0,588** | 0,029 | 6.263 | 408 |
-| `caida_6m` | caída estructural de cobros (< 50 % de su mediana anual) sin rebote | **0,572** | 0,026 | 5.583 | 552 |
-| `expansion_6m` | expansión sostenida y autofinanciada | 0,506 | 0,033 | 8.013 | 468 |
+| `tension_np_raw_6m` | tensión de liquidez con caja propia (< 0,25 meses de gasto, ≥2 de 3 meses) | **0,849** | 0,014 | 10.926 | 4.822 |
+| `incumplimiento_6m` | deja de pagar nómina 2 meses o IVA 2 trimestres | **0,595** | 0,027 | 6.263 | 408 |
+| `caida_6m` | caída estructural de cobros (< 50 % de su mediana anual) sin rebote | **0,577** | 0,026 | 5.583 | 552 |
+| `expansion_6m` | expansión sostenida y autofinanciada | 0,500 | 0,033 | 8.013 | 468 |
 
-**PM = 0,629** (media de los cuatro). Se reporta, no decide: promediar esconde que un cambio
+**PM = 0,630** (media de los cuatro). Se reporta, no decide: promediar esconde que un cambio
 mejore la tensión y estropee la caída. Y **no es comparable** con los PM anteriores (0,658,
 0,659), porque cambió una etiqueta *y* cambió la validación.
 
-La lectura honesta de esta tabla es que **el modelo sabe de liquidez y poco más**. 0,848 en
-tensión es fuerte; 0,506 en expansión es azar. Detectar que una empresa va a crecer con datos
+La feature 18, `payroll_continuity_6m`, entró midiéndola contra la alternativa y no por intuición:
+es la única superviviente del catálogo a priori de `docs/explicacion_pesos.md` en el 2×2 de
+[`experiments/`](experiments/). En pareado contra el modelo de 17: **+2,9σ** anticipando la entrada
+en estrés a 2 meses, **+3,5σ** en impago de IVA, +2,1σ en entrada en tensión a 6 meses, ancla
+plana (+0,8σ) y expansión −1,7σ (no significativo). Las otras 41 variables del catálogo, y sus
+pesos a priori, se midieron y se descartaron — los pesos hundían el ancla 9,7σ.
+
+Dos comprobaciones de que no duplica a `payroll_cv`, que ya miraba la nómina: su correlación es
+**−0,054** (una mide si la nómina *sale*, la otra cuánto *varía*), y de las 2.024 filas con
+continuidad < 1 **solo 291 tienen el veto de nómina ausente** — captura 1.733 casos que el veto,
+que solo mira el mes en curso, no ve. Al entrar se lleva peso de `payroll_cv` (0,148 → 0,100) y
+se convierte en la **segunda feature más pesada** del score, con 0,127.
+
+La otra superviviente del catálogo, `tax_miss`, **no entra como feature porque ya es un veto**
+(`veto_iva_ausente`) y además alimenta `incumplimiento_6m`. Y la escalera de criticidad del
+catálogo se midió aparte, como cota inferior sobre los pesos calibrados: tampoco entra
+(`experiments/README.md`).
+
+La lectura honesta de esta tabla es que **el modelo sabe de liquidez y poco más**. 0,849 en
+tensión es fuerte; 0,500 en expansión es exactamente azar. Detectar que una empresa va a crecer con datos
 de tesorería es un problema distinto y no resuelto — por eso hay una segunda nota (§4.4) y por
 eso no se publica probabilidad de expansión.
 
@@ -188,15 +208,17 @@ lo que haría el sistema con una cartera nueva, y conviene saber cuánto vale.
 
 | evento | frío (< 2025-05, 4.401 filas) | calibrado (16.146 filas) |
 |---|---:|---:|
-| `tension_np_raw_6m` | **0,848** | **0,848** |
-| `incumplimiento_6m` | **0,464** | 0,613 |
-| `expansion_6m` | **0,401** | 0,528 |
+| `tension_np_raw_6m` | **0,848** | **0,850** |
+| `incumplimiento_6m` | **0,469** | 0,620 |
+| `expansion_6m` | **0,401** | 0,522 |
 
 El resultado más útil de todo el README: **con pesos a priori la liquidez se ordena igual de
-bien (0,848 = 0,848), y el incumplimiento y la expansión no se ordenan en absoluto** (0,464 y
+bien (0,848 ≈ 0,850), y el incumplimiento y la expansión no se ordenan en absoluto** (0,469 y
 0,401, peor que una moneda). El juicio experto acierta en qué manda la caja y se equivoca en
-todo lo fino: `payroll_cv` pesa 0,029 a priori y 0,148 calibrado, y es justo la feature que
-predice el incumplimiento.
+todo lo fino: `payroll_cv` pesa 0,028 a priori y 0,100 calibrado, y junto a
+`payroll_continuity_6m` (0,056 a priori, 0,127 calibrado) son las dos que predicen el
+incumplimiento. El experimento de `experiments/` es la versión extrema de esto: un catálogo de
+pesos a priori completo, medido, pierde 9,7σ de ancla.
 
 Traducido a producto: a una empresa nueva se le puede dar nota de liquidez desde el mes 1, pero
 la parte de disciplina de pagos hay que ganársela con historia.
@@ -205,24 +227,24 @@ la parte de disciplina de pagos hay que ganársela con historia.
 
 | evento | AUC | se | n | positivos |
 |---|---:|---:|---:|---:|
-| **`tension_np_raw_6m`** (ancla y juez limpio) | **0,848** | 0,014 | 10.926 | 4.822 |
-| `tension_6m` (la vieja, con póliza) | 0,822 | 0,013 | 8.453 | 3.000 |
+| **`tension_np_raw_6m`** (ancla y juez limpio) | **0,849** | 0,014 | 10.926 | 4.822 |
+| `tension_6m` (la vieja, con póliza) | 0,823 | 0,013 | 8.453 | 3.000 |
 | `tension_grupo_6m` (diagnóstico de grupo) | 0,700 | 0,026 | 13.000 | 5.472 |
-| **`rompe_caja_2m`** (anticipación dura) | **0,656** | 0,034 | 9.198 | 62 |
-| **`entrada_estres_2m`** (anticipación) | **0,637** | 0,021 | 9.198 | 550 |
-| `impago_iva_6m` | 0,599 | 0,046 | 4.637 | 123 |
-| `incumplimiento_6m` | 0,588 | 0,029 | 6.263 | 408 |
-| `impago_ss_6m` | 0,578 | 0,049 | 4.400 | 230 |
-| `caida_6m` | 0,572 | 0,026 | 5.583 | 552 |
-| `recaida_6m` | 0,566 | 0,024 | 649 | 494 |
-| `tension_entrada_6m` | 0,562 | 0,041 | 5.918 | 130 |
-| `impago_ap_6m` (mora crónica, 60 % de las filas) | 0,538 | 0,031 | 8.595 | 5.106 |
+| **`rompe_caja_2m`** (anticipación dura) | **0,666** | 0,035 | 9.198 | 62 |
+| **`entrada_estres_2m`** (anticipación) | **0,645** | 0,021 | 9.198 | 550 |
+| `impago_iva_6m` | 0,626 | 0,044 | 4.637 | 123 |
+| `incumplimiento_6m` | 0,595 | 0,027 | 6.263 | 408 |
+| `tension_entrada_6m` | 0,577 | 0,042 | 5.918 | 130 |
+| `caida_6m` | 0,577 | 0,026 | 5.583 | 552 |
+| `impago_ss_6m` | 0,574 | 0,048 | 4.400 | 230 |
+| `recaida_6m` | 0,568 | 0,024 | 649 | 494 |
+| `impago_ap_6m` (mora crónica, 60 % de las filas) | 0,539 | 0,031 | 8.595 | 5.106 |
 | `caida_3m_corto` | 0,538 | 0,013 | 14.260 | 2.513 |
-| `impago_nomina_6m` | 0,526 | 0,050 | 3.563 | 347 |
+| `impago_nomina_6m` | 0,529 | 0,049 | 3.563 | 347 |
 | `expansion_3m` (con la nota adversa) | 0,519 | 0,018 | 14.260 | 2.302 |
-| `expansion_6m` (con la nota adversa, que no es su trabajo) | 0,506 | 0,033 | 8.013 | 468 |
+| `expansion_6m` (con la nota adversa, que no es su trabajo) | 0,500 | 0,033 | 8.013 | 468 |
 | `impago_cuota_6m` | **0,408** | 0,040 | 2.688 | 376 |
-| `cura_3m` | **0,325** | 0,022 | 16.986 | 442 |
+| `cura_3m` | **0,325** | 0,021 | 16.986 | 442 |
 
 Las dos últimas están por debajo de 0,50 y no es un bug:
 
@@ -235,17 +257,17 @@ Las dos últimas están por debajo de 0,50 y no es un bug:
 
 ### 4.4 · Dos notas, no una
 
-Las mismas 17 features con los pesos calibrados contra la cara positiva. Promediar los pesos
+Las mismas 18 features con los pesos calibrados contra la cara positiva. Promediar los pesos
 de la tensión con los de la expansión dejaba la caja sin peso.
 
 | evento | nota adversa | **nota de expansión** | expansión, solo meses calibrados |
 |---|---:|---:|---:|
-| `expansion_6m` | 0,506 | **0,583** (se 0,032) | **0,610** |
-| `expansion_3m` | 0,519 | 0,553 | 0,566 |
-| `tension_np_raw_6m` | 0,848 | 0,694 | 0,604 |
+| `expansion_6m` | 0,500 | **0,574** (se 0,035) | **0,599** |
+| `expansion_3m` | 0,519 | 0,552 | 0,565 |
+| `tension_np_raw_6m` | 0,849 | 0,690 | 0,604 |
 
 La tercera columna existe por honestidad: en los meses de arranque en frío la nota de expansión
-cae a `PRIOR_W`, que son **pesos adversos**, y por eso aparece ordenando tensión (0,694). Con
+cae a `PRIOR_W`, que son **pesos adversos**, y por eso aparece ordenando tensión (0,690). Con
 historia suficiente se separa de verdad: 0,604 en tensión, casi azar, que es lo que debe. Se ve
 en sus pesos — la manda `oper_growth_12m` (0,317) y `runway` pesa **0,000**.
 
@@ -257,13 +279,15 @@ esas ya son ventanas futuras y regalarían hasta 6 meses de ventaja ficticia. So
 
 | | veía el futuro | **solo el pasado** |
 |---|---:|---:|
-| filas avisadas (del total activo) | 21,8 % | 25,3 % |
-| cobertura (avisadas / entradas) | 9,5 % | **18,6 %** |
+| filas avisadas (del total activo) | 21,8 % | 25,5 % |
+| cobertura (avisadas / entradas) | 9,5 % | **19,5 %** |
 | mediana de antelación | 4 meses | **4 meses** |
-| avisadas con ≥ 2 meses | 70 % | **83 %** |
+| avisadas con ≥ 2 meses | 70 % | **79 %** |
 
 La cobertura se duplica, y la primera fila obliga a preguntar si es solo que la nota bajó y
-salta más la alarma. No lo es — a **tasa de alarma igualada**:
+salta más la alarma. No lo es — a **tasa de alarma igualada** (esta tabla se midió con el modelo
+de 17 features; `payroll_continuity_6m` mueve la cobertura de 18,6 % a 19,5 % sin tocar la
+mediana, así que la conclusión no cambia):
 
 | % de filas avisadas | veía el futuro | **solo el pasado** |
 |---|---|---|
@@ -276,8 +300,8 @@ Avisando al mismo número de empresas, la versión honesta **coge un 47 % más d
 estrés y un mes antes**. Refitear la referencia y la escala cada mes hace la nota más sensible
 al cambio reciente, que es exactamente para lo que se vende.
 
-Sigue avisando poco en términos absolutos: 18,6 % de cobertura al umbral 35. Bajar el umbral la
-sube (27,2 % al umbral 40) a cambio de avisar a un tercio de la cartera. Es la palanca de
+Sigue avisando poco en términos absolutos: 19,5 % de cobertura al umbral 35. Bajar el umbral la
+sube (28,1 % al umbral 40) a cambio de avisar al 32,5 % de la cartera. Es la palanca de
 producto más clara que queda abierta.
 
 ### 4.6 · Probabilidades publicadas
@@ -291,25 +315,31 @@ mal es peor que ninguna. Por eso `expansion_6m` no publica probabilidad con la n
 
 | feature | peso adversa | peso expansión |
 |---|---:|---:|
-| `runway` | **0,271** | 0,000 |
-| `payroll_cv` | 0,148 | 0,000 |
-| `activity_trend` | 0,121 | 0,170 |
-| `oper_persistence_6m` | 0,102 | 0,052 |
-| `lost_share` | 0,072 | 0,131 |
-| `ap_overdue_ratio` | 0,048 | 0,000 |
-| `ar_late_share` | 0,042 | 0,054 |
-| `hhi_ar_6m` | 0,032 | 0,001 |
-| `ap_late_share` | 0,031 | 0,000 |
+| `runway` | **0,266** | 0,000 |
+| `payroll_continuity_6m` | 0,127 | 0,000 |
+| `activity_trend` | 0,105 | 0,170 |
+| `payroll_cv` | 0,100 | 0,000 |
+| `oper_persistence_6m` | 0,091 | 0,052 |
+| `lost_share` | 0,063 | 0,131 |
+| `ar_late_share` | 0,034 | 0,054 |
+| `ap_overdue_ratio` | 0,034 | 0,000 |
+| `ap_late_share` | 0,029 | 0,000 |
+| `hhi_ar_6m` | 0,028 | 0,001 |
 | `debt_burden` | 0,026 | 0,093 |
-| `lc_util` | 0,023 | 0,039 |
-| `transfer_dep` | 0,020 | 0,000 |
-| `net_vol_6m` | 0,019 | 0,074 |
-| `cust_trend` | 0,016 | 0,000 |
+| `transfer_dep` | 0,021 | 0,000 |
+| `lc_util` | 0,019 | 0,039 |
+| `net_vol_6m` | 0,017 | 0,074 |
+| `cust_trend` | 0,015 | 0,000 |
 | `refund_rate` | 0,014 | 0,044 |
 | `ar_overdue_90_ratio` | 0,008 | 0,025 |
-| `oper_growth_12m` | 0,006 | **0,317** |
+| `oper_growth_12m` | 0,005 | **0,317** |
 
-- **Escala**: `nota = −59,80 + 2,10 × compuesto` (P5 → 15, P95 → 85).
+Las dos de nómina suman 0,227 y no miden lo mismo: `payroll_cv` mira **cuánto baila el importe**
+y `payroll_continuity_6m` si la nómina **sale o no sale**. Al entrar la segunda, la primera cede
+peso (0,148 → 0,100) pero no desaparece: el ancla no se mueve y la anticipación sube, así que
+había información que `payroll_cv` no estaba capturando.
+
+- **Escala**: `nota = −65,75 + 2,22 × compuesto` (P5 → 15, P95 → 85).
 - **EWMA** α = 0,5 sobre las contribuciones, no sobre la nota: así la descomposición
   sobrevive al suavizado.
 
@@ -342,6 +372,7 @@ Separarlos de la nota no es cosmética:
 | `veto_nomina_ausente` | 291 | 1,13 | 22 | bloquea |
 | `veto_ss_ausente` | 247 | 1,10 | 26 | bloquea |
 | `veto_grupo_en_estres` | 6.748 | 1,67 | 688 | **aviso** |
+| `veto_dependencia_grupo` | 1.744 | **1,47** | 361 | **aviso** |
 | `veto_cuota_ausente` | 394 | **0,98** | 52 | **aviso** |
 
 Dos degradaciones, medidas:
@@ -358,12 +389,76 @@ veta a partir del **segundo mes seguido** (`eventos.md:17`).
 Y la calidad de dato no es un veto, es `sin_nota`: saldo centinela, reconstrucción que no
 cierra, 2+ meses sin movimientos o menos de 5 apuntes. No se puntúa lo que no se ve.
 
-Reparto del último mes de las 1.286 empresas: **157 prestar · 736 vigilar · 120 no prestar ·
-273 sin nota**. Con veto bloqueante: 54. Con aviso: 441.
+Reparto del último mes de las 1.286 empresas: **174 prestar · 715 vigilar · 124 no prestar ·
+273 sin nota**. Con veto bloqueante: 54. Con aviso: 470.
 
 ---
 
-## 6 · La API
+## 6 · Sector y grupo: dos hipótesis medidas, una sobrevive
+
+Las dos venían del catálogo de pesos (`docs/explicacion_pesos.md`, bloque **GRP**), donde se
+decidió que ni el sector ni el grupo puntúan: **«no suma puntos, fija el listón»**. El listón
+es de este fichero, así que aquí se miden.
+
+### 6.1 · El sector NO cambia el listón de liquidez — descartado
+
+La hipótesis, literal: *«un mayorista que cobra a 90 días y un negocio de suscripción con
+cobro mensual no deben compartir el mismo umbral»*. Se probó con los cuatro regímenes del
+K-means (`analysis/cluster_sector.py`) y con los 12 sectores de `data/processed/company_sector.csv`.
+
+Tasa de tensión futura **en el tramo donde se decide** (0,5–1 mes de caja), con IC 95 %
+remuestreando grupos empresariales enteros. Global: **0,267**.
+
+| sector | n | tasa | IC 95 % | ¿se sale? |
+|---|---:|---:|---|---|
+| holding / tesorería | 146 | 0,192 | [0,082, 0,318] | no |
+| comercio minorista | 450 | 0,238 | [0,150, 0,329] | no |
+| servicios profesionales | 365 | 0,255 | [0,179, 0,351] | no |
+| mayorista / distribución | 134 | 0,291 | [0,176, 0,425] | no |
+| software / suscripción | 81 | 0,333 | [0,208, 0,625] | no |
+| construcción | 49 | 0,408 | [0,178, 0,650] | no |
+
+**Ninguno se separa del global.** La dispersión aparente es ruido: construcción parece el
+doble de arriesgado y su intervalo va de 0,18 a 0,65 con n=49.
+
+Y el mecanismo tampoco está: en este dataset **el mayorista cobra a 15,9 días**, menos que el
+de suscripción (21,0). El DSO va de 5 a 33 días entre sectores, no de 30 a 90. Sin ciclos de
+cobro distintos no hay necesidades de caja distintas que modular. No queda código de la opción.
+
+### 6.2 · La dependencia del grupo SÍ informa — y al revés de lo que se suponía
+
+El catálogo daba `intragroup_dependency` como **filtro obligatorio antes de puntuar**: la
+filial que vive de la matriz parece tensa sin estarlo, así que fuera. Los datos dicen lo
+contrario — depender del grupo **no protege**:
+
+| flujo intragrupo / total (3m) | filas | tensión futura | caja p50 |
+|---|---:|---:|---:|
+| < 5 % | 6.917 | 0,386 | 0,88 meses |
+| 5–20 % | 1.480 | 0,491 | 0,52 |
+| 20–50 % | 1.585 | 0,532 | 0,41 |
+| **> 50 %** | 887 | **0,644** | 0,15 |
+
+El gradiente podría ser un artefacto —quien vive del grupo tiene poca caja propia, y el ancla
+se mide con caja propia—, así que la prueba que importa es **dentro de cada banda de nota**:
+
+| banda | dep > 50 % | dep ≤ 50 % |
+|---|---:|---:|
+| sano | **0,198** (n=222) | 0,101 (n=3.003) |
+| vigilar | 0,578 (n=296) | 0,445 (n=5.115) |
+| riesgo | 0,962 (n=370) | 0,870 (n=1.920) |
+
+**Entre las empresas que el modelo llama «sanas», vivir del grupo dobla la tasa de tensión**
+(19,8 % frente a 10,1 %). Es información que la nota no tiene, y es justo el caso que le
+importa al prestamista: buena nota, pero la liquidez que se le ve es de la matriz.
+
+Entra como **aviso**, no como veto ni como filtro: lift 1,47 con 8,1 % del panel. No es un
+impago, es una condición del grupo — cambia a quién prestas y con qué compromiso, no si
+prestas. Filtrar esas filas antes de puntuar, como pedía el catálogo, habría cegado al modelo
+justo en su decil más arriesgado.
+
+---
+
+## 7 · La API
 
 | endpoint | qué devuelve |
 |---|---|
@@ -376,7 +471,7 @@ Reparto del último mes de las 1.286 empresas: **157 prestar · 736 vigilar · 1
 
 ---
 
-## 7 · Qué NO hace este backend
+## 8 · Qué NO hace este backend
 
 - **No hay forecaster.** El `TrajectoryForecaster` (MLForecast + LightGBM cuantílico, bandas
   q10/q50/q90) se quedó fuera, y con él sus métricas (`auc_deterioro` 0,722, `auc_mejora`

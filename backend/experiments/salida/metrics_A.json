@@ -1,0 +1,221 @@
+{
+ "arm": "A",
+ "desc": "17 features · pesos calibrados (backend)",
+ "n_features": 17,
+ "minutos": 0.9,
+ "pm": 0.6285,
+ "auc": [
+  {
+   "evento": "tension_np_raw_6m",
+   "auc": 0.8483,
+   "se": 0.0143,
+   "ic95_lo": 0.8202,
+   "ic95_hi": 0.8746,
+   "n": 10926,
+   "positivos": 4822,
+   "grupos": 192
+  },
+  {
+   "evento": "incumplimiento_6m",
+   "auc": 0.5882,
+   "se": 0.0286,
+   "ic95_lo": 0.531,
+   "ic95_hi": 0.6477,
+   "n": 6263,
+   "positivos": 408,
+   "grupos": 149
+  },
+  {
+   "evento": "caida_6m",
+   "auc": 0.572,
+   "se": 0.0259,
+   "ic95_lo": 0.5229,
+   "ic95_hi": 0.627,
+   "n": 5583,
+   "positivos": 552,
+   "grupos": 142
+  },
+  {
+   "evento": "expansion_6m",
+   "auc": 0.5056,
+   "se": 0.0331,
+   "ic95_lo": 0.4405,
+   "ic95_hi": 0.5689,
+   "n": 8013,
+   "positivos": 468,
+   "grupos": 159
+  },
+  {
+   "evento": "tension_6m",
+   "auc": 0.8219,
+   "se": 0.0131,
+   "ic95_lo": 0.7961,
+   "ic95_hi": 0.8493,
+   "n": 8453,
+   "positivos": 3000,
+   "grupos": 192
+  },
+  {
+   "evento": "entrada_estres_2m",
+   "auc": 0.6371,
+   "se": 0.0207,
+   "ic95_lo": 0.5954,
+   "ic95_hi": 0.6762,
+   "n": 9198,
+   "positivos": 550,
+   "grupos": 220
+  },
+  {
+   "evento": "rompe_caja_2m",
+   "auc": 0.6557,
+   "se": 0.034,
+   "ic95_lo": 0.5904,
+   "ic95_hi": 0.716,
+   "n": 9198,
+   "positivos": 62,
+   "grupos": 220
+  },
+  {
+   "evento": "tension_entrada_6m",
+   "auc": 0.5623,
+   "se": 0.0409,
+   "ic95_lo": 0.4752,
+   "ic95_hi": 0.6297,
+   "n": 5918,
+   "positivos": 130,
+   "grupos": 165
+  },
+  {
+   "evento": "impago_nomina_6m",
+   "auc": 0.5263,
+   "se": 0.05,
+   "ic95_lo": 0.428,
+   "ic95_hi": 0.6234,
+   "n": 3563,
+   "positivos": 347,
+   "grupos": 121
+  },
+  {
+   "evento": "impago_ss_6m",
+   "auc": 0.5775,
+   "se": 0.0494,
+   "ic95_lo": 0.4853,
+   "ic95_hi": 0.6718,
+   "n": 4400,
+   "positivos": 230,
+   "grupos": 123
+  },
+  {
+   "evento": "impago_iva_6m",
+   "auc": 0.5989,
+   "se": 0.0461,
+   "ic95_lo": 0.5001,
+   "ic95_hi": 0.6848,
+   "n": 4637,
+   "positivos": 123,
+   "grupos": 129
+  },
+  {
+   "evento": "impago_cuota_6m",
+   "auc": 0.4084,
+   "se": 0.0402,
+   "ic95_lo": 0.3388,
+   "ic95_hi": 0.4879,
+   "n": 2688,
+   "positivos": 376,
+   "grupos": 116
+  },
+  {
+   "evento": "impago_ap_6m",
+   "auc": 0.538,
+   "se": 0.0305,
+   "ic95_lo": 0.4847,
+   "ic95_hi": 0.5974,
+   "n": 8595,
+   "positivos": 5106,
+   "grupos": 160
+  },
+  {
+   "evento": "cura_3m",
+   "auc": 0.3251,
+   "se": 0.0218,
+   "ic95_lo": 0.2866,
+   "ic95_hi": 0.3669,
+   "n": 16986,
+   "positivos": 442,
+   "grupos": 247
+  },
+  {
+   "evento": "recaida_6m",
+   "auc": 0.5656,
+   "se": 0.0238,
+   "ic95_lo": 0.5194,
+   "ic95_hi": 0.6082,
+   "n": 649,
+   "positivos": 494,
+   "grupos": 124
+  },
+  {
+   "evento": "caida_3m_corto",
+   "auc": 0.5382,
+   "se": 0.0132,
+   "ic95_lo": 0.5149,
+   "ic95_hi": 0.5653,
+   "n": 14260,
+   "positivos": 2513,
+   "grupos": 245
+  },
+  {
+   "evento": "expansion_3m",
+   "auc": 0.5185,
+   "se": 0.0178,
+   "ic95_lo": 0.4805,
+   "ic95_hi": 0.5517,
+   "n": 14260,
+   "positivos": 2302,
+   "grupos": 245
+  },
+  {
+   "evento": "tension_grupo_6m",
+   "auc": 0.7001,
+   "se": 0.0258,
+   "ic95_lo": 0.6523,
+   "ic95_hi": 0.7465,
+   "n": 13000,
+   "positivos": 5472,
+   "grupos": 232
+  }
+ ],
+ "anticipacion": {
+  "entradas_en_estres": 349,
+  "avisadas": 65,
+  "cobertura": 0.186,
+  "meses_mediana": 4.0,
+  "meses_media": 4.72,
+  "con_2m_o_mas": 0.831
+ },
+ "pesos": {
+  "runway": 0.2705,
+  "payroll_cv": 0.148,
+  "activity_trend": 0.1214,
+  "oper_persistence_6m": 0.1022,
+  "lost_share": 0.0723,
+  "ap_overdue_ratio": 0.0482,
+  "ar_late_share": 0.042,
+  "hhi_ar_6m": 0.0316,
+  "ap_late_share": 0.0312,
+  "debt_burden": 0.0263,
+  "lc_util": 0.0234,
+  "transfer_dep": 0.0201,
+  "net_vol_6m": 0.0188,
+  "cust_trend": 0.016,
+  "refund_rate": 0.0142,
+  "ar_overdue_90_ratio": 0.0076,
+  "oper_growth_12m": 0.0061
+ },
+ "escala": [
+  -59.803,
+  2.102
+ ],
+ "cobertura_media": 0.714
+}

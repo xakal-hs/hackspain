@@ -7,7 +7,7 @@
 Es un scorecard aditivo, no una caja negra. Cuatro pasos, en este orden:
 
   1. REFERENCIA   cada feature -> su percentil dentro del histórico de train (congelado).
-                  Orientado: después de este paso, en las 17 «más alto = más sano».
+                  Orientado: después de este paso, en todas «más alto = más sano».
   2. PESOS        una logística con w >= 0 por evento; los pesos normalizados se promedian.
                   El signo lo fija FEATURES, no los datos: nunca se aprende «más mora = mejor».
   3. ESCALA       recta que lleva P5 -> 15 y P95 -> 85. Lineal, así la explicación sigue sumando.
@@ -42,7 +42,7 @@ RULE_LABELS = {"regla_inactividad": "Regla: sin movimientos en el mes",
 
 @dataclass
 class Scorer:
-    """Todo lo aprendido. Es pequeño a propósito: 17 arrays + 17 pesos + 2 números + 2 por evento."""
+    """Todo lo aprendido. Es pequeño a propósito: 18 arrays + 18 pesos + 2 números + 2 por evento."""
     features: list[str]
     ref: dict[str, np.ndarray]              # valores de train ordenados, por feature
     bounds: dict[str, tuple[float, float]]  # rango 0,5-99,5 % de train, para marcar OOD
@@ -171,7 +171,7 @@ def fit(X: pd.DataFrame, y: pd.DataFrame | pd.Series | None = None, target: str 
     total = sum(w.values())
     sc.weights = {f: v / total for f, v in w.items()}
 
-    # escala publicada: el compuesto crudo se apelotona en el centro (media de 17 percentiles),
+    # escala publicada: el compuesto crudo se apelotona en el centro (media de 18 percentiles),
     # esta recta lo estira. Solo cuentan las empresas activas, para que las dormidas no arrastren el P5.
     comp = (S.fillna(NEUTRAL).to_numpy() @ np.array([sc.weights[f] for f in feats]))
     active = (pd.to_numeric(X.get("months_since_last_tx"), errors="coerce").fillna(0).to_numpy() == 0
@@ -349,7 +349,7 @@ def explain(scored: pd.DataFrame, feats: pd.DataFrame | None, company_id: str, m
 
 
 PCT = {"lc_util", "ap_late_share", "ar_late_share", "refund_rate", "transfer_dep", "lost_share",
-       "debt_burden", "payroll_cv", "oper_persistence_6m"}
+       "debt_burden", "payroll_cv", "oper_persistence_6m", "payroll_continuity_6m"}
 LOG_PCT = {"oper_growth_12m", "growth_vs_12m", "activity_trend", "cust_trend"}
 
 

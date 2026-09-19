@@ -8,6 +8,13 @@ const max = computed(() =>
   Math.max(...props.flows.flatMap((f) => [f.in, f.out, f.cash])) * 1.08,
 )
 
+/* The backend sends ISO months ('2025-09'); the fixtures already say 'sep 25'. */
+const shortMonths = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+const monthLabel = (month: string) => {
+  const iso = /^(\d{4})-(\d{2})$/.exec(month)
+  return iso ? `${shortMonths[Number(iso[2]) - 1]} ${iso[1]!.slice(2)}` : month
+}
+
 const height = (value: number) => `${Math.max((value / max.value) * 100, 1.5)}%`
 
 /* One shared scale for collections, payments and the cash line: putting cash on
@@ -28,7 +35,7 @@ const description = computed(
     props.flows
       .map(
         (f) =>
-          `${f.month}, cobros ${compactEuros(f.in)}, pagos ${compactEuros(f.out)}, caja ${compactEuros(f.cash)}`,
+          `${monthLabel(f.month)}, cobros ${compactEuros(f.in)}, pagos ${compactEuros(f.out)}, caja ${compactEuros(f.cash)}`,
       )
       .join('; '),
 )
@@ -69,7 +76,7 @@ const description = computed(
         v-for="(flow, index) in flows"
         :key="flow.month"
         :class="{ 'is-current': index === flows.length - 1 }"
-        >{{ flow.month }}</span
+        >{{ monthLabel(flow.month) }}</span
       >
     </div>
     <figcaption class="flows__legend">

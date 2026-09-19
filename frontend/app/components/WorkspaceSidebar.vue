@@ -18,18 +18,15 @@ import { perspectives, perspectiveById, type PerspectiveId } from '~/data/demo'
 
 const props = defineProps<{ role: PerspectiveId; section: string }>()
 
+const { name: companyName } = useSelectedCompany()
 const profile = computed(() => perspectiveById(props.role)!)
 
 const items = computed(() => {
-  const all = [
+  const portfolio = [
     { id: 'resumen', label: 'Resumen', icon: Gauge },
     { id: 'cartera', label: 'Cartera', icon: Rows3 },
-    { id: 'senales', label: props.role === 'empresa' ? 'Mis señales' : 'Señales', icon: Activity },
-    {
-      id: 'ofertas',
-      label: props.role === 'empresa' ? 'Mis ofertas' : 'Mercado',
-      icon: Handshake,
-    },
+    { id: 'senales', label: 'Señales', icon: Activity },
+    { id: 'ofertas', label: 'Mercado', icon: Handshake },
   ]
   /* Tesorería propia: solo tiene sentido mirándose a uno mismo. */
   const treasury = [
@@ -43,9 +40,7 @@ const items = computed(() => {
     { id: 'revenue', label: 'Revenue por producto', icon: Banknote },
     { id: 'modelo', label: 'Métricas del modelo', icon: Target },
   ]
-  return props.role === 'empresa'
-    ? [...all.filter((i) => i.id !== 'cartera'), ...treasury]
-    : [...all, ...ops]
+  return props.role === 'empresa' ? treasury : [...portfolio, ...ops]
 })
 
 const open = ref(false)
@@ -64,8 +59,9 @@ async function leave() {
   await navigateTo('/')
 }
 
+/* La primera sección es la portada de la perspectiva: vive en la URL limpia. */
 function href(id: string) {
-  return id === 'resumen'
+  return id === items.value[0]?.id
     ? `/dashboard/${props.role}`
     : `/dashboard/${props.role}?section=${id}`
 }
@@ -121,8 +117,8 @@ watch(
     </div>
 
     <div class="rail__space">
-      <b>{{ profile.name }}</b>
-      <span>{{ profile.person }}</span>
+      <CompanySelector v-if="role === 'empresa'" />
+      <template v-else><b>{{ profile.name }}</b><span>{{ profile.person }}</span></template>
     </div>
 
     <nav
@@ -155,6 +151,7 @@ watch(
       <div class="rail__profile" @keydown.esc="open = false">
         <div v-if="open" id="rail-switcher" class="rail__switcher">
           <p>Cambiar de vista</p>
+          <CompanySelector v-if="role === 'empresa'" />
           <button
             v-for="perspective in perspectives"
             :key="perspective.id"
@@ -162,9 +159,9 @@ watch(
             :aria-pressed="perspective.id === role"
             @click="switchTo(perspective.id)"
           >
-            <i aria-hidden="true">{{ perspective.initials }}</i>
+            <i aria-hidden="true">{{ perspective.id === 'empresa' ? 'CO' : perspective.initials }}</i>
             <span
-              >{{ perspective.name }}<small>{{ perspective.person }}</small></span
+              >{{ perspective.name }}<small>{{ perspective.id === 'empresa' ? companyName : perspective.person }}</small></span
             >
             <Check v-if="perspective.id === role" :size="15" aria-hidden="true" />
           </button>
@@ -180,9 +177,9 @@ watch(
           aria-controls="rail-switcher"
           @click="open = !open"
         >
-          <i aria-hidden="true">{{ profile.initials }}</i>
+          <i aria-hidden="true">{{ role === 'empresa' ? 'CO' : profile.initials }}</i>
           <span
-            ><b>{{ profile.person }}</b
+            ><b>{{ role === 'empresa' ? companyName : profile.person }}</b
             ><small>Cambiar de vista</small></span
           >
           <ChevronsUpDown :size="15" aria-hidden="true" />

@@ -1,0 +1,19 @@
+[project]
+name = "xray-backend"
+version = "1.0.0"
+description = "El score X-Ray: de los CSV del reto a la API que consume el frontend Nuxt."
+requires-python = ">=3.14"
+# Solo lo que importa alguno de los siete ficheros. No hay lightgbm ni mlforecast: el
+# forecaster de trayectoria se quedó fuera (README §8), y arrastrar sus dependencias haría
+# que instalar el backend costase diez veces más de lo que tarda en puntuar la cartera.
+dependencies = [
+    "fastapi>=0.141.1",     # main.py
+    "joblib>=1.5.2",        # predict.save / predict.load del artefacto
+    "numpy>=2.3.4",
+    "pandas>=2.3.3",        # eventos, decisión, métricas
+    "polars>=1.44.2",       # etl.py y las features
+    "pyarrow>=25.0.1",      # parquet
+    "scikit-learn>=1.9.1",  # GroupKFold en metrics.py
+    "scipy>=1.18.1",        # la logística con w >= 0 (L-BFGS-B)
+    "uvicorn>=0.53.0",
+]
