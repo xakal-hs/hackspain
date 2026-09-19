@@ -30,3 +30,6 @@ backend/__pycache__/
 # Experimento de pesos: las notas OOF se regeneran, los resúmenes sí se versionan.
 backend/experiments/salida/oof_*.parquet
 backend/experiments/salida_*.log
+
+# impeccable: el lanzador descarga su binario por plataforma la primera vez.
+.claude/skills/impeccable/scripts/bin/
