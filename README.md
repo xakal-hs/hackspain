@@ -105,8 +105,8 @@ FastAPI mediante `XRAY_API_BASE`:
 
 ```bash
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 La capa de mapeo se comprueba con sus propios tests (con fixtures, no necesitan el dataset) y con una
