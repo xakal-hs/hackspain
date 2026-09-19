@@ -120,10 +120,12 @@ def add_events_v2(d: pd.DataFrame) -> pd.DataFrame:
     risk_set = healthy & obs6 & g["month"].shift(-(H + 3)).notna()   # sanas hoy y con ventana de confirmación observable
     d["tension_onset"] = confirmed
     d["tension_entrada_6m"] = _fwd_any(d, confirmed).where(risk_set)
-    # estado persistente (visión del prestamista): tensión en ≥2 de 3 meses seguidos que arrancan en t
-    valid = stress & ~implausible & ~group_funded
+    # estado persistente (visión del prestamista): tensión en ≥2 de 3 meses seguidos que arrancan en t.
+    # La financiación del grupo no censura la tensión futura como 0 (eso declaraba sanas 2 513 filas con la caja
+    # tapada por el grupo, Q2/Q12): la fila financiada hoy queda sin etiqueta (null), y los meses futuros cuentan.
+    valid = stress & ~implausible
     persist = valid & (sum(_shift_bool(valid, cid, -k).astype(int) for k in (1, 2)) >= 1) & g["month"].shift(-2).notna()
-    d["tension_6m"] = _fwd_any(d, persist).where(obs6 & g["month"].shift(-(H + 2)).notna())
+    d["tension_6m"] = _fwd_any(d, persist).where(obs6 & g["month"].shift(-(H + 2)).notna() & ~group_funded)
 
     # --- E2 · incumplimiento estricto de obligación recurrente
     feed = (d.n_tx >= 5) & (d.outflow > 0) & ((d.uncat_in / (d.inflow + 1e-9)) < 0.8)
