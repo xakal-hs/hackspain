@@ -9,7 +9,7 @@ useHead({ title: 'Monitor · X-Ray' })
       <span class="code-label">&lt;Monitor /&gt;</span>
       <h1>Monitor de cambios</h1>
       <p>Esta ruta está preparada para las alertas de mejora, deterioro, bache y caída estructural.</p>
-      <NuxtLink to="/" class="button button--secondary">Volver a cartera</NuxtLink>
+      <NuxtLink to="/cartera" class="button button--secondary">Volver a cartera</NuxtLink>
     </main>
   </div>
 </template>

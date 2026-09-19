@@ -9,7 +9,7 @@ useHead({ title: 'Escenarios · X-Ray' })
       <span class="code-label">&lt;ScenarioLab /&gt;</span>
       <h1>Laboratorio de escenarios</h1>
       <p>Esta ruta alojará el simulador de cobros, pagos, deuda y caja contra el score actual.</p>
-      <NuxtLink to="/" class="button button--secondary">Volver a cartera</NuxtLink>
+      <NuxtLink to="/cartera" class="button button--secondary">Volver a cartera</NuxtLink>
     </main>
   </div>
 </template>

@@ -4,7 +4,7 @@ import { Bell, Menu, Search, Settings2, X } from '@lucide/vue'
 const route = useRoute()
 const mobileMenuOpen = ref(false)
 const links = [
-  { label: 'Cartera', to: '/' },
+  { label: 'Cartera', to: '/cartera' },
   { label: 'Monitor', to: '/monitor' },
   { label: 'Escenarios', to: '/escenarios' },
 ]

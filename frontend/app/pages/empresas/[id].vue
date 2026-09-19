@@ -12,7 +12,7 @@ useHead({ title: () => `${companyId.value} · X-Ray` })
       <span class="code-label">&lt;CompanyView /&gt;</span>
       <h1>{{ companyId }}</h1>
       <p>Ruta preparada para el nivel, la trayectoria, las causas y la decisión de esta empresa.</p>
-      <NuxtLink to="/" class="button button--secondary">Volver a cartera</NuxtLink>
+      <NuxtLink to="/cartera" class="button button--secondary">Volver a cartera</NuxtLink>
     </main>
   </div>
 </template>
