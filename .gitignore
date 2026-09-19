@@ -31,5 +31,7 @@ backend/__pycache__/
 backend/experiments/salida/oof_*.parquet
 backend/experiments/salida_*.log
 
-# impeccable: el lanzador descarga su binario por plataforma la primera vez.
-.claude/skills/impeccable/scripts/bin/
+# impeccable: herramienta de diseño local, cada uno la instala con `npx impeccable install`.
+.claude/skills/impeccable/
+.claude/agents/impeccable-*
+.impeccable/
