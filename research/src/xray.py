@@ -48,6 +48,7 @@ PRIOR_W = {"runway": 3, "lc_util": 1, "growth_vs_12m": 1.5, "debt_burden": 1, "p
 CONTEXT = ["log_scale", "fx_share", "activity_log"]
 BANDS = [(0, 35, "riesgo"), (35, 65, "vigilar"), (65, 101, "sano")]  # ≈ cuartiles de la escala publicada (D17)
 DORMANT_CAP = 30.0
+POSITIVE_PREFIX = ("positive", "expansion")  # eventos de la cara positiva (nota de expansión)
 
 
 def band_of(s: float) -> str:
@@ -59,12 +60,13 @@ def band_of(s: float) -> str:
 
 class HealthScorer(BaseEstimator, TransformerMixin):
     def __init__(self, calibrate: bool = True, l2: float = 1.0, weight_floor: float = 0.0,
-                 smooth_alpha: float = 0.5, dormant_cap: float = DORMANT_CAP):
+                 smooth_alpha: float = 0.5, dormant_cap: float = DORMANT_CAP, target: str = "adversa"):
         self.calibrate = calibrate
         self.l2 = l2
         self.weight_floor = weight_floor
         self.smooth_alpha = smooth_alpha
         self.dormant_cap = dormant_cap
+        self.target = target  # "adversa" (E1-E3), "expansion" (E4) o "todos": qué eventos calibran los pesos (D32)
 
     # ---------- ajuste ----------
     def fit(self, X: pd.DataFrame, y: pd.Series | None = None):
@@ -91,9 +93,13 @@ class HealthScorer(BaseEstimator, TransformerMixin):
             if len(Y) != len(X):
                 raise ValueError("y debe tener las mismas filas que X")
             Y = Y.set_axis(X.index)
+            # dos notas, no una (D32): promediar los pesos de la tensión con los de la expansión diluía la caja
+            # (runway 3,4 para tensión, 0,0 para expansión). La nota adversa calibra con E1-E3; la de expansión con E4.
+            pos_cols = [c for c in Y.columns if c.startswith(POSITIVE_PREFIX)]
+            cal_cols = {"adversa": [c for c in Y.columns if c not in pos_cols], "expansion": pos_cols}.get(self.target, list(Y.columns)) or list(Y.columns)
             ws, self.calibration_ = [], {}
-            for col in Y.columns:
-                wc, info = self._calibrate(X, Y[col], w, positive=col.startswith(("positive", "expansion")))
+            for col in cal_cols:
+                wc, info = self._calibrate(X, Y[col], w, positive=col.startswith(POSITIVE_PREFIX))
                 self.calibration_[col] = info
                 if wc.sum() > 0:
                     ws.append(wc / wc.sum())
@@ -117,7 +123,7 @@ class HealthScorer(BaseEstimator, TransformerMixin):
             Y = (y.to_frame() if isinstance(y, pd.Series) else pd.DataFrame(y)).set_axis(X.index)
             score = np.clip(self.scale_[0] + self.scale_[1] * comp, 0, 100)
             labels = {c: Y[c] for c in Y.columns}
-            adv = [c for c in Y.columns if not c.startswith(("positive", "expansion"))]
+            adv = [c for c in Y.columns if not c.startswith(POSITIVE_PREFIX)]
             if len(adv) > 1:  # "algún evento adverso": 1 si alguno ocurre, 0 si todos los observables son 0
                 A = Y[adv]
                 labels["adverso"] = A.max(axis=1).where(A.notna().any(axis=1))
