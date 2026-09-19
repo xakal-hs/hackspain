@@ -953,46 +953,6 @@ export type PerspectiveId = Perspective['id']
 export const perspectiveById = (id: string) =>
   perspectives.find((p) => p.id === id)
 
-export interface Offer {
-  id: string
-  bank: string
-  amount: number
-  rate: string
-  months: number
-  note: string
-  accepted: boolean
-}
-
-export const initialOffers: Offer[] = [
-  {
-    id: 'norte',
-    bank: 'Financiador Norte',
-    amount: 20000,
-    rate: '7,1',
-    months: 12,
-    note: 'El tipo subió 0,4 puntos este mes al caer tu score a 68.',
-    accepted: false,
-  },
-  {
-    id: 'atlas',
-    bank: 'Fondo Atlas',
-    amount: 25000,
-    rate: '7,6',
-    months: 9,
-    note: 'Plazo corto, pensado para cubrir el hueco de caja de este trimestre.',
-    accepted: false,
-  },
-  {
-    id: 'sur',
-    bank: 'Prestamista Sur',
-    amount: 15000,
-    rate: '6,9',
-    months: 18,
-    note: 'El tipo más bajo de los tres, a cambio de devolverlo en 18 meses.',
-    accepted: false,
-  },
-]
-
 /** What the product is worth on this portfolio, from the CFO row. */
 export const value = [
   {

@@ -1,403 +1,321 @@
-<script setup>
-import { computed, ref } from 'vue'
+<script setup lang="ts">
+import type { AlertDirection } from './TreasuryAlert.vue'
+import type { LogEntry } from './TreasuryLog.vue'
+import type { TreasuryState } from './TreasuryHead.vue'
 
-const props = defineProps({
-  accentColor: { type: String, default: 'var(--accent)' },
-  // Suelto, el mock se renderiza entero (1720×1080 con su sidebar y su topbar).
-  // Dentro del panel el shell ya lo pone el dashboard: solo va el contenido.
-  chrome: { type: Boolean, default: true }
-})
+const selected = ref<TreasuryState>('bien')
+
+interface Payment {
+  amount: string
+  date: string
+  counterparty: string
+  status: string
+  urgent?: boolean
+}
 
 const { name: companyName, sector: companySector, detail: companyDetail, latest: companyLatest, health: companyHealth, company: selectedCompany } = useSelectedCompany()
 
-const accent = computed(() => props.accentColor)
-
-const selectedState = ref('bien')
-
 // TODO: sustituir por fetch a /api/... cuando el endpoint esté listo
-const states = ref({
+const states: Record<
+  TreasuryState,
+  {
+    chartColor: string
+    direction: AlertDirection
+    headline: string
+    subhead: string
+    ctaLabel: string
+    ctaFilled: boolean
+    exposure: string
+    coverage: string
+    coverageDelta: string
+    coverageBar: string
+    savingsLabel: string
+    savings: string
+    savingsDelta: string
+    savingsHint: string
+    spotHistory: string
+    spotForecast: string
+    payments: [number, number][]
+    upcomingPayments: Payment[]
+    history: LogEntry[]
+  }
+> = {
   bien: {
     // El semáforo solo sobrevive en los puntos de pago de la gráfica; el resto
     // de la vista va en el color primario.
-    chartColor: 'var(--ok)', chip: 'BIEN', tag: 'Oportunidad de hedge', icon: '↓',
-    headline: 'Cubre 45k USD ahora y ahorra 900 € vs. el tipo esperado',
-    subhead: 'Δ tipo hoy vs previsto ≥ 2 % · volatilidad alta · pago previsto el 15/nov confirmado en el ERP.',
-    ctaLabel: 'Ejecutar cobertura', ctaFilled: true,
+    chartColor: 'var(--ok)',
+    direction: 'down',
+    headline: 'Cubre 45k USD ahora y ahorra 900 € frente al tipo esperado',
+    subhead:
+      'El tipo de hoy mejora el previsto en un 2 % o más · volatilidad alta · pago previsto el 15 de noviembre, confirmado en el ERP.',
+    ctaLabel: 'Ejecutar cobertura',
+    ctaFilled: true,
     exposure: '340k €',
-    coverage: '68 %', coverageDelta: '+3 pp esta semana', coverageBar: '68%',
-    savingsLabel: 'Ahorro estimado', savings: '+900 €', savingsDelta: 'sobre este pago',
-    savingsHint: 'Ahorro acumulado del trimestre: 12.400 € vs. tipos de mercado en la fecha real.',
-    spotHistory: '20,110 60,118 100,112 140,108 180,102 220,100 260,105 300,110 340,115 380,120 420,125 460,130',
+    coverage: '68 %',
+    coverageDelta: '+3 pp esta semana',
+    coverageBar: '68%',
+    savingsLabel: 'Ahorro estimado',
+    savings: '+900 €',
+    savingsDelta: 'sobre este pago',
+    savingsHint: 'Ahorro acumulado del trimestre: 12.400 € frente a los tipos de mercado en la fecha real.',
+    spotHistory:
+      '20,110 60,118 100,112 140,108 180,102 220,100 260,105 300,110 340,115 380,120 420,125 460,130',
     spotForecast: '460,130 490,135 520,145 550,150',
     payments: [
-      { x: 260, y: 105 },
-      { x: 380, y: 120 },
-      { x: 490, y: 135 }
+      [260, 105],
+      [380, 120],
+      [490, 135],
     ],
     upcomingPayments: [
-      { amount: '45.000 USD', date: '15 nov', counterparty: 'Global Supplies Inc.', status: 'Cubrir hoy · ahorra 900€', tone: 'var(--accent)' },
-      { amount: '18.500 GBP', date: '22 nov', counterparty: 'London Freight Ltd.', status: 'Cubrir esta semana', tone: null },
-      { amount: '620.000 JPY', date: '01 dic', counterparty: 'Sakura Materials', status: 'Sin urgencia', tone: null }
+      { amount: '45.000 USD', date: '15 nov', counterparty: 'Global Supplies Inc.', status: 'Cubrir hoy · ahorra 900 €', urgent: true },
+      { amount: '18.500 GBP', date: '22 nov', counterparty: 'London Freight Ltd.', status: 'Cubrir esta semana' },
+      { amount: '620.000 JPY', date: '01 dic', counterparty: 'Sakura Materials', status: 'Sin urgencia' },
     ],
     history: [
-      { date: '05 sep', title: 'Cobertura 32k USD · ahorro 640 €', desc: 'Ejecutada 8 días antes del pago · tipo 0,915', badge: 'Cerrada', badgeTone: null },
-      { date: '22 ago', title: 'Cobertura 15k GBP · ahorro 320 €', desc: 'Modo auto activado por < 20k€', badge: 'Cerrada', badgeTone: null },
-      { date: '10 ago', title: 'Cobertura 60k USD · ahorro 1.240 €', desc: 'Trimestre anterior · efecto acumulado', badge: 'Cerrada', badgeTone: null }
-    ]
+      { date: '05 sep', title: 'Cobertura 32k USD · ahorro 640 €', desc: 'Ejecutada 8 días antes del pago · tipo 0,915', badge: 'Cerrada' },
+      { date: '22 ago', title: 'Cobertura 15k GBP · ahorro 320 €', desc: 'Modo automático, por ser menor de 20k €', badge: 'Cerrada' },
+      { date: '10 ago', title: 'Cobertura 60k USD · ahorro 1.240 €', desc: 'Trimestre anterior · efecto acumulado', badge: 'Cerrada' },
+    ],
   },
   normal: {
-    chartColor: 'var(--warn)', chip: 'NORMAL', tag: 'Sin recomendación', icon: '→',
-    headline: 'Tus exposiciones están bien · sin cobertura sugerida esta semana',
-    subhead: 'Los pagos previstos son pequeños o la volatilidad esperada no justifica el spread del hedge.',
-    ctaLabel: 'Ajustar sensibilidad', ctaFilled: false,
+    chartColor: 'var(--warn)',
+    direction: 'flat',
+    headline: 'Tus exposiciones están bien: sin cobertura sugerida esta semana',
+    subhead:
+      'Los pagos previstos son pequeños o la volatilidad esperada no justifica el coste de la cobertura.',
+    ctaLabel: 'Ajustar sensibilidad',
+    ctaFilled: false,
     exposure: '48k €',
-    coverage: '92 %', coverageDelta: 'estable', coverageBar: '92%',
-    savingsLabel: 'Ahorro previsto', savings: '+120 €', savingsDelta: 'trimestre en curso',
-    savingsHint: 'No hay operaciones grandes esperadas. Se ejecutará a tipo spot en la fecha.',
-    spotHistory: '20,110 60,108 100,112 140,110 180,108 220,111 260,110 300,109 340,111 380,110 420,109 460,110',
+    coverage: '92 %',
+    coverageDelta: 'estable',
+    coverageBar: '92%',
+    savingsLabel: 'Ahorro previsto',
+    savings: '+120 €',
+    savingsDelta: 'trimestre en curso',
+    savingsHint: 'No hay operaciones grandes previstas. Se pagará al tipo de contado en la fecha.',
+    spotHistory:
+      '20,110 60,108 100,112 140,110 180,108 220,111 260,110 300,109 340,111 380,110 420,109 460,110',
     spotForecast: '460,110 490,112 520,110 550,111',
     payments: [
-      { x: 300, y: 109 },
-      { x: 490, y: 112 }
+      [300, 109],
+      [490, 112],
     ],
     upcomingPayments: [
-      { amount: '4.200 USD', date: '18 nov', counterparty: 'US Design Studio', status: 'Sin urgencia', tone: null },
-      { amount: '3.800 GBP', date: '01 dic', counterparty: 'Small Vendor UK', status: 'Sin urgencia', tone: null },
-      { amount: '1.100 USD', date: '05 dic', counterparty: 'SaaS License', status: 'Sin urgencia', tone: null }
+      { amount: '4.200 USD', date: '18 nov', counterparty: 'US Design Studio', status: 'Sin urgencia' },
+      { amount: '3.800 GBP', date: '01 dic', counterparty: 'Small Vendor UK', status: 'Sin urgencia' },
+      { amount: '1.100 USD', date: '05 dic', counterparty: 'SaaS License', status: 'Sin urgencia' },
     ],
     history: [
-      { date: '02 sep', title: 'Pago a tipo spot · 3.400 USD', desc: 'Sin cobertura · por debajo del umbral', badge: 'Sin acción', badgeTone: null },
-      { date: '25 ago', title: 'Pago a tipo spot · 5.100 USD', desc: 'Sin cobertura · por debajo del umbral', badge: 'Sin acción', badgeTone: null },
-      { date: '10 ago', title: 'Cobertura 22k USD · ahorro 380 €', desc: 'Última cobertura del ciclo', badge: 'Cerrada', badgeTone: null }
-    ]
+      { date: '02 sep', title: 'Pago al contado · 3.400 USD', desc: 'Sin cobertura · por debajo del umbral', badge: 'Sin acción' },
+      { date: '25 ago', title: 'Pago al contado · 5.100 USD', desc: 'Sin cobertura · por debajo del umbral', badge: 'Sin acción' },
+      { date: '10 ago', title: 'Cobertura 22k USD · ahorro 380 €', desc: 'Última cobertura del ciclo', badge: 'Cerrada' },
+    ],
   },
   mal: {
-    chartColor: 'var(--bad)', chip: 'MAL', tag: 'Posición huérfana', icon: '!',
+    chartColor: 'var(--bad)',
+    direction: 'alert',
     headline: 'Tienes 45k USD cubiertos sin pago que los use',
-    subhead: 'El ERP canceló el pago de Global Supplies el 12/nov. Tu posición FX abierta pierde 240 €/día al ritmo actual.',
-    ctaLabel: 'Revertir posición', ctaFilled: true,
+    subhead:
+      'El ERP canceló el pago de Global Supplies el 12 de noviembre. Tu posición abierta en divisa pierde 240 €/día al ritmo actual.',
+    ctaLabel: 'Revertir posición',
+    ctaFilled: true,
     exposure: '340k €',
-    coverage: '73 %', coverageDelta: '−5 pp por posición abierta', coverageBar: '73%',
-    savingsLabel: 'Coste diario abierto', savings: '−240 €', savingsDelta: '2 días abierta',
+    coverage: '73 %',
+    coverageDelta: '−5 pp por posición abierta',
+    coverageBar: '73%',
+    savingsLabel: 'Coste diario abierto',
+    savings: '−240 €',
+    savingsDelta: '2 días abierta',
     savingsHint: 'Deshacer al tipo actual limita la pérdida a 480 €. Cada día abierta añade riesgo.',
-    spotHistory: '20,90 60,100 100,110 140,120 180,115 220,105 260,115 300,120 340,125 380,140 420,155 460,170',
+    spotHistory:
+      '20,90 60,100 100,110 140,120 180,115 220,105 260,115 300,120 340,125 380,140 420,155 460,170',
     spotForecast: '460,170 490,180 520,190 550,195',
-    payments: [
-      { x: 380, y: 140 }
-    ],
+    payments: [[380, 140]],
     upcomingPayments: [
-      { amount: '45.000 USD', date: '12 nov · cancelado en ERP', counterparty: 'Global Supplies Inc.', status: 'Posición abierta', tone: 'var(--accent)' },
-      { amount: '18.500 GBP', date: '22 nov', counterparty: 'London Freight Ltd.', status: 'Verificando', tone: null },
-      { amount: '620.000 JPY', date: '01 dic', counterparty: 'Sakura Materials', status: 'Sin urgencia', tone: null }
+      { amount: '45.000 USD', date: '12 nov · cancelado en el ERP', counterparty: 'Global Supplies Inc.', status: 'Posición abierta', urgent: true },
+      { amount: '18.500 GBP', date: '22 nov', counterparty: 'London Freight Ltd.', status: 'Verificando' },
+      { amount: '620.000 JPY', date: '01 dic', counterparty: 'Sakura Materials', status: 'Sin urgencia' },
     ],
     history: [
-      { date: '13 nov', title: 'Posición huérfana detectada', desc: 'Pago cancelado en ERP tras hedge · aviso al CFO', badge: 'Activa', badgeTone: 'var(--accent)' },
-      { date: '10 nov', title: 'Cobertura 45k USD ejecutada', desc: 'Ahorro esperado 900 € · antes de la cancelación', badge: 'Sin uso', badgeTone: null },
-      { date: '02 nov', title: 'Cobertura 22k USD · ahorro 360 €', desc: 'Ejecutada y utilizada correctamente', badge: 'Cerrada', badgeTone: null }
-    ]
-  }
-})
+      { date: '13 nov', title: 'Posición huérfana detectada', desc: 'Pago cancelado en el ERP tras la cobertura · aviso al CFO', badge: 'Activa', open: true },
+      { date: '10 nov', title: 'Cobertura 45k USD ejecutada', desc: 'Ahorro esperado de 900 €, antes de la cancelación', badge: 'Sin uso' },
+      { date: '02 nov', title: 'Cobertura 22k USD · ahorro 360 €', desc: 'Ejecutada y utilizada correctamente', badge: 'Cerrada' },
+    ],
+  },
+}
 
-const state = computed(() => states.value[selectedState.value] || states.value.bien)
-
-const stateOptions = computed(() =>
-  [
-    { id: 'bien', label: 'Bien' },
-    { id: 'normal', label: 'Normal' },
-    { id: 'mal', label: 'Mal' }
-  ].map((s) => ({
-    id: s.id,
-    label: s.label,
-    bg: s.id === selectedState.value ? 'var(--card)' : 'transparent',
-    text: s.id === selectedState.value ? 'var(--text)' : 'var(--text-3)',
-    pick: () => { selectedState.value = s.id }
-  }))
-)
+const state = computed(() => states[selected.value])
 </script>
 
 <template>
-  <div
-    v-if="!companyDetail.isPending.value"
-    class="centinela"
-    style="box-sizing: border-box; background: var(--bg); color: var(--text); display: flex; overflow: hidden;"
-    :style="chrome
-      ? { width: '1720px', height: '1080px' }
-      : { width: '100%', overflow: 'visible', borderRadius: 'var(--r-panel)' }"
-  >
+  <div v-if="!companyDetail.isPending.value" class="centinela tz">
+    <TreasuryHead
+      v-model="selected"
+      :title="`Divisa Inteligente · ${companyName}`"
+      lead="Prevé tus pagos en divisa y cubre al mejor tipo antes de la fecha del cobro o del pago."
+      :sync="`ERP: ${selectedCompany?.erp || 'Sin dato'}`"
+    />
 
-    <!-- SIDEBAR (navy) -->
-    <div v-if="chrome" style="width: 250px; flex-shrink: 0; background: linear-gradient(180deg, var(--navy-1) 0%, var(--navy-2) 100%); padding: 22px 16px; display: flex; flex-direction: column; gap: 4px;">
-      <div style="display: flex; align-items: center; gap: 10px; padding: 4px 8px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 12px;">
-        <div style="width: 30px; height: 30px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center;" :style="{ background: accent }">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6V12C4 17 7.5 20.5 12 22C16.5 20.5 20 17 20 12V6L12 2Z" stroke="var(--card)" stroke-width="1.8" stroke-linejoin="round"></path></svg>
-        </div>
-        <span style="font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--on-navy);">Centinela</span>
+    <TreasuryAlert
+      :direction="state.direction"
+      :headline="`Ejemplo simulado · ${state.headline}`"
+      :text="state.subhead"
+      :cta="state.ctaLabel"
+      :cta-filled="state.ctaFilled"
+    />
+
+    <section class="tz-card tz-strip" aria-label="Exposición, cobertura y ahorro">
+      <div>
+        <p class="tz-read__label">Exposición en divisa · próximo trimestre <b>USD · GBP · JPY</b></p>
+        <p class="tz-read__figure">{{ state.exposure }}</p>
+        <p class="tz-read__hint">Previsión a tres meses</p>
       </div>
-
-      <a href="WebAppScore.dc.html" class="nav-link"><span style="width: 16px;">◈</span> Inicio</a>
-      <a href="WebAppScore.dc.html" class="nav-link"><span style="width: 16px;">☰</span> X-Ray Score</a>
-      <a href="WebApp.dc.html" class="nav-link"><span style="width: 16px;">◇</span> Colchón Dinámico</a>
-
-      <!-- Active -->
-      <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-sm); background: rgba(255,255,255,0.12); color: var(--on-navy); font-size: 13.5px; font-weight: 600;" :style="{ borderLeft: `3px solid ${accent}` }">
-        <span style="width: 16px;">$</span> Divisa Inteligente
-        <span style="margin-left: auto; padding: 2px 7px; color: var(--accent-on); border-radius: 999px; font-size: 10px; font-weight: 700;" :style="{ background: accent }">{{ state.chip }}</span>
+      <div>
+        <p class="tz-read__label">Cobertura actual <b class="is-accent">{{ state.coverageDelta }}</b></p>
+        <p class="tz-read__figure">{{ state.coverage }}</p>
+        <div class="tz-meter" aria-hidden="true"><span :style="{ width: state.coverageBar }"></span></div>
       </div>
-
-      <a href="Marketplace.dc.html" class="nav-link"><span style="width: 16px;">⚏</span> Contrapartes</a>
-      <a href="Marketplace.dc.html" class="nav-link"><span style="width: 16px;">◉</span> Marketplace</a>
-
-      <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 10px 8px;"></div>
-      <span style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--on-navy-4); padding: 0 12px 4px;">Embat</span>
-      <div class="nav-sub"><span style="width: 16px;">⇄</span> Conectividad</div>
-      <div class="nav-sub"><span style="width: 16px;">▤</span> Pagos</div>
-      <div class="nav-sub"><span style="width: 16px;">⧉</span> Conciliación</div>
-
-      <div style="margin-top: auto; padding: 12px; background: rgba(255,255,255,0.06); border-radius: var(--r-lg); display: flex; align-items: center; gap: 10px;">
-        <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--on-navy); font-size: 12px; font-weight: 700; font-family: var(--font-display);" :style="{ background: accent }">CA</div>
-        <div style="flex-grow: 1; min-width: 0;">
-          <div style="font-size: 12.5px; font-weight: 600; color: var(--on-navy);">César Álvarez</div>
-          <div style="font-size: 11px; color: var(--on-navy-3);">{{ companyName }}</div>
-        </div>
+      <div>
+        <p class="tz-read__label">
+          {{ state.savingsLabel }} <b class="is-accent">{{ state.savingsDelta }}</b>
+        </p>
+        <p class="tz-read__figure is-accent">{{ state.savings }}</p>
+        <p class="tz-read__hint">{{ state.savingsHint }}</p>
       </div>
-    </div>
+    </section>
 
-    <!-- MAIN -->
-    <div style="flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden;" :style="chrome ? null : { overflow: 'visible' }">
-
-      <!-- TOP BAR -->
-      <div
-        style="display: flex; align-items: center; flex-shrink: 0;"
-        :style="chrome
-          ? { padding: '16px 32px', background: 'var(--card)', borderBottom: '1px solid var(--border)', justifyContent: 'space-between' }
-          : { padding: '0 24px', justifyContent: 'flex-end' }"
-      >
-        <div v-if="chrome" style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--meta);">
-          <span>Tesorería</span><span>›</span>
-          <span style="color: var(--text); font-weight: 600;">Divisa Inteligente</span>
-        </div>
-        <!-- El simulador de estado es una herramienta de demo, no parte del
-             producto: la etiqueta va por title en vez de ocupar ancho fijo. -->
-        <div style="display: flex; background: var(--bg); border-radius: 999px; padding: 1px;" title="Simular escenario de producto" aria-label="Escenario simulado">
-          <button
-            v-for="s in stateOptions"
-            :key="s.id"
-            type="button"
-            style="padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: var(--font-body); border: none;"
-            :style="{ background: s.bg, color: s.text }"
-            @click="s.pick"
-          >{{ s.label }}</button>
-        </div>
-      </div>
-
-      <!-- CONTENT -->
-      <div style="flex: 1; display: flex; flex-direction: column; gap: 18px;" :style="chrome ? { overflowY: 'auto', padding: '26px 32px' } : { padding: '16px 24px 22px' }">
-
-        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+    <div class="tz-split">
+      <section class="tz-card tz-chart">
+        <header class="tz-card__bar">
           <div>
-            <h1 style="margin: 0 0 6px; font-family: var(--font-display); font-size: 26px; font-weight: 600;">Divisa Inteligente · {{ companyName }}</h1>
-            <p style="margin: 0; font-size: 13.5px; color: var(--meta);">Predice tus pagos en divisa y cubre al mejor tipo antes de la fecha del cobro o pago.</p>
+            <h2>Evolución EUR/USD · pagos previstos</h2>
+            <p>Tipo actual y previsión a tres meses</p>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; font-size: 12.5px; color: var(--text-2);">
-            <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--text-3);"></span>
-            ERP: {{ selectedCompany?.erp || 'Sin dato' }}
-          </div>
-        </div>
-
-        <!-- BANNER. Único bloque teñido de la página, y en primario: el
-             verde/ámbar/rojo se queda para los puntos de pago de la gráfica. -->
-        <div
-          style="border-radius: var(--r-lg); padding: 16px 20px; display: flex; align-items: center; gap: 16px;"
-          :style="{
-            background: `color-mix(in srgb, ${accent} 9%, transparent)`,
-            border: `1px solid color-mix(in srgb, ${accent} 26%, transparent)`,
-            borderLeft: `4px solid ${accent}`
-          }"
+          <span class="tz-tag">EUR / USD</span>
+        </header>
+        <svg
+          viewBox="0 0 700 220"
+          preserveAspectRatio="none"
+          role="img"
+          aria-label="Tipo EUR/USD de los últimos 12 meses con previsión a tres meses y los pagos en divisa previstos."
         >
-          <div style="width: 40px; height: 40px; border-radius: var(--r-lg); display: flex; align-items: center; justify-content: center; font-size: 18px;" :style="{ background: `color-mix(in srgb, ${accent} 16%, transparent)` }">{{ state.icon }}</div>
-          <div style="flex-grow: 1;">
-            <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2px;" :style="{ color: accent }">{{ state.tag }}</div>
-            <div style="font-family: var(--font-display); font-size: 16.5px; font-weight: 600; margin-bottom: 3px;">Ejemplo simulado · {{ state.headline }}</div>
-            <div style="font-size: 13px; color: var(--body); line-height: 1.5;">{{ state.subhead }}</div>
-          </div>
-          <button
-            type="button"
-            style="padding: 12px 22px; border-radius: var(--r-md); font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: var(--font-body); white-space: nowrap;"
-            :style="state.ctaFilled
-              ? { background: 'var(--accent-solid)', color: 'var(--accent-on)', border: '1px solid var(--accent-solid)' }
-              : { background: 'var(--card)', color: 'var(--text-2)', border: '1px solid var(--border)' }"
-          >{{ state.ctaLabel }}</button>
-        </div>
+          <line
+            v-for="y in [30, 80, 130, 180]"
+            :key="y"
+            x1="10"
+            :y1="y"
+            x2="690"
+            :y2="y"
+            stroke="var(--grid)"
+            vector-effect="non-scaling-stroke"
+          />
+          <polyline
+            :points="state.spotHistory"
+            fill="none"
+            stroke="var(--text)"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            vector-effect="non-scaling-stroke"
+          />
+          <polyline
+            :points="state.spotForecast"
+            fill="none"
+            stroke="var(--text)"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-dasharray="5 5"
+            opacity="0.5"
+            vector-effect="non-scaling-stroke"
+          />
+          <!-- Trazos de longitud cero con remate redondo: círculos que no se
+               deforman aunque el SVG se estire. -->
+          <g v-for="([x, y], i) in state.payments" :key="i">
+            <path
+              :d="`M${x} ${y}h0`"
+              stroke="var(--card)"
+              stroke-width="18"
+              stroke-linecap="round"
+              vector-effect="non-scaling-stroke"
+            />
+            <path
+              :d="`M${x} ${y}h0`"
+              :stroke="state.chartColor"
+              stroke-width="14"
+              stroke-linecap="round"
+              vector-effect="non-scaling-stroke"
+            />
+          </g>
+        </svg>
+        <p class="tz-chart__axis" aria-hidden="true">
+          <span>oct '25</span><span>ene '26</span><span>hoy</span><span>+3 meses</span>
+        </p>
+        <ul class="tz-legend">
+          <li><i style="color: var(--text)"></i>Tipo simulado</li>
+          <li><i class="is-dashed" style="color: var(--text)"></i>Previsión</li>
+          <li><i class="is-dot" :style="{ background: state.chartColor }"></i>Pago en divisa previsto</li>
+        </ul>
+      </section>
 
-        <!-- HERO -->
-        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
-
-          <div class="card" style="padding: 20px 22px;">
-            <div style="display: flex; justify-content: space-between; align-items: baseline;">
-              <span style="font-size: 12.5px; color: var(--meta);">Exposición FX · próximo trimestre</span>
-              <span style="font-size: 11px; color: var(--text-3); font-weight: 600;">USD · GBP · JPY</span>
-            </div>
-            <div style="font-family: var(--font-display); font-size: 30px; font-weight: 700; margin-top: 8px;">{{ state.exposure }}</div>
-            <div style="font-size: 12px; color: var(--text-2); margin-top: 6px;">Previsto por el forecaster h1-h3</div>
-          </div>
-
-          <div class="card" style="padding: 20px 22px;">
-            <div style="display: flex; justify-content: space-between; align-items: baseline;">
-              <span style="font-size: 12.5px; color: var(--meta);">Cobertura actual</span>
-              <span style="font-size: 11px; font-weight: 600;" :style="{ color: accent }">{{ state.coverageDelta }}</span>
-            </div>
-            <div style="font-family: var(--font-display); font-size: 30px; font-weight: 700; margin-top: 8px;">{{ state.coverage }}</div>
-            <div style="margin-top: 10px;">
-              <div style="height: 6px; background: var(--wash); border-radius: 3px; overflow: hidden;">
-                <div style="height: 100%; border-radius: 3px;" :style="{ width: state.coverageBar, background: accent }"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card" style="padding: 20px 22px;">
-            <div style="display: flex; justify-content: space-between; align-items: baseline;">
-              <span style="font-size: 12.5px; color: var(--meta);">{{ state.savingsLabel }}</span>
-              <span style="font-size: 11px; font-weight: 600;" :style="{ color: accent }">{{ state.savingsDelta }}</span>
-            </div>
-            <div style="font-family: var(--font-display); font-size: 32px; font-weight: 700; margin-top: 8px;" :style="{ color: accent }">{{ state.savings }}</div>
-            <div style="font-size: 12px; color: var(--text-2); margin-top: 8px; line-height: 1.4;">{{ state.savingsHint }}</div>
-          </div>
-
-        </div>
-
-        <!-- FX CHART + PANEL -->
-        <div style="display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px;">
-
-          <div class="card" style="padding: 20px 22px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <div>
-                <div style="font-size: 13.5px; font-weight: 600;">Evolución EUR/USD · pagos previstos</div>
-                <div style="font-size: 11.5px; color: var(--text-3); margin-top: 2px;">Tipo actual + predicción del forecaster h1-h3</div>
-              </div>
-              <span style="padding: 4px 10px; background: var(--wash); color: var(--text-2); border-radius: 6px; font-size: 11.5px; font-weight: 600;">EUR / USD</span>
-            </div>
-            <svg width="100%" height="220" viewBox="0 0 700 220" preserveAspectRatio="none">
-              <line x1="10" y1="180" x2="690" y2="180" stroke="var(--grid)" stroke-width="1"></line>
-              <line x1="10" y1="130" x2="690" y2="130" stroke="var(--grid)" stroke-width="1"></line>
-              <line x1="10" y1="80" x2="690" y2="80" stroke="var(--grid)" stroke-width="1"></line>
-              <line x1="10" y1="30" x2="690" y2="30" stroke="var(--grid)" stroke-width="1"></line>
-
-              <polyline :points="state.spotHistory" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round"></polyline>
-              <polyline :points="state.spotForecast" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-dasharray="5,5" opacity="0.5"></polyline>
-
-              <circle v-for="(p, i) in state.payments" :key="i" :cx="p.x" :cy="p.y" r="7" :fill="state.chartColor" stroke="var(--card)" stroke-width="2"></circle>
-            </svg>
-            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3);">
-              <span>oct '25</span><span>ene '26</span><span>hoy</span><span>h3 →</span>
-            </div>
-            <div style="display: flex; gap: 14px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--grid);">
-              <div class="legend-item"><span style="width: 12px; height: 2px; background: var(--text);"></span> Tipo simulado</div>
-              <div class="legend-item"><span style="width: 12px; height: 2px; background: var(--text); opacity: 0.5;"></span> Predicción h3</div>
-              <div class="legend-item"><span style="width: 10px; height: 10px; border-radius: 50%;" :style="{ background: state.chartColor }"></span> Pago FX previsto</div>
-            </div>
-          </div>
-
-          <!-- Payments queue -->
-          <div class="card" style="padding: 18px 20px;">
-            <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px;">Próximos pagos en divisa</div>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              <!-- La cola de pagos es casi toda rutina. Las tarjetas son
-                   neutras y solo el pago que pide una decisión hoy lleva el
-                   filete lateral y el chip con color. -->
-              <div
-                v-for="pay in state.upcomingPayments"
-                :key="pay.amount"
-                style="border-radius: var(--r-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; background: var(--card); border: 1px solid var(--border);"
-                :style="pay.tone ? { borderLeft: `3px solid ${pay.tone}` } : null"
-              >
-                <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                  <span style="font-size: 13px; font-weight: 600;">{{ pay.amount }}</span>
-                  <span style="font-size: 11.5px; color: var(--meta);">{{ pay.date }}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                  <span style="font-size: 11.5px; color: var(--meta);">{{ pay.counterparty }}</span>
-                  <span
-                    style="padding: 3px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 600; white-space: nowrap;"
-                    :style="pay.tone
-                      ? { background: `color-mix(in srgb, ${pay.tone} 16%, transparent)`, color: pay.tone }
-                      : { background: 'var(--wash)', color: 'var(--text-2)' }"
-                  >{{ pay.status }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- HISTORY -->
-        <div class="card" style="padding: 18px 22px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <div style="font-size: 13.5px; font-weight: 600;">Coberturas recientes</div>
-            <span style="font-size: 12px; font-weight: 600; color: var(--text-2);">Ver todo →</span>
-          </div>
-          <div>
-            <div
-              v-for="h in state.history"
-              :key="h.date"
-              style="display: grid; grid-template-columns: 90px 1fr auto; gap: 14px; align-items: center; padding: 10px 0; border-top: 1px solid var(--grid);"
-            >
-              <span style="font-size: 11.5px; color: var(--text-3);">{{ h.date }}</span>
-              <div>
-                <div style="font-size: 13px; font-weight: 600;">{{ h.title }}</div>
-                <div style="font-size: 11.5px; color: var(--meta); margin-top: 2px;">{{ h.desc }}</div>
-              </div>
-              <!-- Mismo criterio que en la cola de pagos: gris lo cerrado,
-                   contorno con color lo que sigue abierto. -->
-              <span
-                style="padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600;"
-                :style="h.badgeTone
-                  ? { background: 'transparent', border: `1px solid color-mix(in srgb, ${h.badgeTone} 45%, transparent)`, color: h.badgeTone }
-                  : { background: 'var(--wash)', border: '1px solid transparent', color: 'var(--text-2)' }"
-              >{{ h.badge }}</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
+      <!-- La cola de pagos es casi toda rutina: solo el pago que pide una
+           decisión hoy lleva el chip con color. -->
+      <section class="tz-card">
+        <header class="tz-card__bar"><h2>Próximos pagos en divisa</h2></header>
+        <ul class="dv-queue">
+          <li v-for="pay in state.upcomingPayments" :key="pay.amount">
+            <p>
+              <b>{{ pay.amount }}</b><time>{{ pay.date }}</time>
+            </p>
+            <p>
+              <span>{{ pay.counterparty }}</span>
+              <em class="tz-badge" :class="{ 'is-open': pay.urgent }">{{ pay.status }}</em>
+            </p>
+          </li>
+        </ul>
+      </section>
     </div>
 
+    <TreasuryLog title="Coberturas recientes" :entries="state.history" />
   </div>
 </template>
 
 <style scoped>
-/* Se repiten idénticos varias veces en el markup del mock. */
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: var(--r-sm);
-  color: var(--on-navy-3);
-  font-size: 13.5px;
-  text-decoration: none;
+.dv-queue {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.nav-sub {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: var(--r-sm);
-  color: var(--on-navy-3);
-  font-size: 13px;
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
+.dv-queue li {
+  display: grid;
   gap: 6px;
-  font-size: 11.5px;
-  color: var(--text-2);
+  padding: 12px 0;
+  border-top: 1px solid var(--grid);
+}
+
+.dv-queue li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.dv-queue p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 8px;
+  margin: 0;
+}
+
+.dv-queue b {
+  font-size: 13.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-queue time,
+.dv-queue span {
+  font-size: 12.5px;
+  color: var(--meta);
 }
 </style>

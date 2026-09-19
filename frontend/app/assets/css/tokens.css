@@ -230,36 +230,15 @@
   --on-navy: #ffffff;
   --on-navy-2: #b7bee8;
   --on-navy-3: #8990c4;
-  --on-navy-4: #6970a6;
 
-  /* Tinta sobre un botón de estado relleno. Blanca aquí porque en claro los
-   * estados son tonos medios saturados; en oscuro se invierte. */
-  --on-status: #ffffff;
-
-  /* Cada estado tiene tres capas: `-bg` para el fondo del aviso, `-chip` para
-   * un relleno más marcado, y `-strong` para la tinta que va encima. */
+  /* Estados: solo el número del score y los trazos de las gráficas. */
   --ok: #1fa971;
-  --ok-bg: #e9f7f0;
-  --ok-border: #bfe3c8;
-  --ok-chip: #d0efdd;
-  --ok-strong: #17805a;
-
   --warn: #c08a1e;
-  --warn-bg: #fff7e5;
-  --warn-border: #f1e4c0;
-  --warn-chip: #f5e4b8;
-  --warn-strong: #8a6410;
-
   --bad: #e14c43;
-  --bad-bg: #fde9e7;
-  --bad-border: #f5b8b4;
-  --bad-chip: #f7cfcc;
-  --bad-strong: #b0322a;
 
   --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
 
-  --r-sm: 8px;
   --r-md: 10px;
   --r-lg: 12px;
 
@@ -288,24 +267,7 @@
   --accent-solid: var(--ink-live-solid);
   --accent-on: #ffffff;
 
-  /* Sobre un verde o un rojo claros, la tinta legible es el lienzo. */
-  --on-status: var(--ink-canvas);
-
   --ok: var(--mint-ink);
-  --ok-bg: var(--mint-wash);
-  --ok-border: color-mix(in srgb, var(--mint) 30%, transparent);
-  --ok-chip: color-mix(in srgb, var(--mint) 22%, transparent);
-  --ok-strong: var(--mint-ink);
-
   --warn: var(--amber-ink);
-  --warn-bg: var(--amber-wash);
-  --warn-border: color-mix(in srgb, var(--amber) 32%, transparent);
-  --warn-chip: color-mix(in srgb, var(--amber) 24%, transparent);
-  --warn-strong: var(--amber-ink);
-
   --bad: var(--crimson-ink);
-  --bad-bg: var(--crimson-wash);
-  --bad-border: color-mix(in srgb, var(--crimson) 32%, transparent);
-  --bad-chip: color-mix(in srgb, var(--crimson) 24%, transparent);
-  --bad-strong: var(--crimson-ink);
 }

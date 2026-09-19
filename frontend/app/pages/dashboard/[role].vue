@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { Check, Search } from '@lucide/vue'
+import { Search } from '@lucide/vue'
 import {
   companies as demoCompanies,
   currentMonth,
   decisionLabel,
   euros,
-  initialOffers,
-  leadCompany,
   leadMonths,
   months,
   perspectiveById,
@@ -16,7 +14,6 @@ import {
   sizeFilters,
   sizeLabel,
   compactEuros,
-  type Offer,
   type PerspectiveId,
   type SizeBand,
 } from '~/data/demo'
@@ -48,7 +45,7 @@ definePageMeta({
   ],
 })
 
-const { selectedId: activeCompanyId, name: activeCompanyName, sector: activeSector } = useSelectedCompany()
+const { selectedId: activeCompanyId } = useSelectedCompany()
 const route = useRoute()
 const role = computed(() => route.params.role as PerspectiveId)
 const profile = computed(() => perspectiveById(role.value)!)
@@ -63,31 +60,20 @@ const portfolioSource = computed(() => portfolioQuery.data.value?.source || 'dem
 /* Vetos primero y avisos después: lo que bloquea se lee antes que lo que solo advierte. */
 const overrides = (company: Company) => [...(company.vetos || []), ...(company.avisos || [])]
 
-/* Las pantallas de tesorería propia traen su propio encabezado y solo
- * existen para la perspectiva empresa. */
+/* La empresa solo ve su tesorería propia: tres pantallas que traen su propio
+ * encabezado. Embat ve la cartera y, además, las vistas internas, que miran a
+ * Embat y no a una empresa: revenue propio, alertas del ecosistema y salud del
+ * modelo. Cada perspectiva entra por su primera sección. */
 const treasurySections = ['score', 'colchon', 'divisa']
+const sectionsByRole: Record<PerspectiveId, string[]> = {
+  empresa: treasurySections,
+  embat: ['resumen', 'cartera', 'senales', 'ofertas', 'monitor', 'revenue', 'modelo'],
+}
 
-/* Las vistas internas miran a Embat, no a una empresa de la cartera: revenue
- * propio, alertas nominales del ecosistema y salud del modelo. Nunca se sirven
- * a la perspectiva empresa. */
-const opsSections = ['monitor', 'revenue', 'modelo']
-
-const allowed = [
-  'resumen',
-  'cartera',
-  'senales',
-  'ofertas',
-  ...treasurySections,
-  ...opsSections,
-]
 const section = computed(() => {
-  const requested = String(route.query.section || 'resumen')
-  if (!allowed.includes(requested)) return 'resumen'
-  if (requested === 'cartera' && role.value === 'empresa') return 'resumen'
-  if (treasurySections.includes(requested) && role.value !== 'empresa')
-    return 'resumen'
-  if (opsSections.includes(requested) && role.value !== 'embat') return 'resumen'
-  return requested
+  const allowed = sectionsByRole[role.value]
+  const requested = String(route.query.section || '')
+  return allowed.includes(requested) ? requested : allowed[0]!
 })
 
 const isTreasury = computed(() => treasurySections.includes(section.value))
@@ -97,8 +83,8 @@ const sectionLabel = computed(
     ({
       resumen: 'Resumen',
       cartera: 'Cartera',
-      senales: role.value === 'empresa' ? 'Mis señales' : 'Señales',
-      ofertas: role.value === 'empresa' ? 'Mis ofertas' : 'Mercado',
+      senales: 'Señales',
+      ofertas: 'Mercado',
       score: 'X-Ray Score',
       colchon: 'Colchón Dinámico',
       divisa: 'Divisa Inteligente',
@@ -116,13 +102,10 @@ watch(section, () => {
   paneLive.value = true
 })
 
-/* A company view always has a subject. For the company perspective it is fixed;
- * Embat picks it from the portfolio. */
+/* A company view always has a subject, picked from the portfolio. */
 const pickedId = useState('wk-picked', () => 'iberica')
-const subject = computed(() =>
-  role.value === 'empresa'
-    ? leadCompany
-    : companies.value.find((company) => company.id === pickedId.value) || companies.value[0]!,
+const subject = computed(
+  () => companies.value.find((company) => company.id === pickedId.value) || companies.value[0]!,
 )
 
 watch(
@@ -202,27 +185,6 @@ const changed = computed(() =>
     .sort((a, b) => Math.abs(b.delta3) - Math.abs(a.delta3)),
 )
 
-const offers = useState<Offer[]>('wk-offers', () =>
-  initialOffers.map((offer) => ({ ...offer })),
-)
-const notice = ref('')
-const confirming = ref<string | null>(null)
-
-function acceptOffer(id: string) {
-  const offer = offers.value.find((item) => item.id === id)
-  if (offer) offer.accepted = true
-  confirming.value = null
-  notice.value = 'Oferta aceptada en la demo. No se ha contratado nada.'
-}
-
-watch(
-  () => route.fullPath,
-  () => {
-    notice.value = ''
-    confirming.value = null
-  },
-)
-
 const detectedMonth = computed(() =>
   subject.value.detectedAt !== null ? months[subject.value.detectedAt] : null,
 )
@@ -230,24 +192,12 @@ const levelMonth = computed(() =>
   subject.value.levelAt !== null ? months[subject.value.levelAt] : null,
 )
 
-const cheapest = computed(() =>
-  [...offers.value].sort(
-    (a, b) => Number(a.rate.replace(',', '.')) - Number(b.rate.replace(',', '.')),
-  )[0],
-)
-
 const headline = computed(() =>
   ({
-    resumen:
-      role.value === 'empresa'
-        ? 'Esto es lo que ve quien te va a prestar.'
-        : 'Quién se mueve y desde cuándo.',
+    resumen: 'Quién se mueve y desde cuándo.',
     cartera: 'Las grandes, partidas por grupo y por sector.',
     senales: 'Qué se movió, cuánto pesó y cuándo lo dijimos.',
-    ofertas:
-      role.value === 'empresa'
-        ? 'Tres ofertas sobre la misma empresa.'
-        : 'Capital contra oportunidad.',
+    ofertas: 'Capital contra oportunidad.',
     monitor: 'Todo el ecosistema, en una pantalla.',
     revenue: 'De dónde sale el dinero de este mes.',
     modelo: 'Si el modelo sigue acertando, y por cuánto.',
@@ -292,15 +242,8 @@ const connected = activeCompanies.toLocaleString('es-ES')
         <div :key="`${section}-${role === 'empresa' ? activeCompanyId : 'portfolio'}`" class="wk__pane" :class="{ 'is-live': paneLive }">
         <div v-if="!isTreasury" class="wk__head">
           <h1>{{ headline }}</h1>
-          <p v-if="role === 'empresa'">
-            {{ activeCompanyName }} · {{ activeSector }}
-          </p>
-          <p v-else>{{ profile.job }}</p>
+          <p>{{ profile.job }}</p>
         </div>
-
-        <p v-if="notice" class="notice" role="status">
-          <Check :size="16" aria-hidden="true" />{{ notice }}
-        </p>
 
         <!-- Resumen -->
         <div v-if="section === 'resumen'" class="wk__grid">
@@ -400,12 +343,11 @@ const connected = activeCompanies.toLocaleString('es-ES')
               <h2 class="panel__title">Frente al sector</h2>
               <span class="chip chip--neutral">{{ subject.sector }}</span>
             </header>
-            <!-- La empresa solo ve la mediana del sector; Embat, que ya opera
-                 la cartera entera, sigue viendo y pudiendo elegir cada peer. -->
+            <!-- Embat, que ya opera la cartera entera, ve y puede elegir cada peer. -->
             <SectorCompare
               :company="subject"
-              :selectable="role !== 'empresa'"
-              :anonymous="role === 'empresa'"
+              selectable
+              :anonymous="false"
               @select="pickedId = $event"
             />
           </section>
@@ -443,7 +385,7 @@ const connected = activeCompanies.toLocaleString('es-ES')
             </p>
           </section>
 
-          <section v-if="role !== 'empresa'" class="panel span-12">
+          <section class="panel span-12">
             <header class="panel__bar">
               <h2 class="panel__title">Cartera</h2>
               <NuxtLink class="btn btn--quiet" :to="`/dashboard/${role}?section=cartera`"
@@ -494,19 +436,6 @@ const connected = activeCompanies.toLocaleString('es-ES')
             />
           </section>
 
-          <section v-else class="panel span-12">
-            <header class="panel__bar">
-              <h2 class="panel__title">Tus ofertas</h2>
-              <NuxtLink class="btn btn--quiet" :to="`/dashboard/${role}?section=ofertas`"
-                >Comparar las {{ offers.length }} ofertas</NuxtLink
-              >
-            </header>
-            <p class="lead-line">
-              La más barata está al {{ cheapest?.rate }} % a
-              {{ cheapest?.months }} meses. Hace un trimestre, con 85 puntos,
-              este mismo importe se ofrecía al 5,6 %.
-            </p>
-          </section>
         </div>
 
         <!-- Cartera -->
@@ -668,9 +597,9 @@ const connected = activeCompanies.toLocaleString('es-ES')
 
         <!-- Tesorería propia: el mock trae su propio encabezado y su propio
              layout, así que va sin la rejilla del panel. -->
-        <XRayScoreApp v-else-if="section === 'score'" :chrome="false" />
-        <ColchonDinamicoApp v-else-if="section === 'colchon'" :chrome="false" />
-        <DivisaInteligenteApp v-else-if="section === 'divisa'" :chrome="false" />
+        <XRayScoreApp v-else-if="section === 'score'" />
+        <ColchonDinamicoApp v-else-if="section === 'colchon'" />
+        <DivisaInteligenteApp v-else-if="section === 'divisa'" />
 
         <!-- Monitor operativo: Embat mirándose a sí mismo. -->
         <div v-else-if="section === 'monitor'" class="wk__grid">
@@ -827,75 +756,7 @@ const connected = activeCompanies.toLocaleString('es-ES')
 
         <!-- Ofertas -->
         <div v-else class="wk__grid">
-          <section v-if="role === 'empresa'" class="panel span-12 offers">
-            <header class="panel__bar">
-              <h2 class="panel__title">Ofertas recibidas</h2>
-              <span class="chip chip--amber">Tu score bajó 14 puntos</span>
-            </header>
-            <p class="lead-line">
-              Los tres tipos son más altos que en junio porque tu caja cubre
-              menos tiempo. Bajar los días de pago a proveedores es lo que más
-              pesa para recuperarlos.
-            </p>
-            <article v-for="offer in offers" :key="offer.id">
-              <div class="offers__bank">
-                <b>{{ offer.bank }}</b>
-                <span>{{ offer.note }}</span>
-              </div>
-              <dl>
-                <div>
-                  <dt>Importe</dt>
-                  <dd>{{ euros(offer.amount) }}</dd>
-                </div>
-                <div>
-                  <dt>Tipo anual</dt>
-                  <dd>{{ offer.rate }} %</dd>
-                </div>
-                <div>
-                  <dt>Plazo</dt>
-                  <dd>{{ offer.months }} meses</dd>
-                </div>
-                <div>
-                  <dt>Intereses totales</dt>
-                  <dd>
-                    {{
-                      euros(
-                        Math.round(
-                          (offer.amount *
-                            Number(offer.rate.replace(',', '.')) *
-                            offer.months) /
-                            1200,
-                        ),
-                      )
-                    }}
-                  </dd>
-                </div>
-              </dl>
-              <button
-                class="btn"
-                :class="offer.accepted ? 'btn--quiet' : 'btn--live'"
-                type="button"
-                :disabled="offer.accepted"
-                @click="confirming = offer.id"
-              >
-                {{ offer.accepted ? 'Aceptada' : 'Aceptar' }}
-              </button>
-              <div v-if="confirming === offer.id" class="offers__confirm">
-                <span
-                  >Vas a aceptar {{ euros(offer.amount) }} al
-                  {{ offer.rate }} % en la demo.</span
-                >
-                <button class="btn btn--live" type="button" @click="acceptOffer(offer.id)">
-                  Aceptar la oferta
-                </button>
-                <button class="btn btn--quiet" type="button" @click="confirming = null">
-                  Cancelar
-                </button>
-              </div>
-            </article>
-          </section>
-
-          <section v-else class="panel span-12 offers">
+          <section class="panel span-12 offers">
             <header class="panel__bar">
               <h2 class="panel__title">Dónde colocar los próximos 100.000 €</h2>
               <span class="chip chip--neutral">{{ companies.length }} oportunidades</span>

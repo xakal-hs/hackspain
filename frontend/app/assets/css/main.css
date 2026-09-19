@@ -335,21 +335,6 @@ table {
   color: var(--text-dim);
 }
 
-.notice {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 16px;
-  border-radius: var(--r-inner);
-  background: var(--live-wash);
-  color: var(--live-ink);
-  font-size: var(--t-small);
-}
-
-.notice svg {
-  flex: none;
-}
-
 .empty {
   padding: 16px 18px;
   border-radius: var(--r-inner);
@@ -1020,8 +1005,10 @@ table {
 
 /* --- Paired collections and payments, with the cash line over them --- */
 
+/* The single column is bounded so the month labels never push the panel wider. */
 .flows {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0;
   margin: 0;
 }

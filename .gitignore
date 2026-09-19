@@ -10,9 +10,19 @@ backend/oof.parquet
 backend/__pycache__/
 
 # Local environment credentials, at any depth.
+# DECRYPT_KEY lives here; used by scripts/vault.py.
 .env
 .env.*
 !.env.example
+
+# Working copies of vaulted directories. Restore with:
+#   python3 scripts/vault.py decrypt
+# Encrypted packs live in vault/*.enc and are versioned.
+/context/
+/notebooks/
+/research/
+/analysis/
+/docs/
 
 # Machine-local Claude permissions and authentication preferences.
 .claude/settings.local.json
@@ -21,3 +31,8 @@ backend/__pycache__/
 # Experimento de pesos: las notas OOF se regeneran, los resúmenes sí se versionan.
 backend/experiments/salida/oof_*.parquet
 backend/experiments/salida_*.log
+
+# impeccable: herramienta de diseño local, cada uno la instala con `npx impeccable install`.
+.claude/skills/impeccable/
+.claude/agents/impeccable-*
+.impeccable/
