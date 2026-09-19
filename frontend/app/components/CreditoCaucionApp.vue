@@ -2,14 +2,12 @@
 import { useQuery } from '@tanstack/vue-query'
 import {
   BadgeCheck,
-  ChevronDown,
   ChevronRight,
   ChevronsUpDown,
   CircleAlert,
   CircleCheck,
   CircleX,
   EllipsisVertical,
-  Plus,
   Search,
   ShieldCheck,
 } from '@lucide/vue'
@@ -30,24 +28,20 @@ const libro = useQuery({
 onServerPrefetch(() => libro.suspense())
 
 const query = ref('')
-const conDenegados = ref(true)
 const detalle = ref<ClientRow | null>(null)
 const solicitados = ref(new Set<string>())
 
 type Estado = ClientRow['estado']
 const grupos: { id: Estado; label: string; icon: typeof CircleCheck; hint: string }[] = [
   { id: 'preautorizado', label: 'Preautorizados', icon: CircleCheck, hint: 'Cobertura inmediata: Embat ya tiene las pruebas de pago' },
-  { id: 'estudio', label: 'En estudio', icon: CircleAlert, hint: 'La aseguradora responde en 24-72 h' },
-  { id: 'denegado', label: 'Denegados', icon: CircleX, hint: 'Con el motivo delante, para poder discutirlo' },
+  { id: 'estudio', label: 'En estudio', icon: CircleAlert, hint: '' },
+  { id: 'denegado', label: 'Denegados', icon: CircleX, hint: '' },
 ]
 
 const clientes = computed(() => libro.data.value?.clientes ?? [])
 const visibles = computed(() => {
   const needle = query.value.trim().toLocaleLowerCase('es')
-  return clientes.value.filter((row) => {
-    if (!conDenegados.value && row.estado === 'denegado') return false
-    return !needle || row.cliente.toLocaleLowerCase('es').includes(needle)
-  })
+  return clientes.value.filter((row) => !needle || row.cliente.toLocaleLowerCase('es').includes(needle))
 })
 const porEstado = (estado: Estado) => visibles.value.filter((row) => row.estado === estado)
 
@@ -76,7 +70,8 @@ const cover = computed(() => libro.data.value?.cover ?? 0.9)
 const nf = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0, useGrouping: 'always' } as Intl.NumberFormatOptions)
 const money = (v: number) => `${nf.format(v)} €`
 const dias = (v: number | null) =>
-  v == null ? '—' : v <= 0 ? `${nf.format(Math.abs(v))} d antes` : `${nf.format(v)} d tarde`
+  v == null ? '—' : v === 0 ? 'en fecha' : v < 0 ? `${nf.format(-v)} d antes` : `${nf.format(v)} d tarde`
+const nClientes = (n: number) => `${n} ${n === 1 ? 'cliente' : 'clientes'}`
 const meses = (v: number) => `${v} ${v === 1 ? 'mes' : 'meses'}`
 
 function pedir(row: ClientRow) {
@@ -92,21 +87,6 @@ watch(selectedId, () => {
   <div class="cc">
     <header class="cc__title">
       <h1>Crédito y caución</h1>
-      <div class="cc__title-side">
-        <button type="button" class="cc__ghost">
-          <ShieldCheck :size="15" aria-hidden="true" />Abrir línea de caución
-        </button>
-        <button
-          type="button"
-          class="cc__primary"
-          :disabled="!preautorizados.length"
-          @click="preautorizados.forEach(pedir)"
-        >
-          <Plus :size="15" aria-hidden="true" />{{
-            preautorizados.length ? `Cubrir los ${preautorizados.length} preautorizados` : 'Sin preautorizados'
-          }}
-        </button>
-      </div>
     </header>
 
     <div class="cc__bar">
@@ -118,16 +98,6 @@ watch(selectedId, () => {
       >
         <ChevronsUpDown :size="16" aria-hidden="true" />
       </button>
-      <label class="cc__drop">
-        <select aria-label="Tipo de cobertura">
-          <option>Seguro de crédito y caución</option>
-        </select>
-        <ChevronDown :size="16" aria-hidden="true" />
-      </label>
-      <label class="cc__check">
-        <input v-model="conDenegados" type="checkbox" />
-        Mostrar denegados
-      </label>
       <span class="cc__grow" />
       <label class="cc__search">
         <Search :size="16" aria-hidden="true" />
@@ -153,8 +123,8 @@ watch(selectedId, () => {
             </button>
             <component :is="grupo.icon" :size="17" aria-hidden="true" :class="`cc__dot is-${grupo.id}`" />
             <b>{{ grupo.label }}</b>
-            <span>{{ grupo.hint }}</span>
-            <em>{{ porEstado(grupo.id).length }} clientes</em>
+            <span v-if="grupo.hint">{{ grupo.hint }}</span>
+            <em>{{ nClientes(porEstado(grupo.id).length) }}</em>
           </header>
           <table v-if="abiertos.has(grupo.id) && porEstado(grupo.id).length">
             <tbody>
@@ -203,8 +173,7 @@ watch(selectedId, () => {
             </button>
             <ShieldCheck :size="17" aria-hidden="true" class="cc__dot is-caucion" />
             <b>Caución</b>
-            <span>Garantías ante terceros: obra, licitación, anticipos o alquileres</span>
-            <em>{{ caucion ? `${caucion.productos} líneas` : 'sin línea' }}</em>
+            <em>{{ caucion ? `${caucion.productos} ${caucion.productos === 1 ? 'línea' : 'líneas'}` : 'sin línea' }}</em>
           </header>
           <table v-if="abiertos.has('caucion')">
             <tbody>
@@ -224,7 +193,7 @@ watch(selectedId, () => {
                   <button type="button" class="cc__chip">Pignorar excedente</button>
                 </td>
                 <td class="cc__meta">Sin consumir CIRBE</td>
-                <td class="cc__meta">Contragarantía en el banco socio</td>
+                <td class="cc__meta"></td>
                 <td>{{ money(excedente || 0) }}<small>excedente</small></td>
                 <td>4×<small>capacidad estimada</small></td>
                 <td class="cc__amount">{{ money(caucionPropuesta) }}<small>línea estimada</small></td>
@@ -245,7 +214,7 @@ watch(selectedId, () => {
     </section>
 
     <footer class="cc__foot">
-      <span><b>{{ clientes.length }}</b> clientes</span>
+      <span><b>{{ clientes.length }}</b> {{ clientes.length === 1 ? 'cliente' : 'clientes' }}</span>
       <span><b>{{ money(expuestoTotal) }}</b> expuesto hoy</span>
       <span><b>{{ money(limitePreautorizado) }}</b> preautorizado</span>
       <span><b>{{ money(primaPreautorizada) }}</b> prima estimada al año</span>
@@ -350,50 +319,12 @@ watch(selectedId, () => {
   letter-spacing: -0.01em;
 }
 
-.cc__title-side {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 
-.cc__primary,
-.cc__ghost {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  height: 32px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 6px;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
 
-.cc__primary {
-  background: var(--cc-blue);
-  color: #fff;
-}
 
-.cc__primary:hover:not(:disabled) {
-  background: #2f66df;
-}
 
-.cc__primary:disabled {
-  background: var(--cc-fill);
-  color: var(--cc-muted);
-  cursor: default;
-}
 
-.cc__ghost {
-  background: transparent;
-  color: var(--cc-body);
-  box-shadow: inset 0 0 0 1px #dfe2e7;
-}
 
-.cc__ghost:hover {
-  background: var(--cc-hover);
-}
 
 .cc__bar {
   display: flex;
@@ -419,48 +350,10 @@ watch(selectedId, () => {
   background: var(--cc-hover);
 }
 
-.cc__drop {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 30px;
-  padding: 0 10px;
-  border: 1px solid #dfe2e7;
-  border-radius: 5px;
-  color: var(--cc-body);
-}
 
-.cc__drop select {
-  min-width: 190px;
-  height: 100%;
-  padding-right: 20px;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  appearance: none;
-  cursor: pointer;
-}
 
-.cc__drop svg {
-  position: absolute;
-  right: 8px;
-  pointer-events: none;
-}
 
-.cc__check {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--cc-body);
-  cursor: pointer;
-}
 
-.cc__check input {
-  width: 15px;
-  height: 15px;
-  accent-color: var(--cc-blue);
-}
 
 .cc__grow {
   flex: 1;
@@ -494,8 +387,7 @@ watch(selectedId, () => {
 }
 
 .cc button:focus-visible,
-.cc input:focus-visible,
-.cc select:focus-visible {
+.cc input:focus-visible {
   outline: 2px solid var(--cc-blue);
   outline-offset: 2px;
 }
