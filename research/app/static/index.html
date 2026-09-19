@@ -1112,7 +1112,7 @@ async function viewEmpresa(id, token) {
     h('a', { class: 'back', href: '#/cartera' }, icon('back'), 'Cartera'),
     h('div', { style: { display: 'flex', gap: '8px' } },
       h('a', { class: 'btn btn-sm', href: '#/productos/' + encodeURIComponent(c.company_id || id) }, 'Ver productos'),
-      h('a', { class: 'btn btn-sm', href: '#/tesoreria/' + encodeURIComponent(c.company_id || id) }, 'Ver tesorería')));
+      h('a', { class: 'btn btn-sm', href: '#/tesoreria/' + encodeURIComponent(c.company_id || id) }, 'Ver tesorería'))));
   const header = h('section', { class: 'card card-pad', 'aria-labelledby': 'company-title' },
     h('div', { class: 'hero' },
       h('div', null,
