@@ -253,10 +253,12 @@ def contributions(sc: Scorer, X: pd.DataFrame) -> pd.DataFrame:
     out["c_regla_inactividad"] = capped - raw
     out["score_raw"] = capped
 
+    zero = pd.Series(0.0, index=X.index)
     for p in PILLARS:  # lectura por pilar: aquí SÍ se renormaliza, porque es un indicador, no la nota
         fs = [f for f in sc.features if FEATURES[f]["pilar"] == p]
-        num = sum(S[f].fillna(0) * sc.weights[f] * S[f].notna() for f in fs)
-        den = sum(sc.weights[f] * S[f].notna() for f in fs)
+        # con poca historia un pilar entero puede no tener ni una feature calculable
+        num = sum((S[f].fillna(0) * sc.weights[f] * S[f].notna() for f in fs), start=zero)
+        den = sum((sc.weights[f] * S[f].notna() for f in fs), start=zero)
         out[f"p_{p}"] = num / den.replace(0, np.nan)
 
     # OOD sobre el valor CRUDO: no cambia la nota, baja la confianza. Es la señal de

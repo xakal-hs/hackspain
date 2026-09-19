@@ -1,15 +1,16 @@
 """¿La nota significa algo? Medición fuera de grupo, con incertidumbre honesta.
 
-    uv run python metrics.py                 # tabla de AUC por evento
-    uv run python metrics.py --temporal      # además, origen móvil (3 cortes)
+    uv run python metrics.py                 # tabla de AUC por evento (~3 min)
     uv run python metrics.py --comparar a.parquet b.parquet   # bootstrap PAREADO
 
 Tres reglas que no se negocian aquí:
 
 1. FUERA DE GRUPO. Se esconden grupos empresariales completos, no empresas sueltas:
    una matriz y su filial comparten tesorería y se filtrarían la respuesta.
-2. SIN FUTURO. El scorer del fold se calibra solo con filas cuyo evento a 6 meses
-   ya había ocurrido en el corte.
+2. SIN FUTURO, NI EL DE LOS DEMÁS. Para puntuar el mes m, el scorer solo ha visto
+   meses <= m: ni los percentiles de referencia ni los pesos conocen lo que viene
+   después. Esconder grupos no basta, porque una referencia construida con los 24
+   meses ya le cuenta al modelo cómo se va a distribuir el año siguiente.
 3. ERROR TÍPICO POR GRUPO. Se remuestrean grupos enteros, no filas. El se iid es
    2-4x más pequeño y te haría celebrar ruido.
 
@@ -30,7 +31,6 @@ from sklearn.model_selection import GroupKFold
 import preprocessing as pre
 import predict as prd
 
-CUTOFFS = ["2025-11-01", "2026-02-01", "2026-05-01"]
 NREP, SEED = 200, 7
 POSITIVE = ("expansion", "positive", "cura")
 
@@ -49,10 +49,15 @@ def _oriented(event: str, score: np.ndarray) -> np.ndarray:
 
 # ------------------------------------------------------------------- OOF
 def oof(d: pd.DataFrame, n_splits: int = 5, target: str = "adversa") -> pd.Series:
-    """Nota de cada fila calculada por un scorer que NUNCA vio su grupo empresarial.
+    """Nota de cada fila puntuada por un scorer que no vio ni su grupo ni su futuro.
 
-    Un scorer por fold: percentiles, pesos y escala se reconstruyen solo con los grupos
-    de train. Es la simulación del test oculto.
+    Un scorer por (fold, mes): para el mes m se reconstruyen percentiles, pesos y escala
+    solo con los grupos de train y solo con meses <= m. Son ~120 ajustes, y es la
+    simulación honesta del test oculto: el día 1 nadie conoce la distribución del día 400.
+
+    Los primeros meses no tienen aún eventos a 6 meses observados, así que `_fit_weights`
+    se queda con los pesos a priori del prestamista (PRIOR_W). No es un caso degenerado
+    que haya que excluir: es literalmente el arranque en frío de una cartera nueva.
     """
     d = d.sort_values(["company_id", "month"]).reset_index(drop=True)
     cg = d.drop_duplicates("company_id").set_index("company_id")["group_id"]
@@ -60,37 +65,18 @@ def oof(d: pd.DataFrame, n_splits: int = 5, target: str = "adversa") -> pd.Serie
     out = pd.Series(np.nan, index=d.index, name="score_oof")
     for tr, va in GroupKFold(n_splits=n_splits).split(ids, groups=cg.values):
         tr_ids, va_ids = set(ids[tr]), set(ids[va])
-        train = d[d.company_id.isin(tr_ids)]
-        sc = prd.fit(train, pre.labels(train), target=target)
-        val = d[d.company_id.isin(va_ids)]
-        s = prd.score_panel(sc, val).set_index(["company_id", "month"])["score"]
-        key = pd.MultiIndex.from_arrays([val["company_id"], val["month"]])
-        out.loc[val.index] = s.reindex(key).to_numpy()
-    return out
-
-
-def temporal_oof(d: pd.DataFrame, cutoffs: list[str] = CUTOFFS, n_splits: int = 5) -> pd.DataFrame:
-    """Origen móvil: en cada corte, el scorer solo conoce el pasado y otros grupos.
-
-    Devuelve una fila por (grupo escondido, corte): la nota en el corte y los eventos
-    que ocurrieron después. Es la validación más estricta que hacemos.
-    """
-    cg = d.drop_duplicates("company_id").set_index("company_id")["group_id"]
-    ids = cg.index.to_numpy()
-    rows = []
-    for fold, (tr, va) in enumerate(GroupKFold(n_splits=n_splits).split(ids, groups=cg.values)):
-        tr_ids, va_ids = set(ids[tr]), set(ids[va])
-        for cut in map(pd.Timestamp, cutoffs):
-            hist = d[d.month <= cut]
+        for m in sorted(d.month.unique()):
+            hist = d[d.month <= m]
             train = hist[hist.company_id.isin(tr_ids)]
-            sc = prd.fit(train, pre.labels(train, cutoff=cut))
+            sc = prd.fit(train, pre.labels(train, cutoff=m), target=target)
+            # se puntúa toda la historia de validación para que el EWMA llegue bien a m,
+            # pero solo se guarda la fila del mes m
             val = hist[hist.company_id.isin(va_ids)]
             s = prd.score_panel(sc, val)
-            at = s[s.month == cut][["company_id", "group_id", "score"]].rename(columns={"score": "score_oof"})
-            # el panel puede traer ya una columna de nota: fuera, o el merge duplica nombres
-            ev = d[d.month == cut].drop(columns=["group_id", "score", "score_oof"], errors="ignore")
-            rows.append(at.merge(ev, on="company_id").assign(fold=fold, cutoff=cut))
-    return pd.concat(rows, ignore_index=True)
+            s = s[s.month == m].set_index("company_id")["score"]
+            rows = d.index[(d.month == m) & d.company_id.isin(va_ids)]
+            out.loc[rows] = s.reindex(d.loc[rows, "company_id"]).to_numpy()
+    return out
 
 
 # ------------------------------------------------------------- tabla de AUC
@@ -203,10 +189,6 @@ if __name__ == "__main__":
     d[["company_id", "group_id", "month", "score_oof", *pre.EVENTS,
        *[e for e in pre.JUDGES if e in d.columns]]].to_parquet("oof.parquet")
     activo = d[d.months_since_last_tx == 0]
-    print("== AUC fuera de grupo (filas activas) ==")
+    print("== AUC fuera de grupo y fuera del futuro (filas activas) ==")
     print(_fmt(auc_table(activo)))
     print("\n== anticipación ==", anticipation(activo))
-    if "--temporal" in sys.argv:
-        t = temporal_oof(d)
-        print("\n== origen móvil: nota en el corte vs eventos posteriores ==")
-        print(_fmt(auc_table(t.rename(columns={"score": "score_oof"}))))

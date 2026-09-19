@@ -20,7 +20,7 @@ cd backend
 uv run --project ../research python etl.py                # CSV → panel (12 s)
 uv run --project ../research python predict.py            # entrena e imprime pesos y bandas
 uv run --project ../research python decision.py           # informe de vetos
-uv run --project ../research python metrics.py --temporal # validación completa
+uv run --project ../research python metrics.py           # validación completa (~3 min)
 uv run --project ../research uvicorn main:app --port 8000
 ```
 
@@ -70,7 +70,11 @@ problemas:
    prestamista.
 2. **No predecía nada en el 65,6 % de los casos**, porque la empresa ya estaba en tensión.
 
-Medido con bootstrap pareado (mismos grupos remuestreados en los dos brazos):
+Medido con bootstrap pareado (mismos grupos remuestreados en los dos brazos). Los valores
+absolutos de esta tabla y de las dos siguientes son de la validación **anterior** (la que veía
+el futuro de los demás, §3); el cambio de ancla se midió antes de corregir el método. Las
+diferencias se sostienen con la validación nueva — el ancla de caja propia da 0,848 frente a los
+0,833 de aquí — pero los números de §4 son los buenos.
 
 | juez | caja + póliza | **caja propia** | σ pareadas |
 |---|---:|---:|---:|
@@ -118,12 +122,30 @@ nota ordene bien el par. Se usa AUC y no precisión porque no hay umbral fijo: e
 decide dónde corta.
 
 **Fuera de grupo**: se esconden **grupos empresariales completos**. Una matriz y su filial
-comparten tesorería y se filtrarían la respuesta. Un scorer por fold — percentiles, pesos y
-escala se reconstruyen solo con los grupos de train.
+comparten tesorería y se filtrarían la respuesta.
 
-**Origen móvil**: además, el reloj se congela en tres cortes (2025-11, 2026-02, 2026-05). El
-scorer solo ve meses ≤ corte y solo calibra con filas cuyo evento a 6 meses **ya había
-ocurrido**.
+**Fuera del futuro, y también del futuro de los demás**: un scorer por **(fold, mes)**, ~120
+ajustes. Para puntuar el mes `m`, percentiles, pesos y escala se reconstruyen solo con los
+grupos de train y solo con meses ≤ `m`.
+
+Esconder grupos no basta, y esta fue una corrección de método sobre la versión anterior. Una
+referencia de percentiles construida con los 24 meses ya le cuenta al modelo **cómo se va a
+distribuir el año siguiente**, y en este panel eso no es inocuo: la nota media de la cartera
+cae de 54,5 a 49,3 en dos años. Medido en pareado, quitar ese futuro **no baja el AUC, lo
+sube** donde importa:
+
+| evento | veía el futuro | **solo el pasado** | σ pareadas |
+|---|---:|---:|---:|
+| `tension_6m` | 0,803 | **0,822** | **+2,9** |
+| `tension_np_raw_6m` (ancla) | 0,833 | **0,848** | **+2,4** |
+| `caida_6m` | 0,607 | 0,572 | **−2,3** |
+| `incumplimiento_6m` | 0,617 | 0,588 | −1,4 |
+
+Una referencia de percentiles es una **distribución marginal**, no una respuesta: lo que se
+aprende del futuro es «cuánto runway suele tener una empresa», y los cuantiles de 10.000
+valores ya son casi los de 21.000. La fuga sería grave si el modelo aprendiera el desenlace de
+esas filas; aquí aprendía la forma de la nube. Se quita igual, porque es indefendible ante un
+jurado y porque la alternativa sale gratis.
 
 **Error típico por grupo**: bootstrap remuestreando grupos enteros, 200 réplicas. El `se` iid
 es 2-4× menor y te haría celebrar ruido.
@@ -137,40 +159,70 @@ de 5σ parece de 1.
 
 ## 4 · Los números
 
-### 4.1 · Origen móvil (la cifra oficial)
+Todos salen de la misma validación: fuera de grupo, fuera del futuro, sobre las **20.547
+filas activas** puntuadas por un scorer que no vio ni el grupo ni el mes.
 
-| evento | qué significa | AUC | se |
-|---|---|---:|---:|
-| `tension_np_raw_6m` | tensión de liquidez con caja propia (< 0,25 meses de gasto, ≥2 de 3 meses) | **0,770** | 0,022 |
-| `incumplimiento_6m` | deja de pagar nómina 2 meses o IVA 2 trimestres | **0,671** | 0,033 |
-| `caida_6m` | caída estructural de cobros (< 50 % de su mediana anual) sin rebote | **0,612** | 0,030 |
-| `expansion_6m` | expansión sostenida y autofinanciada | 0,577 | 0,039 |
+### 4.1 · Las cuatro anclas (la cifra oficial)
 
-**PM = 0,658** (media de los cuatro). Se reporta, no decide: promediar esconde que un cambio
-mejore la tensión y estropee la caída. Y **no es comparable** con el PM 0,659 del modelo
-anterior, porque una de las cuatro etiquetas ha cambiado.
+| evento | qué significa | AUC | se | n | positivos |
+|---|---|---:|---:|---:|---:|
+| `tension_np_raw_6m` | tensión de liquidez con caja propia (< 0,25 meses de gasto, ≥2 de 3 meses) | **0,848** | 0,014 | 10.926 | 4.822 |
+| `incumplimiento_6m` | deja de pagar nómina 2 meses o IVA 2 trimestres | **0,588** | 0,029 | 6.263 | 408 |
+| `caida_6m` | caída estructural de cobros (< 50 % de su mediana anual) sin rebote | **0,572** | 0,026 | 5.583 | 552 |
+| `expansion_6m` | expansión sostenida y autofinanciada | 0,506 | 0,033 | 8.013 | 468 |
 
-### 4.2 · Fuera de grupo, todas las filas activas
+**PM = 0,629** (media de los cuatro). Se reporta, no decide: promediar esconde que un cambio
+mejore la tensión y estropee la caída. Y **no es comparable** con los PM anteriores (0,658,
+0,659), porque cambió una etiqueta *y* cambió la validación.
+
+La lectura honesta de esta tabla es que **el modelo sabe de liquidez y poco más**. 0,848 en
+tensión es fuerte; 0,506 en expansión es azar. Detectar que una empresa va a crecer con datos
+de tesorería es un problema distinto y no resuelto — por eso hay una segunda nota (§4.4) y por
+eso no se publica probabilidad de expansión.
+
+### 4.2 · El precio del arranque en frío
+
+Los primeros meses no tienen aún eventos a 6 meses observados, así que el scorer se queda con
+los **pesos a priori del prestamista** (`PRIOR_W`). No se excluyen esas filas: es literalmente
+lo que haría el sistema con una cartera nueva, y conviene saber cuánto vale.
+
+| evento | frío (< 2025-05, 4.401 filas) | calibrado (16.146 filas) |
+|---|---:|---:|
+| `tension_np_raw_6m` | **0,848** | **0,848** |
+| `incumplimiento_6m` | **0,464** | 0,613 |
+| `expansion_6m` | **0,401** | 0,528 |
+
+El resultado más útil de todo el README: **con pesos a priori la liquidez se ordena igual de
+bien (0,848 = 0,848), y el incumplimiento y la expansión no se ordenan en absoluto** (0,464 y
+0,401, peor que una moneda). El juicio experto acierta en qué manda la caja y se equivoca en
+todo lo fino: `payroll_cv` pesa 0,029 a priori y 0,148 calibrado, y es justo la feature que
+predice el incumplimiento.
+
+Traducido a producto: a una empresa nueva se le puede dar nota de liquidez desde el mes 1, pero
+la parte de disciplina de pagos hay que ganársela con historia.
+
+### 4.3 · Los 14 jueces (se miden, nunca calibran)
 
 | evento | AUC | se | n | positivos |
 |---|---:|---:|---:|---:|
-| **`tension_np_raw_6m`** (ancla y juez limpio) | **0,833** | 0,016 | 10.926 | 4.822 |
-| `tension_6m` (la vieja, con póliza) | 0,803 | 0,015 | 8.453 | 3.000 |
-| `tension_grupo_6m` (diagnóstico de grupo) | 0,692 | 0,025 | 13.000 | 5.472 |
-| **`rompe_caja_2m`** (anticipación dura) | **0,632** | 0,036 | 9.198 | 62 |
-| **`entrada_estres_2m`** (anticipación) | **0,621** | 0,021 | 9.198 | 550 |
-| `impago_iva_6m` | 0,620 | 0,060 | 4.637 | 123 |
-| `incumplimiento_6m` | 0,617 | 0,028 | 6.263 | 408 |
-| `caida_6m` | 0,607 | 0,027 | 5.583 | 552 |
-| `tension_entrada_6m` | 0,606 | 0,039 | 5.918 | 130 |
-| `impago_ss_6m` | 0,605 | 0,050 | 4.400 | 230 |
-| `caida_3m_corto` | 0,568 | 0,013 | 14.260 | 2.513 |
-| `impago_ap_6m` (mora crónica, 60 % de las filas) | 0,558 | 0,028 | 8.595 | 5.106 |
-| `impago_nomina_6m` | 0,550 | 0,046 | 3.563 | 347 |
-| `recaida_6m` | 0,533 | 0,024 | 649 | 494 |
-| `expansion_6m` (con la nota adversa, que no es su trabajo) | 0,526 | 0,038 | 8.013 | 468 |
-| `impago_cuota_6m` | **0,424** | 0,038 | 2.688 | 376 |
-| `cura_3m` | **0,325** | 0,021 | 16.986 | 442 |
+| **`tension_np_raw_6m`** (ancla y juez limpio) | **0,848** | 0,014 | 10.926 | 4.822 |
+| `tension_6m` (la vieja, con póliza) | 0,822 | 0,013 | 8.453 | 3.000 |
+| `tension_grupo_6m` (diagnóstico de grupo) | 0,700 | 0,026 | 13.000 | 5.472 |
+| **`rompe_caja_2m`** (anticipación dura) | **0,656** | 0,034 | 9.198 | 62 |
+| **`entrada_estres_2m`** (anticipación) | **0,637** | 0,021 | 9.198 | 550 |
+| `impago_iva_6m` | 0,599 | 0,046 | 4.637 | 123 |
+| `incumplimiento_6m` | 0,588 | 0,029 | 6.263 | 408 |
+| `impago_ss_6m` | 0,578 | 0,049 | 4.400 | 230 |
+| `caida_6m` | 0,572 | 0,026 | 5.583 | 552 |
+| `recaida_6m` | 0,566 | 0,024 | 649 | 494 |
+| `tension_entrada_6m` | 0,562 | 0,041 | 5.918 | 130 |
+| `impago_ap_6m` (mora crónica, 60 % de las filas) | 0,538 | 0,031 | 8.595 | 5.106 |
+| `caida_3m_corto` | 0,538 | 0,013 | 14.260 | 2.513 |
+| `impago_nomina_6m` | 0,526 | 0,050 | 3.563 | 347 |
+| `expansion_3m` (con la nota adversa) | 0,519 | 0,018 | 14.260 | 2.302 |
+| `expansion_6m` (con la nota adversa, que no es su trabajo) | 0,506 | 0,033 | 8.013 | 468 |
+| `impago_cuota_6m` | **0,408** | 0,040 | 2.688 | 376 |
+| `cura_3m` | **0,325** | 0,022 | 16.986 | 442 |
 
 Las dos últimas están por debajo de 0,50 y no es un bug:
 
@@ -181,47 +233,61 @@ Las dos últimas están por debajo de 0,50 y no es un bug:
 - **`cura_3m` es mecánico**: para curarte tienes que estar enfermo, y los enfermos tienen
   nota baja. Se deja en la tabla por transparencia.
 
-### 4.3 · Dos notas, no una
+### 4.4 · Dos notas, no una
 
 Las mismas 17 features con los pesos calibrados contra la cara positiva. Promediar los pesos
 de la tensión con los de la expansión dejaba la caja sin peso.
 
-| evento | nota adversa | **nota de expansión** |
-|---|---:|---:|
-| `expansion_6m` | 0,526 | **0,631** (se 0,032) |
-| `expansion_3m` | 0,521 | 0,562 |
-| `caida_6m` | 0,607 | 0,613 |
-| `tension_np_raw_6m` | 0,833 | 0,527 |
+| evento | nota adversa | **nota de expansión** | expansión, solo meses calibrados |
+|---|---:|---:|---:|
+| `expansion_6m` | 0,506 | **0,583** (se 0,032) | **0,610** |
+| `expansion_3m` | 0,519 | 0,553 | 0,566 |
+| `tension_np_raw_6m` | 0,848 | 0,694 | 0,604 |
 
-La última fila confirma que son notas distintas de verdad: la de expansión no sabe nada de
-tensión (0,527 ≈ azar), y no debe. Se ve también en sus pesos: la manda
-`oper_growth_12m` (0,317) y `runway` pesa **0,000**.
+La tercera columna existe por honestidad: en los meses de arranque en frío la nota de expansión
+cae a `PRIOR_W`, que son **pesos adversos**, y por eso aparece ordenando tensión (0,694). Con
+historia suficiente se separa de verdad: 0,604 en tensión, casi azar, que es lo que debe. Se ve
+en sus pesos — la manda `oper_growth_12m` (0,317) y `runway` pesa **0,000**.
 
-### 4.4 · Anticipación
+### 4.5 · Anticipación
 
 Medida contra el **estado mensual** de estrés (`estres_mes`), no contra las etiquetas `*_6m`:
 esas ya son ventanas futuras y regalarían hasta 6 meses de ventaja ficticia. Solo cuentan las
-empresas que empiezan sanas y entran en estrés. Aviso = la nota baja de 35.
+349 empresas que empiezan sanas y entran en estrés. Aviso = la nota baja de 35.
 
-| | caja + póliza | **caja propia** |
+| | veía el futuro | **solo el pasado** |
 |---|---:|---:|
-| entradas en estrés | 349 | 349 |
-| cobertura (avisadas / entradas) | 10,3 % | 9,5 % |
-| **mediana de antelación** | 2 meses | **4 meses** |
-| avisadas con ≥ 2 meses | 61 % | **70 %** |
+| filas avisadas (del total activo) | 21,8 % | 25,3 % |
+| cobertura (avisadas / entradas) | 9,5 % | **18,6 %** |
+| mediana de antelación | 4 meses | **4 meses** |
+| avisadas con ≥ 2 meses | 70 % | **83 %** |
 
-**Cuando avisa, avisa el doble de pronto; sigue avisando poco.** El umbral 35 es conservador
-por diseño: bajarlo sube la cobertura y llena la cartera de falsos positivos. Es la palanca
-de producto más clara que queda abierta.
+La cobertura se duplica, y la primera fila obliga a preguntar si es solo que la nota bajó y
+salta más la alarma. No lo es — a **tasa de alarma igualada**:
 
-### 4.5 · Probabilidades publicadas
+| % de filas avisadas | veía el futuro | **solo el pasado** |
+|---|---|---|
+| 10 % | 0,040 · 2 meses | 0,049 · 2 meses |
+| 15 % | 0,066 · 2 meses | 0,074 · 3 meses |
+| 20 % | 0,092 · 2 meses | **0,135 · 3 meses** |
+| 25 % | 0,120 · 3 meses | **0,181 · 4 meses** |
+
+Avisando al mismo número de empresas, la versión honesta **coge un 47 % más de entradas en
+estrés y un mes antes**. Refitear la referencia y la escala cada mes hace la nota más sensible
+al cambio reciente, que es exactamente para lo que se vende.
+
+Sigue avisando poco en términos absolutos: 18,6 % de cobertura al umbral 35. Bajar el umbral la
+sube (27,2 % al umbral 40) a cambio de avisar a un tercio de la cartera. Es la palanca de
+producto más clara que queda abierta.
+
+### 4.6 · Probabilidades publicadas
 
 Segunda calibración, sobre la nota **publicada**: una logística de una sola variable. Dos
 empresas con la misma nota tienen la misma probabilidad, siempre. Solo se publica si la nota
 separa ese evento con AUC ≥ 0,60 — una probabilidad bien calibrada en media pero que ordena
 mal es peor que ninguna. Por eso `expansion_6m` no publica probabilidad con la nota adversa.
 
-### 4.6 · El modelo, entero
+### 4.7 · El modelo, entero
 
 | feature | peso adversa | peso expansión |
 |---|---:|---:|
