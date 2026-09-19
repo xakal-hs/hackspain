@@ -1,5 +1,13 @@
-import { companies as fixtures, type Company } from '~/data/demo'
+import { companies as fixtures, type Company, type Decision } from '~/data/demo'
 import type { CompanySummary } from '~/types/portfolio'
+
+// `sin_nota` no es «presta»: es «no veo la empresa lo suficiente», y ante la duda se vigila.
+const decisionByAccion: Record<NonNullable<CompanySummary['accion']>, Decision> = {
+  prestar: 'prestar',
+  vigilar: 'vigilar',
+  no_prestar: 'no-prestar',
+  sin_nota: 'vigilar',
+}
 
 const templateByCompany: Record<string, Company> = {
   COMP_0864: fixtures.find((company) => company.id === 'iberica')!,
@@ -15,6 +23,13 @@ const round = (value: number | null | undefined, fallback: number) =>
 const clampScore = (value: number) => Math.max(0, Math.min(100, Math.round(value)))
 
 function alignedHistory(template: Company, summary: CompanySummary) {
+  // Si el backend manda la serie real de la nota, se usa tal cual: la plantilla solo
+  // existe para rellenar la forma cuando la fuente no tiene historia propia.
+  if (summary.history?.length) {
+    const real = summary.history.map(clampScore)
+    const pad = template.history.length - real.length
+    return pad > 0 ? [...Array.from({ length: pad }, () => real[0]!), ...real] : real.slice(-template.history.length)
+  }
   const shifted = template.history.map((value) =>
     clampScore(value + summary.score - template.score),
   )
@@ -66,7 +81,7 @@ function realSignals(summary: CompanySummary, template: Company): Company['signa
     },
     {
       label: 'Facturas pendientes de cobro',
-      detail: overdue == null ? 'Sin cobertura de facturas' : `${overdue.toLocaleString('es-ES', { maximumFractionDigits: 1 })} % vencido`,
+      detail: overdue == null ? 'Sin cobertura de facturas' : `${overdue.toLocaleString('es-ES', { maximumFractionDigits: 1 })} % con más de 60 días de retraso`,
       weight: 0.1,
       direction: overdue == null ? 'flat' : overdue >= 10 ? 'down' : 'flat',
     },
@@ -101,6 +116,10 @@ export function portfolioCompany(summary: CompanySummary): Company {
     group: summary.group_id,
     score: summary.score,
     band: summary.band,
+    // La decisión y su motivo vienen del backend: un veto puede decir «no prestar» con
+    // buena nota, así que deducirla del score sería enseñar otra cosa de la que se decide.
+    decision: summary.accion ? decisionByAccion[summary.accion] : template.decision,
+    action: summary.razon || template.action,
     delta3: Math.round(summary.delta3_q50),
     delta12: summary.score - history.at(-13)!,
     history,
@@ -115,9 +134,12 @@ export function portfolioCompany(summary: CompanySummary): Company {
       now: round(summary.runway_now, template.runway.now),
       prev: round(summary.runway_prev, template.runway.prev),
     },
+    // 0 es el centinela de «sin DSO» que ya entiende la interfaz (`dso.now || '—'`).
+    // Caer al valor de la plantilla enseñaría 31 días de ficción como si fueran medidos:
+    // la mitad de las empresas no tiene ERP suficiente para calcularlo.
     dso: {
-      now: round(summary.dso_now, template.dso.now),
-      prev: round(summary.dso_prev, template.dso.prev),
+      now: round(summary.dso_now, 0),
+      prev: round(summary.dso_prev, 0),
     },
     erp: summary.has_erp,
     monthsConnected: summary.n_months,

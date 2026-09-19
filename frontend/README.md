@@ -15,13 +15,17 @@ pnpm install
 pnpm dev
 ```
 
-The app works with a small Nitro-hosted development portfolio out of the box. To use the existing FastAPI service, copy `.env.example` to `.env`, start the backend on port 8080, and set:
+The app works with a small Nitro-hosted development portfolio out of the box. To score the
+real portfolio, start the X-Ray backend (see `backend/README.md`) and point the app at it:
 
 ```bash
-XRAY_API_BASE=http://localhost:8080
+cd ../backend && uv run --project ../research uvicorn main:app --port 8080   # one terminal
+cd ../frontend && XRAY_API_BASE=http://localhost:8080 pnpm dev               # another
 ```
 
 Nitro then forwards `/api/companies` to the backend, keeping the browser on a same-origin API.
+The contract lives in two mirrored files: `backend/models.py` (FastAPI validates every
+response against it) and `app/types/portfolio.ts`. Change a field in one, change it in both.
 
 ## Structure
 
@@ -63,12 +67,20 @@ Each dashboard takes `?section=` with `resumen` (default), `cartera` (not for
 Switch perspectives or exit using the user panel at the bottom of the desktop sidebar. On mobile, navigation and the user panel move above the content. Dashboard deep links redirect to demo sign-in when no demo-role cookie exists. This cookie is a UI convenience, not an authorization boundary.
 
 The Empresa perspective and all product-only fields use explicit fixtures from
-`app/data/demo.ts`. In the Embat perspective, `/api/companies` enriches the five
-featured companies with Supabase treasury facts: group, ERP coverage, history,
-cash, runway, DSO, overdue invoices and monthly flows. Names, sectors, scores,
-decisions, trajectories and offer terms remain simulated until those outputs
-have their own tables. If Supabase is not configured or cannot be reached, the
-endpoint returns the original development portfolio.
+`app/data/demo.ts`. In the Embat perspective, `/api/companies` resolves three sources in
+order, and the header chip says which one is live:
+
+1. **`XRAY_API_BASE`** (`source: 'api'`) — the X-Ray backend. Real for all 1,286 companies:
+   score, band, 3-month change, confidence, lender decision with its written reason, cash,
+   months of cash, DSO, overdue invoices, margin and monthly flows. Names, sectors, the
+   three-month forecast and the offer terms are still fixtures.
+2. **Supabase** (`source: 'supabase'`) — treasury facts for the five featured companies,
+   with mocked scores.
+3. **Fixtures** (`source: 'demo'`) — when neither is configured.
+
+Missing values arrive as `null` and stay missing: a company without enough invoices shows
+"no hay facturas suficientes", not a borrowed number. Roughly half the portfolio has no
+DSO, so this matters more than it sounds.
 
 Accepting an offer changes only demo state. Offers survive client-side
 navigation and reset on a full page reload. The role cookie survives reloads

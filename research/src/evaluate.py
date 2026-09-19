@@ -20,6 +20,8 @@ H, EVENT = 3, 15.0  # movimiento real = 15 pts en la escala publicada (ejemplos 
 # v2: tres adversos + uno positivo (dos caras). El apagado ya no calibra: sobre todo son desconexiones (targets.py)
 EVENTS = ["tension_6m", "incumplimiento_6m", "caida_6m", "expansion_6m"]
 EVENTS_V1 = ["churn_6m", "cash_stress_6m", "decline_6m", "positive_6m"]
+# v3 (targets.py, learnings del consejo): jueces fijos no circulares y de anticipación; se miden, no calibran
+EVENTS_V3 = ["tension_np_raw_6m", "entrada_estres_2m", "rompe_caja_2m", "caida_3m_corto", "expansion_3m"]
 CUTOFFS = [pd.Timestamp("2025-11-01"), pd.Timestamp("2026-02-01"), pd.Timestamp("2026-05-01")]
 EXOG_SMALL = ["score_raw", "score_raw_d3", "runway", "activity_trend", "months_since_last_tx", "month_idx"]
 STRONG = dict(n_estimators=150, learning_rate=0.04, num_leaves=7, min_child_samples=200, colsample_bytree=0.5, reg_lambda=5.0)
@@ -45,8 +47,9 @@ def build_series(scored: pd.DataFrame, feats: pd.DataFrame) -> pd.DataFrame:
     return s.rename(columns={"company_id": "unique_id", "month": "ds", "score": "y"})
 
 
-def fit_scorer(train_rows: pd.DataFrame, cut: pd.Timestamp, calibrate: bool, events: list | None = None) -> HealthScorer:
-    sc = HealthScorer(calibrate=calibrate)
+def fit_scorer(train_rows: pd.DataFrame, cut: pd.Timestamp, calibrate: bool, events: list | None = None,
+               target: str = "adversa") -> HealthScorer:
+    sc = HealthScorer(calibrate=calibrate, target=target)
     if calibrate:
         obs = train_rows.month <= cut - pd.DateOffset(months=6)  # evento ya observado en el corte (sin fuga)
         lab = train_rows[events or EVENTS].where(obs, axis=0)
@@ -93,16 +96,24 @@ def run(tag: str, calibrate: bool = True, use_exog: bool = True, exog: list | No
             rows.append(pr)
             # validez externa del NIVEL: score en el corte vs eventos en los 6 meses siguientes
             at = sc[(sc.month == cut) & sc.company_id.isin(va_ids)][["company_id", "score", "score_raw"]]
-            ev = panel[panel.month == cut][["company_id", "adverse_6m", *EVENTS_V1, *EVENTS, "has_erp", "month_idx"]]
+            # segunda nota (expansión, D33): mismos percentiles, pesos calibrados solo con la cara positiva
+            if calibrate:
+                sc_exp = fit_scorer(hist[hist.company_id.isin(tr_ids)], cut, calibrate, events, target="expansion").score_panel(panel)
+                at = at.merge(sc_exp[sc_exp.month == cut][["company_id", "score"]].rename(columns={"score": "score_exp"}), on="company_id")
+            ev = panel[panel.month == cut][["company_id", "adverse_6m", *EVENTS_V1, *EVENTS, *EVENTS_V3, "has_erp", "month_idx"]]
             ext_rows.append(at.merge(ev, on="company_id").assign(cutoff=cut))
     res = pd.concat(rows, ignore_index=True)
     ext = pd.concat(ext_rows, ignore_index=True)
     res.to_parquet(ROOT / f"reports/preds_{tag}.parquet")
     out = summarize(res, tag)
-    for e in ["adverse_6m", "churn_6m", "cash_stress_6m", "decline_6m", "tension_6m", "incumplimiento_6m", "caida_6m"]:
+    for e in ["adverse_6m", "churn_6m", "cash_stress_6m", "decline_6m", "tension_6m", "incumplimiento_6m", "caida_6m",
+              *[e for e in EVENTS_V3 if not e.startswith("expansion")]]:
         out[f"auc_level_vs_{e}"] = _auc(ext[e], -ext.score)
-    out["auc_level_vs_positive_6m"] = _auc(ext["positive_6m"], ext.score)
-    out["auc_level_vs_expansion_6m"] = _auc(ext["expansion_6m"], ext.score)
+    for e in ["positive_6m", "expansion_6m", "expansion_3m"]:
+        out[f"auc_level_vs_{e}"] = _auc(ext[e], ext.score)
+    if "score_exp" in ext:  # la nota de expansión, medida contra los cuatro anclas
+        for e in EVENTS:
+            out[f"auc_exp_vs_{e}"] = _auc(ext[e], ext.score_exp if e.startswith("expansion") else -ext.score_exp)
     w = pd.DataFrame(weights)
     out["weights_mean"] = w.mean().round(4).to_dict()
     out["weights_std"] = w.std().round(4).to_dict()

@@ -6,6 +6,8 @@
 Genera:
 - scores_monthly.csv: company_id, month, score, band, confidence, coverage, ood_share, pilares, prob_<evento> a 6 meses
 - forecast_latest.csv: company_id, last_month, score, h1..h3 × (q10, q50, q90), trend, alerts
+- proactive_latest.csv: recomendación proactiva en el último mes (proyección aritmética de caja, política de la fase 1):
+  accion, producto, meses_antelacion, hueco, anticipable (facturas emitidas no vencidas), razones en lenguaje llano
 """
 from __future__ import annotations
 import argparse, sys, warnings
@@ -68,6 +70,19 @@ def main():
         row["alerts"] = " | ".join(f"{x['type']}:{x['severity']}" for x in al)
         rows.append(row)
     pd.DataFrame(rows).to_csv(out / "forecast_latest.csv", index=False)
+    # recomendación proactiva en el último mes de cada empresa (sin forecaster: aritmética sobre panel y facturas)
+    from proactive import ProactiveEngine
+    eng = ProactiveEngine(raw, scorer, data_dir=P.DATA, feats=feats, scored=scored)
+    prow = []
+    for uid in sorted(raw["company_id"].unique()):
+        r = eng.recommend(uid)
+        p, d = r["proyeccion"], r["decision"]
+        prow.append({"company_id": uid, "month": r["month"], "score": r["score"], "band": r["band"], "accion": r["accion"], "regla": d["regla"],
+                     "producto": r["producto"], "necesita_deuda_2m": d["necesita_deuda_2m"], "meses_antelacion": r["meses_antelacion"],
+                     "tension_h": p["tension_h"], "rotura_h": p["rotura_h"], "hueco_2m": p["hueco_2m"], "modo": p["modo"], "fiabilidad": p["fiabilidad"],
+                     "meses_caja": p["meses_caja"], "anticipable_total": p["anticipable"]["total"], "anticipable_n": p["anticipable"]["n"],
+                     "razones": " | ".join(x["texto"] for x in d["razones"]), "producto_texto": d["producto_texto"]})
+    pd.DataFrame(prow).to_csv(out / "proactive_latest.csv", index=False)
     print(f"{m.company_id.nunique()} empresas, {len(m)} filas empresa-mes -> {out}")
 
 

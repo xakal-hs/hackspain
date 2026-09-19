@@ -91,6 +91,28 @@ def test_explanation_is_exact(raw, scorer):
         assert abs(sum(c["delta_points"] for c in e["contributions"]) - e["delta"]) < 0.2  # redondeo a 2 decimales
 
 
+def test_two_notes_calibrate_on_their_own_events(panel, scorer, raw):
+    """D33: la nota adversa calibra con E1-E3 y la de expansión con E4; ambas con explicación aditiva exacta."""
+    assert set(scorer.calibration_) == {"tension_6m", "incumplimiento_6m", "caida_6m"}
+    obs = panel.month <= panel.month.max() - pd.DateOffset(months=6)
+    exp = HealthScorer(target="expansion").fit(panel, panel[E.EVENTS].where(obs, axis=0))
+    assert set(exp.calibration_) == {"expansion_6m"}
+    assert exp.weights_["runway"] < scorer.weights_["runway"]  # la caja manda en la adversa, no en la expansión
+    f = add_features(_company(raw, raw["company_id"].unique().sort()[20])).to_pandas()
+    s = exp.score_panel(f)
+    assert np.allclose(s[[c for c in s.columns if c.startswith("ec_")]].sum(1), s.score, atol=1e-9)
+
+
+def test_liquidity_band_rule(panel, scorer):
+    """D36: con menos de medio mes de caja propia la nota publicada no es «sano», y la regla es una contribución aditiva."""
+    from xray import LIQ_RULE_CAP, LIQ_RULE_MONTHS
+    s = scorer.score_panel(panel)
+    short = panel.sort_values(["company_id", "month"]).reset_index(drop=True)["runway"] < np.log1p(LIQ_RULE_MONTHS)
+    assert (s.score[short.to_numpy()] <= LIQ_RULE_CAP + 1e-9).all()
+    assert (s.ec_regla_liquidez[~short.fillna(False).to_numpy()] == 0).all()
+    assert np.allclose(s[[c for c in s.columns if c.startswith("ec_")]].sum(1), s.score, atol=1e-9)
+
+
 def test_monotonicity(scorer):
     """Mejorar una señal nunca baja el score (pesos ≥ 0 y dirección económica)."""
     base = pd.DataFrame({f: [np.nanmedian(scorer.ref_[f])] for f in scorer.features_})

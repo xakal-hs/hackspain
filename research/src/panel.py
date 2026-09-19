@@ -19,6 +19,10 @@ DEBT = ["debt_repayment", "interest_charge"]
 NON_OPER = ["investment_deployment", "investment_return"]  # movimientos de tesorería, no de negocio
 CASH_TYPES = ["checking", "saving", "investment", "tpv", "expensesPlatform"]
 CREDIT_TYPES = ["lineofcredit"]
+# Calidad de dato (fase 0 del autoresearch, salida/datos_limpieza.md). Umbrales SIEMPRE en EUR:
+# en moneda cruda, 478 de las 491 transacciones > 1e8 son AOA/COP/VND/CLP y no centinelas.
+SENTINEL_EUR = 1e8          # importe de generador, no de pyme (13 tx en 7 empresas; 4 saldos de caja)
+IMPLAUSIBLE_FLOOR_EUR = 1e5  # suelo del check |caja| > 50·flujo 12m (evita marcar pymes pequeñas con ahorro)
 
 
 def _products() -> pl.DataFrame:
@@ -47,7 +51,8 @@ def load_transactions() -> pl.DataFrame:
              .otherwise(pl.col("real_fx").fill_null(pl.when(pl.col("exchange_rate") > 0).then(pl.col("exchange_rate")).otherwise(1.0))),
         fx_fixed=foreign & ~ok.fill_null(False),
         is_foreign=foreign)
-    t = t.with_columns(amount=pl.col("amount") / pl.col("fx")).drop("p_pe", "c_pe")
+    t = t.with_columns(amount=pl.col("amount") / pl.col("fx"))
+    t = t.with_columns(amount_eur=pl.col("amount") / pl.col("c_pe").fill_null(1.0)).drop("p_pe", "c_pe")
     # transferencias internas: mismo día e importe opuesto entre dos productos de la misma empresa
     k = t.select("transaction_id", "company_id", "product_id", "amount",
                  day=pl.col("date").dt.date(), a=pl.col("amount").abs().round(2))
@@ -81,6 +86,8 @@ def _tx_monthly(t: pl.DataFrame) -> pl.DataFrame:
         transfer_in=amt.filter((cat == "transfer") & (amt > 0)).sum(),
         uncat_in=amt.filter((cat == "-") & (amt > 0)).sum(),
         payroll=-amt.filter(cat.is_in(PAYROLL)).sum(),
+        salary=-amt.filter(cat == "salary").sum(),
+        social_security=-amt.filter(cat == "social_security").sum(),
         tax=-amt.filter(cat == "tax").sum(),
         debt_service=-amt.filter(cat.is_in(DEBT)).sum(),
         fees=-amt.filter(cat == "fee").sum(),
@@ -91,7 +98,9 @@ def _tx_monthly(t: pl.DataFrame) -> pl.DataFrame:
     )
     internal = t.filter(pl.col("internal") | pl.col("intragroup")).group_by("company_id", "month").agg(
         internal_flow=pl.col("amount").abs().sum(), intragroup_flow=pl.col("amount").filter(pl.col("intragroup")).abs().sum())
-    return m.join(internal, on=["company_id", "month"], how="left")
+    # centinelas medidos en EUR (A01): solo informativo, no altera flujos ni caja
+    sent = t.group_by("company_id", "month").agg(n_sentinel_tx=(pl.col("amount_eur").abs() > SENTINEL_EUR).sum())
+    return m.join(internal, on=["company_id", "month"], how="left").join(sent, on=["company_id", "month"], how="left")
 
 
 def _balances_backward(t: pl.DataFrame, types: list[str], months: pl.DataFrame, name: str) -> pl.DataFrame:
@@ -108,7 +117,19 @@ def _balances_backward(t: pl.DataFrame, types: list[str], months: pl.DataFrame, 
              .sort("product_id", "month", descending=[False, True]))
     g = g.with_columns(future=pl.col("net").cum_sum().over("product_id") - pl.col("net"))
     g = g.join(b.select("product_id", "balance"), on="product_id").with_columns(v=pl.col("balance") - pl.col("future"))
-    return g.group_by("company_id", "month").agg(pl.col("v").sum().alias(name))
+    # a céntimos: sin redondear, las cuentas que vuelven a cero quedan en ±1e-13 y cambian el signo de la caja (253 filas)
+    return g.group_by("company_id", "month").agg(pl.col("v").sum().round(2).alias(name))
+
+
+def _sentinel_cash_companies(t: pl.DataFrame) -> pl.Series:
+    """Empresas con una transacción o un saldo de caja > SENTINEL_EUR (A01/A02): la caja reconstruida no es fiable."""
+    bal = pl.read_parquet(DATA / "balances.parquet")
+    prods = _products().filter(pl.col("type").is_in(CASH_TYPES)).select("product_id", "pcur")
+    fxm = _fx_table()
+    last = fxm.filter(pl.col("month") == fxm["month"].max()).select(pl.col("currency").alias("pcur"), "per_eur")
+    b = (bal.join(prods, on="product_id").join(last, on="pcur", how="left")
+            .filter((pl.col("balance") / pl.col("per_eur").fill_null(1.0)).abs() > SENTINEL_EUR))
+    return pl.concat([b["company_id"], t.filter(pl.col("amount_eur").abs() > SENTINEL_EUR)["company_id"]]).unique()
 
 
 def _credit_lines(t: pl.DataFrame, months: pl.DataFrame) -> pl.DataFrame:
@@ -152,8 +173,9 @@ def _invoices_monthly(months: pl.DataFrame) -> pl.DataFrame:
         m_end = pl.Series([m]).dt.offset_by("1mo")[0]
         late_cut = pl.Series([m_end]).dt.offset_by("-15d")[0]
         paid_by = pl.col("payment_date").is_not_null() & (pl.col("payment_date") < m_end)
-        # facturas vencidas hace >15 días a cierre de mes: ¿seguían abiertas?
-        due = inv.filter(pl.col("due_date") < late_cut, pl.col("due_date") >= pl.Series([m]).dt.offset_by("-3mo")[0])
+        # facturas vencidas hace >15 días a cierre de mes: ¿seguían abiertas? (solo las ya emitidas: sin fuga as-of, A07)
+        due = inv.filter(pl.col("due_date") < late_cut, pl.col("due_date") >= pl.Series([m]).dt.offset_by("-3mo")[0],
+                         pl.col("issuance_date") < m_end)
         a = due.group_by("company_id", "side").agg(late_share=(~paid_by | ((pl.col("payment_date") - pl.col("due_date")).dt.total_days() > 15)).mean())
         # vencido y abierto, solo de facturas con vencimiento en los últimos 12 meses (sin stock eterno)
         o = inv.filter(pl.col("due_date") < m_end, pl.col("issuance_date") < m_end, ~paid_by,
@@ -167,8 +189,12 @@ def _invoices_monthly(months: pl.DataFrame) -> pl.DataFrame:
                 .with_columns(sh=pl.col("abs_amt") / pl.col("abs_amt").sum().over("company_id"))
                 .group_by("company_id").agg(hhi_ar_6m=(pl.col("sh") ** 2).sum()))
         # dinámica de clientes (D24): amplitud reciente vs anual y facturación de clientes perdidos
-        ar12 = inv.filter(pl.col("side") == "ar", pl.col("issuance_date") < m_end, pl.col("counterparty_id").is_not_null(),
-                          pl.col("issuance_date") >= pl.Series([m_end]).dt.offset_by("-12mo")[0])
+        ar12_all = inv.filter(pl.col("side") == "ar", pl.col("issuance_date") < m_end,
+                              pl.col("issuance_date") >= pl.Series([m_end]).dt.offset_by("-12mo")[0])
+        # cobertura de contraparte del AR (A23): sin ella, HHI y clientes perdidos se calculan sobre una fracción de la cartera
+        cov = ar12_all.group_by("company_id").agg(
+            ar_id_coverage=pl.col("abs_amt").filter(pl.col("counterparty_id").is_not_null()).sum() / pl.col("abs_amt").sum())
+        ar12 = ar12_all.filter(pl.col("counterparty_id").is_not_null())
         rec = pl.col("issuance_date") >= pl.Series([m_end]).dt.offset_by("-3mo")[0]
         cu = ar12.group_by("company_id").agg(
             n_cust_3m=pl.col("counterparty_id").filter(rec).n_unique(), n_cust_12m=pl.col("counterparty_id").n_unique())
@@ -177,7 +203,8 @@ def _invoices_monthly(months: pl.DataFrame) -> pl.DataFrame:
         lost = (prev.join(recent, on=["company_id", "counterparty_id"], how="left")
                     .group_by("company_id").agg(n_prev=pl.len(), lost_share=pl.col("amt").filter(pl.col("still").is_null()).sum() / pl.col("amt").sum())
                     .with_columns(lost_share=pl.when(pl.col("n_prev") >= 3).then(pl.col("lost_share"))).drop("n_prev"))
-        h = h.join(cu, on="company_id", how="full", coalesce=True).join(lost, on="company_id", how="full", coalesce=True)
+        h = (h.join(cu, on="company_id", how="full", coalesce=True).join(lost, on="company_id", how="full", coalesce=True)
+              .join(cov, on="company_id", how="full", coalesce=True))
         ab = a.join(b, on=["company_id", "side"], how="full", coalesce=True)
         ab = ab.pivot(on="side", index="company_id", values=["late_share", "overdue", "overdue_90"])
         rows.append(ab.join(h, on="company_id", how="full", coalesce=True).with_columns(month=pl.lit(m)))
@@ -216,14 +243,28 @@ def build_panel() -> pl.DataFrame:
     ccur = comp.select("company_id", pl.col("currency").alias("ccur"))
     p = (p.join(ccur, on="company_id").join(fxm.rename({"currency": "ccur"}), on=["month", "ccur"], how="left")
           .with_columns(to_eur=1.0 / pl.col("per_eur").fill_null(1.0)).drop("per_eur"))
-    flow_cols = ["n_fx_fixed", "uncat_in", "intragroup_flow", "n_tx", "inflow", "outflow", "oper_in", "transfer_in", "payroll", "tax", "debt_service", "fees",
-                 "refunds", "foreign_flow", "gross_flow", "internal_flow"]
+    flow_cols = ["n_fx_fixed", "uncat_in", "intragroup_flow", "n_tx", "inflow", "outflow", "oper_in", "transfer_in", "payroll", "salary", "social_security", "tax", "debt_service", "fees",
+                 "refunds", "foreign_flow", "gross_flow", "internal_flow", "n_sentinel_tx"]
     p = p.with_columns([pl.col(c).fill_null(0) for c in flow_cols])
     # inactividad causal (D07): meses consecutivos sin movimientos hasta m (se reinicia al volver a operar)
+    # cada racha (run_id) empieza en su mes activo, que ocupa la posición 0; si la serie arranca inactiva (run_id 0) no hay mes activo
     p = p.sort("company_id", "month").with_columns(active=(pl.col("n_tx") > 0).cast(pl.Int32))
     p = p.with_columns(run_id=pl.col("active").cum_sum().over("company_id", order_by="month"))
     p = p.with_columns(months_since_last_tx=pl.when(pl.col("active") == 1).then(0)
-                       .otherwise(pl.int_range(1, pl.len() + 1).over(["company_id", "run_id"], order_by="month"))).drop("active", "run_id")
+                       .otherwise(pl.int_range(0, pl.len()).over(["company_id", "run_id"], order_by="month")
+                                  + (pl.col("run_id") == 0).cast(pl.Int64))).drop("active", "run_id")
+    # flags de calidad (fase 0, salida/datos_limpieza.md): informativos, ninguna feature los consume todavía
+    gf12 = pl.col("gross_flow").rolling_mean(12, min_samples=1).over("company_id", order_by="month")
+    ig3 = pl.col("intragroup_flow").rolling_sum(3, min_samples=1).over("company_id", order_by="month")
+    gross3 = pl.col("gross_flow").rolling_sum(3, min_samples=1).over("company_id", order_by="month")
+    drift = p.group_by("company_id").agg(has_drift=(pl.col("outflow").median() > 0) & (pl.col("cash_end").min() < -pl.col("outflow").median()))
+    p = p.join(drift, on="company_id", how="left").with_columns(
+        dq_cash_sentinel=pl.col("company_id").is_in(_sentinel_cash_companies(t).implode()),
+        dq_cash_implausible=(pl.col("cash_end").abs() * pl.col("to_eur")) > pl.max_horizontal(50 * gf12 * pl.col("to_eur"), pl.lit(IMPLAUSIBLE_FLOOR_EUR)),
+        intragroup_share_3m=ig3 / (gross3 + ig3 + 1),
+        dq_edge_month=pl.col("month") == LAST_FULL_MONTH,
+        has_drift=pl.col("has_drift").fill_null(False),
+    )
     erp_ids = pl.read_parquet(DATA / "invoices.parquet")["company_id"].unique().implode()
     p = p.with_columns(has_erp=pl.col("company_id").is_in(erp_ids))
     inv_cols = ["late_share_ar", "late_share_ap", "overdue_ar", "overdue_ap", "overdue_90_ar", "overdue_90_ap"]

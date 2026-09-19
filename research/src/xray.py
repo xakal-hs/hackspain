@@ -25,10 +25,9 @@ from mlforecast.lag_transforms import RollingMean, RollingStd, ExpandingMean, Ex
 SPEC = {
     "runway": ("liquidez", +1, False, "Meses de caja", "log(1+caja/gasto mensual), con signo; gasto = máx(media 3m, media 12m)"),
     "lc_util": ("liquidez", -1, True, "Uso de líneas de crédito", "Dispuesto / límite de las pólizas de crédito"),
-    "net_margin_6m": ("rentabilidad", +1, False, "Margen de caja 6m", "(entradas − salidas) / (entradas + salidas), 6 meses"),
-    "growth_vs_12m": ("rentabilidad", +1, False, "Tendencia de cobros", "log(entradas medias 3m / entradas medias 12m)"),
+    "oper_growth_12m": ("rentabilidad", +1, False, "Tendencia de cobros", "log(cobros operativos medios 3m / cobros operativos medios 12m), en euros"),
     "debt_burden": ("solvencia", -1, True, "Carga de deuda", "Cuotas + intereses / entradas (3m)"),
-    "payroll_burden": ("solvencia", -1, False, "Peso de nóminas", "Nóminas + SS / entradas (3m); sin nóminas = no aplica"),
+    "payroll_cv": ("solvencia", -1, False, "Regularidad de nóminas", "Semidesviación a la baja de las nóminas / media (6m): nóminas que faltan o bajan; sin nóminas = no aplica"),
     "ap_late_share": ("disciplina", -1, True, "Pagos tardíos a proveedores", "% facturas recibidas vencidas >15 días sin pagar o pagadas tarde (3m)"),
     "ar_late_share": ("disciplina", -1, True, "Cobros tardíos de clientes", "% facturas emitidas cobradas >15 días tarde o impagadas (3m)"),
     "ap_overdue_ratio": ("disciplina", -1, True, "Deuda vencida con proveedores", "Saldo AP vencido / salidas mensuales"),
@@ -40,14 +39,19 @@ SPEC = {
     "net_vol_6m": ("estabilidad", -1, False, "Volatilidad a la baja", "Semidesviación de los meses con flujo neto negativo / gasto mensual (6m)"),
     "cust_trend": ("estabilidad", +1, False, "Amplitud de clientes", "log(clientes facturados 3m / clientes 12m)"),
     "lost_share": ("estabilidad", -1, True, "Facturación de clientes perdidos", "% de la facturación de hace 3-12 meses de clientes sin facturas en los últimos 3"),
+    "oper_persistence_6m": ("estabilidad", +1, False, "Persistencia de cobros", "Meses de los últimos 6 con cobros operativos ≥ 50 % de su mediana anual"),
 }
 PILLARS = ["liquidez", "rentabilidad", "solvencia", "disciplina", "estabilidad"]
-PRIOR_W = {"runway": 3, "lc_util": 1, "net_margin_6m": 1.5, "growth_vs_12m": 1.5, "debt_burden": 1, "payroll_burden": 0.5,
+PRIOR_W = {"runway": 3, "lc_util": 1, "oper_growth_12m": 1.5, "debt_burden": 1, "payroll_cv": 0.5,
            "ap_late_share": 1.5, "ar_late_share": 1, "ap_overdue_ratio": 1, "ar_overdue_90_ratio": 0.5, "refund_rate": 0.5,
-           "activity_trend": 1.5, "transfer_dep": 0.5, "hhi_ar_6m": 0.5, "net_vol_6m": 0.5, "cust_trend": 1.0, "lost_share": 1.0}
+           "activity_trend": 1.5, "transfer_dep": 0.5, "hhi_ar_6m": 0.5, "net_vol_6m": 0.5, "cust_trend": 1.0, "lost_share": 1.0, "oper_persistence_6m": 1.0}
 CONTEXT = ["log_scale", "fx_share", "activity_log"]
 BANDS = [(0, 35, "riesgo"), (35, 65, "vigilar"), (65, 101, "sano")]  # ≈ cuartiles de la escala publicada (D17)
 DORMANT_CAP = 30.0
+# regla de banda del prestamista (D36): con menos de medio mes de caja propia (runway < log 1,5) la nota publicada no
+# puede ser «sano». Se aplica sobre la nota suavizada como contribución aditiva (ec_regla_liquidez), así Σec = nota.
+LIQ_RULE_MONTHS, LIQ_RULE_CAP = 0.5, 64.9
+POSITIVE_PREFIX = ("positive", "expansion")  # eventos de la cara positiva (nota de expansión)
 
 
 def band_of(s: float) -> str:
@@ -59,12 +63,13 @@ def band_of(s: float) -> str:
 
 class HealthScorer(BaseEstimator, TransformerMixin):
     def __init__(self, calibrate: bool = True, l2: float = 1.0, weight_floor: float = 0.0,
-                 smooth_alpha: float = 0.5, dormant_cap: float = DORMANT_CAP):
+                 smooth_alpha: float = 0.5, dormant_cap: float = DORMANT_CAP, target: str = "adversa"):
         self.calibrate = calibrate
         self.l2 = l2
         self.weight_floor = weight_floor
         self.smooth_alpha = smooth_alpha
         self.dormant_cap = dormant_cap
+        self.target = target  # "adversa" (E1-E3), "expansion" (E4) o "todos": qué eventos calibran los pesos (D33)
 
     # ---------- ajuste ----------
     def fit(self, X: pd.DataFrame, y: pd.Series | None = None):
@@ -91,9 +96,13 @@ class HealthScorer(BaseEstimator, TransformerMixin):
             if len(Y) != len(X):
                 raise ValueError("y debe tener las mismas filas que X")
             Y = Y.set_axis(X.index)
+            # dos notas, no una (D33): promediar los pesos de la tensión con los de la expansión diluía la caja
+            # (runway 3,4 para tensión, 0,0 para expansión). La nota adversa calibra con E1-E3; la de expansión con E4.
+            pos_cols = [c for c in Y.columns if c.startswith(POSITIVE_PREFIX)]
+            cal_cols = {"adversa": [c for c in Y.columns if c not in pos_cols], "expansion": pos_cols}.get(self.target, list(Y.columns)) or list(Y.columns)
             ws, self.calibration_ = [], {}
-            for col in Y.columns:
-                wc, info = self._calibrate(X, Y[col], w, positive=col.startswith(("positive", "expansion")))
+            for col in cal_cols:
+                wc, info = self._calibrate(X, Y[col], w, positive=col.startswith(POSITIVE_PREFIX))
                 self.calibration_[col] = info
                 if wc.sum() > 0:
                     ws.append(wc / wc.sum())
@@ -117,7 +126,7 @@ class HealthScorer(BaseEstimator, TransformerMixin):
             Y = (y.to_frame() if isinstance(y, pd.Series) else pd.DataFrame(y)).set_axis(X.index)
             score = np.clip(self.scale_[0] + self.scale_[1] * comp, 0, 100)
             labels = {c: Y[c] for c in Y.columns}
-            adv = [c for c in Y.columns if not c.startswith(("positive", "expansion"))]
+            adv = [c for c in Y.columns if not c.startswith(POSITIVE_PREFIX)]
             if len(adv) > 1:  # "algún evento adverso": 1 si alguno ocurre, 0 si todos los observables son 0
                 A = Y[adv]
                 labels["adverso"] = A.max(axis=1).where(A.notna().any(axis=1))
@@ -222,14 +231,19 @@ class HealthScorer(BaseEstimator, TransformerMixin):
     def score_panel(self, panel: pd.DataFrame) -> pd.DataFrame:
         """transform + suavizado EWMA por empresa. El EWMA es lineal: EWMA(score) = Σ EWMA(contribución),
         así que la explicación sigue siendo exacta tras el suavizado."""
-        s = pd.concat([panel[["company_id", "group_id", "month"]].reset_index(drop=True),
-                       self.transform(panel.reset_index(drop=True))], axis=1)
+        p = panel.reset_index(drop=True)
+        s = pd.concat([p[["company_id", "group_id", "month"]], self.transform(p)], axis=1)
+        s["_runway"] = pd.to_numeric(p["runway"], errors="coerce") if "runway" in p else np.nan
         s = s.sort_values(["company_id", "month"]).reset_index(drop=True)
         ccols = [c for c in s.columns if c.startswith("c_")]
         e = s.groupby("company_id")[ccols].transform(lambda x: x.ewm(alpha=self.smooth_alpha, adjust=False).mean())
         for c in ccols:
             s["e" + c] = e[c]  # contribución suavizada: ec_*
-        s["score"] = e.sum(1)
+        lin = e.sum(1)
+        # regla de banda de liquidez (D36): menos de medio mes de caja propia no puede publicarse como «sano»
+        short = (s.pop("_runway") < np.log1p(LIQ_RULE_MONTHS)).to_numpy()
+        s["ec_regla_liquidez"] = np.where(short, np.minimum(0.0, LIQ_RULE_CAP - lin), 0.0)
+        s["score"] = lin + s["ec_regla_liquidez"]
         n = s.groupby("company_id").cumcount() + 1
         s["confidence"] = (s["coverage"] * (1 - s["ood_share"]) * np.minimum(1, n / 6)).clip(0, 1)
         if getattr(self, "proba_", None):
@@ -255,7 +269,7 @@ def explain(scored: pd.DataFrame, feats: pd.DataFrame | None, company_id: str, m
         key = c[3:]
         dp = float(cur[c] - prev[c])
         meta = SPEC.get(key)
-        label = meta[3] if meta else {"sin_datos": "Sin datos (neutro)", "regla_inactividad": "Regla: sin movimientos", "limite_0_100": "Límite de escala 0-100"}.get(key, key)
+        label = meta[3] if meta else {"sin_datos": "Sin datos (neutro)", "regla_inactividad": "Regla: sin movimientos", "regla_liquidez": "Regla: menos de medio mes de caja no es sano", "limite_0_100": "Límite de escala 0-100"}.get(key, key)
         vp = vn = None
         if fr is not None and key in fr.columns:
             vp, vn = fr[key].iloc[i - 1], fr[key].iloc[i]
@@ -273,7 +287,7 @@ def explain(scored: pd.DataFrame, feats: pd.DataFrame | None, company_id: str, m
             "contributions": contribs, "summary_text": summ}
 
 
-PCT = {"lc_util", "ap_late_share", "ar_late_share", "refund_rate", "transfer_dep", "lost_share", "debt_burden", "payroll_burden"}
+PCT = {"lc_util", "ap_late_share", "ar_late_share", "refund_rate", "transfer_dep", "lost_share", "debt_burden", "payroll_cv", "oper_persistence_6m"}
 
 
 def fmt_feature(f: str, v) -> str:
@@ -285,12 +299,13 @@ def fmt_feature(f: str, v) -> str:
         return f"{es(m, 1)} meses" if abs(m) < 100 else ">100 meses"
     if f in PCT:
         return f"{es(100 * v, 0)} %"
-    if f in ("growth_vs_12m", "activity_trend", "cust_trend"):
+    if f in ("growth_vs_12m", "oper_growth_12m", "activity_trend", "cust_trend"):
         return f"{es(100 * (np.exp(v) - 1), 0, True)} %"
     if f == "net_margin_6m":
         return f"{es(100 * v, 0, True)} %"
     if f in ("ap_overdue_ratio", "ar_overdue_90_ratio", "net_vol_6m"):
-        return f"{es(v, 1)}× gasto mensual" if f == "net_vol_6m" else f"{es(v, 1)} meses de pagos" if v < 100 else ">100 meses"
+        unit = "meses de cobros" if f == "ar_overdue_90_ratio" else "meses de pagos"  # AR sobre entradas, AP sobre salidas
+        return f"{es(v, 1)}× gasto mensual" if f == "net_vol_6m" else f"{es(v, 1)} {unit}" if v < 100 else ">100 meses"
     if f == "hhi_ar_6m":
         return f"{es(v, 2)}"
     return es(v, 2)
