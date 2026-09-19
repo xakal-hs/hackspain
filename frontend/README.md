@@ -4,8 +4,13 @@ The production frontend lives here. It is a Nuxt 4 application built on Vue 3's 
 
 ## Run locally
 
+The Nuxt toolchain requires a supported Node release. This workspace pins Node 22.22 in `.nvmrc`.
+
 ```bash
 cd frontend
+nvm install
+nvm use
+corepack enable
 pnpm install
 pnpm dev
 ```
@@ -34,3 +39,10 @@ Nitro then forwards `/api/companies` to the backend, keeping the browser on a sa
 pnpm typecheck
 pnpm build
 ```
+
+## Troubleshooting
+
+If Rolldown reports that `format` received `['underline', 'gray']`, the terminal is using Node 21 or
+another unsupported release. Run `nvm use` inside this directory, confirm `node --version` reports
+`v22.22.0`, and reinstall with `pnpm install`. The strict engine check now stops earlier with a clear
+version error when the runtime is unsupported.
