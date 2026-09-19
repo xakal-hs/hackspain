@@ -17,7 +17,7 @@ import evaluate as E
 warnings.filterwarnings("ignore")
 ROOT = Path(__file__).resolve().parents[1]
 REP = ROOT / "reports"
-FINAL = "v6"
+FINAL = "v7"
 
 
 def chart(type_, title, x_label, y_label, labels=None, datasets=(), note=None):
@@ -435,10 +435,10 @@ def build():
         why="El simulador de escenarios necesita recalcular al mover cada slider (con debounce) y superponer base frente a escenario. Una SPA con API es más fluida, se despliega en cualquier sitio y separa el modelo (reutilizable como producto: la API es lo que compraría Embat) de la demo.",
         alternatives="Streamlit: más rápido de montar, pero se re-ejecuta entero en cada interacción y queda acoplado a Python.")
 
-    add(category="producto", title="Producto y comprador: monitor y simulador para Embat y sus socios financieros",
+    add(category="producto", title="Producto y comprador: capa de decisión de Embat para el CFO",
         question="¿Quién paga y por qué?",
-        decision="Comprador: Embat. Integra X-Ray en su plataforma como (1) un monitor de alertas proactivas sobre sus clientes y (2) un simulador de escenarios para tesorería. Con el score y la confianza puede derivar operaciones a financiadores (circulante, factoring o pólizas) con un riesgo medido, y cobrar por origen o por suscripción.",
-        why="Embat ya tiene los datos y la relación con la pyme. El score la convierte en un canal de crédito con información que el banco no tiene: caja diaria, disciplina de facturas y anticipación de 1 a 3 meses.",
+        decision="Comprador e integrador: Embat. Usuario: CFO o equipo de tesorería. X-Ray ordena la cartera, explica qué cambió y propone la siguiente acción con un colchón dinámico. Banco, bróker o BaaS quedan como ejecutores opcionales cuando la recomendación requiere capital o licencia.",
+        why="Embat ya ofrece previsión, alertas, riesgo y pagos. La aportación incremental de X-Ray es comparabilidad, explicación aditiva y priorización transversal: convertir el rastro que Embat ya tiene en una cola de decisiones, no duplicar el forecast.",
         status="a confirmar con la organización")
 
     # --- autoresearch (fase 3, rama autoresearch/2026-09-19): bucle testear→diagnosticar→cambiar sobre las premisas del consejo
@@ -497,6 +497,17 @@ def build():
         decision="Sobre la nota suavizada, si runway < log(1,5) la nota se acota a 64,9 con una contribución aditiva ec_regla_liquidez (Σec sigue siendo la nota). Los topes duros (50 / 34,9 con liquidez < 0,25) se descartan por circulares con la etiqueta y por su coste en incumplimiento y caída.",
         why="Con dos notas la objeción de la ronda 1 (la expansión) ya no aplica. El tope suave toca 480 de 5 436 filas sanas, no mueve ningún AUC (±0,002) y baja la tensión del 20 % mejor por nota de 10,9 % a 8,5 %.",
         evidence=f"P120: 7,8 % → 0 % de sanas con < 0,5 meses. En cortes PM {pm(r2['ar105']):.3f} → {pm(r2['ar107']):.3f}; deterioro {g(r2['ar105'], 'auc_deterioro'):.3f} → {g(r2['ar107'], 'auc_deterioro'):.3f}. Detalle: iter_107/.")
+    add(category="producto", title="Voz de producto Embat: coste oculto, mesa de opciones y mix de plazos",
+        question="¿Cómo enseña Embat el exceso, la divisa y la deuda a un CFO que no los siente como problema?",
+        decision="Idle cash y FX son costes ocultos: hay que mostrarlos en la app, no en un agente (el agente no se usa). El módulo se vende como suscripción; intermediar rieles cuando Embed One no cubre es un parche. El upsell es una mesa de opciones que encajan. La deuda, un mix corto/medio/largo según el tiempo de devolución. La criticidad de la liquidez cambia con el sector. La solvencia sale de previsión y colchón, no de conciliación perfecta.",
+        why="Testimonio de una PM de Embat (19-09-2026). El CFO no toma el dinero parado como problema real y la operativa de divisa le parece compleja. Empujar un SKU por comisión o un agente de FX contradice cómo venden ellos. Fuente: context/voz_embat.md.",
+        status="decidido")
+
+    add(category="producto", title="Voz de Capchase: partner con licencia, sector × tenor y depósito como colateral",
+        question="¿Hace falta ser banco para mover el dinero, y cómo se diseña el préstamo?",
+        decision="No hace falta licencia bancaria propia: se apalanca la de un banco partner. El préstamo vive en una rejilla sector × tenor (días / 6 meses / 12 meses / largo); inmediato, corto y medio son productos distintos. El objetivo es retener. Quien tiene caja también pide: aparcar el depósito en el partner es colateral, baja el interés y pega al cliente. Deterioro es deuda nueva mientras la caja se evapora, no el alta de deuda sola.",
+        why="Testimonio de un cofundador de Capchase (19-09-2026). Complementa la voz de Embat: aquella enseña el coste al CFO; esta dice cómo se ejecuta el riel y cómo se parte el crédito. Fuente: context/voz_capchase.md.",
+        status="decidido")
     return D, its
 
 
@@ -530,6 +541,8 @@ DESCS = {
     "ar104": "oper_growth_12m (cobros operativos) sustituye a growth_vs_12m",
     "ar105": "La cuota de deuda sale de incumplimiento_6m",
     "ar107": "Regla de banda: menos de medio mes de caja no es sano (final de la ronda 2)",
+    "v6": "Inactividad causal, intragrupo fuera, FX en facturas, clientes perdidos, calibración 2 caras, EPS relativo",
+    "v7": "Eventos v2: tensión, incumplimiento, caída estructural y expansión; probabilidades a 6 meses",
 }
 
 
@@ -537,6 +550,7 @@ def iterations():
     out = []
     for tag in ["v1", "v2", "v3a", "v3b", *VARIANTS, "v6", "v7", "ar000", "ar002b", "ar004", "ar006", "ar007",
                 "ar100", "ar101", "ar102", "ar104", "ar105", "ar107"]:
+    for tag in ["v1", "v2", "v3a", "v3b", *VARIANTS, "v6", "v7"]:
         m = load_metrics(tag)
         if not m:
             continue

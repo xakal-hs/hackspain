@@ -8,3 +8,11 @@ backend/data/
 backend/artifacts/
 backend/oof.parquet
 backend/__pycache__/
+
+# Local environment credentials, at any depth.
+.env
+.env.*
+!.env.example
+
+# Machine-local Claude permissions and authentication preferences.
+.claude/settings.local.json

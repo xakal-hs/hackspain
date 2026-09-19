@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import {
   Activity,
+  Banknote,
   ChevronsUpDown,
+  CircleDollarSign,
   Gauge,
   Handshake,
   LogOut,
+  PiggyBank,
+  Radar,
   Rows3,
+  ScanLine,
+  Target,
   Check,
 } from '@lucide/vue'
-import {
-  perspectives,
-  perspectiveById,
-  currentMonth,
-  type PerspectiveId,
-} from '~/data/demo'
+import { perspectives, perspectiveById, type PerspectiveId } from '~/data/demo'
 
 const props = defineProps<{ role: PerspectiveId; section: string }>()
 
@@ -26,16 +27,25 @@ const items = computed(() => {
     { id: 'senales', label: props.role === 'empresa' ? 'Mis señales' : 'Señales', icon: Activity },
     {
       id: 'ofertas',
-      label:
-        props.role === 'empresa'
-          ? 'Mis ofertas'
-          : props.role === 'banco'
-            ? 'Ofertas enviadas'
-            : 'Mercado',
+      label: props.role === 'empresa' ? 'Mis ofertas' : 'Mercado',
       icon: Handshake,
     },
   ]
-  return props.role === 'empresa' ? all.filter((i) => i.id !== 'cartera') : all
+  /* Tesorería propia: solo tiene sentido mirándose a uno mismo. */
+  const treasury = [
+    { id: 'score', label: 'X-Ray Score', icon: ScanLine },
+    { id: 'colchon', label: 'Colchón Dinámico', icon: PiggyBank },
+    { id: 'divisa', label: 'Divisa Inteligente', icon: CircleDollarSign },
+  ]
+  /* Interno: el sujeto ya no es una empresa de la cartera, sino Embat. */
+  const ops = [
+    { id: 'monitor', label: 'Monitor operativo', icon: Radar },
+    { id: 'revenue', label: 'Revenue por producto', icon: Banknote },
+    { id: 'modelo', label: 'Métricas del modelo', icon: Target },
+  ]
+  return props.role === 'empresa'
+    ? [...all.filter((i) => i.id !== 'cartera'), ...treasury]
+    : [...all, ...ops]
 })
 
 const open = ref(false)
@@ -59,21 +69,75 @@ function href(id: string) {
     ? `/dashboard/${props.role}`
     : `/dashboard/${props.role}?section=${id}`
 }
+
+/* El pulgar de la pestaña activa se mide contra el enlace, no se estima: el
+ * rail pasa de columna a fila bajo 900px y los anchos no son uniformes. */
+const navEl = ref<HTMLElement | null>(null)
+const placed = ref(false)
+const armed = ref(false)
+const thumb = reactive({ x: 0, y: 0, w: 0, h: 0 })
+
+function placeThumb() {
+  const nav = navEl.value
+  const active = nav?.querySelector<HTMLElement>('a.is-here')
+  if (!nav || !active) return
+  thumb.x = active.offsetLeft
+  thumb.y = active.offsetTop
+  thumb.w = active.offsetWidth
+  thumb.h = active.offsetHeight
+  placed.value = true
+}
+
+onMounted(() => {
+  placeThumb()
+  requestAnimationFrame(() => {
+    armed.value = true
+  })
+  const observer = new ResizeObserver(() => placeThumb())
+  const el = navEl.value
+  if (el) observer.observe(el as unknown as Element)
+  window.addEventListener('resize', placeThumb)
+  onUnmounted(() => {
+    observer.disconnect()
+    window.removeEventListener('resize', placeThumb)
+  })
+})
+
+watch(
+  () => [props.section, props.role, items.value.length] as const,
+  () => placeThumb(),
+  { flush: 'post' },
+)
 </script>
 
 <template>
   <aside class="rail">
-    <NuxtLink to="/" class="lp__brand rail__brand">
-      <BrandMark />
-      <span>X-Ray<small>de Embat</small></span>
-    </NuxtLink>
+    <div class="rail__head">
+      <NuxtLink to="/" class="lp__brand rail__brand">
+        <BrandMark />
+        <span>X-Ray<small>de Embat</small></span>
+      </NuxtLink>
+      <ThemeSwitch />
+    </div>
 
     <div class="rail__space">
       <b>{{ profile.name }}</b>
       <span>{{ profile.person }}</span>
     </div>
 
-    <nav class="rail__nav" aria-label="Secciones del panel">
+    <nav
+      ref="navEl"
+      class="rail__nav"
+      :class="{ 'is-placed': placed, 'is-armed': armed }"
+      aria-label="Secciones del panel"
+      :style="{
+        '--thumb-x': `${thumb.x}px`,
+        '--thumb-y': `${thumb.y}px`,
+        '--thumb-w': `${thumb.w}px`,
+        '--thumb-h': `${thumb.h}px`,
+      }"
+    >
+      <span class="rail__nav-thumb" aria-hidden="true"></span>
       <NuxtLink
         v-for="item in items"
         :key="item.id"
@@ -88,12 +152,6 @@ function href(id: string) {
     </nav>
 
     <div class="rail__foot">
-      <ThemeSwitch />
-
-      <p class="rail__env">
-        Entorno de demostración<span>Datos ficticios · {{ currentMonth }}</span>
-      </p>
-
       <div class="rail__profile" @keydown.esc="open = false">
         <div v-if="open" id="rail-switcher" class="rail__switcher">
           <p>Cambiar de vista</p>

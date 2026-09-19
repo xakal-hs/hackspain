@@ -76,7 +76,16 @@ device as the threshold line in the chart below it: something is crossed.
 
 ## Structure
 
-Both the landing page and the cockpit hang off a fixed 232px rail. The landing's
+Both the landing page and the cockpit hang off a fixed 232px rail, and **the rail
+keeps the dark palette under both themes**. It is chrome, not content: the reader's
+eye should fall on the panels that carry the numbers, and a dark edge frames a
+light canvas without competing with it. The dark surface values therefore live in
+their own `--ink-*` set in `tokens.css`; the dark theme *is* those values and the
+rail borrows them, so the two cannot drift. The rail re-points the theme tokens
+rather than restating colours, so every descendant follows — popovers, buttons and
+the focus ring included.
+
+The landing's
 sections each use a different structural device, because the shape is part of the
 argument: ruled rows for the three readings, a ruled grid of small multiples at
 one shared scale, one panel split in two for bump-versus-fall, and a
@@ -91,14 +100,44 @@ plus an inset sheen, as in the reference.
 Chips are data keys and status, in tracked small capitals with a dot. They are
 never hung above a heading as an eyebrow.
 
+Embat's own perspective carries three internal views — monitor, revenue and
+model metrics — where the subject stops being a company in the portfolio and
+becomes the product itself. They reuse the cockpit language unchanged, because
+the reader is the same person on the same screen; what changes is the noun. Their
+recurring device is the **ruled strip**: three or five readings side by side,
+divided by a hairline rather than boxed into cards, collapsing to ruled rows when
+the column narrows. The model panel is the one surface that keeps the dark
+palette under both themes outside the rail (`.panel--ink`), for the same reason
+the rail does: it re-points the tokens rather than restating colours, so its
+chips, accents and focus ring follow. The accent inks it needs on that navy
+therefore live in the shared `--ink-*` set, which the dark theme now points at,
+so the two cannot drift.
+
 ## Theme
 
 `data-theme="dark|light"` on `<html>`, both token sets complete. The choice is
 kept in the `xray-theme` cookie and read during SSR, so the first byte is already
 the right palette and there is no flash. Dark is the default. The control is a
-two-position segmented switch whose active half is decided by a CSS attribute
-selector on the root, so it is correct before any script runs. Only colour and
-background transition, at 120ms, and not at all under `prefers-reduced-motion`.
+two-position switch — one button, not two options — so a click anywhere flips the
+theme. Sun and moon mark the sides; a sliding thumb says which is current, and the
+active half is decided by a CSS attribute selector on the root, so it is correct
+before any script runs. The thumb does not slide on first paint, only when the
+theme actually changes, and it overshoots a little, like the score crossing a
+threshold. The glyphs replace labels because the control sits in a rail where
+every other line is a destination; the accessible name still says which is which.
+It rides on the brand row, at the far end from the mark and flush with the right
+edge of the panels below it, in all three shells — rail, landing index and access
+screen — because it is the one header element that does not navigate. Page colour
+transitions at 120ms. Under `prefers-reduced-motion` both the thumb and the page
+cut the motion.
+
+The three Centinela product mocks carry their own palette under `.centinela`,
+because they are a different product's interface and `--text` already means
+something else at the root. They follow the theme too: their status accents are
+derived from X-Ray's, so a "bien" in the mock is the same green as a "lend" in the
+score. Their navy panels are the one surface that does not theme — a deliberate
+accent that works on either canvas — so the ink on them lives in a fixed
+`--on-navy` ramp rather than borrowing `--card`, which would go dark and vanish.
 
 ## Motion
 
@@ -106,8 +145,10 @@ One orchestrated sequence, on the landing hero, once: the trace draws, the
 detection marker lands, the forecast extends, the level marker lands, and the
 span between them is measured. Nothing else moves on its own — no scroll-triggered
 entrances. Everything else responds to a click: selecting a row, opening the
-view switcher, flipping the theme. Under `prefers-reduced-motion` the hero
-renders its finished state immediately.
+view switcher, flipping the theme, changing cockpit tabs. The tab thumb
+slides with the same overshoot as the theme switch, and the pane settles
+from 10px below; neither runs on first paint, only on the change. Under
+`prefers-reduced-motion` the hero renders its finished state immediately.
 
 ## Accessibility floor
 

@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "xray-frontend",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-lc",
+        "cd frontend && PATH=\"$HOME/.nvm/versions/node/v22.22.0/bin:$PATH\" pnpm dev --port 3100"
+      ],
+      "port": 3100
+    }
+  ]
+}

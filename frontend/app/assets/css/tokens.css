@@ -5,50 +5,85 @@
  * is reserved for anything the product knows before it happens.
  */
 
+/* The dark surface palette, named apart from the themes because the navigation
+ * rail keeps it under both of them. The dark theme is these values; the light
+ * theme borrows them only for the rail. Defined once so the two never drift. */
+:root {
+  --ink-canvas: #090c22;
+  --ink-panel: #10142f;
+  --ink-raised: #1a1f42;
+  --ink-sunken: #0b0e26;
+  --ink-line: rgba(190, 200, 255, 0.1);
+  --ink-line-strong: rgba(190, 200, 255, 0.19);
+  --ink-text: #eef0fb;
+  --ink-muted: #9aa0c4;
+  --ink-dim: #8288b0;
+  --ink-neutral-wash: rgba(190, 200, 255, 0.07);
+  --ink-live: #5b74ff;
+  --ink-live-solid: #4d5fea;
+  --ink-live-ink: #93a3ff;
+  --ink-live-wash: rgba(91, 116, 255, 0.16);
+  --ink-sheen: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+
+  /* Los acentos de estado sobre superficie oscura. Viven aquí, y no solo en el
+   * tema oscuro, porque el panel navy de las métricas del modelo los necesita
+   * también bajo el tema claro: allí un `--mint-ink` de tema claro es un verde
+   * oscuro que sobre navy no se lee. */
+  --ink-mint: #63dfa4;
+  --ink-mint-ink: #7ce8b4;
+  --ink-mint-wash: rgba(99, 223, 164, 0.13);
+  --ink-amber: #f2b33d;
+  --ink-amber-ink: #f6c464;
+  --ink-amber-wash: rgba(242, 179, 61, 0.14);
+  --ink-crimson: #f4626f;
+  --ink-crimson-ink: #ff8791;
+  --ink-crimson-wash: rgba(244, 98, 111, 0.14);
+}
+
 :root,
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --canvas: #090c22;
-  --panel: #10142f;
-  --panel-raised: #1a1f42;
-  --panel-sunken: #0b0e26;
-  --line: rgba(190, 200, 255, 0.1);
-  --line-strong: rgba(190, 200, 255, 0.19);
+  --canvas: var(--ink-canvas);
+  --panel: var(--ink-panel);
+  --panel-raised: var(--ink-raised);
+  --panel-sunken: var(--ink-sunken);
+  --line: var(--ink-line);
+  --line-strong: var(--ink-line-strong);
 
-  --text: #eef0fb;
-  --text-muted: #9aa0c4;
-  --text-dim: #8288b0;
+  --text: var(--ink-text);
+  --text-muted: var(--ink-muted);
+  --text-dim: var(--ink-dim);
 
   /* Graphic fills: bars, traces, dots. */
-  --mint: #63dfa4;
+  --mint: var(--ink-mint);
   --coral: #ff8f74;
-  --amber: #f2b33d;
-  --crimson: #f4626f;
-  --live: #5b74ff;
+  --amber: var(--ink-amber);
+  --crimson: var(--ink-crimson);
+  --live: var(--ink-live);
   --ahead: #c5b6ff;
 
   /* Filled actions use a deeper blue than the trace so white labels clear AA. */
-  --live-solid: #4d5fea;
+  --live-solid: var(--ink-live-solid);
 
   /* Text-safe variants on this theme's panels. */
-  --mint-ink: #7ce8b4;
+  --mint-ink: var(--ink-mint-ink);
   --coral-ink: #ffa48d;
-  --amber-ink: #f6c464;
-  --crimson-ink: #ff8791;
-  --live-ink: #93a3ff;
+  --amber-ink: var(--ink-amber-ink);
+  --crimson-ink: var(--ink-crimson-ink);
+  --live-ink: var(--ink-live-ink);
   --ahead-ink: #cfc2ff;
 
   /* Chip and well fills. */
-  --mint-wash: rgba(99, 223, 164, 0.13);
+  --mint-wash: var(--ink-mint-wash);
   --coral-wash: rgba(255, 143, 116, 0.13);
-  --amber-wash: rgba(242, 179, 61, 0.14);
-  --crimson-wash: rgba(244, 98, 111, 0.14);
-  --live-wash: rgba(91, 116, 255, 0.16);
+  --amber-wash: var(--ink-amber-wash);
+  --crimson-wash: var(--ink-crimson-wash);
+  --live-wash: var(--ink-live-wash);
   --ahead-wash: rgba(197, 182, 255, 0.13);
-  --neutral-wash: rgba(190, 200, 255, 0.07);
+  --neutral-wash: var(--ink-neutral-wash);
 
-  --sheen: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  --sheen: var(--ink-sheen);
   --grid-line: rgba(190, 200, 255, 0.09);
   --on-live: #ffffff;
   --focus-ring: #93a3ff;
@@ -98,6 +133,36 @@
   --focus-ring: #2a42c9;
 }
 
+/* Both rails — the landing index and the cockpit navigation — stay on the dark
+ * palette under the light theme. They are chrome: the reader's eye should fall
+ * on the panels that carry the numbers, and a dark edge frames a light canvas
+ * without competing with it. Re-pointing the tokens rather than restating the
+ * colours means every descendant follows, popovers and buttons included. */
+.rail,
+.lp__rail {
+  --canvas: var(--ink-canvas);
+  --panel: var(--ink-panel);
+  --panel-raised: var(--ink-raised);
+  --panel-sunken: var(--ink-sunken);
+  --line: var(--ink-line);
+  --line-strong: var(--ink-line-strong);
+  --text: var(--ink-text);
+  --text-muted: var(--ink-muted);
+  --text-dim: var(--ink-dim);
+  --neutral-wash: var(--ink-neutral-wash);
+  --live: var(--ink-live);
+  --live-solid: var(--ink-live-solid);
+  --live-ink: var(--ink-live-ink);
+  --live-wash: var(--ink-live-wash);
+  --sheen: var(--ink-sheen);
+  --focus-ring: var(--ink-live-ink);
+
+  /* So the nav's own overflow scrollbar is dark too under the light theme. */
+  color-scheme: dark;
+  background: var(--canvas);
+  color: var(--text);
+}
+
 :root {
   /* Schibsted Grotesk carries every word. Chivo Mono is restricted to large
    * numeric readings — never to small labels. */
@@ -127,4 +192,113 @@
   --gutter: clamp(1.25rem, 3.5vw, 3rem);
 
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  /* Overshoot for the theme thumb and the rail tab — they land like the
+     score crossing a threshold. */
+  --sw-ease: cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+
+/* Paleta de los mocks Centinela (Colchón Dinámico, Divisa Inteligente, X-Ray
+ * Score). Va acotada a `.centinela` en lugar de a `:root` porque `--text` ya
+ * existe arriba con otro valor por tema: redefinirlo en `:root` rompería el
+ * resto de la app. El bloque de abajo es el tema claro, de origen del mock. */
+.centinela {
+  --bg: #f3f4f8;
+  --card: #ffffff;
+  --border: #e4e6f0;
+  /* Relleno neutro de chips y pistas de progreso, y la retícula de los SVG. */
+  --wash: #eef0f7;
+  --grid: #eef0f7;
+
+  --text: #12142b;
+  --text-2: #565a7a;
+  --text-3: #9298b5;
+  --meta: #6b7089;
+  --body: #23253f;
+
+  --accent: #3b5bff;
+
+  /* Los paneles navy no se tematizan: son un acento deliberado que funciona
+   * igual sobre lienzo claro que oscuro. Su tinta va aparte de `--card` para
+   * que siga siendo blanca cuando `--card` se oscurece. */
+  --navy-1: #171b4c;
+  --navy-2: #0b0e2a;
+  --on-navy: #ffffff;
+  --on-navy-2: #b7bee8;
+  --on-navy-3: #8990c4;
+  --on-navy-4: #6970a6;
+
+  /* Tinta sobre un botón de estado relleno. Blanca aquí porque en claro los
+   * estados son tonos medios saturados; en oscuro se invierte. */
+  --on-status: #ffffff;
+
+  /* Cada estado tiene tres capas: `-bg` para el fondo del aviso, `-chip` para
+   * un relleno más marcado, y `-strong` para la tinta que va encima. */
+  --ok: #1fa971;
+  --ok-bg: #e9f7f0;
+  --ok-border: #bfe3c8;
+  --ok-chip: #d0efdd;
+  --ok-strong: #17805a;
+
+  --warn: #c08a1e;
+  --warn-bg: #fff7e5;
+  --warn-border: #f1e4c0;
+  --warn-chip: #f5e4b8;
+  --warn-strong: #8a6410;
+
+  --bad: #e14c43;
+  --bad-bg: #fde9e7;
+  --bad-border: #f5b8b4;
+  --bad-chip: #f7cfcc;
+  --bad-strong: #b0322a;
+
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 12px;
+
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+/* El dashboard embebe estos mocks, así que en tema oscuro se apoyan en las
+ * mismas superficies `--ink-*` que el resto de la cabina en vez de quedarse
+ * como una isla clara. Los acentos de estado se derivan de la paleta de X-Ray
+ * para que un "bien" del mock sea el mismo verde que un "prestar" del score. */
+:root[data-theme='dark'] .centinela {
+  --bg: var(--ink-canvas);
+  --card: var(--ink-panel);
+  --border: var(--ink-line);
+  --wash: rgba(190, 200, 255, 0.12);
+  --grid: var(--ink-line);
+
+  --text: var(--ink-text);
+  --text-2: var(--ink-muted);
+  --text-3: var(--ink-dim);
+  --meta: var(--ink-muted);
+  --body: var(--ink-text);
+
+  --accent: var(--ink-live);
+
+  /* Sobre un verde o un rojo claros, la tinta legible es el lienzo. */
+  --on-status: var(--ink-canvas);
+
+  --ok: var(--mint-ink);
+  --ok-bg: var(--mint-wash);
+  --ok-border: color-mix(in srgb, var(--mint) 30%, transparent);
+  --ok-chip: color-mix(in srgb, var(--mint) 22%, transparent);
+  --ok-strong: var(--mint-ink);
+
+  --warn: var(--amber-ink);
+  --warn-bg: var(--amber-wash);
+  --warn-border: color-mix(in srgb, var(--amber) 32%, transparent);
+  --warn-chip: color-mix(in srgb, var(--amber) 24%, transparent);
+  --warn-strong: var(--amber-ink);
+
+  --bad: var(--crimson-ink);
+  --bad-bg: var(--crimson-wash);
+  --bad-border: color-mix(in srgb, var(--crimson) 32%, transparent);
+  --bad-chip: color-mix(in srgb, var(--crimson) 24%, transparent);
+  --bad-strong: var(--crimson-ink);
 }

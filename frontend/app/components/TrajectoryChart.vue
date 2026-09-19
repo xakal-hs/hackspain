@@ -74,17 +74,73 @@ const description = computed(
     `Score de ${props.company.name} mes a mes, de ${months[0]} a ${months[23]}: ` +
     `${props.company.history.join(', ')}. Previsión a tres meses: ${props.company.forecast.join(', ')}.`,
 )
+
+const { plot, active, track, clear, keys } = useChartHover(
+  computed(() => series.value.length),
+  (index) => scales.value.x(index),
+)
+
+const measured = computed(() => props.company.history.length)
+
+const cursor = computed(() => {
+  const index = active.value
+  if (index == null) return null
+
+  const value = series.value[index]
+  if (value == null) return null
+
+  const ahead = index >= measured.value
+  return {
+    x: scales.value.x(index),
+    y: scales.value.y(value),
+    ahead,
+    title: ahead
+      ? `+${index - measured.value + 1} m · previsión`
+      : (months[index] ?? `mes ${index + 1}`),
+    rows: [
+      {
+        key: 'score',
+        label: ahead ? 'Score previsto' : 'Score',
+        value: String(value),
+        tone: (ahead ? 'ahead' : 'live') as 'ahead' | 'live',
+      },
+    ],
+    /* La ventaja del producto es justo esta distancia, así que se dice
+     * cada vez que el lector pasa por un mes anterior al aviso. */
+    foot:
+      props.company.detectedAt !== null && index === props.company.detectedAt
+        ? 'Aquí avisamos'
+        : ahead
+          ? 'Predicción, no dato cerrado'
+          : undefined,
+  }
+})
+
+const spoken = computed(() =>
+  cursor.value ? `${cursor.value.title}. Score: ${cursor.value.rows[0]!.value}` : '',
+)
 </script>
 
 <template>
   <figure class="traj">
-    <div class="traj__plot">
+    <div
+      ref="plot"
+      class="traj__plot"
+      tabindex="0"
+      role="img"
+      :aria-label="description"
+      @pointermove="track"
+      @pointerdown="track"
+      @pointerleave="clear"
+      @pointercancel="clear"
+      @blur="clear"
+      @keydown="keys"
+    >
       <svg
         class="traj__svg"
         viewBox="0 0 1000 1000"
         preserveAspectRatio="none"
-        role="img"
-        :aria-label="description"
+        aria-hidden="true"
       >
         <defs>
           <linearGradient
@@ -152,10 +208,32 @@ const description = computed(
       >
 
       <span
+        v-if="!cursor"
         class="traj__head"
         :style="{ left: `${head[0]}%`, top: `${head[1]}%` }"
         aria-hidden="true"
       />
+
+      <template v-if="cursor">
+        <span
+          class="traj__cursor"
+          :style="{ left: `${cursor.x}%` }"
+          aria-hidden="true"
+        />
+        <span
+          class="traj__head is-live"
+          :data-ahead="cursor.ahead ? 'true' : undefined"
+          :style="{ left: `${cursor.x}%`, top: `${cursor.y}%` }"
+          aria-hidden="true"
+        />
+        <ChartTip
+          :x="cursor.x"
+          :place="cursor.y < 48 ? 'bottom' : 'top'"
+          :title="cursor.title"
+          :rows="cursor.rows"
+          :foot="cursor.foot"
+        />
+      </template>
 
       <p
         v-if="detected"
@@ -177,5 +255,7 @@ const description = computed(
       >
       <span class="traj__axis-ahead">+3 m</span>
     </div>
+
+    <p class="sr-only" role="status">{{ spoken }}</p>
   </figure>
 </template>

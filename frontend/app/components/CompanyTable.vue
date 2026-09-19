@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shapeLabel, signed, type Company } from '~/data/demo'
+import { shapeLabel, signed, sizeLabel, type Company } from '~/data/demo'
 
 const props = withDefaults(
   defineProps<{
@@ -49,7 +49,8 @@ const window12 = (company: Company) => company.history.slice(12)
               :aria-pressed="company.id === selectedId"
               @click="emit('select', company.id)"
             >
-              <b>{{ company.name }}</b><small>{{ company.sector }}</small>
+              <b>{{ company.name }}</b
+              ><small>{{ company.sector }} · {{ sizeLabel[company.size] }}</small>
             </button>
           </th>
           <td class="num">

@@ -52,6 +52,7 @@ export const currentMonth = 'septiembre 2026'
 export type Decision = 'prestar' | 'vigilar' | 'no-prestar'
 export type Band = 'sano' | 'vigilar' | 'riesgo'
 export type Shape = 'estable' | 'mejora' | 'bache' | 'deterioro' | 'caida'
+export type SizeBand = 'pequeña' | 'mediana' | 'grande'
 
 export const decisionLabel: Record<Decision, string> = {
   prestar: 'Prestar',
@@ -65,6 +66,26 @@ export const shapeLabel: Record<Shape, string> = {
   bache: 'Bache temporal',
   deterioro: 'Deterioro persistente',
   caida: 'Caída estructural',
+}
+
+export const sizeLabel: Record<SizeBand, string> = {
+  pequeña: 'Pequeña',
+  mediana: 'Mediana',
+  grande: 'Grande',
+}
+
+export const sizeFilters: Array<SizeBand | 'todas'> = [
+  'todas',
+  'grande',
+  'mediana',
+  'pequeña',
+]
+
+export const sizeFilterLabel: Record<SizeBand | 'todas', string> = {
+  todas: 'Todas',
+  grande: 'Grandes',
+  mediana: 'Medianas',
+  pequeña: 'Pequeñas',
 }
 
 /** A signal's weight is its share of the score move, so the bar length in the
@@ -88,6 +109,7 @@ export interface Company {
   name: string
   sector: string
   group: string
+  size: SizeBand
   score: number
   band: Band
   decision: Decision
@@ -131,12 +153,13 @@ function buildFlows(start: number, ins: number[], outs: number[]): MonthFlow[] {
   })
 }
 
-export const companies: Company[] = [
+const coreCompanies: Company[] = [
   {
     id: 'solis',
     name: 'Panadería Solís',
     sector: 'Alimentación',
     group: 'Grupo Solís',
+    size: 'pequeña',
     score: 91,
     band: 'sano',
     decision: 'prestar',
@@ -199,6 +222,7 @@ export const companies: Company[] = [
     name: 'Talleres Vidal',
     sector: 'Metalurgia industrial',
     group: 'Vidal Hermanos',
+    size: 'mediana',
     score: 65,
     band: 'vigilar',
     decision: 'vigilar',
@@ -261,6 +285,7 @@ export const companies: Company[] = [
     name: 'Nortex Logística',
     sector: 'Transporte y logística',
     group: 'Nortex Group',
+    size: 'mediana',
     score: 74,
     band: 'sano',
     decision: 'prestar',
@@ -323,6 +348,7 @@ export const companies: Company[] = [
     name: 'Distribuciones Ibérica',
     sector: 'Distribución alimentaria',
     group: 'Ibérica Retail',
+    size: 'grande',
     score: 68,
     band: 'vigilar',
     decision: 'vigilar',
@@ -391,6 +417,7 @@ export const companies: Company[] = [
     name: 'Recolectora Sureste',
     sector: 'Agroindustria',
     group: 'Sureste Agro',
+    size: 'mediana',
     score: 39,
     band: 'riesgo',
     decision: 'no-prestar',
@@ -453,6 +480,7 @@ export const companies: Company[] = [
     name: 'Atlas Frío',
     sector: 'Cadena de frío',
     group: 'Atlas Industrial',
+    size: 'grande',
     score: 83,
     band: 'sano',
     decision: 'prestar',
@@ -484,6 +512,7 @@ export const companies: Company[] = [
     name: 'Cerámicas Altea',
     sector: 'Materiales de construcción',
     group: 'Altea Cerámica',
+    size: 'mediana',
     score: 78,
     band: 'sano',
     decision: 'prestar',
@@ -515,6 +544,7 @@ export const companies: Company[] = [
     name: 'Grupo Ledesma',
     sector: 'Servicios industriales',
     group: 'Ledesma Servicios',
+    size: 'mediana',
     score: 54,
     band: 'vigilar',
     decision: 'vigilar',
@@ -543,10 +573,319 @@ export const companies: Company[] = [
   },
 ]
 
+function stub(
+  entry: Omit<Company, 'detectedAt' | 'levelAt' | 'term' | 'erp' | 'monthsConnected' | 'coverage'> &
+    Partial<Pick<Company, 'detectedAt' | 'levelAt' | 'term' | 'erp' | 'monthsConnected' | 'coverage'>>,
+): Company {
+  return {
+    detectedAt: null,
+    levelAt: null,
+    term: 12,
+    erp: true,
+    monthsConnected: 24,
+    coverage: 0.92,
+    ...entry,
+  }
+}
+
+/** Legal entities of the two large groups, plus same-sector peers so the
+ *  comparison table has something to rank against. */
+const subsidiaries: Company[] = [
+  stub({
+    id: 'iberica-mayor',
+    name: 'Ibérica Mayorista',
+    sector: 'Distribución alimentaria',
+    group: 'Ibérica Retail',
+    size: 'grande',
+    score: 76,
+    band: 'sano',
+    decision: 'prestar',
+    shape: 'estable',
+    delta3: 0,
+    delta12: -2,
+    history: [
+      80, 81, 80, 79, 80, 81, 79, 80, 78, 79, 78, 77, 78, 77, 78, 77, 76, 77,
+      76, 77, 76, 76, 75, 76,
+    ],
+    forecast: [76, 76, 77],
+    headline: 'La hermana grande sigue cubriendo cinco meses',
+    why: 'Misma red, otro ritmo: cobra a 41 días y no ha estirado a los proveedores. La caja aguanta el trimestre sin tocar la línea.',
+    action: 'Presta. No arrastra el deterioro de Distribuciones Ibérica.',
+    runway: { now: 5.1, prev: 5.3 },
+    dso: { now: 41, prev: 40 },
+    dpo: { now: 48, prev: 47 },
+    rate: '5,4',
+    amount: 35000,
+  }),
+  stub({
+    id: 'iberica-prox',
+    name: 'Ibérica Proximidad',
+    sector: 'Distribución alimentaria',
+    group: 'Ibérica Retail',
+    size: 'mediana',
+    score: 81,
+    band: 'sano',
+    decision: 'prestar',
+    shape: 'mejora',
+    delta3: 1,
+    delta12: 3,
+    history: [
+      74, 75, 74, 76, 75, 76, 77, 76, 77, 78, 77, 78, 79, 78, 79, 80, 79, 80,
+      80, 81, 80, 81, 81, 81,
+    ],
+    forecast: [82, 82, 83],
+    headline: 'Tiendas de barrio con caja sobrada',
+    why: 'Cobra a 33 días y el dinero de la cuenta cubre más de seis meses. Es el colchón interno del grupo.',
+    action: 'Presta y ofrécele ampliar el límite.',
+    runway: { now: 6.4, prev: 5.9 },
+    dso: { now: 33, prev: 35 },
+    dpo: { now: 40, prev: 41 },
+    rate: '4,8',
+    amount: 22000,
+  }),
+  stub({
+    id: 'iberica-frio',
+    name: 'Frío Ibérica',
+    sector: 'Cadena de frío',
+    group: 'Ibérica Retail',
+    size: 'mediana',
+    score: 71,
+    band: 'sano',
+    decision: 'prestar',
+    shape: 'estable',
+    delta3: 0,
+    delta12: -1,
+    history: [
+      77, 76, 77, 75, 76, 74, 75, 73, 74, 72, 73, 72, 71, 72, 70, 71, 72, 70,
+      71, 72, 71, 70, 71, 71,
+    ],
+    forecast: [71, 71, 72],
+    headline: 'Misma caja, otro oficio',
+    why: 'Almacena y reparte frío para el grupo. Los plazos no se han movido; el score plano es el de un servicio cautivo.',
+    action: 'Presta. El riesgo está en la hermana de distribución, no aquí.',
+    runway: { now: 4.6, prev: 4.7 },
+    dso: { now: 40, prev: 39 },
+    dpo: { now: 45, prev: 44 },
+    rate: '5,7',
+    amount: 18000,
+  }),
+  stub({
+    id: 'cashfood',
+    name: 'Cashfood Norte',
+    sector: 'Distribución alimentaria',
+    group: 'Cashfood',
+    size: 'grande',
+    score: 79,
+    band: 'sano',
+    decision: 'prestar',
+    shape: 'mejora',
+    delta3: 1,
+    delta12: 2,
+    history: [
+      73, 74, 73, 75, 74, 76, 75, 76, 77, 76, 77, 78, 77, 78, 79, 78, 78, 79,
+      78, 79, 78, 79, 79, 79,
+    ],
+    forecast: [80, 80, 81],
+    headline: 'La grande del sector que sí cubre el trimestre',
+    why: 'Cobra a 38 días y paga a 44. El dinero en la cuenta cubre casi seis meses, un mes más que la mediana de las grandes.',
+    action: 'Presta el importe completo.',
+    runway: { now: 5.8, prev: 5.4 },
+    dso: { now: 38, prev: 39 },
+    dpo: { now: 44, prev: 44 },
+    rate: '5,1',
+    amount: 40000,
+    term: 18,
+  }),
+  stub({
+    id: 'ebro',
+    name: 'Mercantil del Ebro',
+    sector: 'Distribución alimentaria',
+    group: 'Grupo Ebro',
+    size: 'grande',
+    score: 64,
+    band: 'vigilar',
+    decision: 'vigilar',
+    shape: 'deterioro',
+    delta3: -1,
+    delta12: -8,
+    history: [
+      78, 77, 78, 76, 77, 75, 76, 74, 75, 73, 74, 72, 71, 70, 69, 68, 67, 66,
+      66, 65, 65, 64, 64, 64,
+    ],
+    forecast: [63, 62, 61],
+    headline: 'Misma caída lenta que Ibérica, un año antes',
+    why: 'La caja cubre 3,2 meses y tarda 52 días en cobrar. El deterioro lleva doce meses; no es un mes suelto.',
+    action: 'No amplíes. Renueva corto y pide facturas.',
+    runway: { now: 3.2, prev: 4.8 },
+    dso: { now: 52, prev: 46 },
+    dpo: { now: 58, prev: 49 },
+    rate: '7,8',
+    amount: 20000,
+  }),
+  stub({
+    id: 'supervalle',
+    name: 'SuperValle',
+    sector: 'Distribución alimentaria',
+    group: 'SuperValle SL',
+    size: 'pequeña',
+    score: 88,
+    band: 'sano',
+    decision: 'prestar',
+    shape: 'estable',
+    delta3: 1,
+    delta12: 1,
+    history: [
+      84, 85, 84, 86, 85, 86, 87, 86, 87, 86, 87, 88, 87, 88, 87, 88, 87, 88,
+      87, 88, 88, 87, 88, 88,
+    ],
+    forecast: [88, 88, 89],
+    headline: 'Pequeña, local y sin un mes en negativo',
+    why: 'Cobra a 28 días porque vende al contado en tres tiendas. Compararla con una grande del sector distorsiona la caja.',
+    action: 'Presta. El tamaño no es el riesgo.',
+    runway: { now: 7.2, prev: 6.9 },
+    dso: { now: 28, prev: 29 },
+    dpo: { now: 36, prev: 35 },
+    rate: '4,7',
+    amount: 12000,
+  }),
+  stub({
+    id: 'atlas-log',
+    name: 'Atlas Logística',
+    sector: 'Transporte y logística',
+    group: 'Atlas Industrial',
+    size: 'grande',
+    score: 70,
+    band: 'sano',
+    decision: 'prestar',
+    shape: 'estable',
+    delta3: 0,
+    delta12: -3,
+    history: [
+      68, 69, 68, 70, 69, 71, 70, 71, 72, 71, 72, 73, 72, 73, 72, 71, 72, 71,
+      70, 71, 70, 70, 70, 70,
+    ],
+    forecast: [70, 71, 71],
+    headline: 'Flota del grupo, score plano',
+    why: 'Mueve la mercancía de Atlas Frío. Los plazos no cambian; el score bajo es tamaño de flota, no tensión de caja.',
+    action: 'Presta. Revisa junto a Atlas Frío, no aparte.',
+    runway: { now: 4.4, prev: 4.6 },
+    dso: { now: 42, prev: 41 },
+    dpo: { now: 47, prev: 46 },
+    rate: '6,0',
+    amount: 30000,
+  }),
+  stub({
+    id: 'atlas-comp',
+    name: 'Atlas Componentes',
+    sector: 'Metalurgia industrial',
+    group: 'Atlas Industrial',
+    size: 'mediana',
+    score: 60,
+    band: 'vigilar',
+    decision: 'vigilar',
+    shape: 'deterioro',
+    delta3: 1,
+    delta12: 0,
+    history: [
+      66, 65, 66, 64, 65, 63, 64, 62, 63, 61, 62, 60, 61, 59, 60, 58, 59, 61,
+      60, 59, 61, 60, 59, 60,
+    ],
+    forecast: [60, 61, 61],
+    headline: 'La pieza débil del grupo industrial',
+    why: 'Cobra a 58 días y la caja cubre menos de tres meses. El grupo aguanta; esta sociedad, no.',
+    action: 'Vigila. No prestes sin la garantía del grupo.',
+    runway: { now: 2.7, prev: 3.1 },
+    dso: { now: 58, prev: 55 },
+    dpo: { now: 62, prev: 57 },
+    rate: '7,9',
+    amount: 16000,
+    term: 9,
+  }),
+]
+
+export const companies: Company[] = [...coreCompanies, ...subsidiaries]
+
 export const companyById = (id: string) =>
   companies.find((company) => company.id === id)
 
 export const leadCompany = companies.find((c) => c.id === 'iberica')!
+
+export const allSectors = [...new Set(companies.map((company) => company.sector))].sort((a, b) =>
+  a.localeCompare(b, 'es'),
+)
+
+export const allGroups = [...new Set(companies.map((company) => company.group))].sort((a, b) =>
+  a.localeCompare(b, 'es'),
+)
+
+export const medianOf = (values: number[]) => {
+  if (!values.length) return null
+  const ranked = [...values].sort((a, b) => a - b)
+  const mid = Math.floor(ranked.length / 2)
+  return ranked.length % 2 ? ranked[mid]! : (ranked[mid - 1]! + ranked[mid]!) / 2
+}
+
+export const sectorPeers = (
+  company: Company,
+  size: SizeBand | 'todas' = 'todas',
+  group: string | 'todos' = 'todos',
+) =>
+  companies
+    .filter((peer) => peer.sector === company.sector)
+    .filter((peer) => size === 'todas' || peer.size === size)
+    .filter((peer) => group === 'todos' || peer.group === group)
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, 'es'))
+
+export const groupsInSector = (company: Company) =>
+  [...new Set(
+    companies
+      .filter((peer) => peer.sector === company.sector)
+      .map((peer) => peer.group),
+  )].sort((a, b) => a.localeCompare(b, 'es'))
+
+/** La mediana mes a mes del corte. Es lo único del sector que la empresa llega
+ *  a ver: un agregado, nunca la serie de una competidora identificable. */
+export const sectorMedianSeries = (peers: Company[]) => {
+  const column = (rows: number[][], index: number) =>
+    medianOf(rows.map((row) => row[index]).filter((v): v is number => v != null))
+
+  const series = (pick: (peer: Company) => number[]) => {
+    const rows = peers.map(pick)
+    const length = Math.max(0, ...rows.map((row) => row.length))
+    return Array.from({ length }, (_, index) => column(rows, index))
+      .filter((value): value is number => value != null)
+      .map((value) => Math.round(value * 10) / 10)
+  }
+
+  return {
+    history: series((peer) => peer.history),
+    forecast: series((peer) => peer.forecast),
+  }
+}
+
+export const sectorBenchmarks = (peers: Company[]) => ({
+  score: medianOf(peers.map((peer) => peer.score)),
+  delta3: medianOf(peers.map((peer) => peer.delta3)),
+  runway: medianOf(peers.map((peer) => peer.runway.now)),
+  dso: medianOf(peers.filter((peer) => peer.dso.now > 0).map((peer) => peer.dso.now)),
+  dpo: medianOf(peers.filter((peer) => peer.dpo.now > 0).map((peer) => peer.dpo.now)),
+})
+
+export const formatMonths = (value: number) =>
+  value.toLocaleString('es-ES', { maximumFractionDigits: 1 })
+
+/* La mediana de un número par de empresas cae en medio día, así que el plazo
+ * pasa por el formateador igual que los meses de caja. */
+export const formatDays = (value: number) =>
+  value > 0 ? value.toLocaleString('es-ES', { maximumFractionDigits: 1 }) : '—'
+
+export const vsMedian = (value: number, median: number | null, invert = false) => {
+  if (median == null) return 'flat' as const
+  const delta = value - median
+  if (Math.abs(delta) < 0.45) return 'flat' as const
+  const better = invert ? delta < 0 : delta > 0
+  return better ? ('up' as const) : ('down' as const)
+}
 
 /** Two companies that drop the same four points in a month. The product calls
  *  one a bump and the other a structural fall, and says why. */
@@ -577,7 +916,7 @@ export const dipVsFall = {
 }
 
 export interface Perspective {
-  id: 'embat' | 'empresa' | 'banco'
+  id: 'embat' | 'empresa'
   name: string
   person: string
   initials: string
@@ -586,14 +925,6 @@ export interface Perspective {
 }
 
 export const perspectives: Perspective[] = [
-  {
-    id: 'banco',
-    name: 'Banco',
-    person: 'Banco Meridiano',
-    initials: 'BM',
-    job: 'Decidir a quién presto los próximos 100.000 €',
-    reads: 'Mira primero el dinero que queda en la cuenta y cuánto dura.',
-  },
   {
     id: 'empresa',
     name: 'Empresa',
@@ -629,8 +960,8 @@ export interface Offer {
 
 export const initialOffers: Offer[] = [
   {
-    id: 'meridiano',
-    bank: 'Banco Meridiano',
+    id: 'norte',
+    bank: 'Financiador Norte',
     amount: 20000,
     rate: '7,1',
     months: 12,
@@ -694,7 +1025,7 @@ export const compactEuros = (value: number) => {
 }
 
 export const signed = (value: number) =>
-  `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(value)}`
+  `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(value).toLocaleString('es-ES', { maximumFractionDigits: 1 })}`
 
 export const leadMonths = (company: Company) =>
   company.detectedAt !== null && company.levelAt !== null

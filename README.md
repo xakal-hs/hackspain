@@ -23,15 +23,18 @@ estructural, qué señal se movió y cuándo, y con cuántos meses de antelació
 
 El marco con el que respondemos está en [`context/scoring.md`](context/scoring.md): el score se
 diseña como un prestamista con 100.000 € que decidir. La criticidad no es uniforme (una caja que se
-evapora pesa mucho más que un DSO que se mueve un poco), y el resultado no es solo un número: para
-cada empresa y mes hay nivel, trayectoria, explicación en lenguaje llano, bache frente a caída y una
-acción (prestar / vigilar / no prestar).
+evapora pesa mucho más que un DSO que se mueve un poco, y la liquidez no pesa igual en todos los
+sectores), y el resultado no es solo un número: para cada empresa y mes hay nivel, trayectoria,
+explicación en lenguaje llano, bache frente a caída, el coste de no hacer nada y una mesa de
+opciones. Cómo lo enseña Embat está en [`context/voz_embat.md`](context/voz_embat.md). Cómo se mueve
+el dinero sin licencia propia y cómo se parte el préstamo por plazo está en
+[`context/voz_capchase.md`](context/voz_capchase.md).
 
 ## Estructura
 
 | Ruta | Qué contiene |
 |---|---|
-| [`context/`](context) | Enunciado del reto (`challenge.md`) y el marco de scoring del equipo (`scoring.md`), cada uno con su versión HTML |
+| [`context/`](context) | Enunciado, marco de scoring, monetización, oportunidades, voz de producto de Embat, voz de crédito de Capchase y auditoría comercial para el jurado, con versiones HTML autocontenidas |
 | [`data/`](data) | Los CSV originales del reto y su diccionario. **No se modifican nunca.** `invoices.csv` y `transactions.csv` van por Git LFS |
 | [`src/mapping/`](src/mapping) | Capa de mapeo: vistas DuckDB que corrigen la suciedad al leer (países no ISO, ERP en dos vocabularios, deuda con signo invertido, saldos absurdos…). El inventario de fallos y su regla está en [`ISSUES.md`](src/mapping/ISSUES.md) |
 | [`analysis/`](analysis) | Exploración del dataset. Informes autocontenidos que se abren sin servidor (`report.html`, `features_analisis_automatico.html`, `features_challenge.html`), la reconstrucción del histórico de caja (`cash_history.py`) y un explorador interactivo de esa caja en Streamlit (`app.py`) |
@@ -52,7 +55,7 @@ Dentro de `research/`:
 | `app/static/index.html` | La SPA de un solo fichero. Su lenguaje visual está fijado en [`app/DESIGN.md`](research/app/DESIGN.md) |
 | `src/evaluate.py`, `src/anticipation.py` | Validación GroupKFold por `group_id` × 3 cortes y medición de antelación fuera de fold |
 | `src/predict_submission.py` | Scoring del test oculto de 60-80 empresas nunca vistas |
-| `DECISIONS.md`, `METRICS.md`, `reports/` | Las 27 decisiones con su porqué y su evidencia, la definición de cada métrica y los resultados por versión |
+| `DECISIONS.md`, `METRICS.md`, `reports/` | Las 28 decisiones con su porqué y su evidencia, la definición de cada métrica y los resultados por versión |
 | `brainstorm/` | Propuestas de features de cuatro modelos sobre el mismo brief, con su [síntesis](research/brainstorm/SINTESIS.md) |
 
 ## Arranque rápido
@@ -100,8 +103,9 @@ score, así que se ejecuta desde el entorno de `research/`:
 cd research && uv run python ../analysis/challenge_features.py   # -> analysis/features_challenge.html
 ```
 
-El frontend moderno se ejecuta por separado y puede usar datos de desarrollo o conectarse a la API
-FastAPI mediante `XRAY_API_BASE`:
+El frontend moderno se ejecuta por separado. Sus dashboards son una narrativa de producto con
+fixtures ficticios; `XRAY_API_BASE` solo conecta actualmente el adaptador de `/api/companies` y no
+convierte el resto de la experiencia en un flujo real de backend:
 
 ```bash
 cd frontend
@@ -121,13 +125,23 @@ PYTHONPATH=src .venv/bin/python -m mapping.audit
 
 ## Dónde está el resultado
 
-La versión actual (v6, validación fuera de grupo, escala publicada 0-100) detecta caídas de ≥15
-puntos a 3 meses con un AUC de 0,742 (0,703 el AR(1) de referencia) y de 0,574 en el quintil de
-empresas que aún parecen sanas, donde el AR(1) no distingue nada (0,493). De 229 caídas
-estructurales, el 48 % tuvo alerta antes de cruzar a riesgo, con una antelación mediana de 3 meses.
-La tabla completa, las referencias y lo que **no** está resuelto (sobre todo bache frente a caída,
-con un AUC de 0,53) están en el [README de `research/`](research/README.md) y en
-[`research/METRICS.md`](research/METRICS.md).
+La versión actual es **v7**. En validación fuera de grupo detecta caídas de ≥15 puntos a 3 meses
+con AUC **0,725** (0,693 el AR(1)) y subidas con AUC **0,730** (0,692 el AR(1)). En el quintil de
+empresas que aún parecen sanas, el AUC de deterioro es **0,604** frente a 0,538. El nivel discrimina
+con AUC 0,657 la tensión de liquidez a seis meses. La anticipación longitudinal todavía procede de
+la evaluación v5/v6: el 48 % de 229 caídas estructurales tuvo una alerta previa, con mediana de tres
+meses. Bache frente a caída sigue sin resolverse (AUC 0,53) y el 23 % de las alertas parpadea.
+
+La verdad comercial está en [`context/monetizacion.md`](context/monetizacion.md): con importes
+convertidos y caja reconstruida, el escenario central es **4,2 M€/año** (rango 3,0–5,4), sobre
+**344 M€ de excedente en 370 empresas**. Son escenarios sobre datos sintéticos, no una previsión de
+ventas ni evidencia de disposición a pagar. Cómo se enseña el coste (dinero parado, divisa) y cómo
+se ofrece deuda está en [`context/voz_embat.md`](context/voz_embat.md). Licencia de partner, rejilla
+de plazos y retención están en [`context/voz_capchase.md`](context/voz_capchase.md). La tesis y los
+puntos ciegos priorizados para el jurado están en [`context/auditoria_comercial.md`](context/auditoria_comercial.md).
+
+La tabla completa, las referencias y las limitaciones están en el
+[README de `research/`](research/README.md) y en [`research/METRICS.md`](research/METRICS.md).
 
 Cada elección del sistema —por qué el score es por empresa y no por grupo, por qué los pesos salen
 de una logística con signo restringido, por qué el suavizado es un EWMA con α = 0,5— está registrada

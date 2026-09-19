@@ -1,6 +1,6 @@
 # Cómo pensar el score
 
-**Interpretación operativa del equipo.** No sustituye el [enunciado](challenge.md): lo traduce a una forma de decidir, con el mismo criterio que usaría alguien que presta su propio dinero.
+**Interpretación operativa del equipo.** No sustituye el [enunciado](challenge.md): lo traduce a una forma de decidir, con el mismo criterio que usaría alguien que presta su propio dinero. Cómo lo enseña una PM de Embat está en [voz de producto](voz_embat.md). Cómo se mueve el dinero y se diseña el préstamo sin ser banco, en [voz de Capchase](voz_capchase.md).
 
 El leaderboard pide un número. El producto no puede acabarse ahí.
 
@@ -17,7 +17,7 @@ Eso es lo que hacen los bancos. El scoring de un consumidor y el de una empresa 
 | Que pague cada vez más tarde a quien le fía | Medio de pago / DPO | Facturas recibidas, pagos a proveedores |
 | Que el sueldo se corte o sea irregular | Cobros que caen o se vuelven erráticos | `transactions` (`collection`, `salary`) |
 | Que viva al límite de la tarjeta | Líneas de crédito agotadas | `debt_products.outstanding` / `granted` |
-| Que pida un préstamo para tapar el agujero | Deuda nueva mientras la caja cae | Alta de deuda + trayectoria de caja |
+| Que pida un préstamo para tapar el agujero | Deuda nueva **mientras la caja cae** | Alta de deuda + trayectoria de caja |
 | Que mienta o no se deje ver las cuentas | Cobertura / observabilidad | ERP ausente, conciliación, huecos |
 
 Las palabras raras (DSO, DPO, medio de cobro, medio de pago) hay que poder llevarlas **a lenguaje de consumidor**. Si el jurado o Embat no pueden repetir la explicación en una frase, el score no se entiende.
@@ -38,6 +38,18 @@ Ese matiz es el que un prestamista siente en la tripa y el que un modelo plano (
 
 La trayectoria importa más que la foto: una empresa sana que empieza a vaciar la cuenta es peor apuesta que una mediocre que está recapitalizándose. Eso es el ejemplo Northbrook (45 → 65) frente a Velasco (82 → 68), leído con criticidad y no solo con el último número.
 
+## La criticidad de la liquidez también cambia entre empresas
+
+No todas las señales pesan igual. Tampoco todas las empresas viven igual de la caja. Hay sectores que **viven de la liquidez**: si se seca, muere la empresa. En otros, la tesorería no se mira con esa atención. El mismo runway de pocas semanas no significa lo mismo en un mayorista que cobra a 90 días y en un negocio con cobros recurrentes.
+
+El score no puede tratar un umbral global de caja como criticidad universal. Hay que modular por régimen (sector inferido o huella operativa), no solo por el percentil de `runway`.
+
+Fuente: [voz de producto de Embat](voz_embat.md). Un cofundador de Capchase añade el otro eje: el **producto de préstamo cambia con el plazo** (días / 6 meses / 12 meses / largo) y hay que cruzarlo con el sector. Inmediato, corto y medio no son el mismo instrumento. Fuente: [voz de Capchase](voz_capchase.md).
+
+Pedir crédito **con caja holgada** no es el mismo hecho que pedirla mientras se evapora. Algunas empresas piden prestado aunque tengan dinero, porque tiene sentido bancario (coste de capital, colateral). Deterioro es deuda nueva *y* caja que se acaba; no el alta de deuda sola.
+
+La solvencia, además, es de **planificación y de previsiones**. No hace falta conciliación perfecta para saber si hay colchón, exceso o agujero. La conciliación sigue siendo cobertura, no salud.
+
 ## El output no es solo un número
 
 Hace falta un número para el leaderboard y para ordenar. Eso no implica que el problema se acabe en un ranking de A contra B. Un prestamista no se queda en “72”: quiere saber **por qué**, **con qué gravedad** y **qué haría**.
@@ -49,8 +61,9 @@ Para cada empresa y mes, el sistema debería poder devolver, además del score:
 3. **Por qué, en lenguaje llano** — “se le está acabando el dinero de la cuenta”, no solo `Δcash_p10`.
 4. **Bache o caída** — si el golpe es puntual o estructural.
 5. **Qué haría un prestamista** — prestar / vigilar / no prestar; o, en el producto, avisar / recortar límite / acelerar cobros.
+6. **Coste de no hacer nada** — el dinero parado y la divisa sin convertir son costes ocultos; hay que mostrarlos en la ficha, no asumir que el CFO ya los siente.
 
-Eso encaja con el enunciado: explicación obligatoria, producto encima del score, y la preferencia de Embat por un modelo sencillo que **sirva para decidir** frente a uno sofisticado que se queda en el número.
+Eso encaja con el enunciado: explicación obligatoria, producto encima del score, y la preferencia de Embat por un modelo sencillo que **sirva para decidir** frente a uno sofisticado que se queda en el número. El exceso de caja y el FX no se “descubren” con un agente: se enseñan en la aplicación porque el cliente no los toma como problema real.
 
 ## El dato que el banco no tiene
 
@@ -74,9 +87,13 @@ El leaderboard puede pedir un número. El producto no: hay que dejar claro **par
 ## Cómo usarlo al construir
 
 - Pesar primero la **velocidad de quema de caja disponible**; después cobros, pagos y deuda.
+- Modular esa criticidad por régimen: hay empresas que mueren si se seca la liquidez y otras que no la miran igual.
 - Explicar cada movimiento con la analogía consumidor → empresa.
-- No imputar salud a partir de huecos de observabilidad.
+- No imputar salud a partir de huecos de observabilidad, ni esperar conciliación perfecta para emitir colchón o solvencia.
+- Enseñar el coste oculto del dinero parado y de la divisa antes de empujar un SKU. El agente no se usa.
+- El upsell es una **mesa de opciones** que encajan, no un producto único. La deuda, una rejilla **sector × tenor** (días / 6 m / 12 m / largo), no una línea.
+- No tratar el alta de deuda con caja holgada como deterioro automático; puede ser estructura de capital.
 - Diseñar la demo para que alguien con 100.000 € que prestar sepa, en un vistazo, a quién se los daría y por qué no al otro.
-- Llevar el pitch a bancos: Embat tiene el rastro que ellos no ven.
+- Llevar el pitch a bancos: Embat tiene el rastro que ellos no ven. El riel se ejecuta con un **partner que ya tiene licencia**; no hace falta que Embat sea banco.
 - No fijar una sola métrica. Condicionarla a la oferta y al rol de quien mira.
-- La fila del CFO — qué se le vende y cuánto vale sobre esta cartera — está en [Monetización](monetizacion.md).
+- La fila del CFO — qué se le vende y cuánto vale sobre esta cartera — está en [Monetización](monetizacion.md). Cómo se enseña el coste y la mesa de productos, en [voz de Embat](voz_embat.md). Licencia, plazos y retención, en [voz de Capchase](voz_capchase.md).

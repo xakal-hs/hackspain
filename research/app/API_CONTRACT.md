@@ -109,6 +109,53 @@ Respuesta:
                                 "text": "string", "score": 62.0, "delta3_q50": -9.1}]}
 ```
 
+## GET /api/events
+
+Eventos v2 (`src/events_v2.py`, exportados por `src/export_events.py`). Alimenta la vista «Eventos».
+
+Parámetros: `?company_id=COMP_0001` devuelve toda la historia de esa empresa (`scope: "empresa"`);
+`?month=2025-11` fuerza un mes; sin parámetros, el último mes completo (`scope: "mes"`).
+
+«Último mes completo» **no** es el último del panel: las etiquetas miran 6 meses hacia delante
+(E1 necesita 3 más para confirmarse), así que los últimos meses están censurados y sólo tendrían
+baches. `month` es el último mes en que las siete señales son observables; `last_observable` da el
+corte de cada una y `last_month_panel` el final del panel.
+
+```jsonc
+{
+  "month": "2025-11", "month_label": "noviembre de 2025",
+  "scope": "mes" | "empresa", "company_id": null | "COMP_0001",
+  "summary": {"E1_clean": 20, "E2_strict": 62, "E3": 71, "E4": 38, "E5_bache": 166,
+              "E1_group_funded": 0, "E1_onset": 2, "empresas": 300, "eventos": 359},  // del mes de referencia
+  "rates_6m": {"E1_clean": {"n": 10278, "positivos": 171, "tasa": 1.66}},  // sobre filas no censuradas, toda la historia
+  "last_observable": {"E1_clean": "2025-11", "E2_strict": "2026-02"},
+  "last_month_panel": "2026-07",
+  "censura": "string",
+  "counts": {"E1_clean": 20, "...": 0},        // eventos devueltos en esta respuesta, por tipo
+  "total": 359,
+  "catalog": [{
+    "type": "E1_clean", "code": "E1", "label": "Tensión de caja",
+    "severity": "riesgo" | "mejora" | "ruido",
+    "horizon": "próximos 6 meses" | "este mes",
+    "short": "Se queda sin colchón de caja",
+    "desc": "string", "why": "string", "excl": "string"     // divulgativo, en español
+  }],
+  "events": [{
+    "company_id": "COMP_0009", "month": "2025-11", "type": "E1_clean",
+    "text": "COMP_0009 se quedó sin colchón de caja",
+    "month_label": "noviembre de 2025",
+    "severity": "riesgo", "label": "Tensión de caja"
+  }]
+}
+```
+
+Tipos: `E1_clean` (tensión de caja, sin cash pooling), `E2_strict` (impago de obligación fija),
+`E3` (caída de cobros), `E4` (expansión), `E5_bache` (bache pasajero),
+`E1_group_funded` (tensión que paga el grupo, contexto) y `E1_onset` (mes de arranque de la tensión).
+
+Errores: `503` si faltan `data/events_export.parquet` o `reports/eventos_export.json`
+(hay que ejecutar `uv run python src/export_events.py`).
+
 ## GET /api/metrics
 ```jsonc
 {"iterations": [{"tag": "v1", "description": "string", "metrics": {"mae_h3": 6.4, "...": 0}}],

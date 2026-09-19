@@ -394,35 +394,92 @@ table {
   color: var(--text-dim);
 }
 
-/* Theme control: a two-position segmented switch. Which half reads as active is
-   decided by the root attribute, so it is correct before any script runs. */
+/* Theme control: one switch, not two options, so a click anywhere flips it.
+   Which side reads as active is decided by the root attribute, so it is correct
+   before any script runs — and since transitions never fire on first paint, the
+   thumb does not slide in on load, only when the theme actually changes. */
 .theme-switch {
+  /* Estrecho, no bajo: en la fila de la marca el ancho es lo que escasea, y
+     bajar de 30px empezaría a castigar el área de pulsación. Las dos medidas
+     viven aquí porque el pulgar y su recorrido se derivan de ellas. */
+  --sw-w: 32px;
+  --sw-h: 30px;
+  --sw-gap: 2px;
+
+  position: relative;
   display: inline-flex;
   padding: 3px;
-  gap: 2px;
+  gap: var(--sw-gap);
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
   background: var(--panel-sunken);
+  /* Los hijos no capturan el clic: toda la pastilla es un solo destino. */
+  isolation: isolate;
 }
 
-.theme-switch__opt {
-  padding: 5px 13px;
+.theme-switch > * {
+  pointer-events: none;
+}
+
+.theme-switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: var(--sw-w);
+  height: var(--sw-h);
   border-radius: var(--r-pill);
-  font-size: var(--t-micro);
-  font-weight: 500;
-  color: var(--text-dim);
-  transition: color 0.12s var(--ease);
+  background: var(--panel-raised);
+  box-shadow: var(--sheen);
+  transition: transform 0.32s var(--sw-ease);
 }
 
-.theme-switch__opt:hover {
+:root[data-theme='dark'] .theme-switch__thumb {
+  transform: translateX(calc(var(--sw-w) + var(--sw-gap)));
+}
+
+/* Sun and moon rather than words: the control sits in a rail where every other
+   line is a destination, and two glyphs read faster than two labels. */
+.theme-switch__opt {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--sw-w);
+  height: var(--sw-h);
+  color: var(--text-dim);
+  transition: color 0.22s var(--ease);
+}
+
+/* El glifo que se apaga se encoge y gira un poco, como si el sol se
+   escondiera o la luna se recostara; el que entra se endereza. */
+.theme-switch__opt[data-value='light'] svg {
+  transform: scale(0.84) rotate(-40deg);
+}
+
+.theme-switch__opt[data-value='dark'] svg {
+  transform: scale(0.84) rotate(28deg);
+}
+
+.theme-switch__opt svg {
+  transition:
+    transform 0.32s var(--sw-ease),
+    opacity 0.22s var(--ease);
+  opacity: 0.55;
+}
+
+.theme-switch:hover .theme-switch__opt {
   color: var(--text-muted);
 }
 
 :root[data-theme='light'] .theme-switch__opt[data-value='light'],
 :root[data-theme='dark'] .theme-switch__opt[data-value='dark'] {
-  background: var(--panel-raised);
   color: var(--text);
-  box-shadow: var(--sheen);
+}
+
+:root[data-theme='light'] .theme-switch__opt[data-value='light'] svg,
+:root[data-theme='dark'] .theme-switch__opt[data-value='dark'] svg {
+  transform: scale(1) rotate(0deg);
+  opacity: 1;
 }
 
 /* ===========================================================================
@@ -713,6 +770,24 @@ table {
 .traj__plot {
   position: relative;
   height: clamp(180px, 18vw, 250px);
+  /* El plot entero es la zona de lectura: el puntero no tiene que acertarle a
+     la línea, le basta con estar sobre el mes. */
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+
+.traj__plot:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.traj__cursor {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px solid var(--text-muted);
+  opacity: 0.55;
 }
 
 .traj__svg {
@@ -744,6 +819,17 @@ table {
   box-shadow: 0 0 0 3px var(--panel);
 }
 
+/* El punto que sigue al puntero crece un poco sobre el que marca "hoy". */
+.traj__head.is-live {
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+}
+
+.traj__head[data-ahead] {
+  background: var(--ahead);
+}
+
 .traj__flag {
   position: absolute;
   bottom: 0;
@@ -751,6 +837,108 @@ table {
   font-size: var(--t-micro);
   color: var(--ahead-ink);
   white-space: nowrap;
+}
+
+/* --- The reading that follows the pointer, shared by every chart --- */
+
+.ctip {
+  position: absolute;
+  top: 10px;
+  z-index: 2;
+  min-width: 9.5rem;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-inner);
+  background: var(--panel);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
+.ctip[data-vertical='bottom'] {
+  top: auto;
+  bottom: 10px;
+}
+
+.ctip[data-align='center'] {
+  transform: translateX(-50%);
+}
+
+.ctip[data-align='end'] {
+  transform: translateX(-100%);
+}
+
+.ctip__title {
+  margin-bottom: 5px;
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.ctip__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--t-micro);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.ctip__row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ctip__row b {
+  margin-left: auto;
+  font-family: var(--font-num);
+  font-size: var(--t-small);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.ctip__mark {
+  flex-shrink: 0;
+  width: 12px;
+  height: 0;
+  border-top: 2.5px solid currentColor;
+  border-radius: 2px;
+}
+
+.ctip__row[data-tone='live'] {
+  color: var(--live-ink);
+}
+
+.ctip__row[data-tone='muted'] {
+  color: var(--text-dim);
+}
+
+.ctip__row[data-tone='muted'] .ctip__mark {
+  border-top-style: dashed;
+}
+
+.ctip__row[data-tone='ahead'] {
+  color: var(--ahead-ink);
+}
+
+.ctip__row[data-tone='ahead'] .ctip__mark {
+  border-top-style: dashed;
+}
+
+.ctip__foot {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid var(--line);
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* El mock Centinela pinta sobre `--card`, no sobre `--panel`. */
+.centinela .ctip {
+  background: var(--card);
+  border-color: var(--border);
 }
 
 /* --- Weighted signal bars --- */
@@ -959,6 +1147,14 @@ table {
   border-right: 1px solid var(--line);
 }
 
+/* Igual que en la cabina: la marca a la izquierda y el tema al otro extremo. */
+.lp__rail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .lp__brand {
   display: flex;
   align-items: center;
@@ -1105,7 +1301,7 @@ table {
   color: var(--text-muted);
 }
 
-/* --- Three readings of one company --- */
+/* --- Two readings of one company --- */
 
 .reads {
   margin-top: 34px;

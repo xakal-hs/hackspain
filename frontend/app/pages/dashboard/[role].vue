@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { Check, Search } from '@lucide/vue'
 import {
-  companies,
-  companyById,
+  companies as demoCompanies,
   currentMonth,
   decisionLabel,
   euros,
@@ -13,10 +12,30 @@ import {
   perspectiveById,
   shapeLabel,
   signed,
+  sizeFilterLabel,
+  sizeFilters,
+  sizeLabel,
   compactEuros,
   type Offer,
   type PerspectiveId,
+  type SizeBand,
 } from '~/data/demo'
+import { portfolioCompanies } from '~/data/portfolio'
+import {
+  activeCompanies,
+  millions,
+  modelAllClear,
+  modelMetrics,
+  modelVersion,
+  opsAlerts,
+  opsPulse,
+  revenueAnnualised,
+  revenueGrowth,
+  revenueMonth,
+  revenueProducts,
+  share,
+  thousands,
+} from '~/data/internal'
 
 definePageMeta({
   middleware: [
@@ -31,14 +50,42 @@ definePageMeta({
 const route = useRoute()
 const role = computed(() => route.params.role as PerspectiveId)
 const profile = computed(() => perspectiveById(role.value)!)
+const portfolioQuery = usePortfolioQuery()
+const companies = computed(() => {
+  if (role.value !== 'embat') return demoCompanies
+  const rows = portfolioQuery.data.value?.companies || []
+  return rows.length ? portfolioCompanies(rows) : demoCompanies
+})
+const portfolioSource = computed(() => portfolioQuery.data.value?.source || 'demo')
 
-const allowed = ['resumen', 'cartera', 'senales', 'ofertas']
+/* Las pantallas de tesorería propia traen su propio encabezado y solo
+ * existen para la perspectiva empresa. */
+const treasurySections = ['score', 'colchon', 'divisa']
+
+/* Las vistas internas miran a Embat, no a una empresa de la cartera: revenue
+ * propio, alertas nominales del ecosistema y salud del modelo. Nunca se sirven
+ * a la perspectiva empresa. */
+const opsSections = ['monitor', 'revenue', 'modelo']
+
+const allowed = [
+  'resumen',
+  'cartera',
+  'senales',
+  'ofertas',
+  ...treasurySections,
+  ...opsSections,
+]
 const section = computed(() => {
   const requested = String(route.query.section || 'resumen')
   if (!allowed.includes(requested)) return 'resumen'
   if (requested === 'cartera' && role.value === 'empresa') return 'resumen'
+  if (treasurySections.includes(requested) && role.value !== 'empresa')
+    return 'resumen'
+  if (opsSections.includes(requested) && role.value !== 'embat') return 'resumen'
   return requested
 })
+
+const isTreasury = computed(() => treasurySections.includes(section.value))
 
 const sectionLabel = computed(
   () =>
@@ -47,31 +94,105 @@ const sectionLabel = computed(
       cartera: 'Cartera',
       senales: role.value === 'empresa' ? 'Mis señales' : 'Señales',
       ofertas: role.value === 'empresa' ? 'Mis ofertas' : 'Mercado',
+      score: 'X-Ray Score',
+      colchon: 'Colchón Dinámico',
+      divisa: 'Divisa Inteligente',
+      monitor: 'Monitor operativo',
+      revenue: 'Revenue por producto',
+      modelo: 'Métricas del modelo',
     })[section.value]!,
 )
 
 useHead(() => ({ title: `${sectionLabel.value} · ${profile.value.name} · X-Ray` }))
 
+/* The pane only settles after a tab change, never on the first paint. */
+const paneLive = ref(false)
+watch(section, () => {
+  paneLive.value = true
+})
+
 /* A company view always has a subject. For the company perspective it is fixed;
- * a lender picks it from the portfolio. */
+ * Embat picks it from the portfolio. */
 const pickedId = useState('wk-picked', () => 'iberica')
 const subject = computed(() =>
-  role.value === 'empresa' ? leadCompany : companyById(pickedId.value)!,
+  role.value === 'empresa'
+    ? leadCompany
+    : companies.value.find((company) => company.id === pickedId.value) || companies.value[0]!,
+)
+
+watch(
+  companies,
+  (rows) => {
+    if (role.value === 'embat' && !rows.some((company) => company.id === pickedId.value))
+      pickedId.value = rows[0]?.id || 'iberica'
+  },
+  { immediate: true },
 )
 
 const query = ref('')
+const sizeFilter = ref<SizeBand | 'todas'>('todas')
+const groupFilter = ref('')
+const sectorFilter = ref('')
+
+const groupOptions = computed(() => {
+  const names = companies.value
+    .filter((company) => sizeFilter.value === 'todas' || company.size === sizeFilter.value)
+    .filter((company) => !sectorFilter.value || company.sector === sectorFilter.value)
+    .map((company) => company.group)
+  return [...new Set(names)].sort((a, b) => a.localeCompare(b, 'es'))
+})
+
+const sectorOptions = computed(() => {
+  const names = companies.value
+    .filter((company) => sizeFilter.value === 'todas' || company.size === sizeFilter.value)
+    .filter((company) => !groupFilter.value || company.group === groupFilter.value)
+    .map((company) => company.sector)
+  return [...new Set(names)].sort((a, b) => a.localeCompare(b, 'es'))
+})
+
 const visible = computed(() => {
   const needle = query.value.toLocaleLowerCase('es').trim()
-  if (!needle) return companies
-  return companies.filter((company) =>
-    `${company.name} ${company.sector} ${company.group}`
-      .toLocaleLowerCase('es')
-      .includes(needle),
-  )
+  return companies.value.filter((company) => {
+    if (sizeFilter.value !== 'todas' && company.size !== sizeFilter.value) return false
+    if (groupFilter.value && company.group !== groupFilter.value) return false
+    if (sectorFilter.value && company.sector !== sectorFilter.value) return false
+    if (
+      needle &&
+      !`${company.name} ${company.sector} ${company.group}`
+        .toLocaleLowerCase('es')
+        .includes(needle)
+    ) {
+      return false
+    }
+    return true
+  })
+})
+
+const filtersOn = computed(
+  () =>
+    sizeFilter.value !== 'todas' ||
+    Boolean(groupFilter.value) ||
+    Boolean(sectorFilter.value) ||
+    Boolean(query.value.trim()),
+)
+
+function clearFilters() {
+  sizeFilter.value = 'todas'
+  groupFilter.value = ''
+  sectorFilter.value = ''
+  query.value = ''
+}
+
+watch(groupOptions, (options) => {
+  if (groupFilter.value && !options.includes(groupFilter.value)) groupFilter.value = ''
+})
+
+watch(sectorOptions, (options) => {
+  if (sectorFilter.value && !options.includes(sectorFilter.value)) sectorFilter.value = ''
 })
 
 const changed = computed(() =>
-  [...companies]
+  [...companies.value]
     .filter((company) => Math.abs(company.delta3) > 0)
     .sort((a, b) => Math.abs(b.delta3) - Math.abs(a.delta3)),
 )
@@ -79,29 +200,8 @@ const changed = computed(() =>
 const offers = useState<Offer[]>('wk-offers', () =>
   initialOffers.map((offer) => ({ ...offer })),
 )
-const sent = useState<string[]>('wk-sent', () => [])
 const notice = ref('')
 const confirming = ref<string | null>(null)
-
-function sendOffer(id: string) {
-  const company = companyById(id)!
-  if (sent.value.includes(id)) return
-  sent.value.push(id)
-  if (id === 'iberica')
-    offers.value.push({
-      id: 'meridiano-nueva',
-      bank: 'Banco Meridiano',
-      amount: company.amount,
-      rate: company.rate,
-      months: company.term,
-      note: 'Enviada desde la vista Banco durante esta demo.',
-      accepted: false,
-    })
-  notice.value =
-    id === 'iberica'
-      ? `Oferta enviada a ${company.name}. Cambia a la vista Empresa para verla llegar.`
-      : `Oferta enviada a ${company.name} dentro de la demo.`
-}
 
 function acceptOffer(id: string) {
   const offer = offers.value.find((item) => item.id === id)
@@ -115,7 +215,6 @@ watch(
   () => {
     notice.value = ''
     confirming.value = null
-    query.value = ''
   },
 )
 
@@ -137,17 +236,26 @@ const headline = computed(() =>
     resumen:
       role.value === 'empresa'
         ? 'Esto es lo que ve quien te va a prestar.'
-        : role.value === 'banco'
-          ? 'Prestar, vigilar o no prestar.'
-          : 'Quién se mueve y desde cuándo.',
-    cartera: 'Ocho empresas, ordenadas por lo que puedes perder.',
+        : 'Quién se mueve y desde cuándo.',
+    cartera: 'Las grandes, partidas por grupo y por sector.',
     senales: 'Qué se movió, cuánto pesó y cuándo lo dijimos.',
     ofertas:
       role.value === 'empresa'
         ? 'Tres ofertas sobre la misma empresa.'
         : 'Capital contra oportunidad.',
+    monitor: 'Todo el ecosistema, en una pantalla.',
+    revenue: 'De dónde sale el dinero de este mes.',
+    modelo: 'Si el modelo sigue acertando, y por cuánto.',
   })[section.value]!,
 )
+
+const leadProduct = computed(
+  () => [...revenueProducts].sort((a, b) => b.amount - a.amount)[0]!,
+)
+
+const openAlerts = computed(() => opsAlerts.filter((a) => a.tone === 'crimson'))
+
+const connected = activeCompanies.toLocaleString('es-ES')
 </script>
 
 <template>
@@ -160,11 +268,21 @@ const headline = computed(() =>
         <p class="wk__crumb">
           {{ profile.name }}<span aria-hidden="true">/</span>{{ sectionLabel }}
         </p>
-        <span class="chip chip--neutral">{{ currentMonth }}</span>
+        <div class="wk__source">
+          <span v-if="role === 'embat'" class="chip chip--neutral">
+            {{
+              portfolioSource === 'supabase'
+                ? 'Tesorería real · producto simulado'
+                : 'Datos de demostración'
+            }}
+          </span>
+          <span class="chip chip--neutral">{{ currentMonth }}</span>
+        </div>
       </header>
 
       <main id="main-content" class="wk__main" tabindex="-1">
-        <div class="wk__head">
+        <div :key="section" class="wk__pane" :class="{ 'is-live': paneLive }">
+        <div v-if="!isTreasury" class="wk__head">
           <h1>{{ headline }}</h1>
           <p v-if="role === 'empresa'">
             {{ leadCompany.name }} · {{ leadCompany.sector }}
@@ -245,6 +363,21 @@ const headline = computed(() =>
             <TrajectoryChart :company="subject" />
           </section>
 
+          <section class="panel span-12">
+            <header class="panel__bar">
+              <h2 class="panel__title">Frente al sector</h2>
+              <span class="chip chip--neutral">{{ subject.sector }}</span>
+            </header>
+            <!-- La empresa solo ve la mediana del sector; Embat, que ya opera
+                 la cartera entera, sigue viendo y pudiendo elegir cada peer. -->
+            <SectorCompare
+              :company="subject"
+              :selectable="role !== 'empresa'"
+              :anonymous="role === 'empresa'"
+              @select="pickedId = $event"
+            />
+          </section>
+
           <section class="panel span-7 changed">
             <header class="panel__bar">
               <h2 class="panel__title">Qué ha cambiado</h2>
@@ -285,9 +418,45 @@ const headline = computed(() =>
                 >Abrir la cartera completa</NuxtLink
               >
             </header>
+            <div class="filters">
+              <div class="filters__field">
+                <span id="overview-size">Tamaño</span>
+                <div class="seg" role="radiogroup" aria-labelledby="overview-size">
+                  <button
+                    v-for="size in sizeFilters"
+                    :key="size"
+                    type="button"
+                    role="radio"
+                    :aria-checked="sizeFilter === size"
+                    :class="{ 'is-on': sizeFilter === size }"
+                    @click="sizeFilter = size"
+                  >
+                    {{ sizeFilterLabel[size] }}
+                  </button>
+                </div>
+              </div>
+              <label class="filters__field">
+                Grupo
+                <select v-model="groupFilter" aria-label="Filtrar por grupo">
+                  <option value="">Todos los grupos</option>
+                  <option v-for="group in groupOptions" :key="group" :value="group">
+                    {{ group }}
+                  </option>
+                </select>
+              </label>
+              <label class="filters__field">
+                Sector
+                <select v-model="sectorFilter" aria-label="Filtrar por sector">
+                  <option value="">Todos los sectores</option>
+                  <option v-for="sector in sectorOptions" :key="sector" :value="sector">
+                    {{ sector }}
+                  </option>
+                </select>
+              </label>
+            </div>
             <CompanyTable
               compact
-              :companies="companies"
+              :companies="visible"
               :selected-id="subject.id"
               @select="pickedId = $event"
             />
@@ -323,18 +492,62 @@ const headline = computed(() =>
                 />
               </label>
             </header>
+            <div class="filters">
+              <div class="filters__field">
+                <span id="filter-size">Tamaño</span>
+                <div class="seg" role="radiogroup" aria-labelledby="filter-size">
+                  <button
+                    v-for="size in sizeFilters"
+                    :key="size"
+                    type="button"
+                    role="radio"
+                    :aria-checked="sizeFilter === size"
+                    :class="{ 'is-on': sizeFilter === size }"
+                    @click="sizeFilter = size"
+                  >
+                    {{ sizeFilterLabel[size] }}
+                  </button>
+                </div>
+              </div>
+              <label class="filters__field">
+                Grupo
+                <select v-model="groupFilter" aria-label="Filtrar por grupo">
+                  <option value="">Todos los grupos</option>
+                  <option v-for="group in groupOptions" :key="group" :value="group">
+                    {{ group }}
+                  </option>
+                </select>
+              </label>
+              <label class="filters__field">
+                Sector
+                <select v-model="sectorFilter" aria-label="Filtrar por sector">
+                  <option value="">Todos los sectores</option>
+                  <option v-for="sector in sectorOptions" :key="sector" :value="sector">
+                    {{ sector }}
+                  </option>
+                </select>
+              </label>
+              <button
+                v-if="filtersOn"
+                class="filters__clear"
+                type="button"
+                @click="clearFilters"
+              >
+                Quitar filtros
+              </button>
+            </div>
             <CompanyTable
               :companies="visible"
               :selected-id="subject.id"
               @select="pickedId = $event"
             />
             <p v-if="!visible.length" class="empty">
-              Ninguna empresa coincide con «{{ query }}». Prueba con el sector o
-              el nombre del grupo.
+              Ninguna empresa coincide con este corte. Prueba otro tamaño, grupo
+              o sector.
             </p>
             <footer class="list__foot">
               <span>{{ visible.length }} de {{ companies.length }} empresas</span>
-              <span>Los grupos se mantienen juntos al validar</span>
+              <span>Las grandes se parten por grupo; el sector, aparte</span>
             </footer>
           </section>
 
@@ -344,7 +557,8 @@ const headline = computed(() =>
               <DecisionTag :decision="subject.decision" />
             </header>
             <p class="sheet__sector">
-              {{ subject.sector }} · {{ subject.group }}
+              {{ subject.sector }} · {{ subject.group }} ·
+              {{ sizeLabel[subject.size] }}
             </p>
             <div class="sheet__read">
               <b>{{ subject.score }}</b>
@@ -378,21 +592,6 @@ const headline = computed(() =>
               </div>
             </dl>
             <p class="sheet__action">{{ subject.action }}</p>
-            <button
-              v-if="role === 'banco'"
-              class="btn btn--live"
-              type="button"
-              :disabled="sent.includes(subject.id) || subject.decision === 'no-prestar'"
-              @click="sendOffer(subject.id)"
-            >
-              {{
-                sent.includes(subject.id)
-                  ? 'Oferta enviada'
-                  : subject.decision === 'no-prestar'
-                    ? 'No recomendamos ofertar'
-                    : 'Enviar oferta'
-              }}
-            </button>
           </section>
         </div>
 
@@ -434,6 +633,165 @@ const headline = computed(() =>
             <span>Ordenado por cuánto se movió el score, en las dos direcciones</span>
           </footer>
         </section>
+
+        <!-- Tesorería propia: el mock trae su propio encabezado y su propio
+             layout, así que va sin la rejilla del panel. -->
+        <XRayScoreApp v-else-if="section === 'score'" :chrome="false" />
+        <ColchonDinamicoApp v-else-if="section === 'colchon'" :chrome="false" />
+        <DivisaInteligenteApp v-else-if="section === 'divisa'" :chrome="false" />
+
+        <!-- Monitor operativo: Embat mirándose a sí mismo. -->
+        <div v-else-if="section === 'monitor'" class="wk__grid">
+          <section class="panel span-8 pulse">
+            <header class="panel__bar">
+              <h2 class="panel__title">El pulso del mes</h2>
+              <span class="chip chip--neutral">Mes en curso</span>
+            </header>
+            <dl>
+              <div
+                v-for="reading in opsPulse"
+                :key="reading.id"
+                :data-tone="reading.tone"
+              >
+                <dt>{{ reading.label }}</dt>
+                <dd class="pulse__value">
+                  {{ reading.value
+                  }}<small v-if="reading.unit">{{ reading.unit }}</small>
+                </dd>
+                <dd class="pulse__note">{{ reading.note }}</dd>
+              </div>
+            </dl>
+            <p class="pulse__read">
+              Siete avisos sobre {{ connected }} empresas conectadas. Los tres
+              que siguen sin contacto son los que cuestan dinero: el resto ya
+              está en manos de éxito de cliente.
+            </p>
+          </section>
+
+          <section class="panel span-4 feed">
+            <header class="panel__bar">
+              <h2 class="panel__title">Alertas abiertas</h2>
+              <NuxtLink
+                class="btn btn--quiet"
+                :to="`/dashboard/${role}?section=senales`"
+                >Ver las señales</NuxtLink
+              >
+            </header>
+            <AlertFeed :alerts="opsAlerts" />
+            <footer class="list__foot">
+              <span
+                >{{ openAlerts.length }} por deterioro,
+                {{ opsAlerts.length - openAlerts.length }} por oportunidad</span
+              >
+            </footer>
+          </section>
+
+          <section class="panel span-8">
+            <header class="panel__bar">
+              <h2 class="panel__title">Revenue del mes</h2>
+              <span class="chip chip--mint">{{ revenueGrowth }} sobre agosto</span>
+              <NuxtLink
+                class="btn btn--quiet"
+                :to="`/dashboard/${role}?section=revenue`"
+                >Abrir el desglose</NuxtLink
+              >
+            </header>
+            <RevenueSplit compact :products="revenueProducts" />
+          </section>
+
+          <section class="panel span-12">
+            <header class="panel__bar">
+              <h2 class="panel__title">Salud del modelo</h2>
+              <span v-if="modelAllClear" class="chip chip--mint"
+                >Todas por encima del objetivo</span
+              >
+              <NuxtLink
+                class="btn btn--quiet"
+                :to="`/dashboard/${role}?section=modelo`"
+                >Abrir las métricas</NuxtLink
+              >
+            </header>
+            <ModelMetrics compact :metrics="modelMetrics" />
+          </section>
+        </div>
+
+        <!-- Revenue por producto -->
+        <div v-else-if="section === 'revenue'" class="wk__grid">
+          <section class="panel span-8">
+            <header class="panel__bar">
+              <h2 class="panel__title">Reparto del mes</h2>
+              <span class="chip chip--mint">{{ revenueGrowth }} sobre agosto</span>
+            </header>
+            <p class="lead-line">
+              Cuatro formas de cobrar por lo mismo: ver la tesorería antes que
+              nadie. La suscripción es la única que no depende de que la empresa
+              mueva dinero.
+            </p>
+            <RevenueSplit :products="revenueProducts" />
+          </section>
+
+          <section class="panel span-4 runrate">
+            <h2 class="panel__title">Si el mes se repitiera</h2>
+            <p class="runrate__read">
+              {{ millions(revenueAnnualised) }}<small>al año</small>
+            </p>
+            <p class="runrate__why">
+              Es el mes en curso multiplicado por doce, no una previsión del
+              modelo. Lo ponemos porque es la cifra que se cita fuera, no porque
+              creamos que septiembre se repite.
+            </p>
+            <dl>
+              <div>
+                <dt>Mes en curso</dt>
+                <dd>{{ thousands(revenueMonth) }}</dd>
+              </div>
+              <div>
+                <dt>Producto que más pesa</dt>
+                <dd>
+                  {{ leadProduct.label }} ·
+                  {{ share(leadProduct.amount) }} %
+                </dd>
+              </div>
+              <div>
+                <dt>Empresas activas</dt>
+                <dd>{{ connected }}</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+
+        <!-- Métricas del modelo -->
+        <div v-else-if="section === 'modelo'" class="wk__grid">
+          <section class="panel panel--ink span-12 model">
+            <header class="panel__bar">
+              <h2 class="panel__title">Salud del modelo</h2>
+              <div class="panel__who">
+                <strong>{{ modelVersion }}</strong>
+                <span
+                  >Medido sobre las {{ connected }} empresas conectadas,
+                  ventana de 24 meses</span
+                >
+              </div>
+              <span v-if="modelAllClear" class="chip chip--mint"
+                >Todas por encima del objetivo</span
+              >
+              <span v-else class="chip chip--amber">Alguna por debajo</span>
+            </header>
+            <ModelMetrics :metrics="modelMetrics" />
+          </section>
+
+          <section class="panel span-12">
+            <header class="panel__bar">
+              <h2 class="panel__title">Por qué estas cinco y no otras</h2>
+            </header>
+            <p class="lead-line">
+              Las dos primeras dicen si el orden es correcto; la tercera, si
+              llega con tiempo; la cuarta, si callamos cuando toca. La quinta
+              existe para poder cerrar el producto: si el modelo no bate a
+              repetir el último mes, no hay nada que vender.
+            </p>
+          </section>
+        </div>
 
         <!-- Ofertas -->
         <div v-else class="wk__grid">
@@ -508,9 +866,7 @@ const headline = computed(() =>
           <section v-else class="panel span-12 offers">
             <header class="panel__bar">
               <h2 class="panel__title">Dónde colocar los próximos 100.000 €</h2>
-              <span class="chip chip--neutral"
-                >{{ sent.length }} de {{ companies.length }} contactadas</span
-              >
+              <span class="chip chip--neutral">{{ companies.length }} oportunidades</span>
             </header>
             <p class="lead-line">
               Ordenado por lo que un prestamista gana descontando el riesgo que
@@ -544,28 +900,21 @@ const headline = computed(() =>
                   <dd>{{ decisionLabel[company.decision] }}</dd>
                 </div>
               </dl>
-              <button
-                class="btn"
-                :class="sent.includes(company.id) ? 'btn--quiet' : 'btn--live'"
-                type="button"
-                :disabled="sent.includes(company.id) || company.decision === 'no-prestar'"
-                @click="sendOffer(company.id)"
-              >
-                {{
-                  sent.includes(company.id)
-                    ? 'Enviada'
-                    : company.decision === 'no-prestar'
-                      ? 'Descartada'
-                      : 'Enviar oferta'
-                }}
-              </button>
             </article>
           </section>
         </div>
 
+        </div>
+
         <footer class="wk__foot">
-          Cartera y condiciones ficticias. Lo que hagas aquí solo afecta a esta
-          sesión.
+          <template v-if="role === 'embat' && portfolioSource === 'supabase'">
+            Tesorería desde Supabase. Score, nombres, sectores, decisiones y
+            condiciones todavía son simulados.
+          </template>
+          <template v-else>
+            Cartera y condiciones ficticias. Lo que hagas aquí solo afecta a
+            esta sesión.
+          </template>
         </footer>
       </main>
     </div>

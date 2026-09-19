@@ -13,11 +13,14 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+import pandas as pd
 from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from service import XRayService, SCENARIO_DRIVERS  # noqa: E402
+
+from export_events import TEXTS as EVENT_TEXTS, month_label as _month_label  # noqa: E402
 
 app = FastAPI(title="X-Ray API", version="1.0")
 svc: XRayService | None = None
@@ -30,9 +33,8 @@ def service() -> XRayService:
     return svc
 
 
-@app.on_event("startup")
-def _warm():
-    service()
+# Sin precalentado al arrancar: `service()` entrena el modelo si no hay artifacts/xray.joblib y eso
+# tarda minutos. Cada endpoint que lo necesita lo pide y lo cachea; /api/events no lo toca.
 
 
 class ScenarioIn(BaseModel):
@@ -82,6 +84,78 @@ def scenario(body: ScenarioIn):
         return service().scenario(body.company_id, body.months, body.drivers)
     except KeyError:
         raise HTTPException(404, f"Empresa {body.company_id} no encontrada")
+
+
+EVENTS_PARQUET = ROOT / "data" / "events_export.parquet"
+EVENTS_JSON = "eventos_export.json"
+_events_cache: "pd.DataFrame | None" = None
+
+
+def _events_df():
+    """Tabla de eventos (empresa-mes). Se lee una vez y se cachea; puede tener miles de filas."""
+    global _events_cache
+    if _events_cache is None:
+        if not EVENTS_PARQUET.exists():
+            raise HTTPException(503, "Faltan los eventos: ejecuta `uv run python src/export_events.py`")
+        _events_cache = pd.read_parquet(EVENTS_PARQUET)
+    return _events_cache
+
+
+@app.get("/api/events")
+def events(company_id: str | None = None, month: str | None = None):
+    """Eventos v2 para la vista «Eventos».
+
+    Sin parámetros devuelve el último mes completo (el último en que todas las etiquetas son
+    observables; las de 6 meses se censuran al final del panel). Con `company_id` devuelve toda
+    la historia de esa empresa, que es lo que interesa en su ficha. `month` fuerza un mes concreto.
+    """
+    meta = _read_json(EVENTS_JSON)
+    if not meta:
+        raise HTTPException(503, "Falta reports/eventos_export.json: ejecuta `uv run python src/export_events.py`")
+    df = _events_df()
+    catalog = meta.get("catalog", [])
+    types = [c["type"] for c in catalog]
+
+    if company_id:
+        sel = df[df.company_id == company_id]
+        if sel.empty and company_id not in set(df.company_id):
+            # empresa sin eventos: no es un 404, simplemente no tiene nada que contar
+            sel = df.iloc[0:0]
+        scope, ref_month = "empresa", None
+    else:
+        ref_month = month or meta.get("month")
+        sel = df[df.month == ref_month]
+        scope = "mes"
+
+    texts = {c["type"]: c for c in catalog}
+    out = []
+    for r in sel.itertuples(index=False):
+        for t in types:
+            if t in df.columns and int(getattr(r, t, 0)) > 0:
+                out.append({
+                    "company_id": r.company_id,
+                    "month": r.month,
+                    "type": t,
+                    "text": EVENT_TEXTS.get(t, "{c}: evento {t}").format(c=r.company_id, t=t),
+                    "month_label": _month_label(r.month),
+                    "severity": texts.get(t, {}).get("severity", "riesgo"),
+                    "label": texts.get(t, {}).get("label", t),
+                })
+    out.sort(key=lambda e: (e["month"], e["company_id"], e["type"]), reverse=scope == "empresa")
+
+    counts = {t: 0 for t in types}
+    for e in out:
+        counts[e["type"]] += 1
+    return {
+        "month": ref_month, "month_label": _month_label(ref_month) if ref_month else None,
+        "scope": scope, "company_id": company_id,
+        "summary": meta.get("summary", {}), "rates_6m": meta.get("rates_6m", {}),
+        "last_observable": meta.get("last_observable", {}),
+        "last_month_panel": meta.get("last_month_panel"),
+        "censura": meta.get("censura"),
+        "counts": counts, "total": len(out),
+        "catalog": catalog, "events": out,
+    }
 
 
 @app.get("/api/monitor")

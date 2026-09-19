@@ -84,9 +84,10 @@ Antelación (v5/v6): el 48 % de 229 caídas estructurales se alertó antes de oc
 2. **Hay dos entornos:** `requirements.txt` + `.venv` en la raíz (Streamlit, DuckDB) y `research/pyproject.toml` + uv.
 3. **Las features se calculan en tres sitios:** `research/src/features.py`, `analysis/challenge_features.py` (que importa el panel de `research/src`) y `research/src/measure_events_v2.py` (las del brainstorming).
 4. **Los eventos están duplicados:** `research/src/events_v2.py` (experimental) y `research/src/targets.py` (el oficial).
-5. **Documentación desfasada:**
-   - `research/README.md` y `METRICS.md` describen los eventos v1 y los resultados de v6.
-   - `DECISIONS.md`, `reports/decisions.json` y `reports/metrics_app.json` (lo que ve la SPA) no se han regenerado con la v7.
+5. **Documentación y artefactos generados:** `research/README.md`, `METRICS.md`, `DECISIONS.md` y
+   los JSON que consume la SPA ya reflejan v7. El generador `src/decisions.py` también apunta a v7,
+   pero una regeneración completa requiere `artifacts/xray.joblib`, que no está versionado; hasta
+   reconstruirlo, `scripts/validate_commercial_audit.py` comprueba que los artefactos no deriven.
 6. **`src/decisions.py` mezcla tres cosas:** evidencia, textos y gráficas (unas 560 líneas).
 7. **`reports/` tiene 64 ficheros**, entre métricas de v1 a v7, reviews, logs y parquet ignorados. Falta separar lo generado de lo documental.
 8. **Hay código muerto:**
