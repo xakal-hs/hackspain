@@ -105,6 +105,40 @@ CLUSTER_FEATURES = PROFILE_CATEGORIES + (
 KIND_GOODS = ("payment_share", "bulk_payment_share", "pos_cash_share", "goods_docs", "has_confirming")
 KIND_SERVICES = ("payroll_share", "collection_recurrence", "service_tokens")
 
+# Familias de concepto en facturas emitidas (amount > 0). Lo que la empresa cobra,
+# no lo que paga: todo el mundo tiene alquiler y luz en AP.
+AR_TOKEN_SQL = (
+    ("ar_hotel", "hotel"),
+    ("ar_restor", "restaur|hosteler|cafeter"),
+    ("ar_transport", "transport|logist|flete"),
+    ("ar_software", "software|suscrip|saas|licenc"),
+    ("ar_consult", "consultor|honor"),
+    ("ar_alquil", "alquil|inmobil"),
+    ("ar_energy", "energ|electric|combustible"),
+    ("ar_servic", "servic"),
+    ("ar_construc", "construc|cement|obra"),
+    ("ar_food", "aliment|frigor"),
+    ("ar_metal", "metal|hierro|acero"),
+)
+
+SECTOR_MIN = 0.50
+SECTOR_GAP = 0.12
+MAX_SECTORS = 3
+
+SECTORS = (
+    "comercio minorista",
+    "hostelería",
+    "mayorista / distribución",
+    "industria",
+    "construcción",
+    "servicios profesionales",
+    "software / suscripción",
+    "transporte / logística",
+    "alquiler / inmobiliario",
+    "energía",
+    "holding / tesorería",
+)
+
 
 def _cat_sql() -> str:
     return "(" + ", ".join(f"'{c}'" for c in PROFILE_CATEGORIES) + ")"
@@ -334,12 +368,18 @@ def setup_features(connection: duckdb.DuckDBPyConnection) -> None:
         GROUP BY 1
         """
     )
+    token_counts = ",\n            ".join(
+        f"count(*) FILTER (WHERE amount > 0 AND concept IS NOT NULL "
+        f"AND regexp_matches(lower(concept), '{pattern}')) AS {name}"
+        for name, pattern in AR_TOKEN_SQL
+    )
     connection.execute(
-        """
+        f"""
         CREATE OR REPLACE TEMP TABLE inv_cycle AS
         SELECT
             company_id,
             count(*) AS n_invoices,
+            count(*) FILTER (WHERE amount > 0) AS n_ar,
             count(*) FILTER (WHERE document_type IN ('deliveryNote', 'purchaseOrder')) AS n_goods_docs,
             count(*) FILTER (
                 WHERE concept IS NOT NULL AND regexp_matches(
@@ -348,6 +388,7 @@ def setup_features(connection: duckdb.DuckDBPyConnection) -> None:
                 )
             ) AS n_service_tokens,
             count(DISTINCT counterparty_id) FILTER (WHERE amount > 0) AS n_customers,
+            {token_counts},
             median(date_diff('day', issuance_date, payment_date)) FILTER (
                 WHERE amount > 0
                   AND document_type IN ('invoice', 'invoiceGroup')
@@ -390,7 +431,8 @@ def setup_features(connection: duckdb.DuckDBPyConnection) -> None:
             c.company_id,
             max(CASE WHEN lower(coalesce(b.type, '')) = 'tpv' THEN 1 ELSE 0 END) AS has_tpv,
             max(CASE WHEN lower(coalesce(d.type, '')) = 'confirming' THEN 1 ELSE 0 END) AS has_confirming,
-            max(CASE WHEN lower(coalesce(d.type, '')) = 'factoring' THEN 1 ELSE 0 END) AS has_factoring
+            max(CASE WHEN lower(coalesce(d.type, '')) = 'factoring' THEN 1 ELSE 0 END) AS has_factoring,
+            max(CASE WHEN lower(coalesce(d.type, '')) IN ('leasing', 'renting') THEN 1 ELSE 0 END) AS has_leasing
         FROM companies c
         LEFT JOIN banking_products b USING (company_id)
         LEFT JOIN debt_products d USING (company_id)
@@ -416,6 +458,12 @@ def setup_features(connection: duckdb.DuckDBPyConnection) -> None:
             i.n_invoices,
             CASE WHEN i.n_invoices > 0 THEN i.n_goods_docs * 1.0 / i.n_invoices END AS goods_docs,
             CASE WHEN i.n_invoices > 0 THEN i.n_service_tokens * 1.0 / i.n_invoices END AS service_tokens,
+            """
+        + ",\n            ".join(
+            f"CASE WHEN i.n_ar > 0 THEN i.{name} * 1.0 / i.n_ar END AS {name}"
+            for name, _ in AR_TOKEN_SQL
+        )
+        + """,
             i.n_customers,
             i.dso,
             i.dpo,
@@ -423,6 +471,7 @@ def setup_features(connection: duckdb.DuckDBPyConnection) -> None:
             coalesce(p.has_tpv, 0) AS has_tpv,
             coalesce(p.has_confirming, 0) AS has_confirming,
             coalesce(p.has_factoring, 0) AS has_factoring,
+            coalesce(p.has_leasing, 0) AS has_leasing,
             (i.n_invoices IS NOT NULL AND i.n_invoices > 0) AS has_invoices
         FROM companies c
         LEFT JOIN tx_agg t USING (company_id)
@@ -527,6 +576,189 @@ def classify_kind(rows: list[dict]) -> None:
             row["business_kind"] = "servicio"
         else:
             row["business_kind"] = "producto"
+
+
+def _nz_mean(values: list[float | None]) -> float:
+    clean = [v for v in values if v is not None]
+    if not clean:
+        return 0.0
+    return sum(clean) / len(clean)
+
+
+def assign_sector_sets(rows: list[dict]) -> None:
+    """Conjunto de sectores compatibles con la huella. No es un CNAE."""
+    eligible = [row for row in rows if row["eligible"]]
+    rank_keys = (
+        "pos_cash_share",
+        "payroll_share",
+        "payment_share",
+        "bulk_payment_share",
+        "goods_docs",
+        "dso",
+        "collection_cv",
+        "season_amp",
+        "transfer",
+        "collection_recurrence",
+        "service_tokens",
+    )
+    ranked: dict[str, dict[str, float]] = {}
+    for name in rank_keys:
+        values = [_finite(row.get(name)) for row in eligible]
+        ranks = rank_column(values)
+        ranked[name] = {row["company_id"]: ranks[i] for i, row in enumerate(eligible)}
+
+    def r(row: dict, name: str) -> float:
+        return ranked[name][row["company_id"]]
+
+    def has_ar(row: dict, name: str) -> bool:
+        return (_finite(row.get(name)) or 0) > 0
+
+    for row in rows:
+        if not row["eligible"]:
+            row["sectors"] = []
+            row["sector_scores"] = {}
+            row["sector_set"] = ""
+            row["top_sector"] = ""
+            row["top_sector_score"] = None
+            row["n_sectors"] = 0
+            continue
+        kind = row["business_kind"]
+        kind_product = 0.75 if kind == "producto" else (0.45 if kind == "mixto" else 0.15)
+        kind_service = 0.75 if kind == "servicio" else (0.45 if kind == "mixto" else 0.15)
+        pos = r(row, "pos_cash_share")
+        payroll = r(row, "payroll_share")
+        pay = r(row, "payment_share")
+        goods = r(row, "goods_docs")
+        dso = r(row, "dso")
+        transfer = r(row, "transfer")
+        recur = r(row, "collection_recurrence")
+        cv = r(row, "collection_cv")
+        comercio = _nz_mean(
+                [
+                    pos,
+                    1.0 - dso if row.get("dso") is not None else None,
+                    1.0 if int(row.get("has_tpv") or 0) else pos,
+                    kind_product,
+                    1.0 - payroll,
+                ]
+            )
+        if pos < 0.40 and not int(row.get("has_tpv") or 0):
+            comercio *= 0.4
+        hostel = _nz_mean(
+                [
+                    pos,
+                    payroll,
+                    1.0 if has_ar(row, "ar_hotel") or has_ar(row, "ar_restor") else 0.15,
+                    0.55 if kind in {"producto", "mixto"} else 0.25,
+                ]
+            )
+        if pos < 0.35 and not (has_ar(row, "ar_hotel") or has_ar(row, "ar_restor")):
+            hostel *= 0.4
+        construc = _nz_mean(
+                [
+                    cv,
+                    goods,
+                    dso if row.get("dso") is not None else None,
+                    1.0 if has_ar(row, "ar_construc") else 0.15,
+                    kind_product,
+                ]
+            )
+        if goods < 0.45 and not has_ar(row, "ar_construc"):
+            construc *= 0.35
+        scores = {
+            "comercio minorista": comercio,
+            "hostelería": hostel,
+            "mayorista / distribución": _nz_mean(
+                [
+                    pay,
+                    r(row, "bulk_payment_share"),
+                    goods,
+                    dso if row.get("dso") is not None else None,
+                    1.0 if int(row.get("has_confirming") or 0) else 0.2,
+                    kind_product,
+                    1.0 - pos,
+                ]
+            ),
+            "industria": _nz_mean(
+                [
+                    goods,
+                    payroll,
+                    1.0 if int(row.get("has_leasing") or 0) else 0.2,
+                    1.0 if has_ar(row, "ar_metal") else 0.15,
+                    1.0 - pos,
+                    kind_product,
+                ]
+            ),
+            "construcción": construc,
+            "servicios profesionales": _nz_mean(
+                [
+                    payroll,
+                    r(row, "service_tokens"),
+                    1.0 - goods,
+                    1.0 - pos,
+                    1.0 if has_ar(row, "ar_consult") or has_ar(row, "ar_servic") else 0.2,
+                    kind_service,
+                ]
+            ),
+            "software / suscripción": (
+                0.78
+                if has_ar(row, "ar_software")
+                else 0.0
+            ),
+            "transporte / logística": (
+                _nz_mean(
+                    [
+                        1.0 if has_ar(row, "ar_transport") else 0.0,
+                        1.0 if int(row.get("has_leasing") or 0) else 0.2,
+                    ]
+                )
+                if has_ar(row, "ar_transport") or int(row.get("has_leasing") or 0)
+                else 0.0
+            ),
+            "alquiler / inmobiliario": 0.78 if has_ar(row, "ar_alquil") else 0.0,
+            "energía": 0.78 if has_ar(row, "ar_energy") else 0.0,
+            "holding / tesorería": (
+                _nz_mean([transfer, 1.0 - pos, 1.0 - payroll, 1.0 - goods])
+                if transfer >= 0.65
+                else 0.15
+            ),
+        }
+        if has_ar(row, "ar_hotel") or has_ar(row, "ar_restor"):
+            scores["hostelería"] = max(scores["hostelería"], 0.78)
+        if has_ar(row, "ar_software"):
+            scores["software / suscripción"] = max(scores["software / suscripción"], 0.78)
+        if has_ar(row, "ar_transport"):
+            scores["transporte / logística"] = max(scores["transporte / logística"], 0.78)
+        if has_ar(row, "ar_alquil"):
+            scores["alquiler / inmobiliario"] = max(scores["alquiler / inmobiliario"], 0.78)
+        if has_ar(row, "ar_consult"):
+            scores["servicios profesionales"] = max(scores["servicios profesionales"], 0.72)
+        if has_ar(row, "ar_energy"):
+            scores["energía"] = max(scores["energía"], 0.78)
+        if has_ar(row, "ar_construc"):
+            scores["construcción"] = max(scores["construcción"], 0.75)
+        if has_ar(row, "ar_metal"):
+            scores["industria"] = max(scores["industria"], 0.75)
+        if has_ar(row, "ar_food"):
+            scores["mayorista / distribución"] = max(scores["mayorista / distribución"], 0.70)
+        if has_ar(row, "ar_servic") and kind == "servicio":
+            scores["servicios profesionales"] = max(scores["servicios profesionales"], 0.68)
+
+        ranked_scores = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+        top = ranked_scores[0][1]
+        keep = [
+            name
+            for name, value in ranked_scores
+            if value >= SECTOR_MIN and value >= top - SECTOR_GAP
+        ][:MAX_SECTORS]
+        if not keep and top >= SECTOR_MIN - 0.05:
+            keep = [ranked_scores[0][0]]
+        row["sector_scores"] = {name: round(value, 3) for name, value in ranked_scores}
+        row["sectors"] = keep
+        row["sector_set"] = " | ".join(keep)
+        row["top_sector"] = keep[0] if keep else ""
+        row["top_sector_score"] = ranked_scores[0][1] if keep else None
+        row["n_sectors"] = len(keep)
 
 
 def feature_matrix(rows: list[dict]) -> tuple[list[str], list[list[float]]]:
@@ -643,6 +875,10 @@ def write_table(rows: list[dict]) -> None:
         "company_id",
         "group_id",
         "business_kind",
+        "sector_set",
+        "n_sectors",
+        "top_sector",
+        "top_sector_score",
         "kind_score",
         "goods_score",
         "service_score",
@@ -849,6 +1085,63 @@ def tpv_check(rows: list[dict]) -> tuple[int, int]:
     return ok, len(tpv)
 
 
+def sector_counts(rows: list[dict]) -> Counter:
+    counts: Counter = Counter()
+    for row in rows:
+        for name in row.get("sectors") or []:
+            counts[name] += 1
+    return counts
+
+
+def sector_set_counts(rows: list[dict]) -> list[tuple[str, int]]:
+    counter = Counter(row.get("sector_set") or "sin evidencia" for row in rows if row["eligible"])
+    return counter.most_common(12)
+
+
+def sector_bar_figure(rows: list[dict]) -> go.Figure:
+    counts = sector_counts(rows)
+    ordered = [name for name in SECTORS if counts.get(name)]
+    ordered.sort(key=lambda name: counts[name], reverse=True)
+    figure = go.Figure(
+        go.Bar(
+            x=[counts[name] for name in ordered],
+            y=ordered,
+            orientation="h",
+            marker_color=COLORS["blue"],
+            text=[fmt(counts[name], 0) for name in ordered],
+            textposition="outside",
+            cliponaxis=False,
+            hovertemplate="%{y}: %{x}<extra></extra>",
+        )
+    )
+    figure.update_layout(
+        title="Empresas cuya huella es compatible con cada sector",
+        xaxis_title="Empresas (una puede contar en varios)",
+        yaxis=dict(autorange="reversed"),
+    )
+    return figure
+
+
+def sector_profile_rows(rows: list[dict]) -> list[list]:
+    out = []
+    counts = sector_counts(rows)
+    for name in sorted(counts, key=lambda item: counts[item], reverse=True):
+        subset = [row for row in rows if name in (row.get("sectors") or [])]
+        med_dso = median([row.get("dso") for row in subset])
+        out.append(
+            [
+                html.escape(name),
+                fmt(len(subset), 0),
+                f"{sum(1 for row in subset if row['business_kind']=='producto') / len(subset):.0%} prod".replace(".", ","),
+                f"{median([row.get('payroll_share') for row in subset]) or 0:.1%}".replace(".", ","),
+                f"{median([row.get('pos_cash_share') for row in subset]) or 0:.1%}".replace(".", ","),
+                fmt(med_dso, 0) if med_dso is not None else "—",
+                f"{mean([row.get('n_sectors') for row in subset]) or 0:.1f}".replace(".", ","),
+            ]
+        )
+    return out
+
+
 def payroll_check(rows: list[dict]) -> tuple[int, int]:
     heavy = [
         row
@@ -883,6 +1176,13 @@ def build_report(rows: list[dict], clustering: dict) -> str:
         ]
         for item in search
     ]
+    n_with_set = sum(1 for row in rows if row.get("sectors"))
+    set_sizes = [row.get("n_sectors") or 0 for row in rows if row["eligible"]]
+    med_set = median(set_sizes) or 0
+    set_rows = [
+        [html.escape(name or "sin evidencia"), fmt(n, 0)]
+        for name, n in sector_set_counts(rows)
+    ]
     return f"""<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -900,6 +1200,7 @@ def build_report(rows: list[dict], clustering: dict) -> str:
       <a href="#cobertura">Cobertura</a>
       <a href="#producto-servicio">Producto o servicio</a>
       <a href="#regimen">Régimen operativo</a>
+      <a href="#sectores">Conjunto de sectores</a>
       <a href="#caja">Régimen y caja</a>
       <a href="#limites">Límites</a>
     </nav>
@@ -909,7 +1210,7 @@ def build_report(rows: list[dict], clustering: dict) -> str:
     <header class="hero">
       <div class="eyebrow">HackSpain 2026 · análisis</div>
       <h1>El dataset no trae sector.<br><em>La tesorería sí deja huella.</em></h1>
-      <p>1.286 empresas, cero etiquetas de industria. Inferimos dos cosas que un prestamista puede usar: si vive de vender producto o de prestar un servicio, y el régimen de cobros y pagos con el que opera. Caja y runway no entran: no queremos agrupar empresas enfermas.</p>
+      <p>1.286 empresas, cero etiquetas de industria. Inferimos si vende producto o presta un servicio, el régimen de cobros y pagos, y el <b>conjunto de sectores</b> con el que esa huella es compatible. Caja y runway no entran: no queremos agrupar empresas enfermas.</p>
       <div class="hero-meta">
         <span>{fmt(n_fit, 0)} empresas con huella</span>
         <span>{fmt(n_all - n_fit, 0)} sin cobertura</span>
@@ -926,13 +1227,13 @@ def build_report(rows: list[dict], clustering: dict) -> str:
           <ul>
             <li><b>Producto vs servicio vs mixto</b> — índice explícito, no caja negra. Pagos a proveedor, albaranes, TPV y confirming empujan a producto; nómina, cobros regulares y conceptos de servicio, a servicio.</li>
             <li><b>Régimen operativo</b> — k-means sobre la huella rank-transformada. El nombre son las dos señales que más sobresalen, en lenguaje de prestamista.</li>
-            <li>Tabla persistida en <code>data/processed/company_sector.csv</code> para usarla después en umbrales de runway. Esta entrega no toca el score.</li>
+            <li><b>Conjunto de sectores</b> — no un CNAE. TPV + caja corta es comercio o hostelería; nómina sin albaranes es servicio profesional o software. Los tokens de factura emitida (hotel, software, transporte) empujan cuando existen.</li>
           </ul>
         </div>
         <div class="panel narrative"><h3>Qué no entra</h3>
           <ul>
             <li>Runway, caja negativa, drawdown: son salud, no sector.</li>
-            <li>Nombres tipo Alimentación o Metalurgia: el texto de facturas está anonimizado y fingir CNAE es un demo, no un hallazgo.</li>
+            <li>Nombres tipo Alimentación o Metalurgia como etiqueta única: el texto está anonimizado. Sí se puede decir “compatible con hostelería o comercio”, no “es un restaurante”.</li>
             <li>País y ERP: observabilidad, no industria.</li>
           </ul>
         </div>
@@ -994,11 +1295,41 @@ def build_report(rows: list[dict], clustering: dict) -> str:
         {table(["Régimen", "Empresas", "Producto / servicio", "Nómina", "TPV/efectivo", "DSO", "Runway*", "Confianza"], regime_profile_rows(rows, result.labels))}
         <p class="caption">* El runway se mira después, no se usó para agrupar. Sirve para ver si el régimen cambia el colchón típico —la tesis de Embat— sin circularidad.</p>
       </div>
-      <div class="callout"><b>Los nombres no son CNAE.</b> Son las dos señales más sobre-representadas frente al conjunto. Un régimen “liquidación TPV + efectivo” es comercio de cobro inmediato; “pagos a proveedor + ciclo de cobro” es un mayorista. El prestamista necesita eso, no el código de actividad.</div>
+      <div class="callout"><b>Los nombres del clúster no son CNAE.</b> Son las dos señales más sobre-representadas frente al conjunto. El conjunto de sectores de la siguiente sección traduce esa huella a industrias que un prestamista reconoce.</div>
+    </section>
+
+    <section class="section" id="sectores">
+      <div class="section-head"><span>05</span><div><h2>Conjunto de sectores compatibles</h2><p>Cada empresa recibe hasta tres sectores cuya huella encaja. Un TPV con nómina puede ser comercio o hostelería; no hace falta elegir mal.</p></div></div>
+      <div class="kpis compact-kpis">
+        <div class="kpi"><small>Con al menos un sector</small><strong>{fmt(n_with_set, 0)}</strong><span>{pct(n_with_set, n_fit)} de la huella</span></div>
+        <div class="kpi"><small>Tamaño mediano del conjunto</small><strong>{med_set:.1f}</strong><span>máximo {MAX_SECTORS} etiquetas</span></div>
+        <div class="kpi"><small>Token AR (lo que cobra)</small><strong>preciso</strong><span>hotel, software, transporte, alquiler…</span></div>
+        <div class="kpi"><small>Token AP (lo que paga)</small><strong>ignorado</strong><span>todo el mundo paga luz y alquiler</span></div>
+      </div>
+      <div class="callout insight"><b>No es “esta empresa es hostelería”.</b> Es “esta tesorería es compatible con hostelería y con comercio minorista”. El token de factura emitida (amount &gt; 0) sí puede clavar una etiqueta: si cobra “Hotel…”, entra hostelería aunque el TPV sea flojo.</div>
+      <div class="panel">{chart_html(sector_bar_figure(rows), 480)}</div>
+      <div class="grid two">
+        <div class="panel"><h3>Huella de cada sector</h3>
+          {table(["Sector", "Empresas", "Producto", "Nómina", "TPV/efectivo", "DSO", "Etiquetas/empresa"], sector_profile_rows(rows))}
+          <p class="caption">Una empresa cuenta en todos los sectores de su conjunto. La última columna es cuántas etiquetas lleva de media quien cae aquí.</p>
+        </div>
+        <div class="panel"><h3>Conjuntos más frecuentes</h3>
+          {table(["Conjunto", "Empresas"], set_rows)}
+          <p class="caption">Cómo se combinan. “comercio minorista | hostelería” es el caso típico de cobro inmediato con plantilla.</p>
+        </div>
+      </div>
+      <div class="panel narrative">
+        <h3>Cómo se puntúa</h3>
+        <ul>
+          <li>Cada sector tiene un perfil de tesorería: TPV y DSO corto para comercio; TPV + nómina para hostelería; pagos, albaranes y confirming para mayorista; nómina sin albaranes para servicios; transferencias y sin ERP para holding.</li>
+          <li>Los conceptos de <b>facturas emitidas</b> suman si aparecen: software, hotel, transporte, alquiler, consultor, energía, obra, metal. Los de facturas recibidas no: pagar un hotel no te hace hotelero.</li>
+          <li>Se quedan los sectores con puntuación ≥ {SECTOR_MIN:.0%} y a no más de {SECTOR_GAP:.0%} del primero, hasta {MAX_SECTORS}.</li>
+        </ul>
+      </div>
     </section>
 
     <section class="section" id="caja">
-      <div class="section-head"><span>05</span><div><h2>El régimen cambia el colchón, no el score</h2><p>Runway mediano por clúster, leído a posteriori desde el panel mensual ya construido.</p></div></div>
+      <div class="section-head"><span>06</span><div><h2>El régimen cambia el colchón, no el score</h2><p>Runway mediano por clúster, leído a posteriori desde el panel mensual ya construido.</p></div></div>
       <div class="callout insight"><b>Para el score, más adelante.</b> Si dos regímenes con el mismo runway no tienen la misma tasa de tensión, el umbral global está mal. Esa prueba (E1/E3) no vive en este informe: primero hace falta la etiqueta, que es lo que se persiste ahora.</div>
       <div class="panel narrative">
         <h3>Cómo leerlo</h3>
@@ -1011,10 +1342,10 @@ def build_report(rows: list[dict], clustering: dict) -> str:
     </section>
 
     <section class="section" id="limites">
-      <div class="section-head"><span>06</span><div><h2>Límites</h2><p>Qué no afirma este clustering.</p></div></div>
+      <div class="section-head"><span>07</span><div><h2>Límites</h2><p>Qué no afirma este clustering.</p></div></div>
       <div class="limitations">
-        <article><b>No es NACE</b><p>No hay etiqueta externa. Los nombres son huella operativa. Un demo que ponga “Alimentación” estaría inventando.</p></article>
-        <article><b>Texto anonimizado</b><p>Los tokens de factura (servicio, suscripción) son corroboración débil. El eje duro es tesorería y tipo documental.</p></article>
+        <article><b>No es NACE</b><p>El conjunto es compatible con la huella, no una etiqueta de registro. Sin token AR, comercio y hostelería se solapan a propósito.</p></article>
+        <article><b>Texto anonimizado</b><p>Los tokens de factura emitida cubren pocas empresas (hotel 37, software 24, transporte 32). El resto se juega en tesorería.</p></article>
         <article><b>Sin categorizar</b><p>Una de cada cuatro unidades de volumen no tiene categoría. Eso recorta la huella; no se imputa a cobros o pagos.</p></article>
         <article><b>No es el score</b><p>Esta entrega no cambia umbrales ni el frontend. La tabla está lista para el overlay de runway cuando se mida contra E1/E3.</p></article>
       </div>
@@ -1033,6 +1364,7 @@ def main() -> None:
     setup_features(connection)
     rows = assemble_rows(connection)
     classify_kind(rows)
+    assign_sector_sets(rows)
     clustering = cluster_regimes(rows)
     write_table(rows)
     OUTPUT.write_text(build_report(rows, clustering), encoding="utf-8")
@@ -1040,6 +1372,7 @@ def main() -> None:
     result: KMeansResult = clustering["result"]
     print(
         f"kind {dict(counts)} | k={result.k} silhouette={result.silhouette:.3f} "
+        f"| sectors {dict(sector_counts(rows))} "
         f"| wrote {OUTPUT} ({OUTPUT.stat().st_size / 1_000:.0f} KB) and {TABLE}"
     )
 
