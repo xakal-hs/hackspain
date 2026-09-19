@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel mensual</title>
+<style>
+:root{--bg:#fafaf9;--card:#fff;--fg:#1c1917;--mut:#78716c;--line:#e7e5e4;--a:#2563eb;--r:#dc2626;--g:#16a34a;--o:#d97706}
+@media (prefers-color-scheme:dark){:root{--bg:#0c0a09;--card:#1c1917;--fg:#f5f5f4;--mut:#a8a29e;--line:#292524;--a:#60a5fa;--r:#f87171;--g:#4ade80;--o:#fbbf24}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,sans-serif}
+header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;z-index:2}
+h1{font-size:16px;margin:0}input{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;width:190px}
+main{padding:16px;max-width:1200px;margin:auto}.tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tag{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:2px 10px;font-size:12px;color:var(--mut)}.tag b{color:var(--fg)}
+.warn{border-color:var(--o);color:var(--o)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}.card h3{margin:0 0 6px;font-size:13px;font-weight:600}
+.card small{color:var(--mut)}svg{width:100%;height:150px;display:block}
+.evt{margin:14px 0}.evt table{border-collapse:collapse;width:100%}.evt td,.evt th{padding:3px 4px;font-size:12px;text-align:center}.evt th{color:var(--mut);font-weight:500}.evt td:first-child{text-align:left;white-space:nowrap}
+.c0{background:var(--line)}.c1{background:var(--r)}.cn{background:transparent;color:var(--mut)}
+.tw{overflow:auto;margin-top:14px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+table.t{border-collapse:collapse;width:100%;font-size:12px}.t th,.t td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.t th{position:sticky;top:0;background:var(--card);color:var(--mut);font-weight:500}.t td:first-child,.t th:first-child{text-align:left}
+.neg{color:var(--r)}.leg{display:flex;gap:10px;font-size:11px;color:var(--mut);margin-top:2px}.leg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+</style></head><body>
+<header><h1>Panel mensual · X Ray</h1>
+<input id="q" list="cl" placeholder="COMP_0001…" autocomplete="off"><datalist id="cl"></datalist>
+<button id="prev">◀</button><button id="next">▶</button><span id="cnt" class="tag"></span></header>
+<main><div id="tags" class="tags"></div><div id="grid" class="grid"></div><div class="evt card" id="evt"></div><div class="tw" id="tbl"></div></main>
+<script>
+const DB=__DATA__;const M=DB.months,IDS=Object.keys(DB.companies).sort();let cur=0;
+const $=id=>document.getElementById(id);
+const fmt=(v,d=0)=>v==null?"–":Math.abs(v)>=1e6?(v/1e6).toFixed(1)+"M":Math.abs(v)>=1e4?(v/1e3).toFixed(0)+"k":v.toFixed(d);
+$("cl").innerHTML=IDS.map(i=>`<option value="${i}">`).join("");$("cnt").textContent=IDS.length+" empresas";
+function chart(el,title,series,opts={}){const W=380,H=150,P=[8,6,22,28];const n=series[0].v.length;
+ let all=series.flatMap(s=>s.v).filter(v=>v!=null);if(!all.length){el.innerHTML=`<h3>${title}</h3><small>sin datos</small>`;return}
+ let lo=Math.min(...all,opts.zero?0:Infinity),hi=Math.max(...all,opts.zero?0:-Infinity);if(lo===hi){lo-=1;hi+=1}
+ const x=i=>P[3]+i*(W-P[3]-P[1])/Math.max(n-1,1),y=v=>H-P[2]-(v-lo)/(hi-lo)*(H-P[0]-P[2]);
+ let s=`<line x1="${P[3]}" x2="${W-P[1]}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)" ${lo<0&&hi>0?"":"opacity=0"}/>`;
+ s+=`<text x="2" y="${P[0]+8}" fill="var(--mut)" font-size="9">${fmt(hi,2)}</text><text x="2" y="${H-P[2]}" fill="var(--mut)" font-size="9">${fmt(lo,2)}</text>`;
+ s+=`<text x="${P[3]}" y="${H-6}" fill="var(--mut)" font-size="9">${cur_m[0]}</text><text x="${W-P[1]}" y="${H-6}" fill="var(--mut)" font-size="9" text-anchor="end">${cur_m[n-1]}</text>`;
+ series.forEach(se=>{let d="",up=false;se.v.forEach((v,i)=>{if(v==null){up=false;return}d+=(up?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1);up=true});
+  s+=`<path d="${d}" fill="none" stroke="${se.c}" stroke-width="1.8"/>`});
+ el.innerHTML=`<h3>${title}</h3><svg viewBox="0 0 ${W} ${H}">${s}</svg><div class="leg">${series.map(s=>`<span><i style="background:${s.c}"></i>${s.n}</span>`).join("")}</div>`}
+let cur_m=[];
+function show(id){const c=DB.companies[id],s=c.s;cur=IDS.indexOf(id);$("q").value=id;cur_m=M.slice(c.m0,c.m0+c.n);
+ $("tags").innerHTML=[["grupo",s.group_id],["moneda",s.currency],["ERP",s.erp||"–"],["meses",c.n],
+  ["facturas",s.tiene_facturas?"sí":"no"],["deuda (producto)",s.tiene_deuda_producto?"sí":"no"],["paga deuda en banco",s.paga_deuda_banco?"sí":"no"],
+  ["cuentas otra moneda",s.cuentas_moneda_distinta?"sí":"no"]].map(([k,v])=>`<span class="tag">${k}: <b>${v}</b></span>`).join("")
+  +(s.saldo_inconsistente?`<span class="tag warn">saldo inconsistente</span>`:"");
+ const C="var(--a)",R="var(--r)",G="var(--g)",O="var(--o)",g=$("grid");g.innerHTML="";
+ const add=(t,se,o)=>{const d=document.createElement("div");d.className="card";g.appendChild(d);chart(d,t,se,o)};
+ add("Entradas y salidas operativas",[{n:"entradas",c:G,v:c.inflow_op},{n:"salidas",c:R,v:c.outflow_op}],{zero:1});
+ add("Flujo neto operativo",[{n:"neto",c:C,v:c.net_op}],{zero:1});
+ add("Margen operativo 3m",[{n:"margen",c:C,v:c.margin_3m}],{zero:1});
+ add("Saldo fin de mes / mínimo",[{n:"fin de mes",c:C,v:c.cash_end},{n:"mínimo",c:O,v:c.cash_min}],{zero:1});
+ add("Días con saldo negativo",[{n:"días",c:R,v:c.days_negative}],{zero:1});
+ add("Runway (meses)",[{n:"runway",c:C,v:c.runway_m}],{zero:1});
+ add("% vencido s/ ventas 3m",[{n:"vencido",c:O,v:c.pct_vencido}],{zero:1});
+ add("Servicio de deuda / entradas 3m",[{n:"ratio",c:R,v:c.debt_service_ratio_3m}],{zero:1});
+ // eventos
+ const ec=DB.ev;$("evt").style.display=ec.length?"block":"none";
+ if(ec.length){let h=`<h3>Eventos (rojo = ocurre, gris = no, vacío = no aplicable)</h3><table><tr><th></th>${cur_m.map(m=>`<th>${m.slice(2)}</th>`).join("")}</tr>`;
+  ec.forEach(e=>{h+=`<tr><td>${e}</td>${c["e_"+e].map(v=>`<td class="${v==null?"cn":v?"c1":"c0"}">${v==null?"·":""}</td>`).join("")}</tr>`});$("evt").innerHTML=h+"</table>"}
+ // tabla
+ const cols=["inflow_op","outflow_op","net_op","debt_service","cash_end","days_negative","margin_3m","runway_m","pct_vencido","dso","n_tx"];
+ let h=`<table class="t"><tr><th>mes</th>${cols.map(k=>`<th>${k}</th>`).join("")}</tr>`;
+ cur_m.forEach((m,i)=>{h+=`<tr><td>${m}</td>${cols.map(k=>{const v=c[k][i];return `<td class="${v!=null&&v<0?"neg":""}">${v==null?"–":(k==="margin_3m"||k==="pct_vencido"||k==="runway_m"?v.toFixed(2):fmt(v,0))}</td>`}).join("")}</tr>`});
+ $("tbl").innerHTML=h+"</table>";history.replaceState(null,"","#"+id)}
+$("q").addEventListener("change",e=>{if(DB.companies[e.target.value])show(e.target.value)});
+$("prev").onclick=()=>show(IDS[(cur-1+IDS.length)%IDS.length]);$("next").onclick=()=>show(IDS[(cur+1)%IDS.length]);
+show(location.hash.slice(1)&&DB.companies[location.hash.slice(1)]?location.hash.slice(1):IDS[0]);
+</script></body></html>
