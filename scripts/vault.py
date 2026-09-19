@@ -1,4 +1,4 @@
-"""Cifra y descifra context/, notebooks/, research/ y analysis/.
+"""Cifra y descifra context/, notebooks/, research/, analysis/ y docs/.
 
 La clave vive en .env (DECRYPT_KEY) y no se versiona.
 
@@ -23,7 +23,7 @@ VAULT = ROOT / "vault"
 ENV_PATH = ROOT / ".env"
 MAGIC = b"XRAYENC1"
 
-FOLDERS = ("context", "notebooks", "research", "analysis")
+FOLDERS = ("context", "notebooks", "research", "analysis", "docs")
 SKIP_DIRS = {".venv", "__pycache__", ".pytest_cache", ".git"}
 SKIP_NAMES = {".DS_Store"}
 SKIP_SUFFIXES = {".pyc", ".duckdb"}

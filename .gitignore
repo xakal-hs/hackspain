@@ -22,6 +22,7 @@ backend/__pycache__/
 /notebooks/
 /research/
 /analysis/
+/docs/
 
 # Machine-local Claude permissions and authentication preferences.
 .claude/settings.local.json
