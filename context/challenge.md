@@ -174,6 +174,7 @@ El enunciado pide un número y un producto. Cómo pesar las señales y qué devo
 - El output no puede acabarse en un número. Hace falta criticidad, explicación en lenguaje llano y una decisión (prestar / vigilar / no prestar).
 - El valor diferencial de Embat es el rastro de tesorería que el banco no tiene para valorar el crédito. Hay que contactar mucho a bancos.
 - La métrica cambia según la oferta (circulante, póliza, marketplace…) y según quién mira el score, porque los objetivos no son los mismos.
+- Quién paga y cuánto vale sobre esta cartera: [Monetización](monetizacion.md).
 
 ---
 
