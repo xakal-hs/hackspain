@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>X-Ray · Back-engineering de variables a nivel de ítem</title>
+<style>
+:root{--navy:#102a43;--blue:#1463ff;--cyan:#27b3c2;--green:#22a06b;--amber:#f59e0b;--red:#e5484d;--slate:#64748b;--line:#e2e8f0;--bg:#f6f8fc}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--navy);font:15px/1.55 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85em;background:#eef3fb;padding:1px 5px;border-radius:4px}
+a{color:var(--blue)}
+.hero{background:linear-gradient(135deg,#0b1f36,#102a43 55%,#12406b);color:#fff;padding:48px clamp(20px,5vw,72px) 40px}
+.eyebrow{letter-spacing:.18em;font-size:12px;font-weight:700;color:#7fb0ff}
+.hero h1{font-size:clamp(28px,4.2vw,46px);line-height:1.1;margin:14px 0;font-weight:800}
+.hero h1 code{background:rgba(255,255,255,.12);color:#bcd6ff}
+.hero p{max-width:900px;color:#c7d6ea;font-size:16px}
+.hero-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.hero-meta span{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);padding:5px 12px;border-radius:999px;font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:26px}
+.kpi{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:14px 16px}
+.kpi small{display:block;color:#9db4d0;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.kpi strong{font-size:25px;font-weight:800}
+main{max-width:1240px;margin:0 auto;padding:8px clamp(16px,4vw,40px) 60px}
+.block{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px clamp(16px,3vw,32px);margin-top:26px;box-shadow:0 10px 30px -24px rgba(16,42,67,.5)}
+.block h2{margin:0 0 6px;font-size:22px}
+.block h3.sub{margin:20px 0 8px;font-size:16px}
+.lead{color:#486581;max-width:1000px;margin:0 0 18px}
+.findings{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.finding{border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:12px;padding:16px;background:#fbfdff}
+.finding .ftag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--blue)}
+.finding h3{margin:6px 0 8px;font-size:16px}
+.finding p{margin:0;color:#334e68;font-size:13.5px}
+.finding .impact{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px;color:#486581}
+.finding .impact b{display:block;color:var(--navy);font-size:12px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.pblock{border-top:1px solid var(--line);padding-top:20px;margin-top:22px}
+.phead{display:flex;justify-content:space-between;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px}
+.ptag{display:inline-block;color:var(--pc);font-weight:800;font-size:12px;letter-spacing:.08em}
+.phead h3{margin:2px 0 0;font-size:18px}
+.pweight{font-size:12.5px;color:var(--slate)}
+.pweight b{color:var(--pc);font-size:15px}
+.pwhy{color:#486581;font-size:13.5px;max-width:1000px;margin:0 0 12px}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:900px}
+thead th{background:#f1f5fb;text-align:left;padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#486581;border-bottom:1px solid var(--line)}
+td{padding:11px 12px;border-bottom:1px solid #eef2f7;vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#fafcff}
+td small{display:block;color:#6b7c93;font-size:11.5px;margin-top:2px}
+td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
+td.num.prio{font-size:16px}
+td.num.prio b{color:var(--navy)}
+td.num.w{font-weight:700}
+td.small{font-size:12.5px;color:#486581}
+td.dir{white-space:nowrap;color:#486581}
+td.item code{font-size:11.5px;white-space:normal}
+td.ev{color:#334e68;font-size:12.5px;max-width:420px}
+td.def{color:#486581;font-size:12.5px;max-width:320px}
+td.note{color:#6b7c93;font-size:12.5px;max-width:320px}
+.crit{display:inline-block;background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--c);border:1px solid color-mix(in srgb,var(--c) 40%,#fff);font-weight:700;font-size:12px;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.vtag{display:inline-block;background:color-mix(in srgb,var(--c) 14%,#fff);color:var(--c);border:1px solid color-mix(in srgb,var(--c) 40%,#fff);font-weight:700;font-size:12px;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.auc-table td.auc{text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+td.auc.sig{color:var(--green);background:#f2fbf6}
+td.auc.mild{color:var(--amber);background:#fffaf0}
+td.auc.flat{color:var(--slate)}
+.bs{background:#eef3fb;color:#234e70;border-radius:999px;font-size:10.5px;padding:2px 7px;margin-left:6px}
+.risk{color:var(--red);font-size:11px}
+.srcmark{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:1px 6px;border-radius:999px;background:#e6f6ec;color:#16794c;margin-left:5px}
+.srcmark.marco{background:#eef1f6;color:#5b6b80}
+td.num.wt{white-space:nowrap}
+td.num.wt b{color:#0b3a6b;font-size:14px}
+td.num.wt.noW{color:#8a97a8}
+.wchip{display:inline-block;background:#e7f0fb;color:#1a4f86;border-radius:999px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:4px}
+.caveat-note{color:#6b7c93;font-size:13px;margin-top:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.grid2 h3{margin:0 0 6px;font-size:15px;color:#164f86}
+.grid2 p{margin:0 0 8px;color:#486581;font-size:14px}
+.grid2 ul{margin:0;padding-left:18px;color:#334e68;font-size:13.5px}
+.grid2 li{margin:6px 0}
+.plan{padding-left:18px;color:#334e68;font-size:13.5px}
+.plan li{margin:8px 0}
+.warning{background:linear-gradient(180deg,#fff,#fff8ef);border-color:#f6dfbe}
+.asym{margin-top:20px}
+.caveat{background:linear-gradient(180deg,#fff,#f5f8ff);border-color:#cfe0ff}
+.caveat ul{margin:0;padding-left:20px;color:#486581}
+.caveat li{margin:8px 0}
+footer{padding:24px 6px 0;color:#6b7c93;font-size:13px;text-align:center}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}.pweight{text-align:left}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="eyebrow">EMBAT X-RAY · SCORING v8 · INGENIERÍA INVERSA</div>
+  <h1>De los eventos adversos<br>a la variable de ítem que los anticipa.</h1>
+  <p>Los hallazgos nuevos (<code>eventos_v2</code>, EDA, crosscheck y mapeo) cambian qué señal manda. Aquí se recorre el camino inverso: qué evento importa, qué variable lo discrimina, de qué ítem crudo sale, a qué pilar pertenece y cuánta prioridad merece. La criticidad no es uniforme: la caja que se evapora pesa más que un DSO que empeora tres días.</p>
+  <div class="hero-meta"><span>Generado el 2026-09-19 16:10</span><span>Corte 2026-09-01</span><span>Sin reescribir <code>data/</code></span></div>
+  <div class="kpis"><div class="kpi"><small>Empresas</small><strong>1.286</strong></div><div class="kpi"><small>Con facturas ERP</small><strong>785</strong></div><div class="kpi"><small>Con nóminas</small><strong>878</strong></div><div class="kpi"><small>Con deuda conectada</small><strong>378</strong></div><div class="kpi"><small>Con calendario</small><strong>40</strong></div><div class="kpi"><small>Saldo negativo</small><strong>383</strong></div></div>
+</header>
+
+<main>
+  <section class="block">
+    <h2>1 · Qué cambian los findings nuevos</h2>
+    <p class="lead">Cada hallazgo reordena prioridades: sube unas variables, baja otras y añade filtros. Estos son los que mueven la aguja.</p>
+    <div class="findings"><article class="finding">
+          <span class="ftag">E1 · sesgo de selección</span>
+          <h3>El nivel de caja de hoy no anticipa el arranque de tensión</h3>
+          <p>Medido sobre todas las filas, tener más caja parece predecir más tensión (AUC 0,68): es selección inversa, porque solo puede entrar en tensión quien hoy está sano. Dentro del conjunto en riesgo (5.722 empresa-mes, 4,5 % de evento), el nivel de caja casi no predice (|AUC−0,5| &lt; 0,03). Las señales que sí mandan son la aceleración de pérdida de clientes (0,65), la nómina irregular (0,59), la continuidad de nómina (0,40, protege) y el uso de póliza (0,35, protege).</p>
+          <div class="impact"><b>Qué prioriza</b>Reordenar prioridades: runway baja de &#x27;única verdad&#x27; a nivel/explicación; lost_accel y payroll_cv suben a P0.</div>
+        </article><article class="finding">
+          <span class="ftag">E2 · etiqueta rota</span>
+          <h3>El incumplimiento agregado mezcla cosas y parte es mecánico</h3>
+          <p>E2 marca el 29,6 % de las empresa-mes y lo domina el componente deuda &gt;90d con proveedores (17 %). El 38,6 % de las nóminas o cuotas &#x27;desaparecidas&#x27; reaparecen al mes siguiente, y el 31 % de las expansiones limpias también tienen &#x27;incumplimiento&#x27;. La versión estricta (nómina o cuota ausente 2 meses seguidos, sin proveedores) baja a 7,6 % de filas y 13,7 % de empresas.</p>
+          <div class="impact"><b>Qué prioriza</b>Trocear el evento por tipo y separar impago actual de futuro. La falta de pago es veto de decisión, no feature continua.</div>
+        </article><article class="finding">
+          <span class="ftag">Grupo · artefacto</span>
+          <h3>Un tercio de las &#x27;tensiones&#x27; son financiación intragrupo</h3>
+          <p>El 32 % de los arranques de E1 tiene más del 20 % de su flujo intragrupo (24 % en el panel). Una filial que opera con la caja justa porque la financia el grupo &#x27;entra en tensión&#x27; sin estar en riesgo individual. Al excluirlos quedan 51 de 75 arranques. La hipótesis alternativa (productos sin saldo) queda descartada: el 99 % del volumen pasa por cuentas corrientes.</p>
+          <div class="impact"><b>Qué prioriza</b>Filtro intragrupo obligatorio antes de etiquetar y antes de puntuar; el grupo entra como overlay, no como nivel.</div>
+        </article><article class="finding">
+          <span class="ftag">Features · desconexión</span>
+          <h3>Varias features del brainstorming brillaban por apagado, no por tensión</h3>
+          <p>Concentración de pagos (0,76), aceleración de pérdida de clientes (0,74), nómina irregular (0,69), continuidad de nómina (0,66) y concentración de proveedores (0,60) conservan señal. En cambio tax_miss (0,62 → 0,5) y billing_to_cash (0,54 → 0,5) se debilitan: eran sobre todo proxies de desconexión.</p>
+          <div class="impact"><b>Qué prioriza</b>Subir lost_accel, payroll_cv, payee_concentration y hhi_ap; bajar tax_miss y billing_to_cash a peso residual.</div>
+        </article><article class="finding">
+          <span class="ftag">Bache · frecuencia</span>
+          <h3>El 72 % de las empresas tiene baches, no caídas</h3>
+          <p>Por cada caída de cobros que no se recupera hay 1,66 baches. El 15 % de las caídas limpias rebotan después del horizonte y el 16,9 % de las expansiones revierten. Tratar cada mal mes como deterioro estructural llena el monitor de falsas alarmas.</p>
+          <div class="impact"><b>Qué prioriza</b>La detección de bache sube a pilar propio con peso 8-12 %: es la mayor ganancia marginal (Q4).</div>
+        </article><article class="finding">
+          <span class="ftag">Datos · cobertura</span>
+          <h3>501 empresas sin facturas y 25 % de movimientos sin categoría</h3>
+          <p>Solo 785 de 1.286 empresas tienen facturas ERP. 308.568 movimientos están DISCARDED, 243.028 tienen fecha de apunte posterior a la de valor, 77 con tipo de cambio 0, y en vencidas payment_date es un alias de due_date (~186.638). Historia por empresa: de 1 a 25 meses.</p>
+          <div class="impact"><b>Qué prioriza</b>Las features de disciplina (AR/AP) tienen cobertura estructural baja y no pueden ser el motor del score para todos. Percentiles congelados + confianza publicada.</div>
+        </article><article class="finding">
+          <span class="ftag">Voz Embat · régimen</span>
+          <h3>El mismo runway no significa lo mismo en todo negocio</h3>
+          <p>La PM de Embat (context/voz_embat.md) señala que la criticidad de la liquidez depende del sector: hay empresas que viven de la liquidez y otras para las que no es la prioridad. Un mayorista que cobra a 90 días y un negocio de cobro recurrente no deberían compartir el mismo umbral de meses de caja. La conciliación perfecta no hace falta para leer solvencia: bastan colchón y previsión.</p>
+          <div class="impact"><b>Qué prioriza</b>Modular el umbral de runway por régimen inferido (huella operativa: DSO, recurrencia de cobros, estacionalidad), no por un corte global. Refuerza runway_vs_group y añade un modificador de régimen.</div>
+        </article></div>
+  </section>
+
+  <section class="block">
+    <h2>2 · La diana: eventos y su viabilidad</h2>
+    <p class="lead">No todos los eventos sirven para calibrar. Un evento que marca el 30 % de las filas o que se dispara por un artefacto de grupo no puede ser el objetivo del score.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Evento</th><th>Definición</th><th>Tasa</th><th>Casos</th><th>Veredicto</th><th>Qué implica</th></tr></thead>
+      <tbody><tr>
+          <td><b>E1</b><small>Entrada en tensión de caja persistente</small></td>
+          <td class="def">Pasa de sano (runway ≥ 0,5 y caja ≥ 0) a tensión (caja &lt; 0 o runway &lt; 0,25) y se confirma ≥2 de 3 meses siguientes.</td>
+          <td class="num">2,7 % empresa-mes · 7,2 % empresas</td>
+          <td class="num">196 arranques brutos · 75 confirmados · 51 tras excluir financiados por el grupo</td>
+          <td><span class="vtag" style="--c:#22a06b">usable</span></td>
+          <td class="note">Sesgo de selección si se mide sobre todas las filas: en el conjunto en riesgo, la caja de hoy casi no predice (|AUC−0,5| &lt; 0,03). Medir siempre dentro del conjunto en riesgo.</td>
+        </tr><tr>
+          <td><b>E1_liq</b><small>E1 contando la póliza disponible como liquidez</small></td>
+          <td class="def">Igual que E1 pero runway = (caja + póliza disponible) / burn.</td>
+          <td class="num">2,4 % empresa-mes · 6,4 % empresas</td>
+          <td class="num">—</td>
+          <td><span class="vtag" style="--c:#1463ff">diagnóstico</span></td>
+          <td class="note">Útil como contraste: el 12 % de los E1 no se daría si la póliza cubriera el hueco. Separa ahogo real de iliquidez técnica.</td>
+        </tr><tr>
+          <td><b>E2</b><small>Incumplimiento estricto de obligación recurrente</small></td>
+          <td class="def">Nómina, cuota, IVA (2 trimestres) o deuda &gt;90d con proveedores. Versión agregada.</td>
+          <td class="num">29,6 % empresa-mes · 43,4 % empresas</td>
+          <td class="num">1.988 meses · nómina 291 · cuota 394 · IVA 37 · AP&gt;90 1.342</td>
+          <td><span class="vtag" style="--c:#e5484d">roto</span></td>
+          <td class="note">No discrimina: lo domina el componente AP&gt;90 (17 %) y el 38,6 % de nóminas/cuotas &#x27;desaparecidas&#x27; reaparecen al mes siguiente. Separar por tipo, exigir regularidad y usar la versión estricta (7,6 %).</td>
+        </tr><tr>
+          <td><b>E3</b><small>Caída estructural de cobros</small></td>
+          <td class="def">Mediana de cobros de los 6 meses siguientes &lt; 50 % de la base de 12, sin apagado y sin rebote.</td>
+          <td class="num">10,2 % empresa-mes · 26,6 % empresas</td>
+          <td class="num">581 filas · 15 % rebotan después del horizonte</td>
+          <td><span class="vtag" style="--c:#22a06b">usable</span></td>
+          <td class="note">Es el evento central de Q3/Q4. Exigir &#x27;sin rebote&#x27; quita el 36,2 % de las caídas brutas: el filtro es lo que separa caída de bache.</td>
+        </tr><tr>
+          <td><b>E4</b><small>Expansión sostenida autofinanciada</small></td>
+          <td class="def">Cobros operativos &gt;130 % de la base, caja al alza, sin más póliza dispuesta.</td>
+          <td class="num">5,9 % empresa-mes · 21,9 % empresas</td>
+          <td class="num">486 filas · 16,9 % revierten</td>
+          <td><span class="vtag" style="--c:#22a06b">usable</span></td>
+          <td class="note">Los filtros quitan el 66,8 % de las expansiones brutas: sin ellos, &#x27;crecer&#x27; marca cualquier pico puntual.</td>
+        </tr><tr>
+          <td><b>churn</b><small>Apagado (deja de operar)</small></td>
+          <td class="def">Sin movimientos de forma persistente.</td>
+          <td class="num">3,0 % empresa-mes · 9,1 % empresas</td>
+          <td class="num">—</td>
+          <td><span class="vtag" style="--c:#22a06b">usable</span></td>
+          <td class="note">La cara más extrema del deterioro. Muchas features &#x27;de desconexión&#x27; (concentración, nómina irregular) brillan aquí; no confundir ese poder con anticipación de tensión de caja.</td>
+        </tr><tr>
+          <td><b>E5</b><small>Bache</small></td>
+          <td class="def">Cobros &lt; 70 % de la mediana y recuperan ≥ 80 % en ≤ 2 meses.</td>
+          <td class="num">71,6 % de empresas con ≥12 meses</td>
+          <td class="num">por cada caída que no recupera hay 1,66 baches</td>
+          <td><span class="vtag" style="--c:#27b3c2">central</span></td>
+          <td class="note">Los baches son la norma, no la excepción. Un score que trata cada mal mes como deterioro estructural grita en falso constantemente.</td>
+        </tr><tr>
+          <td><b>E6</b><small>Sano sostenido</small></td>
+          <td class="def">≥9 meses sin E1/E2/E3, mediana de runway ≥1 y ≥3 movimientos/mes.</td>
+          <td class="num">7,9 % de las empresas</td>
+          <td class="num">102 empresas</td>
+          <td><span class="vtag" style="--c:#7c3aed">clase positiva</span></td>
+          <td class="note">Da la cara de &#x27;quién está sano&#x27; (Q1) con criterio, no solo por el nivel de score del mes.</td>
+        </tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="block">
+    <h2>3 · Back-engineering ítem → variable → pilar → prioridad</h2>
+    <p class="lead">Cada fila parte del ítem crudo de <code>data/</code> y llega a la variable, con <b>peso</b> (reparto de arranque dentro de su pilar), <b>prioridad</b>, <b>cobertura</b> y evidencia. La columna Score combina criticidad base, evidencia y cobertura: <code>100 × base × (0,55 + 0,45·evidencia) × (0,5 + 0,5·√cobertura)</code>. La evidencia es la mayor |AUC−0,5| medida (<span class="srcmark">medida</span>); cuando la variable no tiene AUC propia se usa la criticidad de marco (<span class="srcmark marco">marco</span>), porque el marco manda aunque no haya evento medible. Ni el peso ni el score son el peso final: se calibran con signo restringido (D12).</p>
+    <section class="pblock" style="--pc:#e5484d">
+              <div class="phead">
+                <div><span class="ptag">LIQ</span><h3>Liquidez y autonomía de caja</h3></div>
+                <div class="pweight">peso del pilar <b>24,2 %</b><small>6 variables · banda 22 – 26 %</small></div>
+              </div>
+              <p class="pwhy">Es la criticidad que manda: la caja que se evapora. Pero el hallazgo nuevo obliga a separar nivel de tendencia: el nivel de caja de hoy predice mal el arranque de tensión dentro del conjunto en riesgo; el cambio y la aceleración de la caja sí. Además, la voz de Embat avisa de que el umbral no es universal: el mismo runway no vale igual en un negocio de cobro recurrente que en un mayorista a 90 días, así que el corte se modula por régimen de negocio.</p>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Peso</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
+                <tbody><tr>
+                  <td><b>burn_rate</b><small>Lo que gasta al mes</small></td>
+                  <td class="item"><code>transactions.amount &lt; 0 (excluir internas e intragrupo)</code></td>
+                  <td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td>
+                  <td class="num wt"><b>4,4 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>78</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Denominador del runway. Base robusta máx(3m, 12m) para que encogerse no infle la autonomía.<small class="note">19 % del volumen es transferencia y los pares internos reales llegan al 26,8 %: hay que excluirlos.</small></td>
+                </tr><tr>
+                  <td><b>cash_end</b><small>El dinero que le queda en la cuenta</small></td>
+                  <td class="item"><code>balances.balance / available (cuenta corriente, ahorro, wallet)</code></td>
+                  <td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td>
+                  <td class="num wt"><b>4,7 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">1.273<small>99 % empresas</small></td>
+                  <td class="num prio"><b>84</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Nivel: AUC débil dentro del conjunto en riesgo. Sigue siendo P0 como estado y como disparador de veto.<small class="note">Reconstruir hacia atrás desde la foto final (D09); redondear a céntimos para que el signo no oscile.</small></td>
+                </tr><tr>
+                  <td><b>cash_negative</b><small>La cuenta está en negativo</small></td>
+                  <td class="item"><code>signo de cash_end reconstruido</code></td>
+                  <td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td>
+                  <td class="num wt"><b>3,7 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">383<small>30 % empresas</small></td>
+                  <td class="num prio"><b>67</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Dispara veto de decisión, no un punto más de score.<small class="note">No es veto automático (D26): depende de persistencia y de si el grupo cubre el desfase.</small></td>
+                </tr><tr>
+                  <td><b>cash_trend_3m</b><small>Si la cuenta se está vaciando</small></td>
+                  <td class="item"><code>Δcash_end a 3 meses</code></td>
+                  <td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td>
+                  <td class="num wt"><b>4,6 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">1.273<small>99 % empresas</small></td>
+                  <td class="num prio"><b>82</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Es la señal que el marco exige que pese más que un DSO que empeora 3 días.<small class="note">Criticidad crítica: va por delante del nivel de caja para detectar el giro.</small></td>
+                </tr><tr>
+                  <td><b>runway</b><small>Meses que aguanta con el dinero que tiene</small></td>
+                  <td class="item"><code>cash_end / burn</code></td>
+                  <td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td>
+                  <td class="num wt"><b>4,7 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">1.273<small>99 % empresas</small></td>
+                  <td class="num prio"><b>86</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,68 / 0,66 frente a E1 en la población total; cae a ~0,50 dentro del conjunto en riesgo.<small class="note">Excelente para nivel y explicación; flojo para anticipar el arranque. No confiarle la Q3 solo.</small></td>
+                </tr><tr>
+                  <td><b>liquidity_available</b><small>Crédito que aún puede disponer</small></td>
+                  <td class="item"><code>debt_products.liquidity (lineofcredit)</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>2,1 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">206<small>16 % empresas</small></td>
+                  <td class="num prio"><b>37</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">lc_util 0,30 frente a E1 (usar la póliza protege) y 0,35 en el conjunto en riesgo.<small class="note">Casi nunca reportado: tratarlo como cobertura, no como cero.</small></td>
+                </tr></tbody>
+              </table></div>
+            </section><section class="pblock" style="--pc:#1463ff">
+              <div class="phead">
+                <div><span class="ptag">AR</span><h3>Cobros y ciclo de cliente (AR)</h3></div>
+                <div class="pweight">peso del pilar <b>20,2 %</b><small>8 variables · banda 18 – 22 %</small></div>
+              </div>
+              <p class="pwhy">La caída limpia de cobros (E3) y el apagado son los eventos que esta señal anticipa. La pérdida de clientes y su aceleración son la mejor señal temprana; el DSO puro apenas mueve el ranking.</p>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Peso</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
+                <tbody><tr>
+                  <td><b>lost_accel</b><small>Si la pérdida de clientes se acelera</small></td>
+                  <td class="item"><code>lost_share_m − lost_share_{m-3m}</code></td>
+                  <td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td>
+                  <td class="num wt"><b>4,5 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">742<small>58 % empresas</small></td>
+                  <td class="num prio"><b>85</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,74 vs apagado y 0,65 frente a E1 en el conjunto en riesgo: la mejor señal de arranque.<small class="note">Sube de P2 (brainstorming) a P0: es exactamente lo que E1 necesita.</small></td>
+                </tr><tr>
+                  <td><b>ar_overdue_90_ratio</b><small>Lo que le deben y lleva más de 90 días</small></td>
+                  <td class="item"><code>invoices AR con due_date &gt; 2m</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>2,3 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">694<small>54 % empresas</small></td>
+                  <td class="num prio"><b>43</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">Separa mora reciente de un stock que ya no se cobra. AUC 0,58 vs E2.<small class="note">Mezclar mora y stock eterno infla el deterioro.</small></td>
+                </tr><tr>
+                  <td><b>cust_trend</b><small>Si factura a más o menos clientes</small></td>
+                  <td class="item"><code>nº clientes AR 3m vs 12m</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>2,5 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">742<small>58 % empresas</small></td>
+                  <td class="num prio"><b>47</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,39 vs apagado: perder amplitud de cartera avisa antes que la caja.<small class="note">63.814 clientes distintos en facturas emitidas.</small></td>
+                </tr><tr>
+                  <td><b>hhi_ar_6m</b><small>Si depende de pocos clientes</small></td>
+                  <td class="item"><code>HHI de invoices AR por counterparty_id (6m)</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>2,1 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">742<small>58 % empresas</small></td>
+                  <td class="num prio"><b>39</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">Señal de cartera para la aseguradora; AUC 0,52-0,54 (moderada sola, potente en combinación).<small class="note">Concentración de contraparte = prima de impago, no necesariamente tensión de caja.</small></td>
+                </tr><tr>
+                  <td><b>lost_share</b><small>La facturación de clientes que ya no le compran</small></td>
+                  <td class="item"><code>facturación de clientes que ya no compran (3m vs 3-12m)</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>3,1 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">742<small>58 % empresas</small></td>
+                  <td class="num prio"><b>59</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,72 vs apagado, 0,60 vs E3, pero 0,45-0,48 vs E1/E2: es señal de declive, no de caja.<small class="note">La señal más temprana de apagado (D11, D24).</small></td>
+                </tr><tr>
+                  <td><b>overdue_ar</b><small>Facturas de clientes vencidas y sin cobrar</small></td>
+                  <td class="item"><code>invoices AR con pending_amount≠0 y status≠paid</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>2,3 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">694<small>54 % empresas</small></td>
+                  <td class="num prio"><b>43</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Mide stock de impago, no flujo; complementa al DSO.<small class="note">12,5 % del AR emitido está vencido y abierto (18,8 B).</small></td>
+                </tr><tr>
+                  <td><b>ar_late_share</b><small>Cuánto tarda en cobrar (DSO)</small></td>
+                  <td class="item"><code>invoices.due_date vs payment_date (lado AR)</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt"><b>1,6 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">742<small>58 % empresas</small></td>
+                  <td class="num prio"><b>30</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,62 vs apagado, 0,55 vs E3. Crítica media por el marco: unos días no deben dominar.<small class="note">34 % de pago tardío bruto. payment_date no es fiable en vencidas (alias de due_date).</small></td>
+                </tr><tr>
+                  <td><b>billing_to_cash</b><small>Cuánto de su cobro está respaldado por facturas emitidas</small></td>
+                  <td class="item"><code>ar_issued 3m / oper_in 3m</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt"><b>1,8 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">785<small>61 % empresas</small></td>
+                  <td class="num prio"><b>34</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,57 vs E4 y 0,33 vs apagado: su fuerza era sobre todo desconexión.<small class="note">Se debilita al separar apagado de tensión. Mantener con peso bajo.</small></td>
+                </tr></tbody>
+              </table></div>
+            </section><section class="pblock" style="--pc:#b4530a">
+              <div class="phead">
+                <div><span class="ptag">DEBT</span><h3>Endeudamiento y obligaciones recurrentes</h3></div>
+                <div class="pweight">peso del pilar <b>18,2 %</b><small>11 variables · banda 16 – 20 %</small></div>
+              </div>
+              <p class="pwhy">Aquí vive el incumplimiento (E2), que el hallazgo nuevo obliga a trocear: nómina, Seguridad Social, IVA y cuota se comportan distinto, y la falta de pago es más veto que feature continua. La póliza disponible, en cambio, protege (AUC 0,35 frente a E1).</p>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Peso</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
+                <tbody><tr>
+                  <td><b>impago_nomina / ss / iva / cuota</b><small>Deja de pagar una obligación que pagaba siempre</small></td>
+                  <td class="item"><code>regularidad de salary, social_security, tax, debt_repayment</code></td>
+                  <td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td>
+                  <td class="num wt"><b>3,3 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">878<small>68 % empresas</small></td>
+                  <td class="num prio"><b>81</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Evento, no feature: se separa por tipo y exige regularidad e historial de pago.<small class="note">38,6 % de las ausencias se retoman al mes siguiente: sin exigir regularidad, es ruido.</small></td>
+                </tr><tr>
+                  <td><b>payroll_cv</b><small>Si la nómina es irregular</small></td>
+                  <td class="item"><code>coeficiente de variación de salary mensual</code></td>
+                  <td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td>
+                  <td class="num wt"><b>3,0 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">878<small>68 % empresas</small></td>
+                  <td class="num prio"><b>80</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,69 vs apagado y 0,59 frente a E1 en el conjunto en riesgo.<small class="note">Nómina irregular = tensión real. Sube a P0 junto a lost_accel.</small></td>
+                </tr><tr>
+                  <td><b>debt_service_burden</b><small>Lo que paga de cuotas sobre lo que ingresa</small></td>
+                  <td class="item"><code>debt_repayment + interest_charge / inflow</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>1,6 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">718<small>56 % empresas</small></td>
+                  <td class="num prio"><b>43</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">AUC 0,56 vs E2. Pagar deuda con deuda nueva es la tarjeta que tapa el agujero.<small class="note">718 empresas pagando deuda por categoría.</small></td>
+                </tr><tr>
+                  <td><b>debt_utilization</b><small>Cuánto de su deuda total está viva</small></td>
+                  <td class="item"><code>debt_products outstanding/granted (todos los tipos)</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>1,4 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">378<small>29 % empresas</small></td>
+                  <td class="num prio"><b>37</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">41,7 % de utilización mediana. Signo sucio: pasar a pasivo canónico.<small class="note">La foto es final; proyectarla hacia atrás filtra información (D11).</small></td>
+                </tr><tr>
+                  <td><b>lc_util</b><small>Cuánto tiene dispuesto de su póliza</small></td>
+                  <td class="item"><code>debt_products.outstanding / granted (lineofcredit)</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>1,7 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">206<small>16 % empresas</small></td>
+                  <td class="num prio"><b>45</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,30 vs E1: usarla protege. Para nivel, dispuesto cerca del concedido = ahogo.<small class="note">45 % de utilización mediana de póliza. 206 empresas con línea.</small></td>
+                </tr><tr>
+                  <td><b>new_debt_vs_cash</b><small>Pide crédito nuevo mientras la caja cae</small></td>
+                  <td class="item"><code>debt_products.granted por fecha vs Δcash</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>1,5 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">378<small>29 % empresas</small></td>
+                  <td class="num prio"><b>41</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">La tarjeta que tapa el agujero. Sin AUC propia: la foto de deuda es final (D11).<small class="note">Usar los flujos de debt_repayment como proxy mensual; la foto solo para nivel.</small></td>
+                </tr><tr>
+                  <td><b>payroll_continuity_6m</b><small>Si paga la nómina todos los meses</small></td>
+                  <td class="item"><code>presencia mensual de category=salary</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>2,0 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">878<small>68 % empresas</small></td>
+                  <td class="num prio"><b>54</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,40 vs E1 en el conjunto en riesgo (la continuidad protege); 0,66 vs apagado.<small class="note">Su ausencia es veto de decisión (no prestar hasta ver la siguiente), no un punto más.</small></td>
+                </tr><tr>
+                  <td><b>schedule_pressure</b><small>Cuánto le vence próximamente</small></td>
+                  <td class="item"><code>debt_schedule_config.next_payment_date, total_periods, outstanding_balance</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>1,2 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">40<small>3 % empresas</small></td>
+                  <td class="num prio"><b>32</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Cuotas contractuales: la caja tiene que llegar a cada vencimiento. Disparador condicional.<small class="note">Solo 87 préstamos con calendario y 40 empresas: señal rara pero decisiva cuando existe.</small></td>
+                </tr><tr>
+                  <td><b>factoring_confirming</b><small>Cuánto anticipa o confirma con bancos</small></td>
+                  <td class="item"><code>debt_products.type in (factoring, confirming)</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt"><b>0,7 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">74<small>6 % empresas</small></td>
+                  <td class="num prio"><b>18</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Uso intensivo = financiar circulante que no cobra. Sin AUC fuerte medida aún.<small class="note">378 empresas con producto de deuda; factoring/confirming son la cola.</small></td>
+                </tr><tr>
+                  <td><b>interest_rate</b><small>El interés que le cobran</small></td>
+                  <td class="item"><code>debt_schedule_config.annual_interest_rate_or_spread</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt"><b>0,6 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">40<small>3 % empresas</small></td>
+                  <td class="num prio"><b>17</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Coste financiero que anticipa tensión si el margen es estrecho.<small class="note">Alimenta cobertura de intereses.</small></td>
+                </tr><tr>
+                  <td><b>tax_miss</b><small>Si deja de pagar impuestos</small></td>
+                  <td class="item"><code>category=tax en meses fiscales (ene/abr/jul/oct)</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt"><b>1,2 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">1.155<small>90 % empresas</small></td>
+                  <td class="num prio"><b>33</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,62 vs apagado pero solo 0,5 frente a E1-E4: señal débil de tensión.<small class="note">IVA ausente 2 trimestres seguidos es componente de E2 (1,1 %, 3,1 % empresas).</small></td>
+                </tr></tbody>
+              </table></div>
+            </section><section class="pblock" style="--pc:#22a06b">
+              <div class="phead">
+                <div><span class="ptag">CF</span><h3>Generación de caja / actividad operativa</h3></div>
+                <div class="pweight">peso del pilar <b>14,1 %</b><small>5 variables · banda 12 – 16 %</small></div>
+              </div>
+              <p class="pwhy">La tendencia de actividad es la señal más &#x27;en tiempo real&#x27; (persistencia lag-1 0,97 es nivel, pero su caída precede al apagado). El margen neto, en cambio, revierte a la media: mucho peso ahí es ruido.</p>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Peso</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
+                <tbody><tr>
+                  <td><b>oper_share</b><small>Cuánto de lo que entra es cobro de su negocio</small></td>
+                  <td class="item"><code>category in (collection, bulk_collection, pos_settlement, cash_settlement)</code></td>
+                  <td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td>
+                  <td class="num wt"><b>4,7 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">1.264<small>98 % empresas</small></td>
+                  <td class="num prio"><b>75</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Base de la generación operativa; distingue negocio real de transferencias.<small class="note">1.264 de 1.286 empresas tienen algún cobro.</small></td>
+                </tr><tr>
+                  <td><b>activity_trend</b><small>Si se mueve menos dinero que antes</small></td>
+                  <td class="item"><code>nº de movimientos 3m vs 12m</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>3,6 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>57</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,60 vs E4 y 0,41 vs apagado: se apaga antes de caer. Persistencia lag-1 0,97 (muy estructural).<small class="note">Lead indicator de apagado. Su caída es de las primeras cosas que se ve.</small></td>
+                </tr><tr>
+                  <td><b>growth_vs_12m</b><small>Si factura más que su media anual</small></td>
+                  <td class="item"><code>inflow 3m vs inflow 12m</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt"><b>2,0 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>32</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,59 vs E4 (expansión), 0,41 vs E3. Sirve para Q2, no para riesgo.<small class="note">La cara positiva es más débil que la de deterioro: usar previsión simétrica.</small></td>
+                </tr><tr>
+                  <td><b>net_margin_6m</b><small>Si cobra más de lo que gasta</small></td>
+                  <td class="item"><code>(inflow - outflow) / (inflow + outflow)</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt"><b>1,7 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>27</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC ≈ 0,50-0,52 en todos los eventos. Persistencia lag-1 0,51: revierte a la media.<small class="note">Candidata a bajar peso: explica, no discrimina.</small></td>
+                </tr><tr>
+                  <td><b>oper_persistence_6m</b><small>Si su operación sigue activa la mayoría de los meses</small></td>
+                  <td class="item"><code>oper_in &gt;= 50 % mediana 12m en últimos 6m</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt"><b>2,1 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">1.264<small>98 % empresas</small></td>
+                  <td class="num prio"><b>33</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,39 vs E3 (protege) y 0,56 vs E4. Persistencia alta.<small class="note">Pieza de bache vs estructural: poca persistencia = la operación se está apagando.</small></td>
+                </tr></tbody>
+              </table></div>
+            </section><section class="pblock" style="--pc:#f59e0b">
+              <div class="phead">
+                <div><span class="ptag">AP</span><h3>Pagos y disciplina con proveedores</h3></div>
+                <div class="pweight">peso del pilar <b>9,6 %</b><small>4 variables · banda 8 – 11 %</small></div>
+              </div>
+              <p class="pwhy">El vencido a proveedores es el mejor discriminador crudo de E2 (0,72), pero E2 está contaminado: parte de su señal es mecánica. La concentración de pagos anticipa muy bien el apagado (0,76).</p>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Peso</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
+                <tbody><tr>
+                  <td><b>ap_overdue_ratio</b><small>Lo que debe a proveedores y ya venció</small></td>
+                  <td class="item"><code>overdue AP / salidas medias 3m</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>2,7 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">761<small>59 % empresas</small></td>
+                  <td class="num prio"><b>59</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,72 frente a E2: el mejor discriminador crudo de incumplimiento.<small class="note">Pero E2 está contaminado por su propio componente AP&gt;90. Valorar con la versión estricta.</small></td>
+                </tr><tr>
+                  <td><b>payee_concentration</b><small>Si concentra sus pagos en pocos proveedores</small></td>
+                  <td class="item"><code>HHI de transactions.amount&lt;0 por counterparty_id (3m)</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>3,3 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>72</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,76 vs apagado y 0,62 vs E3. Sobrevive al control de desconexión.<small class="note">Riesgo de cadena de suministro: si cae el proveedor clave, cae la operación.</small></td>
+                </tr><tr>
+                  <td><b>payroll_burden</b><small>Cuánto de lo que entra se va en nóminas</small></td>
+                  <td class="item"><code>salary + social_security / inflow</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>2,0 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">878<small>68 % empresas</small></td>
+                  <td class="num prio"><b>43</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">Coste rígido. Persistencia lag-1 0,95: muy estructural.<small class="note">878 empresas con nóminas registradas. Si no se cubre con cobros, se vive de deuda o caja.</small></td>
+                </tr><tr>
+                  <td><b>ap_late_share</b><small>Cuánto tarda en pagar (DPO)</small></td>
+                  <td class="item"><code>invoices.due_date vs payment_date (lado AP)</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt"><b>1,6 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">783<small>61 % empresas</small></td>
+                  <td class="num prio"><b>36</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,70 vs apagado, 0,61 vs E2. Persistencia 0,65: cambia mes a mes, útil para timing.<small class="note">Pagar tarde puede ser tensión o abuso de posición: se lee junto a la caja.</small></td>
+                </tr></tbody>
+              </table></div>
+            </section><section class="pblock" style="--pc:#27b3c2">
+              <div class="phead">
+                <div><span class="ptag">STAB</span><h3>Estabilidad: bache vs caída</h3></div>
+                <div class="pweight">peso del pilar <b>10,1 %</b><small>6 variables · banda 8 – 12 %</small></div>
+              </div>
+              <p class="pwhy">El 72 % de las empresas tiene baches. La volatilidad a la baja y el stress multi-señal separan el mal mes del deterioro. Es la pregunta 4 y hoy es la más floja: aquí está la mayor ganancia marginal.</p>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Peso</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
+                <tbody><tr>
+                  <td><b>multi_signal_stress</b><small>Cuántas señales se activan a la vez</small></td>
+                  <td class="item"><code>cuenta de 4 señales: cobros, actividad, clientes, caja</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>2,8 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>52</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,60 vs E3. Varias señales a la vez = deterioro, no ruido.<small class="note">Clave para la pregunta 4.</small></td>
+                </tr><tr>
+                  <td><b>net_vol_6m</b><small>Cuánto se le hunde la caja en meses malos</small></td>
+                  <td class="item"><code>semidesviación a la baja del flujo neto / gasto</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt"><b>2,6 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>50</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC 0,56/0,58 frente a E1. Persistencia 0,93: rasgo estructural de la empresa.<small class="note">Se ancla al gasto, no a la caja (D25).</small></td>
+                </tr><tr>
+                  <td><b>shock_vs_usual</b><small>Si el golpe fue grande o pequeño</small></td>
+                  <td class="item"><code>|flujo neto negativo| / mediana de meses negativos</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt"><b>1,6 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>31</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Separa bache de deterioro. Evidencia preliminar 0,57.<small class="note">Necesita historia de meses negativos; cobertura irregular.</small></td>
+                </tr><tr>
+                  <td><b>vol_asymmetry</b><small>Si su volatilidad es de ciclo o solo de caída</small></td>
+                  <td class="item"><code>volatilidad al alza / volatilidad a la baja (6m)</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt"><b>1,7 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>32</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Propuesta de brainstorming (≈0,61 vs crecimiento). Sin medir contra E1-E4 todavía.<small class="note">Pendiente de validar; no meter con peso alto sin evidencia.</small></td>
+                </tr><tr>
+                  <td><b>credit_notes</b><small>Notas de crédito emitidas</small></td>
+                  <td class="item"><code>invoices.document_type in (note, refund)</code></td>
+                  <td><span class="crit" style="--c:#27b3c2">P3 · bache/contexto</span></td>
+                  <td class="num wt"><b>0,7 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">785<small>61 % empresas</small></td>
+                  <td class="num prio"><b>14</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Puede revertir facturación ya emitida: se lee aparte del declive.<small class="note">7,8 % de documentos no-factura sobre el total ERP.</small></td>
+                </tr><tr>
+                  <td><b>refund_rate</b><small>Reembolsos y devoluciones</small></td>
+                  <td class="item"><code>category in (collection_refund, payment_refund)</code></td>
+                  <td><span class="crit" style="--c:#27b3c2">P3 · bache/contexto</span></td>
+                  <td class="num wt"><b>0,7 %</b><small>del score total</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">587<small>46 % empresas</small></td>
+                  <td class="num prio"><b>13</b><small><span class="srcmark">medida</span></small></td>
+                  <td class="ev">AUC ≈ 0,50 y 88 % de filas a cero en el análisis previo.<small class="note">Pico puntual, no deterioro estructural. Candidata a quitar o peso mínimo.</small></td>
+                </tr></tbody>
+              </table></div>
+            </section><section class="pblock" style="--pc:#7c3aed">
+              <div class="phead">
+                <div><span class="ptag">SOLV</span><h3>Solvencia y capacidad de cobertura</h3></div>
+                <div class="pweight">peso del pilar <b>3,5 %</b><small>2 variables · banda 2 – 5 %</small></div>
+              </div>
+              <p class="pwhy">El margen y la cobertura de intereses apenas separan eventos en este dataset (AUC ≈ 0,50). Se mantienen como contexto explicativo y para el corte de decisión de crédito, no como motor del score.</p>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Peso</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
+                <tbody><tr>
+                  <td><b>interest_coverage</b><small>Cuántas veces cubre sus cuotas con lo que cobra</small></td>
+                  <td class="item"><code>oper_in / (interest_charge + debt_service)</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt"><b>1,6 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">718<small>56 % empresas</small></td>
+                  <td class="num prio"><b>24</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Contexto de solvencia. En este dataset separa poco (AUC ≈ 0,50).<small class="note">Sirve para el corte de crédito y la explicación, no como motor del score.</small></td>
+                </tr><tr>
+                  <td><b>self_funding</b><small>Si crece sin pedir más crédito</small></td>
+                  <td class="item"><code>Δcaja vs Δlc_drawn</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt"><b>1,9 %</b><small>del score total</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>30</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Filtro de la expansión limpia (E4): los filtros quitan 66,8 % de las expansiones brutas.<small class="note">Distingue crecer de verdad de apalancarse para crecer.</small></td>
+                </tr></tbody>
+              </table></div>
+            </section><section class="pblock" style="--pc:#0e7490">
+              <div class="phead">
+                <div><span class="ptag">GRP</span><h3>Grupo y contagio</h3></div>
+                <div class="pweight">peso del pilar <b>0,0 %</b><small>4 variables · no puntúa (modificador)</small></div>
+              </div>
+              <p class="pwhy">El 32 % de los arranques de E1 son filiales financiadas por su grupo: entran en &#x27;tensión&#x27; sin estar en riesgo individual. El runway relativo al grupo y la dependencia intragrupo son modificadores, no features de nivel. Aquí entra también el régimen de negocio: fija qué runway es aceptable para cada tipo de empresa.</p>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Peso</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
+                <tbody><tr>
+                  <td><b>intragroup_dependency</b><small>Si vive de que le transfiera el grupo</small></td>
+                  <td class="item"><code>pares de transactions mismo grupo/día/importe opuesto</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt noW">—<small>overlay</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>57</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">El 32 % de los arranques de E1 tiene &gt;20 % de flujo intragrupo; excluirlos deja 51 de 75.<small class="note">Filtro obligatorio: sin él, las filiales financiadas por el grupo parecen en tensión sin estarlo.</small></td>
+                </tr><tr>
+                  <td><b>runway_vs_group</b><small>Si va peor que sus empresas hermanas</small></td>
+                  <td class="item"><code>runway − mediana(runway del group_id)</code></td>
+                  <td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td>
+                  <td class="num wt noW">—<small>overlay</small></td>
+                  <td class="dir">↑ sano</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>49</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">AUC 0,57 vs estructural. Modificador, no feature de nivel.<small class="note">Cobertura casi total (grupos de 1 a 24 empresas, mediana 2).</small></td>
+                </tr><tr>
+                  <td><b>group_stress</b><small>Si el grupo entero está tenso</small></td>
+                  <td class="item"><code>agregado de tension_np_raw por group_id</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt noW">—<small>overlay</small></td>
+                  <td class="dir">↓ sano</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>32</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Diagnóstico para la decisión de crédito, aparte del score individual.<small class="note">No marcar automáticamente como sana a la empresa financiada por su grupo, ni al contrario.</small></td>
+                </tr><tr>
+                  <td><b>operating_regime</b><small>Qué régimen de negocio tiene (cobro recurrente vs ciclo largo)</small></td>
+                  <td class="item"><code>huella operativa: DSO, recurrencia de collection, estacionalidad de inflow, nº de clientes</code></td>
+                  <td><span class="crit" style="--c:#1463ff">P2 · medio</span></td>
+                  <td class="num wt noW">—<small>overlay</small></td>
+                  <td class="dir">neutro</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>31</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">La PM de Embat: la criticidad de la liquidez depende del sector. No es señal de salud, es el contexto que fija el umbral.<small class="note">Inferir régimen (huella operativa) y modular el umbral de runway y el peso de la caja; no usarlo como nivel.</small></td>
+                </tr></tbody>
+              </table></div>
+            </section><section class="pblock" style="--pc:#64748b">
+              <div class="phead">
+                <div><span class="ptag">OBS</span><h3>Observabilidad (no es salud)</h3></div>
+                <div class="pweight">peso del pilar <b>0,0 %</b><small>6 variables · no puntúa (modificador)</small></div>
+              </div>
+              <p class="pwhy">ERP, conciliación, categoría y país son huecos de cobertura. Bajan la confianza del score, nunca el nivel. Con 501 empresas sin facturas y 25 % de movimientos sin categoría, confundirlos con riesgo es el error más caro.</p>
+              <div class="table-wrap"><table>
+                <thead><tr><th>Variable</th><th>Ítem crudo en data/</th><th>Prioridad</th><th>Peso</th><th>Dirección</th><th>Cobertura</th><th>Score</th><th>Evidencia y cautela</th></tr></thead>
+                <tbody><tr>
+                  <td><b>currency_exposure</b><small>Cuánto mueve en otra divisa</small></td>
+                  <td class="item"><code>product.currency vs company.currency + exchange_rate</code></td>
+                  <td><span class="crit" style="--c:#64748b">Cobertura</span></td>
+                  <td class="num wt noW">—<small>cobertura</small></td>
+                  <td class="dir">neutro</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>3</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">28 divisas; 77 filas con fx=0.<small class="note">No agregar sin conversión; corrige con tipo real (D03).</small></td>
+                </tr><tr>
+                  <td><b>erp_connected</b><small>Si deja ver sus facturas</small></td>
+                  <td class="item"><code>companies.erp / groups.erp / presencia de invoices</code></td>
+                  <td><span class="crit" style="--c:#64748b">Cobertura</span></td>
+                  <td class="num wt noW">—<small>cobertura</small></td>
+                  <td class="dir">neutro</td>
+                  <td class="num">785<small>61 % empresas</small></td>
+                  <td class="num prio"><b>2</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">57,9 % con ERP; 501 empresas sin facturas.<small class="note">Cobertura, no salud: baja la confianza, no el nivel.</small></td>
+                </tr><tr>
+                  <td><b>history_length</b><small>Cuánto tiempo lleva en la plataforma</small></td>
+                  <td class="item"><code>companies.created_at / products.created_at</code></td>
+                  <td><span class="crit" style="--c:#64748b">Cobertura</span></td>
+                  <td class="num wt noW">—<small>cobertura</small></td>
+                  <td class="dir">neutro</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>3</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">Historia de 1 a 25 meses; 397 empresas con &lt;12 meses.<small class="note">Percentiles congelados en train + confianza publicada (D16, D17).</small></td>
+                </tr><tr>
+                  <td><b>internal_flow</b><small>Traspasos entre sus propias cuentas</small></td>
+                  <td class="item"><code>pares mismo día/importe opuesto; intragrupo</code></td>
+                  <td><span class="crit" style="--c:#64748b">Cobertura</span></td>
+                  <td class="num wt noW">—<small>cobertura</small></td>
+                  <td class="dir">neutro</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>3</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">19 % del volumen por categoría; pares internos reales hasta 26,8 %.<small class="note">Excluir antes de medir cobros, pagos y quema.</small></td>
+                </tr><tr>
+                  <td><b>reconciliation</b><small>Si lleva la contabilidad al día</small></td>
+                  <td class="item"><code>transactions.accounting_status</code></td>
+                  <td><span class="crit" style="--c:#64748b">Cobertura</span></td>
+                  <td class="num wt noW">—<small>cobertura</small></td>
+                  <td class="dir">neutro</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>3</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">20,7 % conciliado; 308.568 movimientos DISCARDED.<small class="note">Es proceso, no solvencia.</small></td>
+                </tr><tr>
+                  <td><b>uncat_share</b><small>Cuánto movimiento no está etiquetado</small></td>
+                  <td class="item"><code>transactions.category in (&#x27;-&#x27;, null)</code></td>
+                  <td><span class="crit" style="--c:#64748b">Cobertura</span></td>
+                  <td class="num wt noW">—<small>cobertura</small></td>
+                  <td class="dir">neutro</td>
+                  <td class="num">1.286<small>100 % empresas</small></td>
+                  <td class="num prio"><b>3</b><small><span class="srcmark marco">marco</span></small></td>
+                  <td class="ev">24,9 % de movimientos sin categoría.<small class="note">No imputar salud a ese hueco (afecta sobre todo a cobros y pagos).</small></td>
+                </tr></tbody>
+              </table></div>
+            </section>
+  </section>
+
+  <section class="block">
+    <h2>4 · Prioridad por grupo (pilar) y reparto de pesos</h2>
+    <p class="lead">El peso de cada variable sale del peso del pilar repartido por prioridad: <code>peso_var = peso_pilar × prioridad / Σ prioridad del pilar</code>. Los pilares puntuables se normalizan a 100; <b>GRP</b> es modificador y <b>OBS</b> no puntúa. Es un reparto de arranque: los pesos finales se calibran con signo restringido (D12).</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Pilar</th><th>Peso (banda / realizado)</th><th>Variables</th><th>Reparto dentro del pilar</th></tr></thead>
+      <tbody><tr>
+          <td><b>LIQ</b><small>Liquidez y autonomía de caja</small></td>
+          <td class="num w">22 – 26 %<small>realizado 24,2 %</small></td>
+          <td class="num">6<small>variables</small></td>
+          <td><code>burn_rate</code> <span class='wchip'>4,4 %</span>, <code>cash_end</code> <span class='wchip'>4,7 %</span>, <code>cash_negative</code> <span class='wchip'>3,7 %</span>, <code>cash_trend_3m</code> <span class='wchip'>4,6 %</span>, <code>runway</code> <span class='wchip'>4,7 %</span>, <code>liquidity_available</code> <span class='wchip'>2,1 %</span></td>
+        </tr><tr>
+          <td><b>AR</b><small>Cobros y ciclo de cliente (AR)</small></td>
+          <td class="num w">18 – 22 %<small>realizado 20,2 %</small></td>
+          <td class="num">8<small>variables</small></td>
+          <td><code>lost_accel</code> <span class='wchip'>4,5 %</span>, <code>ar_overdue_90_ratio</code> <span class='wchip'>2,3 %</span>, <code>cust_trend</code> <span class='wchip'>2,5 %</span>, <code>hhi_ar_6m</code> <span class='wchip'>2,1 %</span>, <code>lost_share</code> <span class='wchip'>3,1 %</span>, <code>overdue_ar</code> <span class='wchip'>2,3 %</span>, <code>ar_late_share</code> <span class='wchip'>1,6 %</span>, <code>billing_to_cash</code> <span class='wchip'>1,8 %</span></td>
+        </tr><tr>
+          <td><b>DEBT</b><small>Endeudamiento y obligaciones recurrentes</small></td>
+          <td class="num w">16 – 20 %<small>realizado 18,2 %</small></td>
+          <td class="num">11<small>variables</small></td>
+          <td><code>impago_nomina / ss / iva / cuota</code> <span class='wchip'>3,3 %</span>, <code>payroll_cv</code> <span class='wchip'>3,0 %</span>, <code>debt_service_burden</code> <span class='wchip'>1,6 %</span>, <code>debt_utilization</code> <span class='wchip'>1,4 %</span>, <code>lc_util</code> <span class='wchip'>1,7 %</span>, <code>new_debt_vs_cash</code> <span class='wchip'>1,5 %</span>, <code>payroll_continuity_6m</code> <span class='wchip'>2,0 %</span>, <code>schedule_pressure</code> <span class='wchip'>1,2 %</span>, <code>factoring_confirming</code> <span class='wchip'>0,7 %</span>, <code>interest_rate</code> <span class='wchip'>0,6 %</span>, <code>tax_miss</code> <span class='wchip'>1,2 %</span></td>
+        </tr><tr>
+          <td><b>CF</b><small>Generación de caja / actividad operativa</small></td>
+          <td class="num w">12 – 16 %<small>realizado 14,1 %</small></td>
+          <td class="num">5<small>variables</small></td>
+          <td><code>oper_share</code> <span class='wchip'>4,7 %</span>, <code>activity_trend</code> <span class='wchip'>3,6 %</span>, <code>growth_vs_12m</code> <span class='wchip'>2,0 %</span>, <code>net_margin_6m</code> <span class='wchip'>1,7 %</span>, <code>oper_persistence_6m</code> <span class='wchip'>2,1 %</span></td>
+        </tr><tr>
+          <td><b>AP</b><small>Pagos y disciplina con proveedores</small></td>
+          <td class="num w">8 – 11 %<small>realizado 9,6 %</small></td>
+          <td class="num">4<small>variables</small></td>
+          <td><code>ap_overdue_ratio</code> <span class='wchip'>2,7 %</span>, <code>payee_concentration</code> <span class='wchip'>3,3 %</span>, <code>payroll_burden</code> <span class='wchip'>2,0 %</span>, <code>ap_late_share</code> <span class='wchip'>1,6 %</span></td>
+        </tr><tr>
+          <td><b>STAB</b><small>Estabilidad: bache vs caída</small></td>
+          <td class="num w">8 – 12 %<small>realizado 10,1 %</small></td>
+          <td class="num">6<small>variables</small></td>
+          <td><code>multi_signal_stress</code> <span class='wchip'>2,8 %</span>, <code>net_vol_6m</code> <span class='wchip'>2,6 %</span>, <code>shock_vs_usual</code> <span class='wchip'>1,6 %</span>, <code>vol_asymmetry</code> <span class='wchip'>1,7 %</span>, <code>credit_notes</code> <span class='wchip'>0,7 %</span>, <code>refund_rate</code> <span class='wchip'>0,7 %</span></td>
+        </tr><tr>
+          <td><b>SOLV</b><small>Solvencia y capacidad de cobertura</small></td>
+          <td class="num w">2 – 5 %<small>realizado 3,5 %</small></td>
+          <td class="num">2<small>variables</small></td>
+          <td><code>interest_coverage</code> <span class='wchip'>1,6 %</span>, <code>self_funding</code> <span class='wchip'>1,9 %</span></td>
+        </tr><tr>
+          <td><b>GRP</b><small>Grupo y contagio</small></td>
+          <td class="num w">overlay<small>realizado 0,0 %</small></td>
+          <td class="num">4<small>variables</small></td>
+          <td><code>intragroup_dependency</code>, <code>runway_vs_group</code>, <code>group_stress</code>, <code>operating_regime</code></td>
+        </tr><tr>
+          <td><b>OBS</b><small>Observabilidad (no es salud)</small></td>
+          <td class="num w">0 % (confianza)<small>realizado 0,0 %</small></td>
+          <td class="num">6<small>variables</small></td>
+          <td><code>currency_exposure</code>, <code>erp_connected</code>, <code>history_length</code>, <code>internal_flow</code>, <code>reconciliation</code>, <code>uncat_share</code></td>
+        </tr></tbody>
+    </table></div>
+    <p class="caveat-note">El pilar <b>GRP</b> actúa como modificador (filtro intragrupo, comparación con hermanas y régimen de negocio), así que sus variables no suman al score. <b>OBS</b> tampoco puntúa: ajusta la confianza. El resto reparte 100 % entre sus variables.</p>
+  </section>
+
+  <section class="block">
+    <h2>5 · Matriz evento × variable (AUC medida)</h2>
+    <p class="lead">AUC de cada variable frente a cada evento a 6 meses. <b>Verde</b> = |AUC−0,5| ≥ 0,10 (separa). En <i>churn</i> muchas features brillan porque detectan desconexión; contra E1/E2/E3 la cosa cambia. La etiqueta <span class="bs">brainstorm</span> marca las propuestas nuevas; <span class="risk">E1 en riesgo</span> es la corrección clave del sesgo de selección.</p>
+    <div class="table-wrap"><table class="auc-table">
+      <thead><tr><th>Variable</th><th>E1</th><th>E1_liq</th><th>E2</th><th>E3</th><th>E4</th><th>churn</th></tr></thead>
+      <tbody><tr><td><b>runway</b></td><td class="auc sig">0.68</td><td class="auc sig">0.66</td><td class="auc flat">0.49</td><td class="auc flat">0.49</td><td class="auc mild">0.44</td><td class="auc flat">0.51</td></tr><tr><td><b>lc_util</b><small class="risk">E1 en riesgo: 0.35</small></td><td class="auc sig">0.30</td><td class="auc mild">0.40</td><td class="auc flat">0.48</td><td class="auc mild">0.44</td><td class="auc flat">0.46</td><td class="auc sig">0.30</td></tr><tr><td><b>net_margin_6m</b></td><td class="auc flat">0.51</td><td class="auc flat">0.49</td><td class="auc flat">0.52</td><td class="auc flat">0.52</td><td class="auc flat">0.47</td><td class="auc flat">0.48</td></tr><tr><td><b>growth_vs_12m</b></td><td class="auc flat">0.46</td><td class="auc mild">0.43</td><td class="auc flat">0.52</td><td class="auc mild">0.41</td><td class="auc mild">0.59</td><td class="auc flat">0.48</td></tr><tr><td><b>debt_burden</b></td><td class="auc flat">0.48</td><td class="auc flat">0.49</td><td class="auc mild">0.56</td><td class="auc flat">0.47</td><td class="auc flat">0.47</td><td class="auc flat">0.45</td></tr><tr><td><b>payroll_burden</b></td><td class="auc flat">0.48</td><td class="auc mild">0.55</td><td class="auc flat">0.47</td><td class="auc flat">0.47</td><td class="auc flat">0.52</td><td class="auc mild">0.44</td></tr><tr><td><b>ap_late_share</b></td><td class="auc flat">0.49</td><td class="auc flat">0.45</td><td class="auc sig">0.61</td><td class="auc flat">0.52</td><td class="auc flat">0.50</td><td class="auc sig">0.70</td></tr><tr><td><b>ar_late_share</b></td><td class="auc flat">0.54</td><td class="auc flat">0.50</td><td class="auc mild">0.57</td><td class="auc mild">0.55</td><td class="auc flat">0.48</td><td class="auc sig">0.62</td></tr><tr><td><b>ap_overdue_ratio</b></td><td class="auc flat">0.51</td><td class="auc flat">0.50</td><td class="auc sig">0.72</td><td class="auc flat">0.53</td><td class="auc flat">0.52</td><td class="auc flat">0.53</td></tr><tr><td><b>ar_overdue_90_ratio</b></td><td class="auc flat">0.49</td><td class="auc flat">0.48</td><td class="auc mild">0.58</td><td class="auc flat">0.48</td><td class="auc flat">0.48</td><td class="auc flat">0.50</td></tr><tr><td><b>refund_rate</b></td><td class="auc flat">0.49</td><td class="auc flat">0.47</td><td class="auc flat">0.51</td><td class="auc flat">0.48</td><td class="auc flat">0.51</td><td class="auc flat">0.50</td></tr><tr><td><b>activity_trend</b></td><td class="auc flat">0.49</td><td class="auc flat">0.48</td><td class="auc flat">0.51</td><td class="auc sig">0.36</td><td class="auc mild">0.60</td><td class="auc mild">0.41</td></tr><tr><td><b>transfer_dep</b></td><td class="auc flat">0.48</td><td class="auc flat">0.48</td><td class="auc flat">0.50</td><td class="auc flat">0.47</td><td class="auc flat">0.51</td><td class="auc mild">0.43</td></tr><tr><td><b>hhi_ar_6m</b></td><td class="auc flat">0.52</td><td class="auc flat">0.51</td><td class="auc flat">0.46</td><td class="auc flat">0.54</td><td class="auc flat">0.50</td><td class="auc flat">0.54</td></tr><tr><td><b>net_vol_6m</b></td><td class="auc mild">0.56</td><td class="auc mild">0.58</td><td class="auc flat">0.50</td><td class="auc flat">0.53</td><td class="auc flat">0.46</td><td class="auc flat">0.48</td></tr><tr><td><b>cust_trend</b></td><td class="auc flat">0.48</td><td class="auc flat">0.49</td><td class="auc flat">0.51</td><td class="auc flat">0.46</td><td class="auc flat">0.53</td><td class="auc sig">0.39</td></tr><tr><td><b>lost_share</b></td><td class="auc flat">0.48</td><td class="auc flat">0.46</td><td class="auc flat">0.45</td><td class="auc mild">0.60</td><td class="auc mild">0.44</td><td class="auc sig">0.72</td></tr><tr><td><b>payee_concentration</b> <span class="bs">brainstorm</span></td><td class="auc mild">0.59</td><td class="auc flat">0.54</td><td class="auc flat">0.51</td><td class="auc sig">0.62</td><td class="auc sig">0.39</td><td class="auc sig">0.76</td></tr><tr><td><b>lost_accel</b> <span class="bs">brainstorm</span><small class="risk">E1 en riesgo: 0.65</small></td><td class="auc sig">0.66</td><td class="auc sig">0.65</td><td class="auc flat">0.53</td><td class="auc mild">0.56</td><td class="auc flat">0.51</td><td class="auc sig">0.74</td></tr><tr><td><b>payroll_cv</b> <span class="bs">brainstorm</span><small class="risk">E1 en riesgo: 0.59</small></td><td class="auc mild">0.58</td><td class="auc flat">0.52</td><td class="auc flat">0.53</td><td class="auc sig">0.62</td><td class="auc mild">0.57</td><td class="auc sig">0.69</td></tr><tr><td><b>payroll_continuity_6m</b> <span class="bs">brainstorm</span><small class="risk">E1 en riesgo: 0.40</small></td><td class="auc sig">0.37</td><td class="auc sig">0.39</td><td class="auc flat">0.53</td><td class="auc mild">0.41</td><td class="auc flat">0.49</td><td class="auc sig">0.34</td></tr><tr><td><b>tax_miss</b> <span class="bs">brainstorm</span></td><td class="auc flat">0.51</td><td class="auc flat">0.49</td><td class="auc flat">0.50</td><td class="auc flat">0.52</td><td class="auc mild">0.55</td><td class="auc sig">0.62</td></tr><tr><td><b>billing_to_cash</b> <span class="bs">brainstorm</span></td><td class="auc flat">0.49</td><td class="auc mild">0.44</td><td class="auc flat">0.54</td><td class="auc mild">0.43</td><td class="auc mild">0.57</td><td class="auc sig">0.33</td></tr><tr><td><b>oper_persistence_6m</b> <span class="bs">brainstorm</span></td><td class="auc flat">0.50</td><td class="auc flat">0.49</td><td class="auc flat">0.48</td><td class="auc sig">0.39</td><td class="auc mild">0.56</td><td class="auc flat">0.53</td></tr><tr><td><b>yoy_inflow</b> <span class="bs">brainstorm</span></td><td class="auc flat">0.54</td><td class="auc flat">0.52</td><td class="auc flat">0.53</td><td class="auc sig">0.39</td><td class="auc mild">0.56</td><td class="auc mild">0.42</td></tr><tr><td><b>multi_signal_stress</b> <span class="bs">brainstorm</span></td><td class="auc flat">0.54</td><td class="auc mild">0.55</td><td class="auc mild">0.55</td><td class="auc mild">0.60</td><td class="auc flat">0.45</td><td class="auc flat">0.54</td></tr><tr><td><b>hhi_ap_6m</b> <span class="bs">brainstorm</span></td><td class="auc mild">0.59</td><td class="auc mild">0.58</td><td class="auc flat">0.49</td><td class="auc sig">0.61</td><td class="auc flat">0.46</td><td class="auc mild">0.60</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="block">
+    <h2>6 · Ranking de variables por prioridad</h2>
+    <p class="lead">Las 22 primeras según el score transparente. Las que suben con los findings nuevos son, sobre todo, <code>lost_accel</code>, <code>payroll_cv</code>, <code>payee_concentration</code> e <code>hhi_ap_6m</code>; las que bajan, <code>net_margin_6m</code>, <code>refund_rate</code>, <code>tax_miss</code> y <code>billing_to_cash</code>.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>#</th><th>Variable</th><th>Prioridad</th><th>Peso</th><th>Score</th><th>Fuerza</th><th>Cobertura</th><th>Nota</th></tr></thead>
+      <tbody><tr><td class='num'>1</td><td><b>runway</b><small>Meses que aguanta con el dinero que tiene</small></td><td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td><td class='num wt'>4,7 %</td><td class='num prio'>86</td><td class='num small'>0.69<span class="srcmark">medida</span></td><td class='num small'>1.00</td><td class='ev'>AUC 0,68 / 0,66 frente a E1 en la población total; cae a ~0,50 dentro del conjunto en riesgo.…</td></tr><tr><td class='num'>2</td><td><b>lost_accel</b><small>Si la pérdida de clientes se acelera</small></td><td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td><td class='num wt'>4,5 %</td><td class='num prio'>85</td><td class='num small'>0.92<span class="srcmark">medida</span></td><td class='num small'>0.88</td><td class='ev'>AUC 0,74 vs apagado y 0,65 frente a E1 en el conjunto en riesgo: la mejor señal de arranque.…</td></tr><tr><td class='num'>3</td><td><b>cash_end</b><small>El dinero que le queda en la cuenta</small></td><td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td><td class='num wt'>4,7 %</td><td class='num prio'>84</td><td class='num small'>0.65<span class="srcmark marco">marco</span></td><td class='num small'>1.00</td><td class='ev'>Nivel: AUC débil dentro del conjunto en riesgo. Sigue siendo P0 como estado y como disparador de veto.…</td></tr><tr><td class='num'>4</td><td><b>cash_trend_3m</b><small>Si la cuenta se está vaciando</small></td><td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td><td class='num wt'>4,6 %</td><td class='num prio'>82</td><td class='num small'>0.60<span class="srcmark marco">marco</span></td><td class='num small'>1.00</td><td class='ev'>Es la señal que el marco exige que pese más que un DSO que empeora 3 días.…</td></tr><tr><td class='num'>5</td><td><b>impago_nomina / ss / iva / cuota</b><small>Deja de pagar una obligación que pagaba siempre</small></td><td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td><td class='num wt'>3,3 %</td><td class='num prio'>81</td><td class='num small'>0.75<span class="srcmark marco">marco</span></td><td class='num small'>0.91</td><td class='ev'>Evento, no feature: se separa por tipo y exige regularidad e historial de pago.…</td></tr><tr><td class='num'>6</td><td><b>payroll_cv</b><small>Si la nómina es irregular</small></td><td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td><td class='num wt'>3,0 %</td><td class='num prio'>80</td><td class='num small'>0.73<span class="srcmark">medida</span></td><td class='num small'>0.91</td><td class='ev'>AUC 0,69 vs apagado y 0,59 frente a E1 en el conjunto en riesgo.…</td></tr><tr><td class='num'>7</td><td><b>burn_rate</b><small>Lo que gasta al mes</small></td><td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td><td class='num wt'>4,4 %</td><td class='num prio'>78</td><td class='num small'>0.50<span class="srcmark marco">marco</span></td><td class='num small'>1.00</td><td class='ev'>Denominador del runway. Base robusta máx(3m, 12m) para que encogerse no infle la autonomía.…</td></tr><tr><td class='num'>8</td><td><b>oper_share</b><small>Cuánto de lo que entra es cobro de su negocio</small></td><td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td><td class='num wt'>4,7 %</td><td class='num prio'>75</td><td class='num small'>0.45<span class="srcmark marco">marco</span></td><td class='num small'>1.00</td><td class='ev'>Base de la generación operativa; distingue negocio real de transferencias.…</td></tr><tr><td class='num'>9</td><td><b>payee_concentration</b><small>Si concentra sus pagos en pocos proveedores</small></td><td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td><td class='num wt'>3,3 %</td><td class='num prio'>72</td><td class='num small'>1.00<span class="srcmark">medida</span></td><td class='num small'>1.00</td><td class='ev'>AUC 0,76 vs apagado y 0,62 vs E3. Sobrevive al control de desconexión.…</td></tr><tr><td class='num'>10</td><td><b>cash_negative</b><small>La cuenta está en negativo</small></td><td><span class="crit" style="--c:#e5484d">P0 · núcleo</span></td><td class='num wt'>3,7 %</td><td class='num prio'>67</td><td class='num small'>0.70<span class="srcmark marco">marco</span></td><td class='num small'>0.77</td><td class='ev'>Dispara veto de decisión, no un punto más de score.…</td></tr><tr><td class='num'>11</td><td><b>ap_overdue_ratio</b><small>Lo que debe a proveedores y ya venció</small></td><td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td><td class='num wt'>2,7 %</td><td class='num prio'>59</td><td class='num small'>0.85<span class="srcmark">medida</span></td><td class='num small'>0.88</td><td class='ev'>AUC 0,72 frente a E2: el mejor discriminador crudo de incumplimiento.…</td></tr><tr><td class='num'>12</td><td><b>lost_share</b><small>La facturación de clientes que ya no le compran</small></td><td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td><td class='num wt'>3,1 %</td><td class='num prio'>59</td><td class='num small'>0.85<span class="srcmark">medida</span></td><td class='num small'>0.88</td><td class='ev'>AUC 0,72 vs apagado, 0,60 vs E3, pero 0,45-0,48 vs E1/E2: es señal de declive, no de caja.…</td></tr><tr><td class='num'>13</td><td><b>activity_trend</b><small>Si se mueve menos dinero que antes</small></td><td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td><td class='num wt'>3,6 %</td><td class='num prio'>57</td><td class='num small'>0.54<span class="srcmark">medida</span></td><td class='num small'>1.00</td><td class='ev'>AUC 0,60 vs E4 y 0,41 vs apagado: se apaga antes de caer. Persistencia lag-1 0,97 (muy estructural).…</td></tr><tr><td class='num'>14</td><td><b>intragroup_dependency</b><small>Si vive de que le transfiera el grupo</small></td><td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td><td class='num wt'>—</td><td class='num prio'>57</td><td class='num small'>0.55<span class="srcmark marco">marco</span></td><td class='num small'>1.00</td><td class='ev'>El 32 % de los arranques de E1 tiene &gt;20 % de flujo intragrupo; excluirlos deja 51 de 75.…</td></tr><tr><td class='num'>15</td><td><b>payroll_continuity_6m</b><small>Si paga la nómina todos los meses</small></td><td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td><td class='num wt'>2,0 %</td><td class='num prio'>54</td><td class='num small'>0.62<span class="srcmark">medida</span></td><td class='num small'>0.91</td><td class='ev'>AUC 0,40 vs E1 en el conjunto en riesgo (la continuidad protege); 0,66 vs apagado.…</td></tr><tr><td class='num'>16</td><td><b>multi_signal_stress</b><small>Cuántas señales se activan a la vez</small></td><td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td><td class='num wt'>2,8 %</td><td class='num prio'>52</td><td class='num small'>0.38<span class="srcmark">medida</span></td><td class='num small'>1.00</td><td class='ev'>AUC 0,60 vs E3. Varias señales a la vez = deterioro, no ruido.…</td></tr><tr><td class='num'>17</td><td><b>net_vol_6m</b><small>Cuánto se le hunde la caja en meses malos</small></td><td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td><td class='num wt'>2,6 %</td><td class='num prio'>50</td><td class='num small'>0.31<span class="srcmark">medida</span></td><td class='num small'>1.00</td><td class='ev'>AUC 0,56/0,58 frente a E1. Persistencia 0,93: rasgo estructural de la empresa.…</td></tr><tr><td class='num'>18</td><td><b>runway_vs_group</b><small>Si va peor que sus empresas hermanas</small></td><td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td><td class='num wt'>—</td><td class='num prio'>49</td><td class='num small'>0.30<span class="srcmark marco">marco</span></td><td class='num small'>1.00</td><td class='ev'>AUC 0,57 vs estructural. Modificador, no feature de nivel.…</td></tr><tr><td class='num'>19</td><td><b>cust_trend</b><small>Si factura a más o menos clientes</small></td><td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td><td class='num wt'>2,5 %</td><td class='num prio'>47</td><td class='num small'>0.42<span class="srcmark">medida</span></td><td class='num small'>0.88</td><td class='ev'>AUC 0,39 vs apagado: perder amplitud de cartera avisa antes que la caja.…</td></tr><tr><td class='num'>20</td><td><b>lc_util</b><small>Cuánto tiene dispuesto de su póliza</small></td><td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td><td class='num wt'>1,7 %</td><td class='num prio'>45</td><td class='num small'>0.77<span class="srcmark">medida</span></td><td class='num small'>0.70</td><td class='ev'>AUC 0,30 vs E1: usarla protege. Para nivel, dispuesto cerca del concedido = ahogo.…</td></tr><tr><td class='num'>21</td><td><b>ar_overdue_90_ratio</b><small>Lo que le deben y lleva más de 90 días</small></td><td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td><td class='num wt'>2,3 %</td><td class='num prio'>43</td><td class='num small'>0.31<span class="srcmark">medida</span></td><td class='num small'>0.87</td><td class='ev'>Separa mora reciente de un stock que ya no se cobra. AUC 0,58 vs E2.…</td></tr><tr><td class='num'>22</td><td><b>debt_service_burden</b><small>Lo que paga de cuotas sobre lo que ingresa</small></td><td><span class="crit" style="--c:#f59e0b">P1 · alto</span></td><td class='num wt'>1,6 %</td><td class='num prio'>43</td><td class='num small'>0.30<span class="srcmark marco">marco</span></td><td class='num small'>0.87</td><td class='ev'>AUC 0,56 vs E2. Pagar deuda con deuda nueva es la tarjeta que tapa el agujero.…</td></tr></tbody>
+    </table></div>
+  </section>
+
+  <section class="block warning">
+    <h2>7 · Vetos: reglas que deciden por encima del score</h2>
+    <p class="lead">El impago no es una feature continua: es una regla binaria que impide prestar hoy, aunque el score no se haya movido. Se aplican por encima del número.</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Código</th><th>Disparador</th><th>Efecto</th></tr></thead>
+      <tbody><tr><td><code>veto_caja_negativa</code></td><td><b>Caja negativa</b></td><td>No es veto automático: depende de persistencia, cobros pendientes y capacidad del grupo.</td></tr><tr><td><code>veto_nomina_ausente</code></td><td><b>Nómina ausente</b></td><td>No prestar hasta ver la siguiente nómina regular.</td></tr><tr><td><code>veto_ss_ausente</code></td><td><b>Seguridad Social ausente</b></td><td>Deja de pagar una obligación que pagaba siempre.</td></tr><tr><td><code>veto_iva_ausente</code></td><td><b>IVA ausente</b></td><td>2 trimestres fiscales seguidos sin pago.</td></tr><tr><td><code>veto_cuota_ausente</code></td><td><b>Cuota de deuda ausente</b></td><td>Deja de pagar una cuota habitual.</td></tr><tr><td><code>veto_poliza_agotada</code></td><td><b>Póliza agotada con caja corta</b></td><td>No ampliar: ya vive al límite del disponible.</td></tr><tr><td><code>veto_grupo_en_estres</code></td><td><b>Grupo en estrés</b></td><td>Diagnóstico agregado del grupo; modula la decisión, no el score individual.</td></tr></tbody>
+    </table></div>
+    <div class="grid2 asym">
+      <div><h3>Asimetría adversa / positiva</h3><p>El deterioro se detecta antes y mejor que la mejora. La cara positiva (E4) tiene filtros que quitan el 66,8 % de las expansiones brutas. Para Q2 no basta con subir el score: hace falta crecimiento sostenido y autofinanciado.</p></div>
+      <div><h3>Bache frente a caída</h3><p>Con 1,66 baches por caída, la detección de bache es un pilar, no un adorno. Señales: persistencia operativa, volatilidad a la baja, stress multi-señal y <code>shock_vs_usual</code>. Es la mayor ganancia marginal pendiente (Q4).</p></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2>8 · Especificación v8 recomendada</h2>
+    <div class="grid2">
+      <div>
+        <h3>Subir</h3>
+        <ul>
+          <li><code>lost_accel</code> a P0 (0,74 churn · 0,65 E1 en riesgo).</li>
+          <li><code>payroll_cv</code> a P0 (0,69 churn · 0,59 E1 en riesgo).</li>
+          <li><code>payee_concentration</code> / <code>hhi_ap_6m</code> a P1 (0,76 / 0,60 churn).</li>
+          <li><code>intragroup_dependency</code> a filtro obligatorio (32 % de E1).</li>
+          <li>Pilar de bache a 8-12 % (Q4).</li>
+          <li>Modular el umbral de liquidez por régimen de negocio inferido (voz Embat): el mismo runway no vale igual en todos.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Bajar o quitar</h3>
+        <ul>
+          <li><code>net_margin_6m</code>: AUC ≈ 0,50, persistencia 0,51 (revierte).</li>
+          <li><code>refund_rate</code>: 88 % ceros, AUC ≈ 0,50.</li>
+          <li><code>tax_miss</code> y <code>billing_to_cash</code>: se debilitan al controlar por apagado.</li>
+          <li><code>debt_burden</code>: solo separa E2 (0,56) y E2 está contaminado.</li>
+          <li>El nivel de caja como único motor de Q3: dentro del conjunto en riesgo no predice.</li>
+        </ul>
+      </div>
+    </div>
+    <h3 class="sub">Plan de validación</h3>
+    <ul class="plan">
+      <li>Etiquetar E1 <b>solo dentro del conjunto en riesgo</b> (sano hoy) y medir con eso.</li>
+      <li>Trocear E2 por tipo (nómina, SS, IVA, cuota, AP>90) y exigir regularidad; usar la versión estricta (7,6 %).</li>
+      <li>Excluir flujo intragrupo antes de etiquetar y de puntuar; reportar la tensión agregada del grupo aparte.</li>
+      <li>Validar con <code>GroupKFold</code> por <code>group_id</code> y comprobar que ninguna variable nueva se explica por el apagado (control de desconexión).</li>
+      <li>Objetivo por evento: E1 ≥ 0,65; E3 ≥ 0,65; E2 estricto ≥ 0,70; bache vs caída ≥ 0,65. Anticipación mediana ≥ 2 meses.</li>
+      <li>Comparar el umbral de runway global contra el modulado por régimen: si no mejora E1/E3, no se añade complejidad.</li>
+    </ul>
+  </section>
+
+  <section class="block caveat">
+    <h2>Lo que este documento no resuelve</h2>
+    <ul>
+      <li>El score transparente de la sección 3 es una <b>guía de ordenación</b>, no un peso calibrado. Los pesos finales salen de la logística con signo restringido (D12).</li>
+      <li>Varias evidencias (E1 con 75 casos, calendario con 40 empresas, factoring) tienen intervalos de confianza amplios.</li>
+      <li>Falta cerrar si el leaderboard puntúa por <code>company_id</code> o <code>group_id</code>, y si hay etiquetas ocultas o el score debe ser no supervisado.</li>
+      <li>La NLP de <code>description</code>/<code>concept</code> (palabras de refinanciación o aplazamiento) sigue sin explotar: es la vía natural para el impago futuro.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>Reproducible con <code>uv run --python 3.12 --with duckdb --no-project python analysis/back_engineering_variables.py</code>. Fuentes: <code>research/reports/eventos_v2.md</code>, <code>docs/eventos.md</code>, <code>research/reports/eda.md</code>, <code>scripts/crosscheck.txt</code>, <code>src/mapping/ISSUES.md</code>, <code>context/scoring.md</code>, <code>research/src/events_v2.py</code>, <code>research/src/panel.py</code>. Los CSV de <code>data/</code> no se modifican.</p>
+  </footer>
+</main>
+</body>
+</html>
