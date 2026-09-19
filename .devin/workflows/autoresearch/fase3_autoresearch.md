@@ -9,9 +9,10 @@ Entrada: `salida/premisas.jsonl` (fase 2). El runner es `.devin/workflows/autore
 ## Preparación
 
 1. Comprueba que el árbol está limpio salvo `salida/`. Crea la rama `autoresearch/<fecha>` desde `main`.
-2. `cd research && uv run python ../.devin/workflows/autoresearch/premisas.py build` (cachea features+eventos).
-3. Captura la **línea base**: `premisas.py run` y `cd src && uv run python evaluate.py v7 --small`. Guarda en `salida/iteraciones/iter_000/`.
+2. `cd research && uv run python ../.devin/workflows/autoresearch/premisas.py build --oof` (cachea features+eventos+score y el **score fuera de grupo** `score_oof`).
+3. Captura la **línea base** con **etiquetas propias**, para no pisar los resultados versionados: `premisas.py run` y `cd src && uv run python evaluate.py ar000 --small`. Guarda la salida en `salida/iteraciones/iter_000/` y anota su **PM** (`puntuacion.py reports/metrics_ar000.json`). **No uses `v7`**: `evaluate.py v7` sobrescribe `reports/metrics_v7.json`, que está versionado.
 4. Lee la lista de premisas **centrales** que dejó el consejo (fase 2). Una premisa central que falle es prioridad máxima.
+5. Verifica sobre `score_oof`, no sobre `score`: el score en muestra sobreestima la separación. Las premisas de score del consejo deberían referenciar `score_oof`; si referencian `score`, anótalo como limitación en el informe.
 
 ## El bucle (una iteración = un cambio)
 
@@ -39,16 +40,24 @@ Prohibido: dar más peso a una feature solo porque sí; romper la **explicación
 ### 4 · Implementar y medir
 Implementa el cambio en `src/` (nunca en `data/`). Vuelve a correr, en este orden:
 1. `premisas.py run` → ¿pasa la premisa objetivo?
-2. `cd research/src && uv run python evaluate.py v<N> --small` → AUC del nivel frente a E1-E4.
+2. `cd research/src && uv run python evaluate.py ar<N> --small` → AUC del nivel frente a E1-E4 (etiqueta propia, nunca `v7`).
 3. `cd research && uv run pytest -q tests` → verde.
 4. `explain()` cuadra (test de explicación exacta).
 
 ### 5 · Aceptar o descartar
-Acepta el cambio solo si **todas** se cumplen:
+La medida única es la **PM** (`puntuacion.py`): la media del AUC del nivel frente a E1-E4. Acepta el cambio solo si **todas** se cumplen:
 - La premisa objetivo pasa.
+- La **PM sube** (o empata) y no empeora ningún evento por sí solo.
 - Ninguna premisa **central** que pasaba antes deja de pasar.
-- El AUC del nivel no baja más de 0,01 en ningún evento E1-E4 y sube en al menos uno.
+- Los **guardarraíles** de `puntuacion.py` no empeoran (deterioro, mejora, `skill_vs_ar1_h3`, cobertura 80 %).
+- La **separación del ranking** no empeora: la tasa de tensión del 20 % mejor por score no sube, y la del 20 % peor no baja.
 - Los tests siguen verdes.
+
+Compárala así, con etiquetas propias:
+```bash
+cd research/src && uv run python evaluate.py ar<N> --small
+cd research && uv run python ../.devin/workflows/autoresearch/puntuacion.py reports/metrics_ar000.json reports/metrics_ar<N>.json
+```
 
 Si no, revierte (`git checkout -- src/`) y anota por qué en `decision.md`. Un cambio descartado con su porqué vale tanto como uno aceptado.
 
@@ -70,7 +79,9 @@ Escribe `salida/iteraciones/iter_NNN/` con: `diagnostico.md`, `cambio.md` (el di
 
 ## Reglas
 
-- Solo tocas `research/src/`, `research/tests/` y `.devin/workflows/autoresearch/salida/`. No toques `data/`, ni los CSV, ni `analysis/`.
+- Solo tocas `research/src/`, `research/tests/`, `research/ESTADO.md`, `research/REFLEXIONES.md` y `.devin/workflows/autoresearch/salida/`. No toques `data/`, ni los CSV, ni `analysis/`.
+- **`DECISIONS.md` no se edita a mano**: se regenera con `uv run python src/decisions.py`. Si el cambio introduce una decisión nueva, añádela a la fuente de `decisions.py` y regenéralo.
+- Los informes de métricas usan etiquetas propias (`ar000`, `ar001`…), nunca sobrescriben `reports/metrics_v<N>.json`.
 - Nada de secretos en ficheros.
 - Escribe en español. Cada afirmación sobre el código o los datos lleva su referencia (`file:line`).
 - Termina con: nº de iteraciones, cambios aceptados, AUC por evento frente a la base, premisas que resultaron incorrectas y el estado final del PR.

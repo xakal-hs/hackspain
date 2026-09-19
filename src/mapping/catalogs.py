@@ -12,10 +12,27 @@ UNMAPPED = "_unmapped"
 
 WINDOW_START = "2024-09-01"
 WINDOW_END = "2026-09-01"
-BALANCE_SUSPECT_ABS = 1e8
+BALANCE_SUSPECT_ABS = 1e8  # en EUR equivalentes, no en moneda cruda (ver CURRENCY_PER_EUR_APPROX)
+AMOUNT_SENTINEL_EUR = 1e8
 VALUE_DATE_MAX_GAP_DAYS = 30
 VALUE_DATE_SENTINEL_YEAR = 2090
 COUNTERPARTY_PAD = 6
+SNAPSHOT_DATE = "2026-09-01"
+
+# Unidades de moneda por 1 EUR (mediana 2024-09..2026-09 de los tipos BCE / currency-api
+# usados en research/src/fx.py). Solo sirve para los flags de orden de magnitud
+# (centinelas > 1e8 EUR): en moneda cruda, 478 de las 491 transacciones > 1e8 son
+# AOA/COP/VND/CLP/XOF/ARS y no artefactos. La conversión contable real queda fuera
+# de esta capa (research/src/panel.py, D03).
+CURRENCY_PER_EUR_APPROX: dict[str, float] = {
+    "EUR": 1.0, "USD": 1.16, "GBP": 0.86, "CHF": 0.94, "AUD": 1.66, "CAD": 1.60, "NZD": 1.97,
+    "SGD": 1.48, "AED": 4.24, "SAR": 4.34, "PLN": 4.26, "RON": 5.07, "BRL": 6.17, "MYR": 4.71,
+    "PEN": 3.99, "ILS": 3.76, "CNY": 7.97, "DKK": 7.46, "HKD": 9.04, "NOK": 11.66, "SEK": 11.00,
+    "MAD": 10.8, "GHS": 13.28, "ZAR": 19.36, "NAD": 19.41, "MXN": 21.30, "CZK": 24.44,
+    "THB": 37.44, "TRY": 48.49, "PHP": 67.21, "MZN": 73.74, "RUB": 92.58, "INR": 102.71,
+    "ISK": 144.75, "JPY": 173.55, "HUF": 391.63, "XOF": 655.96, "CLP": 1055.66, "AOA": 1058.02,
+    "ARS": 1598.57, "COP": 4411.09, "IDR": 19303.88, "VND": 30265.15, "BAM": 1.96,
+}
 
 # Dirty or mixed labels → ISO-3166 alpha-2. Already-canonical 2-letter codes
 # are accepted by the SQL layer via length=2, not only via this dict.
@@ -185,6 +202,10 @@ TYPE_FAMILY: dict[str, str] = {
     "confirming": "working_capital",
     "guarantee": "contingent",
 }
+
+# Productos cuyo saldo es caja (o casi) para el flag de centinela: un préstamo de −125 M€
+# (COMP_0630) es deuda plausible, un checking de 1e11 (COMP_1068) no es caja de pyme.
+CASH_LIKE_TYPES = ("checking", "saving", "wallet", "expensesPlatform", "investment", "tpv")
 
 RAW_TABLES = (
     "groups",

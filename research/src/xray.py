@@ -25,10 +25,9 @@ from mlforecast.lag_transforms import RollingMean, RollingStd, ExpandingMean, Ex
 SPEC = {
     "runway": ("liquidez", +1, False, "Meses de caja", "log(1+caja/gasto mensual), con signo; gasto = máx(media 3m, media 12m)"),
     "lc_util": ("liquidez", -1, True, "Uso de líneas de crédito", "Dispuesto / límite de las pólizas de crédito"),
-    "net_margin_6m": ("rentabilidad", +1, False, "Margen de caja 6m", "(entradas − salidas) / (entradas + salidas), 6 meses"),
     "growth_vs_12m": ("rentabilidad", +1, False, "Tendencia de cobros", "log(entradas medias 3m / entradas medias 12m)"),
     "debt_burden": ("solvencia", -1, True, "Carga de deuda", "Cuotas + intereses / entradas (3m)"),
-    "payroll_burden": ("solvencia", -1, False, "Peso de nóminas", "Nóminas + SS / entradas (3m); sin nóminas = no aplica"),
+    "payroll_cv": ("solvencia", -1, False, "Regularidad de nóminas", "Semidesviación a la baja de las nóminas / media (6m): nóminas que faltan o bajan; sin nóminas = no aplica"),
     "ap_late_share": ("disciplina", -1, True, "Pagos tardíos a proveedores", "% facturas recibidas vencidas >15 días sin pagar o pagadas tarde (3m)"),
     "ar_late_share": ("disciplina", -1, True, "Cobros tardíos de clientes", "% facturas emitidas cobradas >15 días tarde o impagadas (3m)"),
     "ap_overdue_ratio": ("disciplina", -1, True, "Deuda vencida con proveedores", "Saldo AP vencido / salidas mensuales"),
@@ -40,11 +39,12 @@ SPEC = {
     "net_vol_6m": ("estabilidad", -1, False, "Volatilidad a la baja", "Semidesviación de los meses con flujo neto negativo / gasto mensual (6m)"),
     "cust_trend": ("estabilidad", +1, False, "Amplitud de clientes", "log(clientes facturados 3m / clientes 12m)"),
     "lost_share": ("estabilidad", -1, True, "Facturación de clientes perdidos", "% de la facturación de hace 3-12 meses de clientes sin facturas en los últimos 3"),
+    "oper_persistence_6m": ("estabilidad", +1, False, "Persistencia de cobros", "Meses de los últimos 6 con cobros operativos ≥ 50 % de su mediana anual"),
 }
 PILLARS = ["liquidez", "rentabilidad", "solvencia", "disciplina", "estabilidad"]
-PRIOR_W = {"runway": 3, "lc_util": 1, "net_margin_6m": 1.5, "growth_vs_12m": 1.5, "debt_burden": 1, "payroll_burden": 0.5,
+PRIOR_W = {"runway": 3, "lc_util": 1, "growth_vs_12m": 1.5, "debt_burden": 1, "payroll_cv": 0.5,
            "ap_late_share": 1.5, "ar_late_share": 1, "ap_overdue_ratio": 1, "ar_overdue_90_ratio": 0.5, "refund_rate": 0.5,
-           "activity_trend": 1.5, "transfer_dep": 0.5, "hhi_ar_6m": 0.5, "net_vol_6m": 0.5, "cust_trend": 1.0, "lost_share": 1.0}
+           "activity_trend": 1.5, "transfer_dep": 0.5, "hhi_ar_6m": 0.5, "net_vol_6m": 0.5, "cust_trend": 1.0, "lost_share": 1.0, "oper_persistence_6m": 1.0}
 CONTEXT = ["log_scale", "fx_share", "activity_log"]
 BANDS = [(0, 35, "riesgo"), (35, 65, "vigilar"), (65, 101, "sano")]  # ≈ cuartiles de la escala publicada (D17)
 DORMANT_CAP = 30.0
@@ -273,7 +273,7 @@ def explain(scored: pd.DataFrame, feats: pd.DataFrame | None, company_id: str, m
             "contributions": contribs, "summary_text": summ}
 
 
-PCT = {"lc_util", "ap_late_share", "ar_late_share", "refund_rate", "transfer_dep", "lost_share", "debt_burden", "payroll_burden"}
+PCT = {"lc_util", "ap_late_share", "ar_late_share", "refund_rate", "transfer_dep", "lost_share", "debt_burden", "payroll_cv", "oper_persistence_6m"}
 
 
 def fmt_feature(f: str, v) -> str:

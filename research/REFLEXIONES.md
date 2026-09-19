@@ -25,6 +25,9 @@ Estados: **abierta** (sin propuesta), **propuesta** (hay recomendación y falta 
 | R13 | Modelos generativos (TimeGPT, VAE, DeepAR) | abierta | baja |
 | R14 | Empresas del test fuera de distribución | decidida en parte | media |
 | R15 | Efecto de borde en agosto de 2026 | abierta | baja |
+| R16 | Entre quien tiene deuda, la carga no ordena el riesgo | abierta | media |
+| R17 | Premisas del consejo que resultaron incorrectas (fase 3) | decidida (registro) | — |
+| R18 | La cohorte larga puntúa ~5 puntos menos a igual caja | abierta | baja |
 
 ---
 
@@ -210,6 +213,8 @@ La trayectoria cambia poco: el AUC de deterioro baja de 0,742 a 0,725, el de mej
 
 **Siguiente paso.** Validarlas de forma incremental, añadiendo una cada vez al score, con AUC fuera de grupo frente a E1-E4. Solo entra la que mejore.
 
+**Actualización (autoresearch, fase 3).** Medidas sobre el panel actual (`.devin/workflows/autoresearch/salida/iteraciones/diag_candidatas.py`): entran `payroll_cv` **a la baja** (D28, en sustitución de `payroll_burden`) y `oper_persistence_6m` (D30). `lost_accel` y `yoy_inflow` son demasiado ruidosas (17-25 puntos de percentil al mes) y de poca cobertura. `payee_concentration` y `hhi_ap_6m` exigen rehacer el panel y siguen pendientes; por su perfil (señal adversa sin cara positiva) es probable que choquen con la expansión (R10).
+
 ## R08 · La caja reconstruida no cuadra con los flujos en el 16 % de los meses
 
 **Estado:** abierta. Hallazgo nuevo, encontrado al revisar a mano casos de E1.
@@ -242,6 +247,8 @@ La trayectoria cambia poco: el AUC de deterioro baja de 0,742 a 0,725, el de mej
 - **Consecuencia.** Estas filiales operan con la caja justa porque su grupo cubre los huecos, y su riesgo de liquidez es del grupo. `tension_6m` y `tension_entrada_6m` excluyen los meses con más del 20 % del flujo intragrupo.
 - **Pendiente:** una feature de "financiación neta del grupo" y la liquidez a nivel de grupo.
 
+**Actualización (autoresearch, fase 3).** La caja **centinela** (`dq_cash_sentinel`, 9 empresas) ya no puntúa: `runway` es «sin dato» (D31). La caja **implausible** (`dq_cash_implausible`, 55 empresas activas) resultó ser riqueza real (holdings con mucha caja y poco flujo: unión adversa 13 % frente a 32 %) y **no** se toca. La **deriva** (`has_drift`, 45 empresas, 791 filas) sigue pendiente: es un flag de empresa (marca todos los meses aunque solo los primeros estén mal) y su etiqueta de tensión (52 %) sale de la misma caja, así que neutralizar `runway` bajaría la PM sin que eso signifique nada. Hace falta un flag por fila y la exclusión simétrica en `targets.py`.
+
 ## R09 · La forma del modelo no es el límite: la información sí
 
 **Estado:** decidida.
@@ -262,6 +269,18 @@ La trayectoria cambia poco: el AUC de deterioro baja de 0,742 a 0,725, el de mej
 3. Un modelo multitarea.
 
 **Recomendación.** Empezar por la opción 1, porque encaja con las preguntas del reto y con el producto. La 2 solo si hay tiempo.
+
+**Actualización (autoresearch, fase 3): el trade-off está medido y es estructural.** Tres veces apareció el mismo choque entre liquidez y crecimiento (`salida/iteraciones/iter_001`, `iter_002`, `iter_008`):
+
+| cambio | tensión | expansión | caída | PM |
+|---|---|---|---|---|
+| peso ×2 al evento de tensión al promediar (`EVENT_W`) | **+0,059** | −0,028 | −0,017 | +0,003 |
+| CV total de nómina (penaliza también contratar) | +0,009 | −0,025 (OOF) | +0,021 | +0,011 |
+| regla «< 0,5 meses de liquidez → no sano» | +0,006 a +0,019 | −0,008 a −0,025 | −0,003 | −0,001 a −0,003 |
+
+Las empresas «sanas» con menos de medio mes de liquidez tienen 4× más unión adversa (41,8 % frente a 11,3 %) **y** 2,3× más expansión (15,5 % frente a 6,7 %): gastan la caja en crecer. Un score que también deba ordenar la expansión no puede darles la criticidad que exige el prestamista (P120, P122, P173, P175, P176 quedan en `falla` por eso, no por error del modelo). Además, cada feature nueva reparte peso y baja el de la caja (`runway` 0,169 → 0,157 en el bucle).
+
+**Propuesta concreta para la fase 4:** publicar junto a la nota general una **nota del prestamista** con la misma explicación aditiva: `EVENT_W = {tension_6m: 2}` (3 líneas en `HealthScorer.fit`, medidas en iter_001: AUC frente a tensión 0,718 en vez de 0,659) más la regla de banda de liquidez. Es la opción 1 de esta reflexión, con números.
 
 ## R11 · Bache frente a caída sigue sin resolverse
 
@@ -316,6 +335,43 @@ La trayectoria cambia poco: el AUC de deterioro baja de 0,742 a 0,725, el de mej
 **Opciones.**
 - Excluir los dos últimos meses de las etiquetas.
 - Marcarlos como de baja confianza.
+
+## R16 · Entre quien tiene deuda, la carga no ordena el riesgo
+
+**Estado:** abierta (medido en `salida/iteraciones/iter_005`).
+
+**Lo medido.** Con `runway` 0,3-0,7: sin deuda, unión adversa 25,8 % (nota 55,4); deuda < 10 % de las entradas, 34,5 % (51,6); deuda ≥ 10 %, **34,2 % (39,1)**. La deuda pesada cobra −12 puntos frente a la ligera con la misma tasa de eventos. Entre las 8 632 filas con deuda, `debt_burden` tiene AUC 0,462 / 0,440 / 0,479 frente a tensión / incumplimiento / caída (más carga → *menos* eventos). La señal vive en «tiene cuotas o no» (binaria: AUC 0,615 frente a incumplimiento, contra 0,592 de la continua).
+
+**Probado y descartado.** `has_debt` binaria (sin deuda 100, con deuda 50): incumplimiento +0,028 OOF, pero los cuatro guardarraíles de trayectoria empeoran a la vez (la nota salta 100 → 50 al aparecer la primera cuota), la tensión del 20 % peor baja y el sesgo de tamaño pasa de −0,014 a −0,058.
+
+**Opciones.** (1) Aplanar el percentil de los positivos con transición suave (p. ej. sub-score = 100 − 50·min(1, carga/0,02)). (2) Carga de deuda relativa a la **caja** (`debt3 / cash_end`) en lugar de a las entradas. (3) Dejarlo: el efecto sobre la PM es pequeño.
+
+## R17 · Premisas del consejo que resultaron incorrectas (fase 3)
+
+**Estado:** decidida (registro; el detalle está en `salida/premisas.jsonl` → `diagnostico` y en `salida/iteraciones/iter_003`, `iter_005`).
+
+Esto es aprendizaje, no fracaso: cada una se contrastó con los eventos antes de tocar código.
+
+| premisa | decía | los datos dicen |
+|---|---|---|
+| P168 | ninguna fila con caja implausible puede ser sana | son holdings con mucha caja y poco flujo: unión adversa 13 % frente a 32 %; publicarlas sanas es correcto, la confianza ya es menor |
+| P157 | ≥ 20 % de flags llegan a sano = rotura | es un hecho, no una rotura: el 63 % de las implausibles son sanas de verdad |
+| P159 | ≤ 2 % de sano con confianza < 0,3 | 685 de 688 son los dos primeros meses de cada empresa (`min(1, n/6)`); es un requisito de producto (nota provisional, P191), no de modelo |
+| P158 | cobertura < 0,55 no puede subir la nota | composición: las filas con poca cobertura tienen más caja; a igual quintil de caja la nota es igual (D17/D21 se sostiene) |
+| P182 | sesgo de arranque +11 % a igual caja | confundida con el calendario: dentro del mismo semestre los meses 0-2 puntúan igual o menos que los 3-12; lo que baja es la cohorte de 2024-09 (R18) |
+| P150 | póliza sin usar no debe valer más que no tener póliza | a igual caja, tensión 5,8 % frente a 24,6 %: la póliza disponible es liquidez real (el evento la cuenta) |
+| P152 | sin deuda no debe valer más que con deuda | a igual caja, unión adversa 25,8 % frente a 34,5 %; el hallazgo real es otro (R16) |
+| P172 | `payroll_burden` debe pesar | tenía el signo contrario a los eventos; la intención (nombrar la nómina ausente) era correcta y se cumple con `payroll_cv` (D28) |
+| P177 | AUC directo frente a incumplimiento > 0,44 | documentaba el estado: al mejorar la separación baja de 0,44 y «falla» |
+| P008 / P010 (semilla) | volatilidad a la baja y tendencia de actividad anticipan tensión / apagado | ya diagnosticadas en la fase 2 (AUC 0,33 y 0,41); sin cambio |
+
+Y las que son **correctas para el prestamista pero el modelo de una sola nota no puede cumplir** (R10): P120, P122, P173, P175, P176.
+
+## R18 · La cohorte larga puntúa ~5 puntos menos a igual caja
+
+**Estado:** abierta (hallazgo de `iter_003`).
+
+Con `runway` 0,3-0,7 y dentro del mismo semestre, las empresas con ≥ 13 meses de historia (las 369 que arrancan en 2024-09) puntúan 48-52 frente a 53-56 del resto. Hipótesis: con 12 meses se hacen visibles señales que casi siempre restan (`lost_share`, `hhi_ar_6m`, `growth_vs_12m` con base anual completa), o la cohorte inicial es distinta (más grande, más antigua). Importa para el test oculto: si las 60-80 empresas nuevas llegan con historia completa, se parecerán a esta cohorte.
 
 ---
 

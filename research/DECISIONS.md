@@ -27,7 +27,7 @@ Generado por `src/decisions.py`. Las gráficas están en la SPA, pestaña «Deci
 
 **Alternativas descartadas.** Score totalmente no supervisado (clustering, PCA): no es interpretable ni verificable. Predecir directamente el evento: sería una caja negra y solo daría una cara del problema.
 
-**Evidencia.** Tasas de evento a 6 meses: apagado 3,0 %, tensión de caja 5,4 %, declive 17,0 %. AUC del score final frente a evento adverso: 0.59.
+**Evidencia.** Tasas de evento a 6 meses: apagado 3,0 %, tensión de caja 4,3 %, declive 17,0 %. AUC del score final frente a evento adverso: 0.59.
 
 ## D03 · Tipos de cambio: los del dataset, validados contra BCE y currency-api
 
@@ -113,7 +113,7 @@ Generado por `src/decisions.py`. Las gráficas están en la SPA, pestaña «Deci
 
 **Por qué.** Si el gasto se desploma, caja/gasto sube aunque la empresa se esté apagando. Con la base anual el denominador no cae y se premia la caja real.
 
-**Evidencia.** AUC del runway frente a tensión de caja a 6 meses: 0,23 (menos de 0,5 = protege).
+**Evidencia.** AUC del runway frente a tensión de caja a 6 meses: 0,30 (menos de 0,5 = protege).
 
 ## D10 · Masa en cero: el cero es 'lo mejor' o 'no aplica', nunca un empate en el percentil 0
 
@@ -137,7 +137,7 @@ Generado por `src/decisions.py`. Las gráficas están en la SPA, pestaña «Deci
 
 **Por qué.** Perder clientes es la señal más temprana de apagado y de declive. El review de la v5 mostró que transfer_dep medía sobre todo cobros sin categorizar, y que la volatilidad total penalizaba a las empresas con mucha caja: lo que daña es la volatilidad a la baja.
 
-**Evidencia.** AUC frente a apagado: lost_share 0,72, cust_trend 0.39. Frente a tensión de caja: lc_util 0.59. transfer_dep sin '-' frente a apagado: 0,43, casi sin señal.
+**Evidencia.** AUC frente a apagado: lost_share 0,72, cust_trend 0.39. Frente a tensión de caja: lc_util 0.54. transfer_dep sin '-' frente a apagado: 0,43, casi sin señal.
 
 ## D12 · Pesos calibrados por evento con signo económico restringido
 
@@ -151,7 +151,7 @@ Generado por `src/decisions.py`. Las gráficas están en la SPA, pestaña «Deci
 
 **Alternativas descartadas.** Pesos a priori (v4a): funcionan peor frente a eventos. Logística sin restricción: pesos negativos e inexplicables.
 
-**Evidencia.** Pesos por debajo del 1 %: ninguno. Los datos no respaldan su dirección. Mayores pesos: Tendencia de actividad 21 %, Meses de caja 16 %, Facturación de clientes perdidos 10 %, Pagos tardíos a proveedores 10 %.
+**Evidencia.** Pesos por debajo del 1 %: Pagos tardíos a proveedores, Deuda vencida con proveedores, Clientes morosos >60 días, Amplitud de clientes. Los datos no respaldan su dirección. Mayores pesos: Meses de caja 16 %, Tendencia de actividad 14 %, Persistencia de cobros 11 %, Regularidad de nóminas 9 %.
 
 ## D13 · Exógenas por horizonte retardadas h meses (horizon_feature_templates)
 
@@ -175,7 +175,7 @@ Generado por `src/decisions.py`. Las gráficas están en la SPA, pestaña «Deci
 
 **Por qué.** Con α = 0,5 un bache de un mes pesa la mitad y una caída estructural se refleja al 87,5 % en 3 meses. Es el equilibrio entre estabilidad ante baches (lo pide el enunciado) y retraso en la detección.
 
-**Evidencia.** Cambio medio mensual |Δ| y proporción de movimientos ≥10 a 3 meses según α: α=0,3: 3,23 / 24 %; α=0,4: 4,02 / 31 %; α=0,5: 4,77 / 35 %; α=0,6: 5,47 / 38 %; α=0,8: 6,86 / 43 %; α=1,0: 8,38 / 46 %
+**Evidencia.** Cambio medio mensual |Δ| y proporción de movimientos ≥10 a 3 meses según α: α=0,3: 3,16 / 23 %; α=0,4: 3,96 / 30 %; α=0,5: 4,71 / 35 %; α=0,6: 5,43 / 38 %; α=0,8: 6,85 / 42 %; α=1,0: 8,40 / 45 %
 
 ## D15 · Features de facturas: se arrastra el último dato hasta 3 meses
 
@@ -213,7 +213,7 @@ Generado por `src/decisions.py`. Las gráficas están en la SPA, pestaña «Deci
 
 **Alternativas descartadas.** Renormalizar (v5b): +9,4 % frente a AR(1) pero con sesgo de arranque y un 24 % de movimientos grandes. Neutro (v5e): +5,2 % frente a AR(1), sin sesgo y con un 15 % de movimientos grandes. Se prioriza la estabilidad y la justicia con las empresas nuevas.
 
-**Evidencia.** Mediana del score bruto en el mes 0 frente al mes 11: renormalizando 71,5 → 51,1; con neutro 51,8 → 47.9.
+**Evidencia.** Mediana del score bruto en el mes 0 frente al mes 11: renormalizando 92,2 → 55,8; con neutro 56,0 → 51.8.
 
 ## D18 · Escala publicada: transformación lineal P5→15, P95→85
 
@@ -221,11 +221,11 @@ Generado por `src/decisions.py`. Las gráficas están en la SPA, pestaña «Deci
 
 **Pregunta.** ¿Cómo hacer legible el score (del estilo '82 → 68') sin perder la explicación exacta?
 
-**Decisión.** Score publicado = a + b × compuesto, con a = -71,6 y b = 2,21, calibrados en train para llevar el P5 del compuesto a 15 y el P95 a 85. Se recorta a [0, 100] y el recorte aparece como término explícito en la explicación.
+**Decisión.** Score publicado = a + b × compuesto, con a = -86,0 y b = 2,41, calibrados en train para llevar el P5 del compuesto a 15 y el P95 a 85. Se recorta a [0, 100] y el recorte aparece como término explícito en la explicación.
 
 **Por qué.** La media ponderada de percentiles, con neutro para lo desconocido, concentra el score entre 38 y 68. Una transformación lineal abre el rango y mantiene la suma exacta de contribuciones, porque la constante se reparte según los pesos. Una transformación no lineal (percentil del compuesto) rompería la explicación.
 
-**Evidencia.** Cuantiles del compuesto → publicado: P5: 39,2 → 15,0, P25: 48,1 → 34,5, P50: 54,8 → 49,4, P75: 61,5 → 64,2, P95: 70,9 → 85,0
+**Evidencia.** Cuantiles del compuesto → publicado: P5: 41,8 → 15,0, P25: 51,5 → 38,4, P50: 57,7 → 53,4, P75: 63,4 → 67,2, P95: 70,8 → 85,0
 
 ## D19 · Bandas sano/vigilar/riesgo (65/35) y reglas del monitor
 
@@ -237,7 +237,7 @@ Generado por `src/decisions.py`. Las gráficas están en la SPA, pestaña «Deci
 
 **Por qué.** Usar el intervalo y no solo la mediana reduce las falsas alarmas: solo se alerta cuando el modelo está seguro de la dirección. Los umbrales de banda dejan unos tercios aproximados de la cartera y se pueden ajustar al apetito de riesgo del comprador.
 
-**Evidencia.** Distribución del último mes: riesgo 32 %, vigilar 48 %, sano 20 %.
+**Evidencia.** Distribución del último mes: riesgo 26 %, vigilar 52 %, sano 22 %.
 
 ## D20 · Regresión cuantílica (q10/q50/q90) con calibración conformal (CQR)
 
@@ -249,7 +249,7 @@ Generado por `src/decisions.py`. Las gráficas están en la SPA, pestaña «Deci
 
 **Por qué.** Sin calibrar, el intervalo nominal del 80 % solo cubría alrededor del 60 %: LightGBM cuantílico es demasiado confiado. CQR da cobertura garantizada sin cambiar el modelo.
 
-**Evidencia.** Cobertura del intervalo 80 % por horizonte (sin CQR → con CQR): h1: 73 % → 80 %, h2: 74 % → 83 %, h3: 73 % → 79 %
+**Evidencia.** Cobertura del intervalo 80 % por horizonte (sin CQR → con CQR): h1: 73 % → 78 %, h2: 78 % → 84 %, h3: 77 % → 83 %
 
 ## D21 · Eventos definidos contra la base anual, no contra el trimestre actual
 
@@ -273,7 +273,7 @@ Generado por `src/decisions.py`. Las gráficas están en la SPA, pestaña «Deci
 
 **Por qué.** El review mostró que la ventaja de la v1 frente al naive era regresión a la media: un AR(1) la igualaba. Por eso toda mejora se mide contra el AR(1).
 
-**Evidencia.** Skill frente a AR(1) a h3 por versión: v3a: +1,3 %, v3b: +4,7 %, v4a: +3,0 %, v4b: +5,5 %, v4c: -9,1 %, v5a: +7,4 %, v5b: +9,4 %, v5c: -14,6 %, v5d: +8,4 %, v5e: +5,2 %, v5f: +3,1 %, v6: +3,8 %
+**Evidencia.** Skill frente a AR(1) a h3 por versión: v3a: +1,3 %, v3b: +4,7 %, v4a: +3,0 %, v4b: +5,5 %, v4c: -9,1 %, v5a: +7,4 %, v5b: +9,4 %, v5c: -14,6 %, v5d: +8,4 %, v5e: +5,2 %, v5f: +3,1 %, v6: +3,8 %, v7: +2,0 %, ar000: +1,8 %, ar002b: +2,6 %, ar004: +2,3 %, ar006: +2,5 %, ar007: +2,7 %
 
 ## D23 · Forecaster final: mlforecast + LightGBM cuantílico (q10/q50/q90, CQR) con 6 exógenas por horizonte
 
@@ -330,3 +330,55 @@ Generado por `src/decisions.py`. Las gráficas están en la SPA, pestaña «Deci
 **Decisión.** Comprador: Embat. Integra X-Ray en su plataforma como (1) un monitor de alertas proactivas sobre sus clientes y (2) un simulador de escenarios para tesorería. Con el score y la confianza puede derivar operaciones a financiadores (circulante, factoring o pólizas) con un riesgo medido, y cobrar por origen o por suscripción.
 
 **Por qué.** Embat ya tiene los datos y la relación con la pyme. El score la convierte en un canal de crédito con información que el banco no tiene: caja diaria, disciplina de facturas y anticipación de 1 a 3 meses.
+
+## D28 · La nómina puntúa por su regularidad a la baja (payroll_cv), no por su peso sobre las entradas
+
+*Categoría:* features · *Estado:* decidido
+
+**Pregunta.** ¿Por qué payroll_burden tenía peso 0 y la explicación no podía nombrar la nómina ausente? (premisa P172 del consejo)
+
+**Decisión.** Se sustituye payroll_burden (nóminas/entradas 3m) por payroll_cv: semidesviación a la baja de las nóminas respecto a su media de 6 meses, dividida por esa media. Solo penaliza nóminas que faltan o bajan; contratar no resta. Sin nóminas sigue siendo «no aplica».
+
+**Por qué.** Con dirección «más peso de nómina = peor», payroll_burden tenía AUC 0,41 frente a tensión y 0,43 frente a incumplimiento: quien paga más nómina relativa tiene menos eventos. Era un proxy del tamaño (rho −0,46 con log_scale) y la logística con signo restringido hacía lo correcto al darle peso 0. La señal está en la regularidad: payroll_cv separa incumplimiento (0,58) y caída (0,61) y es neutra al tamaño (−0,05).
+
+**Alternativas descartadas.** Coeficiente de variación total (std/media): más AUC en incumplimiento (0,607) pero penaliza la expansión (−0,025), porque contratar también hace variar la nómina. payroll_continuity_6m: correlaciona con el tamaño (+0,27). payroll_gap binaria: cobertura 35 %.
+
+**Evidencia.** GroupKFold por grupo × 3 cortes: PM 0,615 → 0,618; incumplimiento 0,603 → 0,617, caída 0,588 → 0,601; guardarraíles de trayectoria mejoran. Peso calibrado de payroll_cv: 0,10 (tercera feature). Detalle: .devin/workflows/autoresearch/salida/iteraciones/iter_002/.
+
+## D29 · El margen de caja a 6 meses sale del score (queda como contexto)
+
+*Categoría:* features · *Estado:* decidido
+
+**Pregunta.** ¿Rescatar net_margin_6m o retirarla? (premisa P199)
+
+**Decisión.** Se retira del catálogo del score. Se sigue calculando como contexto para el forecaster.
+
+**Por qué.** AUC 0,46-0,49 frente a los cuatro eventos (a más margen, ligeramente más eventos adversos: reversión a la media) y peso calibrado 0 en los cuatro. La explicación mostraba un «Margen de caja 6m» que nunca movía nada.
+
+**Evidencia.** La nota es idéntica en todas las filas (PM 0,618 = 0,618). Detalle: iter_004.
+
+## D30 · Entra la persistencia de cobros operativos (oper_persistence_6m)
+
+*Categoría:* features · *Estado:* decidido
+
+**Pregunta.** ¿Qué feature del brainstorming (R07) entra sin empeorar ningún evento?
+
+**Decisión.** oper_persistence_6m = meses de los últimos 6 con cobros operativos ≥ 50 % de su mediana anual (pilar estabilidad, dirección +1).
+
+**Por qué.** Dirección coherente en los cuatro eventos (menos caída e incumplimiento, más expansión), neutra al tamaño (rho 0,04) y cinco veces menos ruidosa que activity_trend (2,9 frente a 13,6 puntos de percentil al mes), a la que quita peso (0,18 → 0,16) y acerca la criticidad de la caja (P173: +1,60 → +0,88).
+
+**Alternativas descartadas.** lost_accel y yoy_inflow: ruidosas (17-25 puntos al mes) y de poca cobertura. payee_concentration y hhi_ap_6m: exigen rehacer el panel; pendientes.
+
+**Evidencia.** PM 0,618 → 0,627: tensión 0,658 → 0,666, caída 0,601 → 0,617, expansión igual. Detalle: iter_006.
+
+## D31 · Con caja centinela, la liquidez es «sin dato»
+
+*Categoría:* datos · *Estado:* decidido
+
+**Pregunta.** ¿Qué hacer con las 9 empresas cuya caja reconstruida es un artefacto del generador (saldo o transacción > 1e8 €)?
+
+**Decisión.** runway pasa a nulo cuando dq_cash_sentinel: la nota va al neutro en liquidez y la confianza baja. La caja implausible por riqueza real (dq_cash_implausible: holdings con mucha caja y poco flujo, eventos a la mitad) no se toca.
+
+**Por qué.** La caja falsa movía la nota ±20-30 puntos en las dos direcciones (COMP_1068: 83,7 «sano» con 87 000 M€ falsos; COMP_0420: 25,3 con −2 000 M€). Marcar no bastaba: el sub-score de runway era alto o bajo, no neutro. La deriva de reconstrucción (has_drift) queda pendiente de un flag por fila y de la exclusión simétrica en los eventos.
+
+**Evidencia.** PM idéntica fuera de las filas centinela (0,6143 = 0,6143 en todas las filas OOF); en cortes 0,627 → 0,626 (ruido). Detalle: iter_007 y salida/datos_limpieza.md A02/A16.

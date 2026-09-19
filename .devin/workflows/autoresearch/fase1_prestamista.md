@@ -4,9 +4,12 @@ Eres el **orquestador** del workflow de autoresearch del score X-Ray (reto de Em
 
 ## Por qué existe esta fase
 
-El sistema actual (v7) se diseñó de abajo arriba: features → pesos → score. Aquí le damos la vuelta. Primero nos ponemos en el sitio de quien pone el dinero y decidimos **a qué empresas prestaríamos y cómo las rankearíamos**. Todo lo que venga después (el consejo de la fase 2 y el bucle de la fase 3) se juzga contra esta política. Si una feature no sirve para tomar una decisión de crédito, no tiene por qué estar en el score.
+El sistema actual (v7) se construyó desde las features hacia el score: primero las 17 señales, después los pesos y la nota. Aquí empezamos por el otro extremo: las preguntas de quien pone el dinero, y desde ahí subimos a qué señales y qué modelo hacen falta. Todo lo que venga después (el consejo de la fase 2 y el bucle de la fase 3) se juzga contra esta política. Si una feature no sirve para tomar una decisión de crédito, no tiene por qué estar en el score.
+
+**La estrategia es data-lead: los datos primero.** No escribas un criterio de decisión sin haber mirado antes si los datos lo sostienen. La fase 0 dejó la base de evidencia en `salida/analisis_datos.md` y `salida/hechos_datos.jsonl`; cada criterio que escribas debe poder citar un hecho (`H0xx`) o una consulta que hayas corrido tú. Un criterio que la política afirme pero los datos no respalden se marca como **hipótesis a verificar**, no como criterio.
 
 Lee primero:
+- `salida/analisis_datos.md` y `salida/hechos_datos.jsonl` (la evidencia de la fase 0). Si no existen, para y avisa: hay que ejecutar antes `analisis_datos.py`.
 - `context/scoring.md` (la prueba de los 100.000 €) y `context/challenge.md`.
 - `research/ESTADO.md`, `research/DECISIONS.md`, `research/REFLEXIONES.md`.
 - `features.md` y `data/data_dictionary.md`.
@@ -14,7 +17,7 @@ Lee primero:
 
 ## Paso 1 · Investigaciones de apoyo en paralelo
 
-Lanza 4 subagentes `researcher` con `is_background: true`. Todos devuelven columnas y `file:line`, no opiniones. Pueden ejecutar consultas de solo lectura con `uv run python` desde `research/` sobre `data/panel.parquet`.
+Lanza 4 subagentes `researcher` con `is_background: true`. Todos devuelven columnas y `file:line`, no opiniones. Pueden ejecutar consultas de solo lectura con `uv run python` desde `research/` sobre `data/panel.parquet`. **Cada investigación debe terminar con 3-6 hechos de datos** (patrón observado + n + tasa/lift/AUC), no con conclusiones en prosa.
 
 - **A · Liquidez y caja.** ¿Qué mide hoy `runway`, `lc_util`, `cash_end`? ¿Cómo se reconstruye la caja y dónde está el intragrupo (R08)? ¿Qué significa «romper la caja» en estos datos y con cuántos meses de antelación se ve?
 - **B · Cobros y pagos.** DSO/DPO, morosidad (`overdue_*`, `late_share_*`), clientes perdidos (`lost_share`, `cust_trend`), concentración (`hhi_ar_6m`). ¿Qué señales hay de que la empresa deja de cobrar o empieza a pagar con deuda?
@@ -27,10 +30,11 @@ Escribe `.devin/workflows/autoresearch/salida/politica_prestamo.md`. Debe conten
 
 1. **El comprador.** Quién paga por el producto y por qué (Embat, banco, fondo de deuda, CFO). Qué decide cada uno con el score y con qué objetivo distinto.
 2. **Preguntas de underwriting.** Tabla consumidor → empresa → **columna/feature del dataset** que la responde. Amplía la de `context/scoring.md`; no la repitas sin añadir.
-3. **Criterios de decisión.** Por cada situación (caja rota N meses, impago de nómina, caída de cobros, póliza agotada, intragrupo que tapa el hueco, sin movimientos…): ¿prestar / vigilar / no prestar? **Bajo qué condiciones** (importe, plazo, factoring con o sin recurso, covenant de caja mínima, anticipo, garantía).
+3. **Criterios de decisión.** Por cada situación (caja rota N meses, impago de nómina, caída de cobros, póliza agotada, intragrupo que tapa el hueco, sin movimientos…): ¿prestar / vigilar / no prestar? **Bajo qué condiciones** (importe, plazo, factoring con o sin recurso, covenant de caja mínima, anticipo, garantía). **Cada criterio cita el hecho de datos que lo sostiene** (`H0xx` de `hechos_datos.jsonl`) o una consulta propia; si no hay evidencia, márcalo como *hipótesis a verificar*.
 4. **Metodología de ranking.** Si tuvieras que ordenar 1.286 empresas para colocar deuda, ¿qué miras primero, qué descarta de entrada, qué desempata? Define el orden de las decisiones, no solo el número.
 5. **Productos y su señal.** Por cada producto (factoring de pagarés, confirming, línea de circulante, refinanciación), la situación que lo dispara y las señales del dataset que lo confirman.
-6. **Premisas candidatas.** La lista inicial de afirmaciones que el consejo deberá debatir (≥ 25), cada una en una frase, del estilo «una empresa con la caja rota 3 meses seguidos no recibe deuda nueva, salvo X».
+6. **Hechos de datos.** Los 10-15 patrones observados (de `hechos_datos.jsonl` o propios) que más cambian una decisión, con su `n`, tasa y lift. Esta es la columna vertebral data-lead de la política.
+7. **Premisas candidatas.** La lista inicial de afirmaciones que el consejo deberá debatir (≥ 25), cada una en una frase, del estilo «una empresa con la caja rota 3 meses seguidos no recibe deuda nueva, salvo X», **y con el hecho de datos que la motiva**.
 
 ## Paso 3 · Revisión adversarial
 

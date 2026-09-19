@@ -293,6 +293,132 @@
     "prec_top5_down": 0.47093023255813954,
     "prec_top5_up": 0.4069767441860465
    }
+  },
+  {
+   "tag": "v7",
+   "description": "Eventos v2 (tensión, incumplimiento, caída, expansión) calibran los pesos; probabilidades publicadas",
+   "metrics": {
+    "mae_h1": 4.483166704615685,
+    "mae_h3": 10.848491563244492,
+    "mae_ar1_h3": 11.071506876189774,
+    "skill_vs_ar1_h3": 0.020143176122203954,
+    "auc_deterioro": 0.7252489043698701,
+    "auc_deterioro_ar1": 0.6925584826634303,
+    "auc_mejora": 0.7297037573476389,
+    "auc_mejora_ar1": 0.6923078697190408,
+    "auc_deterioro_top_quintil": 0.6041482789055604,
+    "coverage80_h3": 0.8124093940272543,
+    "share_big_moves": 0.2847202087561612,
+    "auc_level_vs_adverse_6m": 0.580627768063975,
+    "auc_level_vs_positive_6m": 0.5781433229518503,
+    "prec_top5_down": 0.3953488372093023,
+    "prec_top5_up": 0.3372093023255814
+   }
+  },
+  {
+   "tag": "ar000",
+   "description": "Base del autoresearch: v7 sobre el panel con flags de calidad (fase 0)",
+   "metrics": {
+    "mae_h1": 4.493290897187851,
+    "mae_h3": 10.921044135313076,
+    "mae_ar1_h3": 11.125459984009005,
+    "skill_vs_ar1_h3": 0.01837369861468585,
+    "auc_deterioro": 0.7276061442871936,
+    "auc_deterioro_ar1": 0.6921140310065885,
+    "auc_mejora": 0.7246474747800897,
+    "auc_mejora_ar1": 0.6907503163540029,
+    "auc_deterioro_top_quintil": 0.6100572147378672,
+    "coverage80_h3": 0.8144389678167585,
+    "share_big_moves": 0.2850101478689475,
+    "auc_level_vs_adverse_6m": 0.571486453880368,
+    "auc_level_vs_positive_6m": 0.586092803507161,
+    "prec_top5_down": 0.43023255813953487,
+    "prec_top5_up": 0.3023255813953488
+   }
+  },
+  {
+   "tag": "ar002b",
+   "description": "+ payroll_cv (regularidad de nóminas a la baja) en lugar de payroll_burden",
+   "metrics": {
+    "mae_h1": 4.500306962725692,
+    "mae_h3": 10.714754812586044,
+    "mae_ar1_h3": 10.997812205521187,
+    "skill_vs_ar1_h3": 0.025737609230410463,
+    "auc_deterioro": 0.7285758580540651,
+    "auc_deterioro_ar1": 0.6848132023893895,
+    "auc_mejora": 0.7433414463164694,
+    "auc_mejora_ar1": 0.7034326583016297,
+    "auc_deterioro_top_quintil": 0.6137082204155375,
+    "coverage80_h3": 0.8196578718469122,
+    "share_big_moves": 0.27921136561322124,
+    "auc_level_vs_adverse_6m": 0.5798199010275111,
+    "auc_level_vs_positive_6m": 0.5822568462210638,
+    "prec_top5_down": 0.47674418604651164,
+    "prec_top5_up": 0.36046511627906974
+   }
+  },
+  {
+   "tag": "ar004",
+   "description": "− net_margin_6m (sin señal, peso 0)",
+   "metrics": {
+    "mae_h1": 4.5061176626165755,
+    "mae_h3": 10.749642785326765,
+    "mae_ar1_h3": 11.00158885484062,
+    "skill_vs_ar1_h3": 0.0229008803035754,
+    "auc_deterioro": 0.7300308373226665,
+    "auc_deterioro_ar1": 0.6845777897764073,
+    "auc_mejora": 0.7414393608976552,
+    "auc_mejora_ar1": 0.7021661640994423,
+    "auc_deterioro_top_quintil": 0.6104760052809874,
+    "coverage80_h3": 0.8135691504783995,
+    "share_big_moves": 0.27950130472600754,
+    "auc_level_vs_adverse_6m": 0.579847216341842,
+    "auc_level_vs_positive_6m": 0.582363482871488,
+    "prec_top5_down": 0.46511627906976744,
+    "prec_top5_up": 0.3372093023255814
+   }
+  },
+  {
+   "tag": "ar006",
+   "description": "+ oper_persistence_6m (persistencia de cobros operativos)",
+   "metrics": {
+    "mae_h1": 4.4138294923307475,
+    "mae_h3": 10.46586528778785,
+    "mae_ar1_h3": 10.732096262997981,
+    "skill_vs_ar1_h3": 0.024806987254488266,
+    "auc_deterioro": 0.7178097952904523,
+    "auc_deterioro_ar1": 0.6550699063390797,
+    "auc_mejora": 0.7405535798662058,
+    "auc_mejora_ar1": 0.7146112589424122,
+    "auc_deterioro_top_quintil": 0.6128745112620987,
+    "coverage80_h3": 0.8100898811249637,
+    "share_big_moves": 0.2681936793273413,
+    "auc_level_vs_adverse_6m": 0.5818321291832266,
+    "auc_level_vs_positive_6m": 0.5765132777440425,
+    "prec_top5_down": 0.43023255813953487,
+    "prec_top5_up": 0.37209302325581395
+   }
+  },
+  {
+   "tag": "ar007",
+   "description": "runway sin dato con caja centinela (final del bucle)",
+   "metrics": {
+    "mae_h1": 4.424173798358014,
+    "mae_h3": 10.496559482132094,
+    "mae_ar1_h3": 10.782684026501835,
+    "skill_vs_ar1_h3": 0.026535558648152935,
+    "auc_deterioro": 0.7163573406312436,
+    "auc_deterioro_ar1": 0.6557679829886741,
+    "auc_mejora": 0.7430578697371366,
+    "auc_mejora_ar1": 0.7160752033025789,
+    "auc_deterioro_top_quintil": 0.6104918326047338,
+    "coverage80_h3": 0.8155987242679037,
+    "share_big_moves": 0.2693534357784865,
+    "auc_level_vs_adverse_6m": 0.5807986997910379,
+    "auc_level_vs_positive_6m": 0.5763207393474429,
+    "prec_top5_down": 0.436046511627907,
+    "prec_top5_up": 0.37790697674418605
+   }
   }
  ],
  "final": {
@@ -343,7 +469,13 @@
       5.92,
       5.0208,
       10.8596,
-      11.2157
+      11.2157,
+      10.8485,
+      10.921,
+      10.7148,
+      10.7496,
+      10.4659,
+      10.4966
      ]
     },
     {
@@ -362,7 +494,13 @@
       6.4651,
       5.2939,
       11.2051,
-      11.6608
+      11.6608,
+      11.0715,
+      11.1255,
+      10.9978,
+      11.0016,
+      10.7321,
+      10.7827
      ]
     }
    ],
@@ -380,7 +518,13 @@
     "v5d",
     "v5e",
     "v5f",
-    "v6"
+    "v6",
+    "v7",
+    "ar000",
+    "ar002b",
+    "ar004",
+    "ar006",
+    "ar007"
    ]
   },
   {
@@ -401,12 +545,24 @@
       0.5987,
       0.6018,
       0.6098,
-      0.5944
+      0.5944,
+      0.5806,
+      0.5715,
+      0.5798,
+      0.5798,
+      0.5818,
+      0.5808
      ]
     },
     {
      "label": "churn_6m",
      "data": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
       null,
       null,
       null,
@@ -431,12 +587,24 @@
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
       null
      ]
     },
     {
      "label": "decline_6m",
      "data": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
       null,
       null,
       null,
@@ -461,7 +629,13 @@
       0.5263,
       0.5258,
       0.5316,
-      0.5681
+      0.5681,
+      0.5781,
+      0.5861,
+      0.5823,
+      0.5824,
+      0.5765,
+      0.5763
      ]
     }
    ],
@@ -475,7 +649,13 @@
     "v5d",
     "v5e",
     "v5f",
-    "v6"
+    "v6",
+    "v7",
+    "ar000",
+    "ar002b",
+    "ar004",
+    "ar006",
+    "ar007"
    ]
   },
   {
