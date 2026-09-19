@@ -19,7 +19,7 @@ The app works with a small Nitro-hosted development portfolio out of the box. To
 real portfolio, start the X-Ray backend (see `backend/README.md`) and point the app at it:
 
 ```bash
-cd ../backend && uv run --project ../research uvicorn main:app --port 8080   # one terminal
+cd ../backend && uv sync && uv run uvicorn main:app --port 8080             # one terminal
 cd ../frontend && XRAY_API_BASE=http://localhost:8080 pnpm dev               # another
 ```
 

@@ -18,11 +18,12 @@ que son hechos de hoy y mandan sobre la nota.
 
 ```bash
 cd backend
-uv run --project ../research python etl.py                # CSV → panel (12 s)
-uv run --project ../research python predict.py            # entrena e imprime pesos y bandas
-uv run --project ../research python decision.py           # informe de vetos
-uv run --project ../research python metrics.py           # validación completa (~3 min)
-uv run --project ../research uvicorn main:app --port 8000
+uv sync                          # entorno propio: pyproject.toml, sin research/
+uv run python etl.py             # CSV → panel (12 s)
+uv run python predict.py         # entrena e imprime pesos y bandas
+uv run python decision.py        # informe de vetos
+uv run python metrics.py         # validación completa (~3 min)
+uv run uvicorn main:app --port 8080
 ```
 
 ---
