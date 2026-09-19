@@ -342,6 +342,7 @@ Separarlos de la nota no es cosmética:
 | `veto_nomina_ausente` | 291 | 1,13 | 22 | bloquea |
 | `veto_ss_ausente` | 247 | 1,10 | 26 | bloquea |
 | `veto_grupo_en_estres` | 6.748 | 1,67 | 688 | **aviso** |
+| `veto_dependencia_grupo` | 1.744 | **1,47** | 361 | **aviso** |
 | `veto_cuota_ausente` | 394 | **0,98** | 52 | **aviso** |
 
 Dos degradaciones, medidas:
@@ -363,7 +364,71 @@ Reparto del último mes de las 1.286 empresas: **157 prestar · 736 vigilar · 1
 
 ---
 
-## 6 · La API
+## 6 · Sector y grupo: dos hipótesis medidas, una sobrevive
+
+Las dos venían del catálogo de pesos (`docs/explicacion_pesos.md`, bloque **GRP**), donde se
+decidió que ni el sector ni el grupo puntúan: **«no suma puntos, fija el listón»**. El listón
+es de este fichero, así que aquí se miden.
+
+### 6.1 · El sector NO cambia el listón de liquidez — descartado
+
+La hipótesis, literal: *«un mayorista que cobra a 90 días y un negocio de suscripción con
+cobro mensual no deben compartir el mismo umbral»*. Se probó con los cuatro regímenes del
+K-means (`analysis/cluster_sector.py`) y con los 12 sectores de `data/processed/company_sector.csv`.
+
+Tasa de tensión futura **en el tramo donde se decide** (0,5–1 mes de caja), con IC 95 %
+remuestreando grupos empresariales enteros. Global: **0,267**.
+
+| sector | n | tasa | IC 95 % | ¿se sale? |
+|---|---:|---:|---|---|
+| holding / tesorería | 146 | 0,192 | [0,082, 0,318] | no |
+| comercio minorista | 450 | 0,238 | [0,150, 0,329] | no |
+| servicios profesionales | 365 | 0,255 | [0,179, 0,351] | no |
+| mayorista / distribución | 134 | 0,291 | [0,176, 0,425] | no |
+| software / suscripción | 81 | 0,333 | [0,208, 0,625] | no |
+| construcción | 49 | 0,408 | [0,178, 0,650] | no |
+
+**Ninguno se separa del global.** La dispersión aparente es ruido: construcción parece el
+doble de arriesgado y su intervalo va de 0,18 a 0,65 con n=49.
+
+Y el mecanismo tampoco está: en este dataset **el mayorista cobra a 15,9 días**, menos que el
+de suscripción (21,0). El DSO va de 5 a 33 días entre sectores, no de 30 a 90. Sin ciclos de
+cobro distintos no hay necesidades de caja distintas que modular. No queda código de la opción.
+
+### 6.2 · La dependencia del grupo SÍ informa — y al revés de lo que se suponía
+
+El catálogo daba `intragroup_dependency` como **filtro obligatorio antes de puntuar**: la
+filial que vive de la matriz parece tensa sin estarlo, así que fuera. Los datos dicen lo
+contrario — depender del grupo **no protege**:
+
+| flujo intragrupo / total (3m) | filas | tensión futura | caja p50 |
+|---|---:|---:|---:|
+| < 5 % | 6.917 | 0,386 | 0,88 meses |
+| 5–20 % | 1.480 | 0,491 | 0,52 |
+| 20–50 % | 1.585 | 0,532 | 0,41 |
+| **> 50 %** | 887 | **0,644** | 0,15 |
+
+El gradiente podría ser un artefacto —quien vive del grupo tiene poca caja propia, y el ancla
+se mide con caja propia—, así que la prueba que importa es **dentro de cada banda de nota**:
+
+| banda | dep > 50 % | dep ≤ 50 % |
+|---|---:|---:|
+| sano | **0,198** (n=222) | 0,101 (n=3.003) |
+| vigilar | 0,578 (n=296) | 0,445 (n=5.115) |
+| riesgo | 0,962 (n=370) | 0,870 (n=1.920) |
+
+**Entre las empresas que el modelo llama «sanas», vivir del grupo dobla la tasa de tensión**
+(19,8 % frente a 10,1 %). Es información que la nota no tiene, y es justo el caso que le
+importa al prestamista: buena nota, pero la liquidez que se le ve es de la matriz.
+
+Entra como **aviso**, no como veto ni como filtro: lift 1,47 con 8,1 % del panel. No es un
+impago, es una condición del grupo — cambia a quién prestas y con qué compromiso, no si
+prestas. Filtrar esas filas antes de puntuar, como pedía el catálogo, habría cegado al modelo
+justo en su decil más arriesgado.
+
+---
+
+## 7 · La API
 
 | endpoint | qué devuelve |
 |---|---|
@@ -376,7 +441,7 @@ Reparto del último mes de las 1.286 empresas: **157 prestar · 736 vigilar · 1
 
 ---
 
-## 7 · Qué NO hace este backend
+## 8 · Qué NO hace este backend
 
 - **No hay forecaster.** El `TrajectoryForecaster` (MLForecast + LightGBM cuantílico, bandas
   q10/q50/q90) se quedó fuera, y con él sus métricas (`auc_deterioro` 0,722, `auc_mejora`

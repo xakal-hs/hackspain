@@ -96,7 +96,9 @@ JUDGES = ["tension_6m", "entrada_estres_2m", "rompe_caja_2m", "tension_entrada_6
 # Vetos: hechos de HOY que deciden por encima de la nota (docs/eventos.md:19-31).
 # No predicen nada y no entran en el score; se aplican en decision.py.
 VETOS = ["veto_caja_negativa", "veto_nomina_ausente", "veto_ss_ausente", "veto_iva_ausente",
-         "veto_cuota_ausente", "veto_poliza_agotada", "veto_grupo_en_estres"]
+         "veto_cuota_ausente", "veto_poliza_agotada", "veto_grupo_en_estres",
+         "veto_dependencia_grupo"]
+DEP_GRUPO = 0.5   # flujo intragrupo / flujo total (3m) por encima del cual la caja no es propia
 
 H = 6                 # horizonte de los eventos, en meses
 FISCAL = {1, 4, 7, 10}  # meses de liquidación de IVA
@@ -199,7 +201,9 @@ def _fwd_any(d: pd.DataFrame, flag: pd.Series, h: int = H) -> pd.Series:
 
 
 def _shift(s: pd.Series, by: pd.Series, k: int) -> pd.Series:
-    return s.groupby(by).shift(k).fillna(False).astype(bool)
+    # `shift` sobre bool deja object con NaN en los bordes: se pasa por el bool nullable
+    # de pandas para rellenar sin el downcasting silencioso (deprecado en pandas 2, roto en 3).
+    return s.groupby(by).shift(k).astype("boolean").fillna(False).astype(bool)
 
 
 def add_events(d: pd.DataFrame) -> pd.DataFrame:
@@ -259,9 +263,9 @@ def add_events(d: pd.DataFrame) -> pd.DataFrame:
     fisc = d.month.dt.month.isin(FISCAL)
     taxpos = (d.tax > 0).where(fisc)
     tprev = [taxpos.groupby(cid).shift(3 * k) for k in (1, 2, 3)]
-    reg_tax = sum(t.fillna(False).astype(int) for t in tprev) >= 2
+    reg_tax = sum(t.astype("boolean").fillna(False).astype(int) for t in tprev) >= 2
     miss_tax = fisc & reg_tax & (d.tax <= 0) & (tprev[0] == False) & feed  # noqa: E712
-    has_tax = reg_tax.where(fisc).groupby(cid).ffill().fillna(False).astype(bool)
+    has_tax = reg_tax.where(fisc).groupby(cid).ffill().astype("boolean").fillna(False).astype(bool)
 
     # La cuota de deuda NO entra en E2: sin calendario de cuotas (3 % de cobertura) no se distingue
     # impago de vencimiento o cambio de periodicidad. Se publica aparte como impago_cuota_6m.
@@ -355,6 +359,9 @@ def add_events(d: pd.DataFrame) -> pd.DataFrame:
     # Póliza agotada con caja corta: no ampliar (eventos.md:22)
     lc_util = (d.lc_drawn / d.lc_limit).where(d.lc_limit > 0)
     d["veto_poliza_agotada"] = (lc_util > 0.9).fillna(False) & (d.cash_end / burn < 0.5)
+    # Vive del grupo: más de la mitad de su flujo es intragrupo. Aviso, no bloqueo — y el
+    # signo es el contrario del que se suponía: depender del grupo NO protege (README §6).
+    d["veto_dependencia_grupo"] = d.intragroup_share_3m.fillna(0) > DEP_GRUPO
 
     # --- tensión del grupo: diagnóstico, NO sustituye a la nota de la entidad
     if "group_id" in d.columns:
