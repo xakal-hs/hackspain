@@ -57,13 +57,31 @@ lo llama honesto; Elkano mide con Gini y control de «feature gemela» del event
 circularidad de la etiqueta (Q2: `tension_nopol`, `group_funded = null`) y el control de feature gemela,
 **¿cuánto baja nuestro AUC?** ¿es nuestro 0,70 real o el artefacto que ellos evitan?
 
-**R7 · El encuadre.** burn-rate mueve la unidad al **grupo** y al **usuario inversor con cartera ordenada**;
+**R7 · Los «big NO» (knockouts) como ancla medible.** En crédito hay reglas de exclusión que van **por encima**
+del score: no pagar la nómina/SS/impuestos, caja en negativo. Elkano las convierte en un **evento observable
+D1-D4** y lo valida. Nosotros ya las tenemos **codificadas en la decisión** — **C1** caja rota, **C5** nómina
+ausente, **C4** póliza agotada (`politica_prestamo.md` §3, `proactive.py:decide()`), con `payroll` = salary +
+**social_security** (`panel.py:17`) — pero **el score se calibra contra otra etiqueta** (`tension_6m`, circular
+por la póliza). **Medid**:
+- ¿Nuestros C1/C5/C4 se pueden construir como **evento observable** (al estilo D1-D4) y medirse **como ancla**
+  (AUC con `n`/empresas/grupos)? ¿Separan mejor o peor que `tension_6m`? ¿Existen desde el mes 0?
+- **Falso positivo trimestral** (Q8): 49/209 episodios de impago duran exactamente 3 meses y 120 empresas
+  tienen patrón trimestral. Un veto «nómina ausente este mes → fuera» (C5 hoy, umbral de **1 mes**)
+  **¿cuántas empresas sanas rechaza de más?** ¿Exigir **2 meses** (o los **90 días** de Elkano) lo arregla,
+  y a qué coste de anticipación?
+- ¿Debe el producto publicar **dos capas separadas** — los knockouts (política, auditable, defendible ante
+  Embat) y el score (ranking de los supervivientes)?
+
+**Métrica:** **AUC es la base**; el **Gini es un extra** opcional (equivale a `2·AUC − 1`), no se cambia la
+métrica titular del proyecto por Gini.
+
+**R8 · El encuadre.** burn-rate mueve la unidad al **grupo** y al **usuario inversor con cartera ordenada**;
 Elkano tiene la validación; Byte_Me el producto. **Conclusión**: dado todo lo anterior, ¿cuál es **nuestra**
 conclusión nueva —qué hacemos distinto, qué copiamos y qué descartamos—? No vale «hacer todo»: priorizad.
 
 ## Producto
 
-`salida/consejo/debate_radar.md`, una fila por pregunta (R1-R7):
+`salida/consejo/debate_radar.md`, una fila por pregunta (R1-R8):
 
 | pregunta | veredicto | medición que lo sostiene | quién disintió | qué copiamos / descartamos del radar |
 |---|---|---|---|---|

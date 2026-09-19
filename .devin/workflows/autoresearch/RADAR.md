@@ -96,3 +96,9 @@ ranking explicable; FX declarado como limitación.
   `tension_6m = null` en `group_funded`?
 - **Anticipación honesta**: publican 0,53-0,58 a 6 meses. ¿Es el techo realista o nuestro 0,62-0,70 es
   inflado por la circularidad de la etiqueta?
+- **Los «big NO» como ancla (R7)**: Elkano convierte las reglas de exclusión (no pagar nómina/SS/tax, caja
+  negativa 5+ días, facturas vencidas 90+ días) en un **evento observable D1-D4** y lo valida. Nosotros
+  tenemos los mismos vetos **codificados en la decisión** (C1 caja rota, C5 nómina ausente, C4 póliza
+  agotada) pero el **score se calibra contra `tension_6m`**, no contra ellos. ¿Deberían ser el ancla
+  medible, con el falso positivo trimestral (Q8: 49/209 episodios duran 3 meses) sobre la mesa?
+  **Métrica: AUC es la base; el Gini es un extra (2·AUC − 1), no la métrica titular.**
