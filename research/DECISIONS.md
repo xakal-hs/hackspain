@@ -321,12 +321,12 @@ Generado por `src/decisions.py`. Las gráficas están en la SPA, pestaña «Deci
 
 **Alternativas descartadas.** Streamlit: más rápido de montar, pero se re-ejecuta entero en cada interacción y queda acoplado a Python.
 
-## D27 · Producto y comprador: monitor y simulador para Embat y sus socios financieros
+## D27 · Producto y comprador: capa de decisión de Embat para el CFO
 
 *Categoría:* producto · *Estado:* a confirmar con la organización
 
 **Pregunta.** ¿Quién paga y por qué?
 
-**Decisión.** Comprador: Embat. Integra X-Ray en su plataforma como (1) un monitor de alertas proactivas sobre sus clientes y (2) un simulador de escenarios para tesorería. Con el score y la confianza puede derivar operaciones a financiadores (circulante, factoring o pólizas) con un riesgo medido, y cobrar por origen o por suscripción.
+**Decisión.** Comprador e integrador: Embat. Usuario: CFO o equipo de tesorería. X-Ray ordena la cartera, explica qué cambió y propone la siguiente acción con un colchón dinámico. Banco, bróker o BaaS quedan como ejecutores opcionales cuando la recomendación requiere capital o licencia.
 
-**Por qué.** Embat ya tiene los datos y la relación con la pyme. El score la convierte en un canal de crédito con información que el banco no tiene: caja diaria, disciplina de facturas y anticipación de 1 a 3 meses.
+**Por qué.** Embat ya ofrece previsión, alertas, riesgo y pagos. La aportación incremental de X-Ray es comparabilidad, explicación aditiva y priorización transversal: convertir el rastro que Embat ya tiene en una cola de decisiones, no duplicar el forecast.

@@ -275,7 +275,7 @@
   },
   {
    "tag": "v6",
-   "description": "Final: inactividad causal, intragrupo fuera, FX en facturas, clientes perdidos, calibración 2 caras, EPS relativo",
+   "description": "Inactividad causal, intragrupo fuera, FX en facturas, clientes perdidos, calibración 2 caras, EPS relativo",
    "metrics": {
     "mae_h1": 4.520211756039129,
     "mae_h3": 11.215732310117959,
@@ -293,32 +293,53 @@
     "prec_top5_down": 0.47093023255813954,
     "prec_top5_up": 0.4069767441860465
    }
+  },
+  {
+   "tag": "v7",
+   "description": "Eventos v2: tensión, incumplimiento, caída estructural y expansión; probabilidades a 6 meses",
+   "metrics": {
+    "mae_h1": 4.483166704615685,
+    "mae_h3": 10.848491563244492,
+    "mae_ar1_h3": 11.071506876189774,
+    "skill_vs_ar1_h3": 0.020143176122203954,
+    "auc_deterioro": 0.7252489043698701,
+    "auc_deterioro_ar1": 0.6925584826634303,
+    "auc_mejora": 0.7297037573476389,
+    "auc_mejora_ar1": 0.6923078697190408,
+    "auc_deterioro_top_quintil": 0.6041482789055604,
+    "coverage80_h3": 0.8124093940272543,
+    "share_big_moves": 0.2847202087561612,
+    "auc_level_vs_adverse_6m": 0.580627768063975,
+    "auc_level_vs_positive_6m": 0.5781433229518503,
+    "prec_top5_down": 0.3953488372093023,
+    "prec_top5_up": 0.3372093023255814
+   }
   }
  ],
  "final": {
-  "AUC caída ≥15 a 3m (modelo)": 0.7418517295516887,
-  "AUC caída ≥15 a 3m (AR1)": 0.7028302730256217,
-  "AUC caída · aún sanas (quintil alto)": 0.5736165391152379,
-  "AUC subida ≥15 a 3m (modelo)": 0.7148084592734039,
-  "AUC subida ≥15 a 3m (AR1)": 0.6827879992086633,
-  "AUC subida · desde abajo (quintil bajo)": 0.6353537735849055,
-  "Precisión 5 % más en riesgo": 0.47093023255813954,
-  "Precisión 5 % más en mejora": 0.4069767441860465,
-  "MAE a 1 mes": 4.520211756039129,
-  "MAE a 3 meses": 11.215732310117959,
-  "MAE a 3 meses (AR1)": 11.660780179230047,
-  "Skill vs AR1 a 3 meses": 0.038166217206014985,
-  "Cobertura intervalo 80 % (h3)": 0.8216874456364164,
-  "AUC nivel vs evento adverso 6m": 0.5944248196043278,
-  "AUC nivel vs crecimiento 6m": 0.5681303095436534,
-  "Precisión alerta deterioro": 0.42058165548098436,
-  "Precisión alerta mejora": 0.45161290322580644,
-  "Antelación mediana (meses)": 3.0,
-  "Caídas estructurales alertadas antes": 0.4847161572052402,
-  "Precisión alerta deterioro (origen móvil)": 0.3381240544629349,
-  "Precisión alerta mejora (origen móvil)": 0.36666666666666664,
-  "Acierto bache vs caída": 0.7405159332321699,
-  "Alertas que parpadean": 0.2291981845688351
+  "AUC caída ≥15 a 3m (modelo v7)": 0.7252489043698701,
+  "AUC caída ≥15 a 3m (AR1)": 0.6925584826634303,
+  "AUC caída · aún sanas (quintil alto)": 0.6041482789055604,
+  "AUC subida ≥15 a 3m (modelo v7)": 0.7297037573476389,
+  "AUC subida ≥15 a 3m (AR1)": 0.6923078697190408,
+  "AUC subida · desde abajo (quintil bajo)": 0.5979804593070104,
+  "Precisión 5 % más en riesgo": 0.3953488372093023,
+  "Precisión 5 % más en mejora": 0.3372093023255814,
+  "MAE a 1 mes": 4.483166704615685,
+  "MAE a 3 meses": 10.848491563244492,
+  "MAE a 3 meses (AR1)": 11.071506876189774,
+  "Skill vs AR1 a 3 meses": 0.020143176122203954,
+  "Cobertura intervalo 80 % (h3)": 0.8124093940272543,
+  "AUC nivel vs tensión 6m": 0.657282348303363,
+  "AUC nivel vs incumplimiento 6m": 0.6025880546865948,
+  "AUC nivel vs caída estructural 6m": 0.5868003916483633,
+  "AUC nivel vs expansión 6m": 0.6074759140316206,
+  "Precisión / recall alerta deterioro v7": "0,38 / 0,26",
+  "Precisión / recall alerta mejora v7": "0,26 / 0,05",
+  "Antelación mediana v5/v6 (meses)": 3.0,
+  "Caídas alertadas antes v5/v6": 0.4847161572052402,
+  "AUC bache vs caída v5/v6": 0.53,
+  "Alertas que parpadean v5/v6": 0.2291981845688351
  },
  "charts": [
   {
@@ -343,7 +364,8 @@
       5.92,
       5.0208,
       10.8596,
-      11.2157
+      11.2157,
+      10.8485
      ]
     },
     {
@@ -362,7 +384,8 @@
       6.4651,
       5.2939,
       11.2051,
-      11.6608
+      11.6608,
+      11.0715
      ]
     }
    ],
@@ -380,102 +403,31 @@
     "v5d",
     "v5e",
     "v5f",
-    "v6"
+    "v6",
+    "v7"
    ]
   },
   {
    "type": "bar",
-   "title": "Validez externa del nivel: AUC frente a eventos a 6 meses",
-   "x_label": "versión",
+   "title": "Validez externa v7: AUC frente a eventos proxy a 6 meses",
+   "x_label": "evento",
    "y_label": "AUC",
    "datasets": [
     {
-     "label": "adverse_6m",
+     "label": "AUC v7",
      "data": [
-      0.58,
-      0.6014,
-      0.6014,
-      0.5987,
-      0.5987,
-      0.5987,
-      0.5987,
-      0.6018,
-      0.6098,
-      0.5944
-     ]
-    },
-    {
-     "label": "churn_6m",
-     "data": [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
-     ]
-    },
-    {
-     "label": "cash_stress_6m",
-     "data": [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
-     ]
-    },
-    {
-     "label": "decline_6m",
-     "data": [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
-     ]
-    },
-    {
-     "label": "positive_6m",
-     "data": [
-      0.5414,
-      0.5302,
-      0.5302,
-      0.5263,
-      0.5263,
-      0.5263,
-      0.5263,
-      0.5258,
-      0.5316,
-      0.5681
+      0.6573,
+      0.6026,
+      0.5868,
+      0.6075
      ]
     }
    ],
    "labels": [
-    "v4a",
-    "v4b",
-    "v4c",
-    "v5a",
-    "v5b",
-    "v5c",
-    "v5d",
-    "v5e",
-    "v5f",
-    "v6"
+    "tensión",
+    "incumplimiento",
+    "caída",
+    "expansión"
    ]
   },
   {
@@ -487,9 +439,9 @@
     {
      "label": "cobertura",
      "data": [
-      83.5025,
-      82.5747,
-      82.1687
+      82.1687,
+      81.5019,
+      81.2409
      ]
     },
     {
@@ -509,7 +461,7 @@
   },
   {
    "type": "bar",
-   "title": "Antelación de la primera alerta en caídas estructurales",
+   "title": "Antelación de la primera alerta en caídas estructurales (v5/v6)",
    "x_label": "meses de antelación",
    "y_label": "caídas",
    "datasets": [
