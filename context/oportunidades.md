@@ -16,7 +16,7 @@ Tres lentes a la vez, en este orden:
 
 1. **Impacto para el CFO** — ahorro recurrente o un salto grande de salud financiera (caja hoy, runway, no quebrar el colchón).
 2. **Dinero para Embat dentro de ese impacto** — spread o origination, no un ranking de comisiones simuladas.
-3. **Derecho a crear o intermediar el producto** — hoy no somos banco; el rastro tiene que dejar un libro que mañana sí pueda estar en balance (depósito o circulante).
+3. **Derecho a crear o intermediar el producto** — hoy no somos banco; un partner con licencia existente basta para mover el dinero. El rastro tiene que dejar un libro que mañana sí pueda estar en balance (depósito o circulante).
 
 Lo que no entra: maximizar un Excel de take independiente (reserve a 37 M€, seguro crudo a 15 M€). Eso es cola del generador, no identidad.
 
@@ -32,7 +32,7 @@ Una PM de Embat lo dijo claro: el exceso de dinero **no se toma como un problema
 
 El agente no resuelve esto. Es una de las funcionalidades que **no se acostumbra a utilizar**. La visibilidad va en la aplicación, en euros y en lenguaje llano, antes del SKU.
 
-La solvencia tampoco espera a conciliar al céntimo. Colchón, exceso y agujero salen de **planificación y previsiones**. Fuente: [voz de producto](voz_embat.md).
+La solvencia tampoco espera a conciliar al céntimo. Colchón, exceso y agujero salen de **planificación y previsiones**. Fuente: [voz de producto](voz_embat.md). Cómo se ejecuta el riel sin licencia propia y cómo se parte el préstamo por plazo: [voz de Capchase](voz_capchase.md).
 
 ## Primero el grupo mueve capital
 
@@ -73,9 +73,9 @@ Detectar → partir caja (colchón / exceso / agujero)
 
 El cliente gana más que Embat. Eso es el diseño correcto: impacto primero, spread segundo.
 
-Camino a banco: hoy un bróker o BaaS ejecuta el barrido cuando Embed One no cubre el riel. Intermediar no es lo ideal; la suscripción del módulo sí. El día que Embat tome depósitos, **esta cola es el pasivo**. El score ya sabe quién puede sacar dinero de la cuenta sin romper el colchón.
+Camino a banco: no hace falta licencia propia para mover ese saldo. Un **partner con licencia existente** ejecuta el barrido. Intermediar no es el relato de P&L (la suscripción del módulo sí); la licencia no es el muro. El día que Embat tome depósitos, **esta cola es el pasivo**. El score ya sabe quién puede sacar dinero de la cuenta sin romper el colchón.
 
-En la ficha, el primer número no es el take de Embat: es **cuánto cuesta no hacer nada** con el saldo ocioso.
+En la ficha, el primer número no es el take de Embat: es **cuánto cuesta no hacer nada** con el saldo ocioso. El segundo, para quien pide crédito con caja: aparcar ese saldo en el partner **es colateral** —baja el interés y retiene al cliente. El yield no es solo rentabilidad; es pegamento.
 
 ### 2. Anticipar cobros — caja hoy, sin préstamo nuevo
 
@@ -103,18 +103,21 @@ FX es dinero de verdad y entra en el pitch de tesorería. Es **menos identidad**
 
 La cifra de crédito defendible es más pequeña todavía: **8,05 M€** tras pooling (11,38 M€ brutos en 41 agujeros). Por eso el jurado no ve un marketplace. El relato de compañía es otro: el agujero es pequeño; **el AR detrás de la tensión no lo es**; el excedente en corriente, tampoco; y parte de lo que parece crédito es un traspaso entre filiales.
 
-Cuando sí hay que aportar deuda, no se empuja una línea genérica. Con estos datos se puede (1) aportar un producto, (2) entender la necesidad y ofrecer **varios** conforme al tiempo de devolución, y (3) proponer un **mix a corto, medio y largo plazo**. La criticidad de esa liquidez no es la misma en todas: hay empresas que viven de ella y otras que no la miran.
+Cuando sí hay que aportar deuda, no se empuja una línea genérica. Con estos datos se puede (1) aportar un producto, (2) entender la necesidad y ofrecer **varios** conforme al tiempo de devolución, y (3) proponer un mix en la rejilla **sector × tenor**: pocos días, 6 meses, 12 meses, más largo. Inmediato, corto y medio son productos distintos, no el mismo préstamo con otro vencimiento. La criticidad de esa liquidez no es la misma en todas: hay empresas que viven de ella y otras que no la miran.
+
+Quien tiene caja también pide prestado cuando tiene sentido bancario. Ahí el producto no es “tapar el agujero”: es aparcar el depósito en el partner para **abaratar el crédito** y que el cliente se quede. Fuente: [voz de Capchase](voz_capchase.md).
 
 ## Secuencia
 
-**Ahora** — capa de decisión + suscripción (intermediación solo si Embed One no cubre)
+**Ahora** — capa de decisión + suscripción (el riel, si hace falta, lo ejecuta un banco partner)
 
 1. Colchón explicable. Eso no lo duplica el forecast de Embat. No espera conciliación perfecta.
 2. Coste de no hacer nada: dinero parado y divisa sin convertir, visibles en la ficha.
 3. Si el grupo tiene excedente y agujero, movimiento de capital. No un SKU.
 4. Mesa de opciones que encajan (barrido, factoring, FX, mix de deuda), no un único producto.
 5. Factoring / confirming como acción por defecto cuando hay tensión, hay facturas y el grupo no cubre, no «busca un préstamo».
-6. Si hay deuda, combinar corto / medio / largo según el tiempo de devolución.
+6. Si hay deuda, rejilla sector × tenor: días / 6 m / 12 m / largo. Quien tiene caja y pide, depósito como colateral, no “agujero”.
+7. Cada acción debe dejar al cliente dentro (retención), no cerrar un one-shot.
 
 **Después** — dueños del riel
 
@@ -130,7 +133,9 @@ La póliza y el crédito genérico salen de haber visto 24 meses de caja. Los ag
 - El pitch de compañía añade el AR de las tensas y el camino pasivo → activo.
 - Mostrar en la app el coste oculto del dinero parado y de la divisa. No depender del agente.
 - El upsell es una mesa de 2–4 opciones que encajan, no el SKU de más comisión.
-- La deuda, si entra, es un mix de plazos según cuándo tiene que volver el dinero, no una línea única.
+- La deuda, si entra, es una rejilla sector × tenor (días / 6 m / 12 m / largo), no una línea única.
+- No tratar crédito con caja holgada como agujero; el depósito en el partner es colateral y retención.
+- No presentar la falta de licencia de Embat como bloqueo: se apalanca un banco existente.
 - No rankear la demo de Productos por comisión de la SPA (mezcla yield del CFO con take de Embat, y FX con `n_tx > 50`).
 - No originar líneas con una fórmula de gasto que explota en colas. Eso maximiza un Excel, no el impacto ni el derecho a ser el banco después.
 

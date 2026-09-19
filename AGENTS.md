@@ -5,6 +5,7 @@
 - After completing a deliverable, open a pull request and merge it into `main`.
 - Preferred models for subagent workflows: GPT-5.6 Sol, Claude Opus 5, GLM-5.3, and DeepSeek V4.1 Flash for quick work. Do not route quality-sensitive work to Claude Sonnet 5 — go to Opus 5 instead. Custom subagent profiles live in `.devin/agents/` (`researcher`, `implementer`, `reviewer`, `prototyper`, and the council roles `prestamista`, `cfo`, `auditor-datos`, `riesgo-modelo`, `abogado-diablo`, `cobrador`).
 - The score must be designed bottom-up from the lender's view, with the model explaining why it classified a rating (Y, Z, K), and improved through a measurable test→diagnose→change loop rather than LGBM prediction.
+- Size and rank financial products by client impact first, then Embat take within that impact, then the right to create or intermediate the rail. Embat is not a bank today; a partner with an existing banking license is enough to move money.
 
 ## Learned Workspace Facts
 - The repository remote is `https://github.com/xakal-hs/hackspain`, with `main` as the default branch.
@@ -16,6 +17,8 @@
 - The autoresearch workflow lives in `.devin/workflows/autoresearch/`: fase1 (política de préstamo), fase2 (consejo → `salida/premisas.jsonl`), fase3 (bucle sobre `premisas.py`), fase4 (sala de situaciones en la SPA + demo proactiva de factoring/refi). `premisas.py` (`build`/`run`/`export`) evalúa premisas contra `research/data/panel.parquet` + `features.py` + `targets.py` and exports `salida/situaciones.json` for the UI; `premisas.seed.jsonl` es la semilla. `salida/` no se versiona. The repo-restructuring workflow is in `.devin/workflows/reestructura/`.
 - The visual language of the demo SPA is defined in `research/app/DESIGN.md`; follow it when touching `research/app/static/index.html`.
 - Qualitative product voice from an Embat PM (19 Sep 2026) lives in `context/voz_embat.md` (readable page: `context/voz_embat.html`). Idle cash and FX are hidden costs to show in the app; the agent is unused; subscription is the preferred model and intermediation is a fallback; liquidity criticality is sector-dependent; upsell is a table of fitting options; debt is a short/medium/long mix matched to repayment time.
+- Qualitative credit voice from a Capchase co-founder (19 Sep 2026) lives in `context/voz_capchase.md` (readable page: `context/voz_capchase.html`). Moving client money does not require Embat's own banking license — partner with a licensed bank; loan products sit on a sector × tenor grid (days / 6m / 12m / longer); retain the client; cash-rich firms still borrow — park deposits at the partner as collateral to cut the rate.
+- Product opportunity sizing lives in `analysis/productos.py` → `analysis/productos.html` (notebook `notebooks/02_productos.ipynb`); the placement frame is `context/oportunidades.md`. Net surplus and holes by `group_id` first — sister companies with both transfer cash internally before any SPA SKU — then yield, FX, factoring, residual insurance, reserve. Uncapped reserve and insurance takes are generator-tail artifacts, not P&L.
 
 ## Project Context
 
@@ -37,7 +40,7 @@ The most obvious buyer is Embat or the company contributing its own treasury dat
 
 ## Scoring Philosophy
 
-Operational frame: [`context/scoring.md`](context/scoring.md) (readable page: [`context/scoring.html`](context/scoring.html)). The CFO product row — what is sold and what it is worth on this portfolio — is in [`context/monetizacion.md`](context/monetizacion.md) (readable page: [`context/monetizacion.html`](context/monetizacion.html)). Product placement (cushion / excess / hole, group pooling, yield vs factoring vs FX) is in [`context/oportunidades.md`](context/oportunidades.md). Qualitative voice from Embat product is in [`context/voz_embat.md`](context/voz_embat.md).
+Operational frame: [`context/scoring.md`](context/scoring.md) (readable page: [`context/scoring.html`](context/scoring.html)). The CFO product row — what is sold and what it is worth on this portfolio — is in [`context/monetizacion.md`](context/monetizacion.md) (readable page: [`context/monetizacion.html`](context/monetizacion.html)). Product placement (cushion / excess / hole, group pooling, yield vs factoring vs FX) is in [`context/oportunidades.md`](context/oportunidades.md). Qualitative voice from Embat product is in [`context/voz_embat.md`](context/voz_embat.md). Qualitative credit voice (partner license, sector × tenor, retention, deposits as collateral) is in [`context/voz_capchase.md`](context/voz_capchase.md).
 
 - Design the score as a lender with €100,000 to place. Start from consumer credit questions, then map them onto company cash, invoices and debt. The nature of the risk is the same; the data type is not.
 - **Criticality is not uniform.** Cash available that evaporates quickly must move the score far more than a mild shift in collection days (DSO) or payment days (DPO). Do not give every feature the same weight. Liquidity criticality is also sector-dependent: some firms die without cash; others barely watch it. Do not treat a global runway threshold as universal.
@@ -46,7 +49,7 @@ Operational frame: [`context/scoring.md`](context/scoring.md) (readable page: [`
 - Observability gaps (missing ERP, truncated month, uncategorized flows) are coverage, not health. Solvency does not wait for perfect reconciliation: it comes from planning and forecasts.
 - Embat’s wedge versus banks is treasury data banks do not have (live cash, ERP invoices, reconciliation, connected debt). Pitch banks hard; do not treat the annual rating as the competitor.
 - Do not ship one universal metric. The score, weights and decision change with the product being sold (working-capital line, policy, marketplace, agent) and with the viewer (bank, insurer, CFO, Embat), because their objectives differ.
-- Upsell is a table of fitting options, not a single SKU ranked by commission. Debt, when offered, is a short / medium / long mix matched to repayment time. The module sells as a subscription; intermediation is the fallback when Embed One does not cover the rail.
+- Upsell is a table of fitting options, not a single SKU ranked by commission. Debt, when offered, is a sector × tenor grid (days / 6 months / 12 months / longer), not one generic line. New debt with ample cash is capital structure, not automatically a hole; the distress case is new debt while cash evaporates. The module sells as a subscription; a partner bank's license is enough to move money — Embat does not need its own. Park surplus at that partner as collateral to cut the rate and keep the client.
 
 ## Delivery Requirements
 
