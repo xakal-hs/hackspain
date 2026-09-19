@@ -17,3 +17,7 @@ backend/__pycache__/
 # Machine-local Claude permissions and authentication preferences.
 .claude/settings.local.json
 .playwright-mcp/
+
+# Experimento de pesos: las notas OOF se regeneran, los resúmenes sí se versionan.
+backend/experiments/salida/oof_*.parquet
+backend/experiments/salida_*.log
