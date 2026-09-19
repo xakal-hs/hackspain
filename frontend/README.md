@@ -62,7 +62,17 @@ Each dashboard takes `?section=` with `resumen` (default), `cartera` (not for
 
 Switch perspectives or exit using the user panel at the bottom of the desktop sidebar. On mobile, navigation and the user panel move above the content. Dashboard deep links redirect to demo sign-in when no demo-role cookie exists. This cookie is a UI convenience, not an authorization boundary.
 
-The dashboards use explicitly fictional EUR fixtures from `app/data/demo.ts`, independently of `XRAY_API_BASE`. Accepting an offer changes only demo state. Offers survive client-side navigation and reset on a full page reload. The role cookie survives reloads until logout/browser session expiry.
+The Empresa perspective and all product-only fields use explicit fixtures from
+`app/data/demo.ts`. In the Embat perspective, `/api/companies` enriches the five
+featured companies with Supabase treasury facts: group, ERP coverage, history,
+cash, runway, DSO, overdue invoices and monthly flows. Names, sectors, scores,
+decisions, trajectories and offer terms remain simulated until those outputs
+have their own tables. If Supabase is not configured or cannot be reached, the
+endpoint returns the original development portfolio.
+
+Accepting an offer changes only demo state. Offers survive client-side
+navigation and reset on a full page reload. The role cookie survives reloads
+until logout/browser session expiry.
 
 Manual acceptance flow: enter as Empresa and confirm an offer, then switch to Embat, search/select a company and inspect signals. Also check empty search, logout, direct-link redirect, and mobile/desktop layouts.
 

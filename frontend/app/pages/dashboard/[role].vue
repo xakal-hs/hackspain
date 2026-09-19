@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { Check, Search } from '@lucide/vue'
 import {
-  companies,
-  companyById,
+  companies as demoCompanies,
   currentMonth,
   decisionLabel,
   euros,
@@ -21,6 +20,7 @@ import {
   type PerspectiveId,
   type SizeBand,
 } from '~/data/demo'
+import { portfolioCompanies } from '~/data/portfolio'
 
 definePageMeta({
   middleware: [
@@ -35,6 +35,13 @@ definePageMeta({
 const route = useRoute()
 const role = computed(() => route.params.role as PerspectiveId)
 const profile = computed(() => perspectiveById(role.value)!)
+const portfolioQuery = usePortfolioQuery()
+const companies = computed(() => {
+  if (role.value !== 'embat') return demoCompanies
+  const rows = portfolioQuery.data.value?.companies || []
+  return rows.length ? portfolioCompanies(rows) : demoCompanies
+})
+const portfolioSource = computed(() => portfolioQuery.data.value?.source || 'demo')
 
 /* Las pantallas de tesorería propia traen su propio encabezado y solo
  * existen para la perspectiva empresa. */
@@ -76,7 +83,18 @@ watch(section, () => {
  * Embat picks it from the portfolio. */
 const pickedId = useState('wk-picked', () => 'iberica')
 const subject = computed(() =>
-  role.value === 'empresa' ? leadCompany : companyById(pickedId.value)!,
+  role.value === 'empresa'
+    ? leadCompany
+    : companies.value.find((company) => company.id === pickedId.value) || companies.value[0]!,
+)
+
+watch(
+  companies,
+  (rows) => {
+    if (role.value === 'embat' && !rows.some((company) => company.id === pickedId.value))
+      pickedId.value = rows[0]?.id || 'iberica'
+  },
+  { immediate: true },
 )
 
 const query = ref('')
@@ -85,7 +103,7 @@ const groupFilter = ref('')
 const sectorFilter = ref('')
 
 const groupOptions = computed(() => {
-  const names = companies
+  const names = companies.value
     .filter((company) => sizeFilter.value === 'todas' || company.size === sizeFilter.value)
     .filter((company) => !sectorFilter.value || company.sector === sectorFilter.value)
     .map((company) => company.group)
@@ -93,7 +111,7 @@ const groupOptions = computed(() => {
 })
 
 const sectorOptions = computed(() => {
-  const names = companies
+  const names = companies.value
     .filter((company) => sizeFilter.value === 'todas' || company.size === sizeFilter.value)
     .filter((company) => !groupFilter.value || company.group === groupFilter.value)
     .map((company) => company.sector)
@@ -102,7 +120,7 @@ const sectorOptions = computed(() => {
 
 const visible = computed(() => {
   const needle = query.value.toLocaleLowerCase('es').trim()
-  return companies.filter((company) => {
+  return companies.value.filter((company) => {
     if (sizeFilter.value !== 'todas' && company.size !== sizeFilter.value) return false
     if (groupFilter.value && company.group !== groupFilter.value) return false
     if (sectorFilter.value && company.sector !== sectorFilter.value) return false
@@ -142,7 +160,7 @@ watch(sectorOptions, (options) => {
 })
 
 const changed = computed(() =>
-  [...companies]
+  [...companies.value]
     .filter((company) => Math.abs(company.delta3) > 0)
     .sort((a, b) => Math.abs(b.delta3) - Math.abs(a.delta3)),
 )
@@ -207,7 +225,16 @@ const headline = computed(() =>
         <p class="wk__crumb">
           {{ profile.name }}<span aria-hidden="true">/</span>{{ sectionLabel }}
         </p>
-        <span class="chip chip--neutral">{{ currentMonth }}</span>
+        <div class="wk__source">
+          <span v-if="role === 'embat'" class="chip chip--neutral">
+            {{
+              portfolioSource === 'supabase'
+                ? 'Tesorería real · producto simulado'
+                : 'Datos de demostración'
+            }}
+          </span>
+          <span class="chip chip--neutral">{{ currentMonth }}</span>
+        </div>
       </header>
 
       <main id="main-content" class="wk__main" tabindex="-1">
@@ -684,8 +711,14 @@ const headline = computed(() =>
         </div>
 
         <footer class="wk__foot">
-          Cartera y condiciones ficticias. Lo que hagas aquí solo afecta a esta
-          sesión.
+          <template v-if="role === 'embat' && portfolioSource === 'supabase'">
+            Tesorería desde Supabase. Score, nombres, sectores, decisiones y
+            condiciones todavía son simulados.
+          </template>
+          <template v-else>
+            Cartera y condiciones ficticias. Lo que hagas aquí solo afecta a
+            esta sesión.
+          </template>
         </footer>
       </main>
     </div>
