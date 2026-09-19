@@ -80,6 +80,29 @@ candidatos sin probar.
 **Que el consejo responda:** ¿cuántas iteraciones sin mejora son una meseta de verdad? ¿qué cambios
 quedaron sin probar y por qué? ¿el objetivo (PM) debe ser el promedio o por evento?
 
+### Q12 · ¿La unidad de medida debe ser el **grupo**, no la empresa?
+
+**Hipótesis (a verificar o refutar):** dentro de un grupo, las empresas se prestan entre ellas (transferencias
+intragrupo, *cash pooling*). La caja *standalone* de una filial engaña justo por eso: o el grupo le tapa el
+hueco, o la filial custodia la caja de todo el grupo. Entonces **la unidad correcta para el riesgo del deudor
+puede ser el grupo consolidado**, no la entidad legal. El consejo ya detectó que «el score no tiene ninguna
+feature de grupo» (`r2_riesgo-modelo.md`) y la etiqueta excluye a las financiadas por su grupo (Q2); esto
+propone la respuesta contraria a excluirlas: **medirlas donde de verdad se decide la liquidez.**
+
+**Que el consejo responda, con datos:**
+- ¿El score *standalone* **desclasifica** a las filiales de grupo? Medir: en las empresas `group_funded`, ¿un
+  score **agregado por `group_id`** (caja consolidada, cobros, deuda) predice la tensión del grupo mejor que
+  el score individual? ¿cuánto mejor (AUC, con `n` de grupos)?
+- ¿Cómo se agrega bien? ¿suma de caja neta de intragrupo, `runway` consolidado, deuda intragrupo neteada?
+  ¿La filial que **custodia** la caja del grupo infla su propio `runway` (falso sano)?
+- **Legal vs económico.** El deudor es la entidad legal; el grupo solo responde por contrato (avales,
+  *comfort letters*, cash pooling formal). ¿Cambia la decisión de préstamo o solo el diagnóstico?
+- ¿La entrega (60-80 empresas no vistas) se puntúa por `company_id` o por `group_id`? `AGENTS.md` lo tiene
+  como pregunta abierta. ¿Debe el producto publicar **dos niveles** (grupo consolidado + entidad legal)?
+
+**Acusación de cierre:** puntuar a la filial por su caja propia, cuando el grupo la cubre, es tan circular
+como la etiqueta de Q2 — y en el sentido contrario.
+
 ## Producto del debate
 
 `salida/consejo/debate_veredicto.md`, con una fila por pregunta:

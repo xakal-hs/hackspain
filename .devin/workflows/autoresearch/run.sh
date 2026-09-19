@@ -69,6 +69,9 @@ case "${1:-}" in
            && uv run python "$HERE/analisis_datos.py") ;;
   fase1)  run_orq "$HERE/fase1_prestamista.md" fase1 ;;
   fase2)  run_orq "$HERE/fase2_consejo.md" fase2 ;;
+  debate)  # seguimiento del debate: la unidad de medida (grupo) + preguntas nuevas (Q6-Q12)
+    [ -f "$HERE/salida/consejo/debate_veredicto.md" ] || { echo "falta salida/consejo/debate_veredicto.md (ejecuta fase2)"; exit 1; }
+    run_orq "$HERE/fase2b_debate_seguimiento.md" debate2 ;;
   premisas) runner ;;
   fase3)  _run "$HERE/fase3_autoresearch.md" fase3 ;;
   fase4)  _run "$HERE/fase4_demo.md" fase4 ;;
