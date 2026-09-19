@@ -12,6 +12,7 @@ import {
   Radar,
   Rows3,
   ScanLine,
+  Settings,
   Target,
   Check,
 } from '@lucide/vue'
@@ -35,6 +36,7 @@ const items = computed(() => {
     { id: 'score', label: 'X-Ray Score', icon: ScanLine },
     { id: 'colchon', label: 'Colchón Dinámico', icon: PiggyBank },
     { id: 'divisa', label: 'Divisa Inteligente', icon: CircleDollarSign },
+    { id: 'ajustes', label: 'Ajustes', icon: Settings },
   ]
   /* Interno: el sujeto ya no es una empresa de la cartera, sino Embat. */
   const ops = [
