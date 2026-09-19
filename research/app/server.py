@@ -222,6 +222,61 @@ def product_adoption():
     }
 
 
+# ------------------------------------------------------------ sala de situaciones (fase 4 del autoresearch)
+SITUACIONES = ROOT.parent / ".devin" / "workflows" / "autoresearch" / "salida" / "situaciones.json"
+SITUACIONES_HINT = "cd research && uv run python ../.devin/workflows/autoresearch/premisas.py export"
+
+
+def _situaciones() -> list[dict]:
+    if not SITUACIONES.exists():
+        return []
+    try:
+        data = json.loads(SITUACIONES.read_text())
+    except json.JSONDecodeError:
+        return []
+    return data if isinstance(data, list) else data.get("situaciones", [])
+
+
+@app.get("/api/situaciones")
+def situaciones():
+    items = _situaciones()
+    n = lambda pred: sum(1 for s in items if pred(s))
+    resumen = {"total": len(items), "pasan": n(lambda s: s.get("estado") == "pasa"), "fallan": n(lambda s: s.get("estado") == "falla"),
+               "no_verificables": n(lambda s: s.get("estado") == "no_verificable" or not s.get("verificable", True)),
+               "centrales": n(lambda s: s.get("central")), "centrales_fallan": n(lambda s: s.get("central") and s.get("estado") == "falla")}
+    out = {"situaciones": items, "resumen": resumen, "fuente": str(SITUACIONES.relative_to(ROOT.parent))}
+    if not items:
+        out["aviso"] = f"No hay situaciones exportadas. Genera el fichero con: {SITUACIONES_HINT}"
+    return out
+
+
+@app.get("/api/situaciones/{sid}")
+def situacion(sid: str):
+    for s in _situaciones():
+        if s.get("id") == sid:
+            return s
+    raise HTTPException(404, f"Situación {sid} no encontrada")
+
+
+# ------------------------------------------------------------ motor proactivo (proyección aritmética, sin forecaster)
+@app.get("/api/proactive")
+def proactive(company_id: str, month: str | None = None, horizon: int = 6):
+    if not 1 <= horizon <= 12:
+        raise HTTPException(422, "horizon debe estar entre 1 y 12")
+    try:
+        return service().proactive(company_id, month, horizon)
+    except KeyError as e:
+        raise HTTPException(404, str(e.args[0]) if e.args else f"Empresa {company_id} no encontrada")
+
+
+@app.get("/api/proactive/validation")
+def proactive_validation():
+    p = ROOT.parent / ".devin" / "workflows" / "autoresearch" / "salida" / "demo" / "validacion_proactiva.json"
+    if not p.exists():
+        return {"casos": [], "metricas": {}, "aviso": "Sin validación exportada. Ejecuta: cd research && uv run python src/proactive.py validate"}
+    return json.loads(p.read_text())
+
+
 STATIC = ROOT / "app" / "static"
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 

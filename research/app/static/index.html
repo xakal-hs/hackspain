@@ -477,7 +477,107 @@ figure.gchart figcaption { font-size: 12.5px; color: var(--muted); margin-top: 8
 .debt-row.total { background: var(--surface-2); border-radius: 0 0 8px 8px; }
 .debt-row.contingent { color: var(--muted); }
 
+/* ───────────── Sala de situaciones ───────────── */
+.nav .count-warn { background: var(--serious); }
+.sit-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr); gap: 16px; align-items: start; }
+.sit-list { display: grid; gap: 0; }
+.sit-row {
+  display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; padding: 11px 16px;
+  border-bottom: 1px solid var(--line); cursor: pointer; text-align: left; background: transparent; border-left: 3px solid transparent; width: 100%;
+}
+.sit-row:last-child { border-bottom: none; }
+.sit-row:hover { background: var(--surface-2); }
+.sit-row[aria-current="true"] { background: var(--accent-soft); border-left-color: var(--accent); }
+.sit-row.central { border-left-color: var(--ink); }
+.sit-row.central[aria-current="true"] { border-left-color: var(--accent); }
+.sit-id { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--ink-2); padding-top: 2px; }
+.sit-premisa { font-size: 13px; line-height: 1.4; color: var(--ink); }
+.sit-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 2px; }
+.sit-meta .chip { font-size: 11px; line-height: 18px; padding: 1px 8px 1px 6px; }
+.sit-val { text-align: right; font-size: 12.5px; color: var(--ink-2); white-space: nowrap; display: grid; gap: 2px; justify-items: end; }
+.sit-val b { font-variant-numeric: tabular-nums; color: var(--ink); font-size: 13px; }
+.light { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+.light::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 18%, transparent); }
+.light-pasa { color: var(--good-text); } .light-pasa::before { background: var(--good); }
+.light-falla { color: var(--crit-text); } .light-falla::before { background: var(--crit); }
+.light-no_verificable { color: var(--muted); } .light-no_verificable::before { background: var(--line-strong); }
+.chip-central { background: var(--ink); color: var(--surface); }
+.chip-rol { background: var(--surface-3); color: var(--ink-2); }
+.sit-detail { position: sticky; top: 72px; display: grid; gap: 14px; }
+.sit-detail h2 { font-size: 16px; line-height: 1.35; }
+.sit-detail dl { margin: 0; display: grid; gap: 10px; }
+.sit-detail dt { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.sit-detail dd { margin: 2px 0 0; font-size: 13.5px; }
+.sit-cond { padding: 10px 12px; border-left: 3px solid var(--ink); background: var(--surface-2); border-radius: 0 8px 8px 0; font-size: 13.5px; }
+.sit-test { font-family: var(--mono); font-size: 12px; background: var(--surface-2); border-radius: 8px; padding: 8px 10px; display: grid; gap: 2px; }
+.sit-res { display: flex; gap: 20px; align-items: baseline; flex-wrap: wrap; }
+.sit-res .fig-value { font-size: 26px; }
+.sit-diag { border: 1px dashed var(--line-strong); border-radius: 10px; padding: 10px 12px; font-size: 13px; display: grid; gap: 4px; }
+.sit-diag b { color: var(--ink); }
+.ex-grid { display: grid; gap: 6px; }
+.ex-row { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 12.5px; }
+.ex-row .cid { font-size: 12.5px; }
+.ex-row .when { color: var(--muted); font-variant-numeric: tabular-nums; }
+.ex-row .vals { color: var(--ink-2); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sit-group { margin-top: 20px; }
+.sit-group h2 { margin-bottom: 8px; }
+.sit-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.sit-tiles .tile-value.crit { color: var(--crit-text); }
+
+/* ───────────── Proactivo ───────────── */
+.pro-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px 32px; align-items: end; }
+.pro-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; align-items: stretch; }
+.pro-step { display: flex; flex-direction: column; gap: 12px; position: relative; }
+.pro-step .step-n { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.pro-step h2 { font-size: 16px; }
+.pro-lines { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.pro-line { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.pro-line:last-child { border-bottom: none; }
+.pro-line .sgn { font-weight: 700; color: var(--muted); text-align: center; }
+.pro-line .sgn.pos { color: var(--good-text); } .pro-line .sgn.neg { color: var(--crit-text); }
+.pro-line .lab { display: grid; gap: 1px; }
+.pro-line .lab small { color: var(--muted); font-size: 11.5px; }
+.pro-line .amt { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pro-line.total { background: var(--surface-2); font-weight: 600; }
+.pro-line.total .amt.neg { color: var(--crit-text); }
+.pro-line.head { background: var(--surface-2); }
+.pro-path { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 6px; }
+.pro-m { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; display: grid; gap: 2px; font-size: 12.5px; }
+.pro-m .mo { color: var(--muted); font-size: 11.5px; }
+.pro-m .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+.pro-m.rotura { border-color: var(--crit); background: color-mix(in srgb, var(--crit) 8%, var(--surface)); }
+.pro-m.tension { border-color: color-mix(in srgb, var(--warn) 80%, #7a5200); background: color-mix(in srgb, var(--warn) 14%, var(--surface)); }
+.pro-m.real { border-style: dashed; }
+.verdict { padding: 14px; border-radius: 10px; background: var(--surface-2); display: grid; gap: 8px; }
+.verdict .big { font-size: 22px; font-weight: 650; letter-spacing: -.01em; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.chip-acc-lend { background: color-mix(in srgb, var(--good) 14%, var(--surface)); } .chip-acc-lend .icon { color: var(--good); }
+.chip-acc-watch { background: color-mix(in srgb, var(--warn) 22%, var(--surface)); } .chip-acc-watch .icon { color: color-mix(in srgb, var(--warn) 70%, #7a5200); }
+.chip-acc-decline { background: color-mix(in srgb, var(--crit) 15%, var(--surface)); } .chip-acc-decline .icon { color: var(--crit); }
+.chip-acc-sin_nota { background: var(--surface-3); color: var(--ink-2); }
+.chip-prod { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.razones { display: grid; gap: 8px; }
+.razon { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; font-size: 13px; }
+.razon .code { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 4px; text-align: center; padding: 2px 0; height: fit-content; }
+.razon b { display: block; }
+.razon .val { color: var(--ink-2); font-size: 12.5px; }
+.razon p { color: var(--ink-2); margin-top: 2px; }
+.outcome-ok { color: var(--good-text); } .outcome-bad { color: var(--crit-text); }
+.cases { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 10px; margin-bottom: 16px; }
+.case { text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px 12px; cursor: pointer; display: grid; gap: 4px; }
+.case:hover { border-color: var(--line-strong); background: var(--surface-2); }
+.case[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.case .top { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.case small { color: var(--muted); font-size: 11.5px; }
+.pro-picker { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.pro-picker .search { flex: none; width: 180px; }
+.val-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.val-tiles .mtile { padding: 10px 12px; }
+.val-tiles .mtile .v { font-size: 20px; }
+
 /* ───────────── Responsive ───────────── */
+@media (max-width: 1100px) { .sit-layout { grid-template-columns: minmax(0, 1fr); } .sit-detail { position: static; } .pro-steps { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 900px) { .sit-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .pro-head { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 720px) { .sit-row { grid-template-columns: 50px minmax(0, 1fr); } .sit-val { grid-column: 1 / -1; justify-items: start; } .ex-row { grid-template-columns: auto auto; } .ex-row .vals { grid-column: 1 / -1; white-space: normal; } .pro-path { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 1100px) {
   .workbench { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "traj" "scn" "why"; }
   .scn { position: static; }
@@ -553,6 +653,8 @@ figure.gchart figcaption { font-size: 12.5px; color: var(--muted); margin-top: 8
       <a href="#/tesoreria" data-route="tesoreria">Tesorería</a>
       <a href="#/productos" data-route="productos">Productos</a>
       <a href="#/monitor" data-route="monitor">Monitor <span class="count" id="nav-alerts" hidden></span></a>
+      <a href="#/proactivo" data-route="proactivo">Proactivo</a>
+      <a href="#/situaciones" data-route="situaciones">Situaciones <span class="count count-warn" id="nav-sit" hidden></span></a>
       <a href="#/metricas" data-route="metricas">Métricas</a>
       <a href="#/decisiones" data-route="decisiones">Decisiones</a>
     </nav>
@@ -738,6 +840,10 @@ const getProducts = () => cached('products', () => api('/api/products/collection
 const getProductForCompany = (cid) => api(`/api/products/${cid}`);
 const getProductAdoption = () => cached('adoption', () => api('/api/products/adoption'));
 const getDecisions = () => cached('decisions', () => api('/api/decisions'));
+const getSituaciones = () => cached('situaciones', () => api('/api/situaciones'));
+const getProactive = (id, month, horizon = 6) => cached(`proactive:${id}:${month || ''}:${horizon}`, () =>
+  api(`/api/proactive?company_id=${encodeURIComponent(id)}${month ? '&month=' + encodeURIComponent(month) : ''}&horizon=${horizon}`));
+const getProactiveValidation = () => cached('proactive:validation', () => api('/api/proactive/validation'));
 
 /* ═════════════ Estado y vistas comunes ═════════════ */
 const state = {
@@ -745,6 +851,8 @@ const state = {
   cartera: { q: '', band: '', trend: '', erp: '', alert: false, sort: 'score', dir: 'desc', limit: 60 },
   monitorType: '',
   decCat: '', decStatus: '',
+  sit: { q: '', ambito: '', rol: '', estado: '', central: '', sel: null },
+  pro: { cid: '', month: '' },
   scn: null, // {cid, values, months}
   renderToken: 0,
 };
@@ -854,9 +962,11 @@ async function route() {
   main.replaceChildren(loading());
   const view = parts[0] || 'cartera';
   setActiveNav(view === 'empresa' ? 'cartera' : view);
-  const titles = { cartera: 'Cartera', empresa: parts[1] || 'Empresa', tesoreria: 'Tesorería', productos: 'Productos', monitor: 'Monitor', metricas: 'Métricas', decisiones: 'Decisiones' };
+  const titles = { cartera: 'Cartera', empresa: parts[1] || 'Empresa', tesoreria: 'Tesorería', productos: 'Productos', monitor: 'Monitor', metricas: 'Métricas', decisiones: 'Decisiones',
+    situaciones: 'Situaciones', proactivo: 'Proactivo' };
   document.title = `${titles[view] || 'X-Ray'} · X-Ray`;
-  const views = { cartera: viewCartera, empresa: () => viewEmpresa(parts[1]), tesoreria: (t) => viewTesoreria(parts[1], t), productos: viewProductos, monitor: viewMonitor, metricas: viewMetricas, decisiones: viewDecisiones };
+  const views = { cartera: viewCartera, empresa: () => viewEmpresa(parts[1]), tesoreria: (t) => viewTesoreria(parts[1], t), productos: viewProductos, monitor: viewMonitor, metricas: viewMetricas, decisiones: viewDecisiones,
+    situaciones: (t) => viewSituaciones(parts[1], t), proactivo: (t) => viewProactivo(parts[1], parts[2], t) };
   const fn = views[view];
   if (!fn) { main.replaceChildren(errorBox({ message: `No existe la sección «${view}».` })); return; }
   try {
@@ -1894,6 +2004,344 @@ async function viewDecisiones(token) {
   return root;
 }
 
+/* ═════════════ Vista: Sala de situaciones ═════════════ */
+const ROL_LABEL = { prestamista: 'Prestamista', cfo: 'CFO', 'auditor-datos': 'Auditor de datos', 'riesgo-modelo': 'Riesgo de modelo', 'abogado-diablo': 'Abogado del diablo', cobrador: 'Cobrador' };
+const ESTADO_LABEL = { pasa: 'Pasa', falla: 'Falla', no_verificable: 'No verificable' };
+const ESTADO_RANK = { falla: 0, pasa: 1, no_verificable: 2 };
+function lightEl(estado) { return h('span', { class: `light light-${estado}` }, ESTADO_LABEL[estado] || cap(estado || '—')); }
+function sitOrder(a, b) {
+  return (b.central ? 1 : 0) - (a.central ? 1 : 0) || (ESTADO_RANK[a.estado] ?? 9) - (ESTADO_RANK[b.estado] ?? 9) || String(a.id).localeCompare(String(b.id));
+}
+function fmtEsperado(t) { return t && t.esperado != null ? String(t.esperado) : '—'; }
+function fmtValor(v) { return isNum(v) ? fmtMetric(v) : v == null ? '—' : String(v); }
+function fmtExVal(k, v) {
+  if (!isNum(v)) return v == null ? '—' : String(v);
+  if (/_6m$|_mes$|^tension|^caida|^expansion|^incumpl/.test(k) && (v === 0 || v === 1)) return v ? 'sí' : 'no';
+  return fmtMetric(v);
+}
+
+async function viewSituaciones(sel, token) {
+  const data = await getSituaciones();
+  if (!isCurrent(token)) return null;
+  const all = [...(data.situaciones || [])].sort(sitOrder);
+  const r = data.resumen || {};
+  const f = state.sit;
+  if (sel) f.sel = sel;
+  const root = h('div');
+  root.append(h('div', { class: 'page-head' }, h('div', null, h('h1', null, 'Sala de situaciones'),
+    h('p', null, all.length
+      ? `${NF[0].format(r.total ?? all.length)} situaciones planteadas por el consejo (fase 2) y evaluadas contra el panel (fase 3): ${NF[0].format(r.pasan || 0)} pasan, ${NF[0].format(r.fallan || 0)} fallan y ${NF[0].format(r.no_verificables || 0)} no se pueden verificar con el dato. De las ${NF[0].format(r.centrales || 0)} centrales, ${NF[0].format(r.centrales_fallan || 0)} fallan: ahí está el trabajo pendiente.`
+      : 'Las premisas del consejo evaluadas contra el panel: qué esperábamos del score, qué se cumple y qué no.'))));
+  if (!all.length) {
+    root.append(h('div', { class: 'card' }, h('div', { class: 'state' }, data.aviso || 'No hay situaciones exportadas.')));
+    return root;
+  }
+  const tiles = h('div', { class: 'sit-tiles', role: 'group', 'aria-label': 'Resumen de situaciones (pulsa para filtrar)' });
+  const tdefs = [
+    { key: '', estado: '', label: 'Situaciones', n: r.total ?? all.length, sub: 'del consejo', icon: 'table', color: 'var(--ink-2)' },
+    { key: 'pasa', estado: 'pasa', label: 'Pasan', n: r.pasan || 0, sub: 'el dato las sostiene', icon: 'check', color: 'var(--good)' },
+    { key: 'falla', estado: 'falla', label: 'Fallan', n: r.fallan || 0, sub: 'el dato las contradice', icon: 'x', color: 'var(--crit)' },
+    { key: 'central-falla', estado: 'falla', central: 'si', label: 'Centrales que fallan', n: r.centrales_fallan || 0, sub: `de ${NF[0].format(r.centrales || 0)} centrales`, icon: 'alert', color: 'var(--crit)', crit: true },
+  ];
+  tdefs.forEach((t) => {
+    const pressed = t.key === 'central-falla' ? (f.estado === 'falla' && f.central === 'si') : t.key === '' ? (!f.estado && !f.central) : (f.estado === t.estado && !f.central);
+    tiles.append(h('button', { class: 'tile', type: 'button', 'aria-pressed': String(pressed),
+      onclick: () => { f.estado = pressed ? '' : t.estado; f.central = pressed ? '' : (t.central || ''); draw(); } },
+      h('span', { class: 'tile-label' }, h('span', { style: { color: t.color }, 'aria-hidden': 'true' }, icon(t.icon)), t.label),
+      h('span', { class: `tile-value ${t.crit && t.n ? 'crit' : ''}` }, NF[0].format(t.n)),
+      h('span', { class: 'tile-sub' }, t.sub)));
+  });
+  root.append(tiles);
+
+  const ambitos = [...new Set(all.map((s) => s.ambito).filter(Boolean))].sort();
+  const roles = [...new Set(all.map((s) => s.rol).filter(Boolean))].sort();
+  const mkSelect = (label, key, options) => h('label', { class: 'field' }, h('span', null, label),
+    h('select', { class: 'select', onchange: (e) => { f[key] = e.target.value; draw(); } },
+      options.map(([v, t]) => { const o = h('option', { value: v }, t); if (f[key] === v) o.selected = true; return o; })));
+  const search = h('input', { class: 'input', type: 'search', placeholder: 'Buscar en premisas, ids, empresas…', value: f.q, 'aria-label': 'Buscar situación',
+    oninput: (e) => { f.q = e.target.value; draw(); } });
+  const countEl = h('span', { class: 'result-count', 'aria-live': 'polite' });
+  const filters = h('div', { class: 'filters' }, h('div', { class: 'search' }, icon('search'), search),
+    mkSelect('Ámbito', 'ambito', [['', 'Todos'], ...ambitos.map((a) => [a, cap(a)])]),
+    mkSelect('Rol', 'rol', [['', 'Todos'], ...roles.map((a) => [a, ROL_LABEL[a] || cap(a)])]),
+    mkSelect('Estado', 'estado', [['', 'Todos'], ['pasa', 'Pasa'], ['falla', 'Falla'], ['no_verificable', 'No verificable']]),
+    mkSelect('Central', 'central', [['', 'Todas'], ['si', 'Solo centrales'], ['no', 'No centrales']]),
+    countEl);
+  root.append(filters);
+
+  const listCard = h('div', { class: 'card' });
+  const detailCard = h('aside', { class: 'card card-pad sit-detail', 'aria-live': 'polite' });
+  const groupNV = h('section', { class: 'sit-group' });
+  root.append(h('div', { class: 'sit-layout' }, h('div', null, listCard, groupNV), detailCard));
+
+  function matches(s) {
+    const q = f.q.trim().toLowerCase();
+    const hay = q ? [s.id, s.premisa, s.por_que, s.condicion, s.ambito, s.rol, s.test?.variable, s.test?.objetivo, s.evidencia?.hecho,
+      ...((s.resultado?.ejemplos || []).map((e) => e.company_id))].filter(Boolean).join(' ').toLowerCase() : '';
+    return (!q || hay.includes(q)) && (!f.ambito || s.ambito === f.ambito) && (!f.rol || s.rol === f.rol) &&
+      (!f.estado || s.estado === f.estado) && (!f.central || (f.central === 'si' ? !!s.central : !s.central));
+  }
+  function rowEl(s) {
+    const res = s.resultado || {};
+    const btn = h('button', { class: `sit-row ${s.central ? 'central' : ''}`, type: 'button', 'aria-current': String(f.sel === s.id),
+      onclick: () => { f.sel = s.id; history.replaceState(null, '', '#/situaciones/' + encodeURIComponent(s.id)); drawDetail(); root.querySelectorAll('.sit-row').forEach((b) => b.setAttribute('aria-current', String(b.dataset.id === s.id))); } });
+    btn.dataset.id = s.id;
+    btn.append(h('span', { class: 'sit-id' }, s.id),
+      h('span', null, h('div', { class: 'sit-premisa' }, s.premisa),
+        h('div', { class: 'sit-meta' }, h('span', { class: 'chip chip-ghost' }, cap(s.ambito)), h('span', { class: 'chip chip-rol' }, ROL_LABEL[s.rol] || cap(s.rol)),
+          s.central ? h('span', { class: 'chip chip-central' }, 'Central') : null, s.fragil ? h('span', { class: 'chip chip-ghost' }, 'Frágil') : null,
+          s.iteracion ? h('span', { class: 'chip chip-ghost mono' }, s.iteracion) : null)),
+      h('span', { class: 'sit-val' }, lightEl(s.estado),
+        s.estado === 'no_verificable' ? h('span', null, 'sin test') : h('span', null, h('b', null, fmtValor(res.valor)), ` vs ${fmtEsperado(s.test)}`),
+        isNum(res.n) ? h('span', null, `n = ${NF[0].format(res.n)}`) : null));
+    return btn;
+  }
+  function draw() {
+    const shown = all.filter(matches);
+    const ver = shown.filter((s) => s.estado !== 'no_verificable'), nv = shown.filter((s) => s.estado === 'no_verificable');
+    countEl.textContent = `${NF[0].format(shown.length)} de ${NF[0].format(all.length)} situaciones`;
+    tiles.querySelectorAll('.tile').forEach((t, i) => {
+      const d = tdefs[i];
+      const pressed = d.key === 'central-falla' ? (f.estado === 'falla' && f.central === 'si') : d.key === '' ? (!f.estado && !f.central) : (f.estado === d.estado && !f.central);
+      t.setAttribute('aria-pressed', String(pressed));
+    });
+    listCard.replaceChildren(ver.length ? h('div', { class: 'sit-list', role: 'list' }, ver.map(rowEl)) : h('div', { class: 'state' }, 'Ninguna situación verificable cumple los filtros.'));
+    groupNV.replaceChildren();
+    if (nv.length) {
+      groupNV.append(h('h2', null, `No verificables con el dato · ${NF[0].format(nv.length)}`),
+        h('p', { class: 'muted', style: { 'font-size': '12.5px', 'margin-bottom': '8px' } }, 'Premisas que piden juicio de negocio o una medición que el runner no implementa. Se listan con su motivo; no cuentan como fallo.'),
+        h('div', { class: 'card' }, h('div', { class: 'sit-list', role: 'list' }, nv.map((s) => {
+          const b = rowEl(s);
+          b.querySelector('.sit-premisa').after(h('div', { class: 'muted', style: { 'font-size': '12px', 'margin-top': '2px' } }, s.motivo_no_verificable || ''));
+          return b;
+        }))));
+    }
+    if (!shown.some((s) => s.id === f.sel)) f.sel = shown.length ? shown[0].id : null;
+    drawDetail();
+  }
+  function drawDetail() {
+    const s = all.find((x) => x.id === f.sel);
+    if (!s) { detailCard.replaceChildren(h('div', { class: 'state' }, 'Selecciona una situación para ver el detalle.')); return; }
+    const res = s.resultado || {}, t = s.test || {}, ev = s.evidencia || {};
+    const ok = s.estado === 'pasa';
+    const kids = [
+      h('div', { class: 'dec-top' }, h('span', { class: 'dec-id' }, s.id), h('span', { class: 'chip chip-ghost' }, cap(s.ambito)), h('span', { class: 'chip chip-rol' }, ROL_LABEL[s.rol] || cap(s.rol)),
+        s.central ? h('span', { class: 'chip chip-central' }, 'Central') : null, s.fragil ? h('span', { class: 'chip chip-ghost' }, 'Frágil') : null,
+        h('span', { style: { 'margin-left': 'auto' } }, lightEl(s.estado))),
+      h('h2', null, s.premisa),
+    ];
+    const dl = h('dl');
+    if (s.por_que) dl.append(h('dt', null, 'Por qué importa'), h('dd', null, s.por_que));
+    if (s.condicion) dl.append(h('dt', null, 'Condición'), h('dd', null, h('div', { class: 'sit-cond' }, s.condicion)));
+    if (s.verificable && t.tipo) {
+      dl.append(h('dt', null, 'Test'), h('dd', null, h('div', { class: 'sit-test' },
+        h('span', null, `tipo: ${t.tipo}`), t.objetivo ? h('span', null, `objetivo: ${t.objetivo}`) : null, t.variable ? h('span', null, `variable: ${t.variable}${t.variable_b ? ' · ' + t.variable_b : ''}`) : null,
+        t.condicion ? h('span', null, `condición: ${t.condicion}`) : null, t.razon ? h('span', null, `razón: ${t.razon}`) : null, t.banda ? h('span', null, `banda: ${t.banda}`) : null,
+        h('span', null, `esperado: ${fmtEsperado(t)}`))));
+      dl.append(h('dt', null, 'Resultado'), h('dd', null, h('div', { class: 'sit-res' },
+        h('div', { class: 'fig' }, h('span', { class: 'eyebrow' }, 'Observado'), h('span', { class: `fig-value ${ok ? 'delta-pos' : s.estado === 'falla' ? 'delta-neg' : ''}` }, fmtValor(res.valor))),
+        h('div', { class: 'fig' }, h('span', { class: 'eyebrow' }, 'Esperado'), h('span', { class: 'fig-value', style: { 'font-size': '18px' } }, fmtEsperado(t))),
+        isNum(res.n) ? h('div', { class: 'fig' }, h('span', { class: 'eyebrow' }, 'n'), h('span', { class: 'fig-value', style: { 'font-size': '18px' } }, NF[0].format(res.n))) : null)));
+    } else {
+      dl.append(h('dt', null, 'Por qué no se verifica'), h('dd', { class: 'ink2' }, s.motivo_no_verificable || 'Requiere juicio de negocio o una medición no implementada.'));
+    }
+    if (ev.observado || ev.hecho) dl.append(h('dt', null, 'Evidencia (fase 0-1)'), h('dd', { class: 'ink2' }, [ev.hecho, ev.fuente].filter(Boolean).join(' · '), ev.observado ? ` — ${ev.observado}` : '', isNum(ev.n) ? ` (n = ${NF[0].format(ev.n)})` : ''));
+    kids.push(dl);
+    if (s.diagnostico || s.iteracion) {
+      const d = s.diagnostico || {};
+      kids.push(h('div', { class: 'sit-diag' }, h('span', { class: 'eyebrow' }, `Diagnóstico de la fase 3${s.iteracion ? ' · ' + s.iteracion : ''}`),
+        d.veredicto ? h('b', null, d.veredicto) : null, d.texto ? h('span', { class: 'ink2' }, d.texto) : null));
+    }
+    const ex = res.ejemplos || [];
+    if (ex.length) {
+      kids.push(h('div', null, h('span', { class: 'eyebrow' }, `Empresas × mes de ejemplo · ${ex.length}`),
+        h('div', { class: 'ex-grid', style: { 'margin-top': '6px' } }, ex.map((e) => {
+          const extra = Object.entries(e).filter(([k]) => !['company_id', 'month', 'band'].includes(k)).map(([k, v]) => `${k}: ${fmtExVal(k, v)}`).join(' · ');
+          return h('div', { class: 'ex-row' },
+            h('a', { class: 'cid', href: '#/empresa/' + encodeURIComponent(e.company_id), title: 'Ver la ficha de la empresa' }, e.company_id),
+            h('span', { class: 'when' }, fmtMonth(e.month)),
+            h('span', { class: 'vals', title: extra }, e.band ? bandChip(e.band) : null, extra ? ' ' + extra : ''),
+            h('a', { class: 'btn btn-sm', href: `#/proactivo/${encodeURIComponent(e.company_id)}/${encodeURIComponent(e.month)}`, title: 'Proyección de caja y recomendación en ese mes' }, 'En T'));
+        }))));
+    }
+    detailCard.replaceChildren(...kids);
+  }
+  draw();
+  return root;
+}
+
+/* ═════════════ Vista: Proactivo ═════════════ */
+const ACC = { lend: { label: 'Prestar', icon: 'check' }, watch: { label: 'Vigilar', icon: 'alert' }, decline: { label: 'No prestar', icon: 'x' }, sin_nota: { label: 'Sin nota', icon: 'pause' } };
+const PROD = { factoring: 'Factoring', confirming: 'Confirming', linea: 'Línea de circulante', refi: 'Refinanciación', ninguna: 'Sin producto' };
+const CASO = { acierto: 'Anticipada', control_sano: 'Control sano', falsa_alarma: 'Falsa alarma', no_detectada: 'No detectada' };
+function accChip(a) { const m = ACC[a] || { label: a, icon: 'bell' }; return h('span', { class: `chip chip-acc-${a}` }, icon(m.icon), m.label); }
+function prodChip(p) { return h('span', { class: 'chip chip-prod' }, PROD[p] || cap(p)); }
+
+async function viewProactivo(cid, month, token) {
+  const val = await getProactiveValidation().catch(() => ({ casos: [], metricas: {} }));
+  if (!isCurrent(token)) return null;
+  const casos = val.casos || [];
+  if (!cid && casos.length) { const c = casos.find((x) => x.tipo === 'acierto') || casos[0]; cid = c.company_id; month = c.month; }
+  cid = cid || state.pro.cid; month = month || (cid === state.pro.cid ? state.pro.month : '');
+  state.pro = { cid, month };
+  const root = h('div');
+  root.append(h('div', { class: 'page-head' }, h('div', null, h('h1', null, 'Proactivo · empresa real, dos meses antes'),
+    h('p', null, 'Nos situamos en un mes T, proyectamos la caja con aritmética (facturas pendientes por vencer, nóminas y cuotas), recomendamos sin ver el futuro y comprobamos qué pasó de verdad en T+2. Sin modelo de predicción: cada línea se puede señalar.'))));
+
+  // validación held-out
+  const m = val.metricas || {};
+  const ms = m.tension_2m_sanas_hoy || {}, mt = m.tension_2m_todas || {}, mn = m.necesita_deuda_2m_vs_tension || {}, mb = m['baseline_mc<0.5_tension_2m_sanas_hoy'] || {};
+  const valCard = h('section', { class: 'card card-pad', 'aria-labelledby': 'val-title' },
+    h('div', { class: 'card-head' }, h('div', null, h('h2', { id: 'val-title' }, 'Validación sobre empresas que el modelo no vio'),
+      h('p', null, val.n_empresas
+        ? `${NF[0].format(val.n_empresas)} empresas de ${NF[0].format(val.n_grupos)} grupos (fold ${val.fold + 1} de ${val.n_splits}, partición por grupo), puntuadas por un scorer entrenado sin ellas; ${NF[0].format(val.n_empresa_mes)} decisiones empresa × mes comprobadas a ${val.h} meses.`
+        : (val.aviso || 'Sin validación exportada.')))));
+  if (val.n_empresas) {
+    const tile = (k, v, d) => h('div', { class: 'mtile' }, h('span', { class: 'k' }, k), h('span', { class: 'v' }, v), d ? h('span', { class: 'd muted' }, d) : null);
+    valCard.append(h('div', { class: 'val-tiles' },
+      tile('Precisión (sanas hoy → tensión en 2 m)', fmtPct(ms.precision), `base ${fmtPct(ms.tasa_base, 1)} · lift ×${fmt(ms.lift, 1)} · n ${NF[0].format(ms.n || 0)}`),
+      tile('Recall (sanas hoy)', fmtPct(ms.recall), `${NF[0].format(ms.tp || 0)} de ${NF[0].format(ms.positivos_real || 0)} tensiones anticipadas`),
+      tile('Sin alerta y sin tensión (NPV)', fmtPct(ms.npv), 'sanas hoy'),
+      tile('Nivel actual (mc < 0,5) en sanas', fmtPct(mb.precision) === '—' ? 'no alerta' : fmtPct(mb.precision), 'la referencia no ve nada ahí'),
+      tile('«Necesita deuda» → tensión real', fmtPct(mn.precision), `recall ${fmtPct(mn.recall)} · todas las empresa-mes`),
+      tile('Tensión en 2 m, todas', fmtPct(mt.precision), `base ${fmtPct(mt.tasa_base)} · recall ${fmtPct(mt.recall)}`)),
+      h('p', { class: 'muted', style: { 'font-size': '12.5px', 'margin-top': '10px' } }, val.lectura || ''));
+    if (casos.length) {
+      valCard.append(h('p', { class: 'eyebrow', style: { margin: '14px 0 8px' } }, 'Casos reales (pulsa para cargar T)'),
+        h('div', { class: 'cases' }, casos.map((c) => h('button', { class: 'case', type: 'button', 'aria-pressed': String(c.company_id === cid && c.month === month),
+          onclick: () => { location.hash = `#/proactivo/${encodeURIComponent(c.company_id)}/${encodeURIComponent(c.month)}`; } },
+          h('div', { class: 'top' }, h('span', { class: 'cid' }, c.company_id), h('span', { class: `chip chip-ghost ${c.tipo === 'acierto' || c.tipo === 'control_sano' ? 'trend-mejora' : 'trend-deterioro'}` }, CASO[c.tipo] || c.tipo)),
+          h('small', null, `T = ${fmtMonth(c.month, true)} · ${fmt(c.mc_T, 1)} meses de caja · ${c.modo === 'facturas' ? 'con facturas' : 'sin ERP'}${c.fiabilidad && c.fiabilidad !== 'sin facturas' ? ` (fiabilidad ${c.fiabilidad})` : ''}`),
+          h('small', null, `${ACC[c.accion]?.label || c.accion} · ${PROD[c.producto] || c.producto} → ${c.real_tension ? 'tensión real en T+2' : 'sin tensión en T+2'}`)))));
+    }
+  }
+  root.append(valCard);
+
+  // selector
+  const companies = await getCompanies().catch(() => ({ companies: [] }));
+  if (!isCurrent(token)) return null;
+  const ids = (companies.companies || []).map((c) => c.company_id);
+  const dl = h('datalist', { id: 'pro-ids' }, ids.map((i) => h('option', { value: i })));
+  const input = h('input', { class: 'input', type: 'search', list: 'pro-ids', placeholder: 'COMP_0001', value: cid || '', 'aria-label': 'Empresa' });
+  const monthSel = h('select', { class: 'select', 'aria-label': 'Mes T' });
+  const horSel = h('select', { class: 'select', 'aria-label': 'Horizonte' }, [3, 6, 12].map((x) => h('option', { value: x }, `${x} meses`)));
+  horSel.value = '6';
+  const go = () => { const c = input.value.trim(); if (c) location.hash = `#/proactivo/${encodeURIComponent(c)}${monthSel.value ? '/' + monthSel.value : ''}`; };
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+  root.append(h('div', { class: 'card card-pad', style: { 'margin-top': '16px' } }, h('div', { class: 'pro-picker' },
+    h('label', { class: 'field' }, h('span', null, 'Empresa'), h('div', { class: 'search' }, icon('search'), input, dl)),
+    h('label', { class: 'field' }, h('span', null, 'Mes T'), monthSel),
+    h('label', { class: 'field' }, h('span', null, 'Horizonte'), horSel),
+    h('button', { class: 'btn btn-primary', type: 'button', onclick: go }, 'Situarme en T'))));
+  const body = h('div');
+  root.append(body);
+  if (!cid) { body.append(h('div', { class: 'card', style: { 'margin-top': '16px' } }, h('div', { class: 'state' }, 'Elige una empresa y un mes T.'))); return root; }
+
+  async function loadBody() {
+    body.replaceChildren(loading('Proyectando la caja…'));
+    let d;
+    try { d = await getProactive(cid, month, Number(horSel.value)); } catch (e) { body.replaceChildren(errorBox(e)); return; }
+    if (!isCurrent(token)) return;
+    monthSel.replaceChildren(...(d.meses_disponibles || []).map((mm) => { const o = h('option', { value: mm }, fmtMonth(mm, true)); if (mm === d.month) o.selected = true; return o; }));
+    monthSel.onchange = go;
+    body.replaceChildren(proactiveBody(d));
+  }
+  horSel.onchange = loadBody;
+  root._after = loadBody;
+  return root;
+}
+
+function proactiveBody(d) {
+  const cur = d.currency || 'EUR';
+  const fm = (x) => fmtMoney(x, cur);
+  const p = d.proyeccion || {}, dec = d.decision || {}, out = d.desenlace || {};
+  const root = h('div', { style: { 'margin-top': '16px' } });
+  root.append(h('section', { class: 'card card-pad' }, h('div', { class: 'pro-head' },
+    h('div', null, h('div', { class: 'hero-id' }, h('h1', { style: { 'font-family': 'var(--mono)', 'font-size': '22px' } }, d.company_id), d.band ? bandChip(d.band) : null,
+      h('span', { class: 'chip chip-ghost' }, `T = ${fmtMonth(d.month, true)}`), h('span', { class: 'chip chip-ghost' }, d.has_erp ? 'Con ERP' : 'Sin ERP')),
+      h('div', { class: 'hero-meta' }, h('span', null, 'Dinero en la cuenta ', h('b', null, fm(p.caja_inicial))), h('span', null, 'Póliza sin usar ', h('b', null, fm(p.poliza_disponible))),
+        h('span', null, 'Gasto mensual ', h('b', null, fm(p.gasto_mensual))), h('span', null, 'Meses de caja ', h('b', null, fmt(p.meses_caja, 2))),
+        h('span', null, 'Umbral de tensión ', h('b', null, `${fm(p.umbral_tension)} (0,25 meses)`)))),
+    h('div', { class: 'hero-figs' },
+      h('div', { class: 'fig' }, h('span', { class: 'eyebrow' }, 'Score en T (modelo vigente)'), h('span', { class: 'hero-score', style: { 'font-size': '44px' } }, fmt(d.score), h('small', null, ' / 100')),
+        h('span', { class: 'fig-sub' }, `confianza ${fmtPct(d.confidence)}`)),
+      h('div', { class: 'fig' }, h('span', { class: 'eyebrow' }, 'Enlaces'),
+        h('div', { style: { display: 'flex', gap: '6px', 'flex-wrap': 'wrap' } },
+          h('a', { class: 'btn btn-sm', href: '#/empresa/' + encodeURIComponent(d.company_id) }, 'Ficha'),
+          h('a', { class: 'btn btn-sm', href: '#/tesoreria/' + encodeURIComponent(d.company_id) }, 'Tesorería')))))));
+
+  // paso 1 · el panel en T
+  const sen = d.senales || {};
+  const keys = ['mc', 'runway', 'lc_util', 'growth_vs_12m', 'activity_trend', 'payroll_cv', 'ap_late_share', 'ar_late_share', 'debt_burden', 'lost_share'];
+  const step1 = h('section', { class: 'card card-pad pro-step' }, h('span', { class: 'step-n' }, 'Paso 1 · El panel en T'), h('h2', null, 'Lo que se veía ese mes'),
+    h('div', { class: 'table-wrap' }, h('table', { class: 'data' }, h('tbody', null, keys.filter((k) => sen[k]).map((k) => h('tr', null,
+      h('th', { scope: 'row', style: { 'text-transform': 'none', 'letter-spacing': '0', 'font-size': '13px', color: 'var(--ink)', 'font-weight': '500', position: 'static' } }, sen[k].label),
+      h('td', { class: 'r', style: { 'font-weight': '600' } }, sen[k].texto)))))),
+    (d.contribuciones || []).length ? h('div', null, h('span', { class: 'eyebrow' }, 'Por qué el score es el que es (puntos frente al neutro)'),
+      contributionsEl(d.contribuciones.map((c) => ({ ...c, delta_points: c.puntos, text: `${c.label}: ${c.valor_texto}` })), {}, 'Sin contribuciones.')) : null,
+    d.explicacion && d.explicacion.summary_text ? h('p', { class: 'summary', style: { 'margin-bottom': '0' } }, d.explicacion.summary_text) : null);
+
+  // paso 2 · la proyección
+  const lines = p.lineas || [];
+  const H = p.horizon || (p.meses || []).length;
+  const total = lines.reduce((a, l) => a + (l.signo * (l.total || 0)), 0);
+  const finalCaja = (p.meses || []).length ? p.meses[p.meses.length - 1].caja : null;
+  const fiabChip = p.fiabilidad ? h('span', { class: `chip ${p.fiabilidad === 'alta' ? 'chip-band-sano' : p.fiabilidad === 'media' ? 'chip-band-vigilar' : 'chip-ghost'}` },
+    `Fiabilidad ${p.fiabilidad}${isNum(p.cobertura_facturas) ? ` · facturas = ${fmtPct(Math.min(p.cobertura_facturas, 2))} del banco` : ''}`) : null;
+  const step2 = h('section', { class: 'card card-pad pro-step' }, h('span', { class: 'step-n' }, `Paso 2 · La proyección a ${H} meses`), h('h2', null, 'Aritmética, línea a línea'),
+    h('div', { style: { display: 'flex', gap: '6px', 'flex-wrap': 'wrap' } }, h('span', { class: 'chip chip-ghost' }, p.modo === 'facturas' ? 'Con facturas del ERP' : 'Sin ERP: medianas bancarias'), fiabChip),
+    h('div', { class: 'pro-lines' },
+      h('div', { class: 'pro-line head' }, h('span', { class: 'sgn' }, '='), h('span', { class: 'lab' }, 'Dinero en la cuenta en T', h('small', null, 'panel.cash_end')), h('span', { class: 'amt' }, fm(p.caja_inicial))),
+      lines.map((l) => h('div', { class: 'pro-line', title: l.fuente }, h('span', { class: `sgn ${l.signo > 0 ? 'pos' : 'neg'}` }, l.signo > 0 ? '+' : '−'),
+        h('span', { class: 'lab' }, l.label, h('small', null, `${l.fuente}${isNum(l.n) ? ` · ${NF[0].format(l.n)} facturas` : ''}`)), h('span', { class: 'amt' }, fm(l.total)))),
+      h('div', { class: 'pro-line total' }, h('span', { class: 'sgn' }, '='), h('span', { class: 'lab' }, `Caja proyectada en T+${H}`, h('small', null, `cambio neto ${fmtSigned(total / (p.gasto_mensual || 1), 2)} meses de gasto`)),
+        h('span', { class: `amt ${isNum(finalCaja) && finalCaja < 0 ? 'neg' : ''}` }, fm(finalCaja)))),
+    h('div', { class: 'pro-path', role: 'list', 'aria-label': 'Caja proyectada mes a mes' }, (p.meses || []).map((mm) => h('div', { class: `pro-m ${mm.rotura ? 'rotura' : mm.tension ? 'tension' : ''}`, role: 'listitem' },
+      h('span', { class: 'mo' }, `T+${mm.h} · ${fmtMonth(mm.month)}`), h('span', { class: 'v' }, fm(mm.caja)),
+      h('span', { class: 'muted', style: { 'font-size': '11px' } }, mm.rotura ? 'en negativo' : mm.tension ? 'tensión' : `liq. ${fm(mm.liquidez)}`)))),
+    p.anticipable && p.anticipable.n ? h('div', { class: 'scn-result', style: { margin: '0' } },
+      h('div', { class: 'row' }, h('b', null, 'Facturas emitidas pendientes que aún no han vencido'), h('span', { class: 'chip chip-ghost' }, `${NF[0].format(p.anticipable.n)} facturas · ${NF[0].format(p.anticipable.n_contrapartes || 0)} clientes`)),
+      h('div', { class: 'scn-sum' }, `Nominal ${fm(p.anticipable.total)} · anticipo estimado al 80 % ${fm(p.anticipable.anticipo_estimado)}. Lo ya vencido (${fm(d.panel_T?.overdue_ar)}) no se descuenta.`),
+      p.efectos && p.efectos.n_6m ? h('div', { class: 'scn-sum' }, `Cobro aplazado detectado en banco: ${NF[0].format(p.efectos.n_6m)} movimientos «pagaré/efecto/remesa» en 6 meses (${fmtPct(p.efectos.share_cobros_6m)} de los cobros).`) : null) : null,
+    h('p', { class: 'muted', style: { 'font-size': '12px' } }, p.formula || ''));
+
+  // paso 3 · la recomendación
+  const step3 = h('section', { class: 'card card-pad pro-step' }, h('span', { class: 'step-n' }, 'Paso 3 · La recomendación en T'), h('h2', null, 'Sin ver el futuro'),
+    h('div', { class: 'verdict' },
+      h('div', { class: 'big' }, accChip(dec.accion), prodChip(dec.producto), dec.regla ? h('span', { class: 'chip chip-ghost mono' }, `regla ${dec.regla}`) : null),
+      h('div', { class: 'scn-sum' }, isNum(dec.meses_antelacion)
+        ? `Tensión proyectada dentro de ${dec.meses_antelacion === 1 ? '1 mes' : dec.meses_antelacion + ' meses'}${p.hueco_2m ? ` · hueco a 2 meses ${fm(p.hueco_2m)}` : ''}${p.hueco && H > 2 ? ` · a ${H} meses ${fm(p.hueco)}` : ''}${dec.necesita_deuda_2m ? ' · necesita producto en ≤ 2 meses' : ''}`
+        : `Sin tensión proyectada en ${H} meses`),
+      dec.producto_texto ? h('div', { class: 'scn-sum' }, dec.producto_texto) : null,
+      isNum(dec.importe_max) ? h('div', { class: 'scn-sum' }, `Importe máximo orientativo: ${fm(dec.importe_max)}`) : null,
+      (dec.recorte_importe || []).length ? h('div', { class: 'scn-sum' }, 'Recorte por cobertura: ', dec.recorte_importe.join('; ')) : null),
+    h('div', { class: 'razones' }, (dec.razones || []).map((r) => h('div', { class: 'razon' }, h('span', { class: 'code' }, r.codigo),
+      h('div', null, h('b', null, r.senal), h('span', { class: 'val' }, r.valor), h('p', null, r.texto))))));
+  root.append(h('div', { class: 'pro-steps' }, step1, step2, step3));
+
+  // desenlace
+  const outCard = h('section', { class: 'card card-pad', style: { 'margin-top': '16px' } });
+  if (out.disponible) {
+    const predT = isNum(dec.meses_antelacion) && dec.meses_antelacion <= 2;
+    const hit = predT === !!out.tension_real;
+    outCard.append(h('div', { class: 'card-head' }, h('div', null, h('h2', null, 'Lo que pasó de verdad en T+1 y T+2'),
+      h('p', null, 'Caja real reconstruida del banco frente a la proyectada. La recomendación se hizo sin ver estos meses.')),
+      h('span', { class: `chip ${hit ? 'chip-band-sano' : 'chip-band-riesgo'}` }, icon(hit ? 'check' : 'x'), hit ? (predT ? 'Anticipado: la tensión llegó' : 'Correcto: sin tensión') : (predT ? 'Falsa alarma: no hubo tensión' : 'No detectado: hubo tensión'))));
+    outCard.append(h('div', { class: 'pro-path' }, (out.meses || []).map((mm, i) => {
+      const pr = (p.meses || [])[i];
+      return h('div', { class: `pro-m real ${mm.rotura ? 'rotura' : mm.tension ? 'tension' : ''}` },
+        h('span', { class: 'mo' }, `T+${i + 1} · ${fmtMonth(mm.month)} · real`), h('span', { class: 'v' }, fm(mm.caja_real)),
+        h('span', { class: 'muted', style: { 'font-size': '11px' } }, `${mm.rotura ? 'en negativo' : mm.tension ? 'tensión' : 'sin tensión'}${pr ? ` · proyectado ${fm(pr.caja)}` : ''}${isNum(mm.score) ? ` · score ${fmt(mm.score)}` : ''}`));
+    })));
+    outCard.append(tableView('Ver flujos reales', ['Mes', 'Cobros reales', 'Pagos reales', 'Nóminas', 'Cuotas', 'Caja real', 'Caja proyectada'],
+      (out.meses || []).map((mm, i) => [fmtMonth(mm.month, true), fm(mm.cobros_reales), fm(mm.pagos_reales), fm(mm.nominas_reales), fm(mm.cuotas_reales), fm(mm.caja_real), fm(((p.meses || [])[i] || {}).caja)]), [1, 2, 3, 4, 5, 6]));
+  } else {
+    outCard.append(h('div', { class: 'card-head' }, h('div', null, h('h2', null, 'Desenlace real'), h('p', null, out.motivo || 'T+2 aún no está en el panel: esta recomendación es la que se daría hoy.'))));
+  }
+  root.append(outCard);
+  return root;
+}
+
 /* ═════════════ Tema ═════════════ */
 const THEMES = ['auto', 'light', 'dark'];
 const THEME_LABEL = { auto: 'Automático', light: 'Claro', dark: 'Oscuro' };
@@ -1928,6 +2376,10 @@ function boot() {
     const n = (m.alerts || []).filter((a) => a.severity === 'alta').length;
     const el = $('#nav-alerts'); if (n) { el.textContent = String(n); el.hidden = false; el.setAttribute('aria-label', `${n} alertas de severidad alta`); }
   }).catch(() => { /* el monitor mostrará el error */ });
+  getSituaciones().then((s) => {
+    const n = (s.resumen || {}).centrales_fallan || 0;
+    const el = $('#nav-sit'); if (n) { el.textContent = String(n); el.hidden = false; el.setAttribute('aria-label', `${n} situaciones centrales que fallan`); }
+  }).catch(() => { /* la pestaña mostrará el error */ });
 }
 boot();
 </script>

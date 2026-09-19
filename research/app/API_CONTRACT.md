@@ -126,3 +126,94 @@ Respuesta:
   "chart": null | { /* Chart */ }
 }]}
 ```
+
+## GET /api/situaciones
+Sala de situaciones: las premisas del consejo (fase 2) evaluadas contra el panel (fase 3). Sirve
+`.devin/workflows/autoresearch/salida/situaciones.json` (`premisas.py export`). Si el fichero no existe responde **200** con lista vacía y `aviso`.
+```jsonc
+{
+  "resumen": {"total": 150, "pasan": 98, "fallan": 29, "no_verificables": 23, "centrales": 19, "centrales_fallan": 14},
+  "fuente": ".devin/workflows/autoresearch/salida/situaciones.json",
+  "aviso": "string opcional (solo si no hay fichero)",
+  "situaciones": [{
+    "id": "P001", "rol": "prestamista" | "cfo" | "auditor-datos" | "riesgo-modelo" | "abogado-diablo" | "cobrador",
+    "ambito": "liquidez" | "cobros" | "pagos" | "deuda" | "observabilidad" | "producto" | "recuperacion" | "calibracion" | "comportamiento" | "sesgos" | "estabilidad" | "gaming",
+    "premisa": "string", "por_que": "string",
+    "condicion": "si X entonces Y, salvo Z",          // opcional
+    "verificable": true, "central": false, "fragil": false,
+    "test": {"tipo": "auc" | "tasa_evento" | "condicional" | "correlacion" | "estadistico" | "banda" | "probabilidad" | "contribucion" | "ranking",
+             "objetivo": "tension_6m", "variable": "runway", "esperado": "<0.5"},
+    "evidencia": {"hecho": "H089", "fuente": "D09", "observado": "string", "n": 11193},
+    "estado": "pasa" | "falla" | "no_verificable",
+    "motivo_no_verificable": "string",                 // solo en no_verificable
+    "resultado": null | {"valor": 0.2086, "n": 11121,
+                         "ejemplos": [{"company_id": "COMP_0005", "month": "2025-03", "band": "riesgo", "...": 0}]},  // ≤ 6 filas empresa × mes
+    "diagnostico": {"veredicto": "string", "texto": "string"},   // fase 3, opcional
+    "iteracion": "iter_006"                                       // fase 3, opcional
+  }]
+}
+```
+
+## GET /api/situaciones/{id}
+Una situación (mismo objeto que en la lista); 404 si no existe.
+
+## GET /api/proactive?company_id=COMP_0004&month=2026-06&horizon=6
+Motor proactivo: **proyección de tesorería aritmética** (sin LGBM ni forecaster) en el mes `T = month` (por defecto el último),
+decisión y producto según la política de la fase 1, score del **modelo vigente sin reentrenar** y, si `T+2` está en el panel, el desenlace real.
+`horizon` entre 1 y 12. 404 si la empresa o el mes no existen.
+```jsonc
+{
+  "company_id": "COMP_0004", "month": "2026-06", "currency": "EUR", "has_erp": true,
+  "meses_disponibles": ["2026-01", "..."],
+  "score": 51.2, "band": "vigilar", "confidence": 0.89,
+  "accion": "lend" | "watch" | "decline" | "sin_nota",
+  "producto": "factoring" | "confirming" | "linea" | "refi" | "ninguna",
+  "meses_antelacion": null | 2,                          // primer h con caja proyectada < 0 (o tensión)
+  "decision": {
+    "accion": "lend", "accion_label": "Prestar", "regla": "C2",   // regla de la política que manda (C0..C9)
+    "producto": "ninguna", "producto_label": "Ninguna", "producto_texto": "string en lenguaje llano",
+    "necesita_deuda_2m": false, "meses_antelacion": null,
+    "razones": [{"codigo": "C2", "senal": "Meses de caja", "valor": "1,3 meses", "texto": "por qué importa, en llano"}],
+    "recorte_importe": ["sin ERP: ... (importe × 0,5)"], "importe_max": 478473.1 | null
+  },
+  "proyeccion": {
+    "modo": "facturas" | "bancario",                    // bancario = sin ERP: medianas bancarias en lugar de facturas
+    "variante": "completa" | "estricta",
+    "caja_inicial": 269235.7, "poliza_disponible": 1.0e6, "gasto_mensual": 956946.2, "umbral_tension": 239236.6, "meses_caja": 1.33,
+    "formula": "caja(T+h) = caja(T) + cobros pendientes(T,T+h] − pagos pendientes(T,T+h] − nóminas×h − cuotas×h",
+    "lineas": [{"clave": "cobros_pendientes", "signo": 1, "label": "string", "fuente": "de dónde sale el número",
+                "por_mes": [114417.5, 267638.7], "total": 1414754.9, "n": 39 | null}],
+    "meses": [{"h": 1, "month": "2026-07", "caja": 252626.5, "liquidez": 1252626.5, "rotura": false, "tension": false}],
+    "rotura_h": null | 2, "tension_h": null | 1, "hueco": 0.0,
+    "anticipable": {"total": 1414754.9, "por_vencer_h": 1414754.9, "n": 39, "anticipo_estimado": 1131803.9, "n_contrapartes": 8},  // facturas emitidas NO vencidas
+    "ap_pendiente": {"total": 423984.9, "n": 96},
+    "efectos": {"n_6m": 65, "importe_6m": 4445.7, "share_cobros_6m": 0.0},   // «pagaré/efecto/remesa» en la descripción bancaria
+    "productos_contratados": ["confirming", "loan"]
+  },
+  "panel_T": {"cash_end": 0, "inflow": 0, "outflow": 0, "payroll": 0, "debt_service": 0, "lc_drawn": 0, "lc_limit": 0, "...": 0},
+  "senales": {"runway": {"valor": 0.25, "texto": "0,3 meses", "label": "Meses de caja"}, "mc": {"...": 0}},
+  "contribuciones": [{"feature": "lc_util", "label": "string", "pillar": "liquidez", "puntos": 9.9, "valor": 0.0, "valor_texto": "0 %"}],  // explain(): puntos frente al neutro
+  "explicacion": { /* igual que /api/company.explanation, en T */ },
+  "desenlace": {"disponible": true, "rotura_real": false, "tension_real": false,
+                "meses": [{"month": "2026-07", "caja_real": 79219.8, "liquidez_real": 1079219.8, "rotura": false, "tension": false,
+                           "cobros_reales": 0, "pagos_reales": 0, "nominas_reales": 0, "cuotas_reales": 0, "score": 50.1}]}
+                | {"disponible": false, "motivo": "T+2 no está en el panel"}
+}
+```
+
+## GET /api/proactive/validation
+Validación no circular: empresas de un fold de GroupKFold por `group_id`, puntuadas por un scorer que no las vio, recomendadas en cada
+`T` sin ver el futuro y comprobadas en `T+1..T+2`. Sirve `salida/demo/validacion_proactiva.json` (`proactive.py validate`); si no existe, 200 con `aviso`.
+```jsonc
+{
+  "fold": 0, "n_splits": 5, "h": 2, "n_empresas": 250, "n_grupos": 50, "n_empresa_mes": 3500,
+  "metricas": {"rotura_2m": {"n": 0, "tasa_base": 0.05, "precision": 0.6, "recall": 0.4, "npv": 0.97, "tp": 0, "fp": 0, "fn": 0, "tn": 0},
+               "tension_2m": {}, "necesita_deuda_vs_rotura_o_tension": {}, "rotura_2m_variante_estricta": {}, "baseline_mc<0.5_vs_rotura": {}},
+  "por_modo": {"facturas": {"rotura_2m": {}, "tension_2m": {}}, "bancario": {}},
+  "error_caja_h_eur_completa": {"mediana_abs": 0, "p75_abs": 0, "mediana": 0, "mediana_abs_en_meses_de_gasto": 0},
+  "casos": [{"tipo": "acierto" | "control_sano" | "falsa_alarma" | "no_detectada", "company_id": "COMP_0001", "month": "2026-01",
+             "modo": "facturas", "accion": "watch", "producto": "factoring", "mc_T": 0.4, "hueco": 12000.0, "score_oof": 41.2,
+             "pred_rotura": true, "real_rotura": true, "real_tension": true}],
+  "empresas_held_out": ["COMP_0001"]
+}
+```
