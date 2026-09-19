@@ -76,7 +76,7 @@
    "decision": "El nivel es un score interpretable (percentiles ponderados). Sus pesos se calibran con eventos futuros observables: apagado (la empresa deja de operar), tensión de caja (saldo negativo) y declive (cobros <50 % de su media anual). La trayectoria es una previsión supervisada del propio score.",
    "why": "Un score sin ancla externa puede estar al revés sin que ninguna métrica lo detecte. Eso nos pasó en la v1: AUC de 0,37 frente al apagado. Con eventos observables, el nivel del score significa algo y se puede medir.",
    "alternatives": "Score totalmente no supervisado (clustering, PCA): no es interpretable ni verificable. Predecir directamente el evento: sería una caja negra y solo daría una cara del problema.",
-   "evidence": "Tasas de evento a 6 meses: apagado 3,0 %, tensión de caja 5,4 %, declive 17,0 %. AUC del score final frente a evento adverso: 0.59.",
+   "evidence": "Tasas de evento a 6 meses: apagado 3,0 %, tensión de caja 4,3 %, declive 17,0 %. AUC del score final frente a evento adverso: 0.59.",
    "status": "a confirmar con la organización",
    "chart": null
   },
@@ -243,16 +243,16 @@
      {
       "label": "método actual",
       "data": [
-       0.6385,
+       0.6422,
+       0.5585,
        0.555,
-       0.5514,
-       0.5137,
-       0.429,
-       0.4603,
-       0.4281,
-       0.424,
-       0.488,
-       0.4815
+       0.5149,
+       0.4307,
+       0.4617,
+       0.4287,
+       0.4249,
+       0.4895,
+       0.4828
       ]
      }
     ],
@@ -388,7 +388,7 @@
    "question": "¿Por qué las empresas que se apagaban tenían más 'meses de caja'?",
    "decision": "Runway = signo(caja) × log(1 + |caja| / gasto), con gasto = máx(media de 3 meses, media de 12 meses). La caja negativa da un runway negativo, así que la feature binaria sobra.",
    "why": "Si el gasto se desploma, caja/gasto sube aunque la empresa se esté apagando. Con la base anual el denominador no cae y se premia la caja real.",
-   "evidence": "AUC del runway frente a tensión de caja a 6 meses: 0,23 (menos de 0,5 = protege).",
+   "evidence": "AUC del runway frente a tensión de caja a 6 meses: 0,30 (menos de 0,5 = protege).",
    "chart": {
     "type": "bar",
     "title": "AUC de cada feature frente a eventos a 6 meses (0,5 = sin señal)",
@@ -398,13 +398,12 @@
      {
       "label": "apagado",
       "data": [
-       0.509,
-       0.2967,
-       0.4756,
+       0.5107,
+       0.2981,
        0.4783,
        0.4515,
-       0.4424,
-       0.6963,
+       0.6189,
+       0.6997,
        0.6173,
        0.5343,
        0.4956,
@@ -414,42 +413,42 @@
        0.538,
        0.4778,
        0.3913,
-       0.7226
+       0.7226,
+       0.5295
       ]
      },
      {
       "label": "tensión de caja",
       "data": [
-       0.2315,
-       0.5945,
-       0.4804,
-       0.5242,
-       0.5014,
-       0.5406,
-       0.5447,
-       0.545,
-       0.5646,
-       0.504,
-       0.5038,
-       0.5195,
-       0.51,
-       0.4811,
-       0.4572,
-       0.4345,
-       0.4971
+       0.305,
+       0.5421,
+       0.5371,
+       0.5053,
+       0.573,
+       0.5477,
+       0.5461,
+       0.5735,
+       0.5002,
+       0.5102,
+       0.5299,
+       0.4597,
+       0.4953,
+       0.4586,
+       0.4258,
+       0.5041,
+       0.4911
       ]
      },
      {
       "label": "declive",
       "data": [
-       0.4931,
-       0.4376,
-       0.5274,
+       0.4979,
+       0.4388,
        0.4301,
        0.4935,
-       0.448,
-       0.5292,
-       0.5447,
+       0.6089,
+       0.5342,
+       0.5445,
        0.5178,
        0.4974,
        0.4924,
@@ -458,17 +457,17 @@
        0.5445,
        0.5282,
        0.4506,
-       0.6039
+       0.6039,
+       0.3783
       ]
      }
     ],
     "labels": [
      "Meses de caja",
      "Uso de líneas de crédito",
-     "Margen de caja 6m",
      "Tendencia de cobros",
      "Carga de deuda",
-     "Peso de nóminas",
+     "Regularidad de nóminas",
      "Pagos tardíos a proveedores",
      "Cobros tardíos de clientes",
      "Deuda vencida con proveedores",
@@ -479,7 +478,8 @@
      "Concentración de clientes",
      "Volatilidad a la baja",
      "Amplitud de clientes",
-     "Facturación de clientes perdidos"
+     "Facturación de clientes perdidos",
+     "Persistencia de cobros"
     ],
     "note": "AUC < 0,5 significa que valores altos protegen"
    },
@@ -505,10 +505,10 @@
       "data": [
        59.597,
        87.8494,
-       37.9027,
-       11.4157,
-       42.1947,
-       14.1776,
+       38.3629,
+       11.3944,
+       42.1806,
+       14.2715,
        68.1725
       ]
      }
@@ -533,7 +533,7 @@
    "question": "¿Qué variables añadir tras el review?",
    "decision": "Se añaden estas señales: lc_util (dispuesto/límite de pólizas, reconstruido hacia atrás), lost_share (% de la facturación de hace 3-12 meses de clientes a los que ya no se factura), cust_trend (clientes facturados en 3 meses frente a 12) y hhi_ar_6m (concentración). net_vol_6m pasa a medir solo la volatilidad a la baja (semidesviación de los meses con flujo negativo, sobre el gasto). transfer_dep se queda solo con las transferencias reales: la categoría '-' (sin categorizar) pasa a contexto. No se usan debt_products ni debt_schedule_config como features mensuales porque son una foto final y proyectarlos hacia atrás filtraría información.",
    "why": "Perder clientes es la señal más temprana de apagado y de declive. El review de la v5 mostró que transfer_dep medía sobre todo cobros sin categorizar, y que la volatilidad total penalizaba a las empresas con mucha caja: lo que daña es la volatilidad a la baja.",
-   "evidence": "AUC frente a apagado: lost_share 0,72, cust_trend 0.39. Frente a tensión de caja: lc_util 0.59. transfer_dep sin '-' frente a apagado: 0,43, casi sin señal.",
+   "evidence": "AUC frente a apagado: lost_share 0,72, cust_trend 0.39. Frente a tensión de caja: lc_util 0.54. transfer_dep sin '-' frente a apagado: 0,43, casi sin señal.",
    "chart": null,
    "status": "decidido",
    "alternatives": ""
@@ -546,7 +546,7 @@
    "decision": "Para cada evento (apagado, tensión de caja, declive) se ajusta una logística P(evento) = σ(b − Σ w·s) con w ≥ 0, sobre filas cuyo evento ya era observable. Los pesos normalizados se promedian para que cada tipo de deterioro cuente igual. Si los datos contradicen la dirección económica de una feature, su peso queda en 0.",
    "why": "Calibrar contra el evento compuesto dejaba que el declive (20 % de las filas) dominara, y la disciplina de pagos, que predice los apagados, quedaba en 0. Restringir el signo mantiene la monotonía: mejorar una señal nunca baja el score.",
    "alternatives": "Pesos a priori (v4a): funcionan peor frente a eventos. Logística sin restricción: pesos negativos e inexplicables.",
-   "evidence": "Pesos por debajo del 1 %: ninguno. Los datos no respaldan su dirección. Mayores pesos: Tendencia de actividad 21 %, Meses de caja 16 %, Facturación de clientes perdidos 10 %, Pagos tardíos a proveedores 10 %.",
+   "evidence": "Pesos por debajo del 1 %: Pagos tardíos a proveedores, Deuda vencida con proveedores, Clientes morosos >60 días, Amplitud de clientes. Los datos no respaldan su dirección. Mayores pesos: Meses de caja 16 %, Tendencia de actividad 14 %, Persistencia de cobros 11 %, Regularidad de nóminas 9 %.",
    "chart": {
     "type": "bar",
     "title": "Pesos por feature: a priori frente a calibrados",
@@ -556,55 +556,54 @@
      {
       "label": "a priori",
       "data": [
-       0.1667,
-       0.0556,
-       0.0833,
-       0.0833,
-       0.0556,
-       0.0278,
-       0.0833,
-       0.0556,
-       0.0556,
-       0.0278,
-       0.0278,
-       0.0833,
-       0.0278,
-       0.0278,
-       0.0278,
-       0.0556,
-       0.0556
+       0.1714,
+       0.0571,
+       0.0857,
+       0.0571,
+       0.0286,
+       0.0857,
+       0.0571,
+       0.0571,
+       0.0286,
+       0.0286,
+       0.0857,
+       0.0286,
+       0.0286,
+       0.0286,
+       0.0571,
+       0.0571,
+       0.0571
       ]
      },
      {
       "label": "calibrado (modelo final)",
       "data": [
-       0.1591,
-       0.0133,
-       0.0129,
-       0.0449,
-       0.0304,
-       0.0145,
-       0.1021,
-       0.0755,
-       0.0309,
-       0.0197,
-       0.0355,
-       0.2063,
-       0.0246,
-       0.0376,
-       0.0179,
-       0.0723,
-       0.1025
+       0.156,
+       0.082,
+       0.0498,
+       0.0664,
+       0.0933,
+       0.0055,
+       0.0417,
+       0.0092,
+       0.0087,
+       0.0639,
+       0.1433,
+       0.0461,
+       0.0238,
+       0.0344,
+       0.0,
+       0.0703,
+       0.1057
       ]
      }
     ],
     "labels": [
      "Meses de caja",
      "Uso de líneas de crédito",
-     "Margen de caja 6m",
      "Tendencia de cobros",
      "Carga de deuda",
-     "Peso de nóminas",
+     "Regularidad de nóminas",
      "Pagos tardíos a proveedores",
      "Cobros tardíos de clientes",
      "Deuda vencida con proveedores",
@@ -615,7 +614,8 @@
      "Concentración de clientes",
      "Volatilidad a la baja",
      "Amplitud de clientes",
-     "Facturación de clientes perdidos"
+     "Facturación de clientes perdidos",
+     "Persistencia de cobros"
     ]
    },
    "status": "decidido"
@@ -661,7 +661,7 @@
    "question": "¿Cuánto suavizar el score publicado?",
    "decision": "Score publicado = EWMA(α = 0,5) del score bruto. Como el EWMA es lineal, se suaviza cada contribución por separado y el score sigue siendo la suma exacta de contribuciones: explain() cuadra al céntimo.",
    "why": "Con α = 0,5 un bache de un mes pesa la mitad y una caída estructural se refleja al 87,5 % en 3 meses. Es el equilibrio entre estabilidad ante baches (lo pide el enunciado) y retraso en la detección.",
-   "evidence": "Cambio medio mensual |Δ| y proporción de movimientos ≥10 a 3 meses según α: α=0,3: 3,23 / 24 %; α=0,4: 4,02 / 31 %; α=0,5: 4,77 / 35 %; α=0,6: 5,47 / 38 %; α=0,8: 6,86 / 43 %; α=1,0: 8,38 / 46 %",
+   "evidence": "Cambio medio mensual |Δ| y proporción de movimientos ≥10 a 3 meses según α: α=0,3: 3,16 / 23 %; α=0,4: 3,96 / 30 %; α=0,5: 4,71 / 35 %; α=0,6: 5,43 / 38 %; α=0,8: 6,85 / 42 %; α=1,0: 8,40 / 45 %",
    "chart": {
     "type": "line",
     "title": "Estabilidad del score según α",
@@ -671,23 +671,23 @@
      {
       "label": "|Δ| medio mensual",
       "data": [
-       3.2259,
-       4.0245,
-       4.7652,
-       5.4724,
-       6.8623,
-       8.3801
+       3.1573,
+       3.9595,
+       4.7088,
+       5.4258,
+       6.8451,
+       8.3953
       ]
      },
      {
       "label": "% movimientos ≥10 en 3m",
       "data": [
-       24.2037,
-       31.0103,
-       35.4025,
-       38.4948,
-       42.8498,
-       45.7006
+       23.2566,
+       29.7335,
+       34.5343,
+       37.9562,
+       42.3484,
+       45.4313
       ]
      }
     ],
@@ -769,7 +769,7 @@
    "decision": "Una feature sin dato contribuye con su peso × 50, el valor neutro. No se redistribuye su peso entre las demás. La cobertura (peso con dato) reduce la confianza publicada.",
    "why": "Al renormalizar, una empresa con 2 meses de historia se puntuaba casi solo por su caja y salía más sana que la media (sesgo de arranque, grave para el test oculto de empresas nuevas). Además, el score saltaba cuando aparecía una feature. Con el neutro, lo que no sabemos tira al centro y la confianza lo refleja.",
    "alternatives": "Renormalizar (v5b): +9,4 % frente a AR(1) pero con sesgo de arranque y un 24 % de movimientos grandes. Neutro (v5e): +5,2 % frente a AR(1), sin sesgo y con un 15 % de movimientos grandes. Se prioriza la estabilidad y la justicia con las empresas nuevas.",
-   "evidence": "Mediana del score bruto en el mes 0 frente al mes 11: renormalizando 71,5 → 51,1; con neutro 51,8 → 47.9.",
+   "evidence": "Mediana del score bruto en el mes 0 frente al mes 11: renormalizando 92,2 → 55,8; con neutro 56,0 → 51.8.",
    "chart": {
     "type": "line",
     "title": "Mediana del score bruto según los meses de historia",
@@ -779,35 +779,35 @@
      {
       "label": "renormalizando pesos",
       "data": [
-       71.5036,
-       68.9997,
-       57.0735,
-       60.1477,
-       57.1437,
-       55.6717,
-       54.9593,
-       50.8958,
-       52.8606,
-       53.3984,
-       53.6538,
-       51.1086
+       92.2284,
+       85.3383,
+       68.0954,
+       69.7044,
+       65.9174,
+       62.9573,
+       62.1934,
+       56.6578,
+       58.8466,
+       57.1526,
+       58.0115,
+       55.8355
       ]
      },
      {
       "label": "sin dato = neutro (final)",
       "data": [
-       51.7871,
-       50.5415,
-       50.8368,
-       53.3374,
-       51.6407,
-       51.025,
-       49.7668,
-       47.4015,
-       48.7301,
-       50.2057,
-       49.7737,
-       47.9033
+       56.0459,
+       54.6582,
+       56.7306,
+       57.7321,
+       55.981,
+       54.4324,
+       53.4081,
+       52.2867,
+       54.0256,
+       52.8467,
+       53.8225,
+       51.7556
       ]
      }
     ],
@@ -833,9 +833,9 @@
    "category": "score",
    "title": "Escala publicada: transformación lineal P5→15, P95→85",
    "question": "¿Cómo hacer legible el score (del estilo '82 → 68') sin perder la explicación exacta?",
-   "decision": "Score publicado = a + b × compuesto, con a = -71,6 y b = 2,21, calibrados en train para llevar el P5 del compuesto a 15 y el P95 a 85. Se recorta a [0, 100] y el recorte aparece como término explícito en la explicación.",
+   "decision": "Score publicado = a + b × compuesto, con a = -86,0 y b = 2,41, calibrados en train para llevar el P5 del compuesto a 15 y el P95 a 85. Se recorta a [0, 100] y el recorte aparece como término explícito en la explicación.",
    "why": "La media ponderada de percentiles, con neutro para lo desconocido, concentra el score entre 38 y 68. Una transformación lineal abre el rango y mantiene la suma exacta de contribuciones, porque la constante se reparte según los pesos. Una transformación no lineal (percentil del compuesto) rompería la explicación.",
-   "evidence": "Cuantiles del compuesto → publicado: P5: 39,2 → 15,0, P25: 48,1 → 34,5, P50: 54,8 → 49,4, P75: 61,5 → 64,2, P95: 70,9 → 85,0",
+   "evidence": "Cuantiles del compuesto → publicado: P5: 41,8 → 15,0, P25: 51,5 → 38,4, P50: 57,7 → 53,4, P75: 63,4 → 67,2, P95: 70,8 → 85,0",
    "chart": {
     "type": "bar",
     "title": "Cuantiles del compuesto y del score publicado",
@@ -845,20 +845,20 @@
      {
       "label": "compuesto (media de percentiles)",
       "data": [
-       39.2234,
-       48.0634,
-       54.8062,
-       61.492,
-       70.927
+       41.8236,
+       51.4973,
+       57.74,
+       63.4284,
+       70.8099
       ]
      },
      {
       "label": "publicado",
       "data": [
        15.0,
-       34.5182,
-       49.4061,
-       64.1679,
+       38.3612,
+       53.437,
+       67.1741,
        85.0
       ]
      }
@@ -881,7 +881,7 @@
    "question": "¿Cuándo sale una alerta?",
    "decision": "Bandas: riesgo < 35 ≤ vigilar < 65 ≤ sano, aproximadamente los cuartiles de la escala publicada. Alerta de deterioro si la mediana prevista a 3 meses cae ≥ 10 puntos y el percentil 90 también está por debajo del nivel actual (el intervalo no cruza 0). Severidad alta si todavía parece sana (≥ 55). La mejora es simétrica. Bache frente a caída: tras una caída bruta ≥ 10 en el mes, es bache si la mediana prevista recupera al menos la mitad. Inactividad: alerta inmediata.",
    "why": "Usar el intervalo y no solo la mediana reduce las falsas alarmas: solo se alerta cuando el modelo está seguro de la dirección. Los umbrales de banda dejan unos tercios aproximados de la cartera y se pueden ajustar al apetito de riesgo del comprador.",
-   "evidence": "Distribución del último mes: riesgo 32 %, vigilar 48 %, sano 20 %.",
+   "evidence": "Distribución del último mes: riesgo 26 %, vigilar 52 %, sano 22 %.",
    "chart": {
     "type": "bar",
     "title": "Distribución del score en el último mes",
@@ -891,25 +891,25 @@
      {
       "label": "empresas",
       "data": [
-       26.0,
-       16.0,
-       34.0,
+       18.0,
+       23.0,
+       22.0,
        39.0,
-       73.0,
-       109.0,
-       109.0,
-       111.0,
-       122.0,
-       120.0,
+       44.0,
        86.0,
-       97.0,
-       85.0,
-       81.0,
-       69.0,
-       42.0,
-       27.0,
-       17.0,
-       15.0,
+       100.0,
+       100.0,
+       120.0,
+       116.0,
+       114.0,
+       123.0,
+       96.0,
+       96.0,
+       63.0,
+       44.0,
+       28.0,
+       28.0,
+       18.0,
        8.0
       ]
      }
@@ -948,7 +948,7 @@
    "question": "¿Cómo dar confianza a la previsión?",
    "decision": "LightGBM con objective = quantile para q10, q50 y q90 dentro de mlforecast. Después, CQR: se reentrena con train cortado H meses, se miden las puntuaciones de no-conformidad y se ensancha el intervalo por horizonte. q50 es la previsión puntual y los cuantiles se ordenan para que no se crucen.",
    "why": "Sin calibrar, el intervalo nominal del 80 % solo cubría alrededor del 60 %: LightGBM cuantílico es demasiado confiado. CQR da cobertura garantizada sin cambiar el modelo.",
-   "evidence": "Cobertura del intervalo 80 % por horizonte (sin CQR → con CQR): h1: 73 % → 80 %, h2: 74 % → 83 %, h3: 73 % → 79 %",
+   "evidence": "Cobertura del intervalo 80 % por horizonte (sin CQR → con CQR): h1: 73 % → 78 %, h2: 78 % → 84 %, h3: 77 % → 83 %",
    "chart": {
     "type": "bar",
     "title": "Cobertura del intervalo 80 % (objetivo 80 %)",
@@ -959,16 +959,16 @@
       "label": "sin calibrar",
       "data": [
        73.0435,
-       74.3478,
-       73.0435
+       77.8261,
+       76.9565
       ]
      },
      {
       "label": "con CQR",
       "data": [
-       80.0,
-       83.0435,
-       79.1304
+       78.2609,
+       83.913,
+       83.4783
       ]
      }
     ],
@@ -1025,7 +1025,7 @@
    "question": "¿Cómo sabemos que generaliza y que no es regresión a la media?",
    "decision": "5 folds por group_id × cortes nov-25, feb-26 y may-26. El scorer se ajusta sin la empresa y el forecaster predice con new_df. La referencia principal es un AR(1) agrupado por horizonte, no el naive.",
    "why": "El review mostró que la ventaja de la v1 frente al naive era regresión a la media: un AR(1) la igualaba. Por eso toda mejora se mide contra el AR(1).",
-   "evidence": "Skill frente a AR(1) a h3 por versión: v3a: +1,3 %, v3b: +4,7 %, v4a: +3,0 %, v4b: +5,5 %, v4c: -9,1 %, v5a: +7,4 %, v5b: +9,4 %, v5c: -14,6 %, v5d: +8,4 %, v5e: +5,2 %, v5f: +3,1 %, v6: +3,8 %",
+   "evidence": "Skill frente a AR(1) a h3 por versión: v3a: +1,3 %, v3b: +4,7 %, v4a: +3,0 %, v4b: +5,5 %, v4c: -9,1 %, v5a: +7,4 %, v5b: +9,4 %, v5c: -14,6 %, v5d: +8,4 %, v5e: +5,2 %, v5f: +3,1 %, v6: +3,8 %, v7: +2,0 %, ar000: +1,8 %, ar002b: +2,6 %, ar004: +2,3 %, ar006: +2,5 %, ar007: +2,7 %",
    "chart": {
     "type": "bar",
     "title": "Skill a 3 meses frente a AR(1) por iteración",
@@ -1046,7 +1046,13 @@
        8.4314,
        5.1584,
        3.0839,
-       3.8166
+       3.8166,
+       2.0143,
+       1.8374,
+       2.5738,
+       2.2901,
+       2.4807,
+       2.6536
       ]
      }
     ],
@@ -1062,7 +1068,13 @@
      "v5d",
      "v5e",
      "v5f",
-     "v6"
+     "v6",
+     "v7",
+     "ar000",
+     "ar002b",
+     "ar004",
+     "ar006",
+     "ar007"
     ]
    },
    "status": "decidido",
@@ -1187,6 +1199,54 @@
    "chart": null,
    "alternatives": "",
    "evidence": ""
+  },
+  {
+   "id": "D28",
+   "category": "features",
+   "title": "La nómina puntúa por su regularidad a la baja (payroll_cv), no por su peso sobre las entradas",
+   "question": "¿Por qué payroll_burden tenía peso 0 y la explicación no podía nombrar la nómina ausente? (premisa P172 del consejo)",
+   "decision": "Se sustituye payroll_burden (nóminas/entradas 3m) por payroll_cv: semidesviación a la baja de las nóminas respecto a su media de 6 meses, dividida por esa media. Solo penaliza nóminas que faltan o bajan; contratar no resta. Sin nóminas sigue siendo «no aplica».",
+   "why": "Con dirección «más peso de nómina = peor», payroll_burden tenía AUC 0,41 frente a tensión y 0,43 frente a incumplimiento: quien paga más nómina relativa tiene menos eventos. Era un proxy del tamaño (rho −0,46 con log_scale) y la logística con signo restringido hacía lo correcto al darle peso 0. La señal está en la regularidad: payroll_cv separa incumplimiento (0,58) y caída (0,61) y es neutra al tamaño (−0,05).",
+   "alternatives": "Coeficiente de variación total (std/media): más AUC en incumplimiento (0,607) pero penaliza la expansión (−0,025), porque contratar también hace variar la nómina. payroll_continuity_6m: correlaciona con el tamaño (+0,27). payroll_gap binaria: cobertura 35 %.",
+   "evidence": "GroupKFold por grupo × 3 cortes: PM 0,615 → 0,618; incumplimiento 0,603 → 0,617, caída 0,588 → 0,601; guardarraíles de trayectoria mejoran. Peso calibrado de payroll_cv: 0,10 (tercera feature). Detalle: .devin/workflows/autoresearch/salida/iteraciones/iter_002/.",
+   "chart": null,
+   "status": "decidido"
+  },
+  {
+   "id": "D29",
+   "category": "features",
+   "title": "El margen de caja a 6 meses sale del score (queda como contexto)",
+   "question": "¿Rescatar net_margin_6m o retirarla? (premisa P199)",
+   "decision": "Se retira del catálogo del score. Se sigue calculando como contexto para el forecaster.",
+   "why": "AUC 0,46-0,49 frente a los cuatro eventos (a más margen, ligeramente más eventos adversos: reversión a la media) y peso calibrado 0 en los cuatro. La explicación mostraba un «Margen de caja 6m» que nunca movía nada.",
+   "evidence": "La nota es idéntica en todas las filas (PM 0,618 = 0,618). Detalle: iter_004.",
+   "chart": null,
+   "status": "decidido",
+   "alternatives": ""
+  },
+  {
+   "id": "D30",
+   "category": "features",
+   "title": "Entra la persistencia de cobros operativos (oper_persistence_6m)",
+   "question": "¿Qué feature del brainstorming (R07) entra sin empeorar ningún evento?",
+   "decision": "oper_persistence_6m = meses de los últimos 6 con cobros operativos ≥ 50 % de su mediana anual (pilar estabilidad, dirección +1).",
+   "why": "Dirección coherente en los cuatro eventos (menos caída e incumplimiento, más expansión), neutra al tamaño (rho 0,04) y cinco veces menos ruidosa que activity_trend (2,9 frente a 13,6 puntos de percentil al mes), a la que quita peso (0,18 → 0,16) y acerca la criticidad de la caja (P173: +1,60 → +0,88).",
+   "alternatives": "lost_accel y yoy_inflow: ruidosas (17-25 puntos al mes) y de poca cobertura. payee_concentration y hhi_ap_6m: exigen rehacer el panel; pendientes.",
+   "evidence": "PM 0,618 → 0,627: tensión 0,658 → 0,666, caída 0,601 → 0,617, expansión igual. Detalle: iter_006.",
+   "chart": null,
+   "status": "decidido"
+  },
+  {
+   "id": "D31",
+   "category": "datos",
+   "title": "Con caja centinela, la liquidez es «sin dato»",
+   "question": "¿Qué hacer con las 9 empresas cuya caja reconstruida es un artefacto del generador (saldo o transacción > 1e8 €)?",
+   "decision": "runway pasa a nulo cuando dq_cash_sentinel: la nota va al neutro en liquidez y la confianza baja. La caja implausible por riqueza real (dq_cash_implausible: holdings con mucha caja y poco flujo, eventos a la mitad) no se toca.",
+   "why": "La caja falsa movía la nota ±20-30 puntos en las dos direcciones (COMP_1068: 83,7 «sano» con 87 000 M€ falsos; COMP_0420: 25,3 con −2 000 M€). Marcar no bastaba: el sub-score de runway era alto o bajo, no neutro. La deriva de reconstrucción (has_drift) queda pendiente de un flag por fila y de la exclusión simétrica en los eventos.",
+   "evidence": "PM idéntica fuera de las filas centinela (0,6143 = 0,6143 en todas las filas OOF); en cortes 0,627 → 0,626 (ruido). Detalle: iter_007 y salida/datos_limpieza.md A02/A16.",
+   "chart": null,
+   "status": "decidido",
+   "alternatives": ""
   }
  ]
 }
