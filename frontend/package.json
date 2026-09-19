@@ -21,7 +21,6 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.58",
     "@ai-sdk/vue": "^4.0.107",
     "@lucide/vue": "^1.47.0",
     "@pinia/nuxt": "^1.0.2",
