@@ -42,7 +42,7 @@ def add_features(p: pl.DataFrame) -> pl.DataFrame:
         # Liquidez
         runway=pl.col("cash_end").sign() * (pl.col("cash_end").abs() / burn + 1).log(),
         lc_util=pl.when(pl.col("lc_limit") > 0).then(pl.col("lc_drawn") / pl.col("lc_limit")),
-        # Rentabilidad (ventanas largas: menos reversión a la media, D08)
+        # Rentabilidad (ventanas largas: menos reversión a la media, D08); el margen ya no puntúa (D27)
         net_margin_6m=(pl.col("in6") - pl.col("out6")) / (pl.col("in6") + pl.col("out6") + EPSC),
         growth_vs_12m=pl.when(pl.col("month_idx") >= 2).then(_safe_log_ratio(pl.col("in3") / 3, pl.col("in12") / 12, EPSC)),
         # Solvencia: en deuda y reembolsos cero es bueno (two-part en el scorer). La nómina puntúa por su regularidad,
@@ -82,9 +82,10 @@ def add_features(p: pl.DataFrame) -> pl.DataFrame:
                            if c in f.columns and f.schema[c] in (pl.Float64, pl.Float32)])
 
 
-SCORE_FEATURES = ["runway", "lc_util", "net_margin_6m", "growth_vs_12m", "debt_burden", "payroll_cv",
+SCORE_FEATURES = ["runway", "lc_util", "growth_vs_12m", "debt_burden", "payroll_cv",
                   "ap_late_share", "ar_late_share", "ap_overdue_ratio", "ar_overdue_90_ratio", "refund_rate",
                   "activity_trend", "transfer_dep", "hhi_ar_6m", "net_vol_6m", "cust_trend", "lost_share"]
-CONTEXT_FEATURES = ["log_scale", "fx_share", "uncat_share", "activity_log", "month_idx", "dormant", "months_since_last_tx"]
+# net_margin_6m sale del score (AUC 0,47-0,53 frente a E1-E4, peso 0; D27) y queda como contexto para el forecaster
+CONTEXT_FEATURES = ["net_margin_6m", "log_scale", "fx_share", "uncat_share", "activity_log", "month_idx", "dormant", "months_since_last_tx"]
 DRIVERS = ["inflow", "outflow", "cash_end", "payroll", "debt_service", "overdue_ap", "overdue_ar",
            "late_share_ap", "late_share_ar", "n_tx", "refunds", "lc_drawn"]
