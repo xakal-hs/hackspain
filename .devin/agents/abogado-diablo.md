@@ -1,6 +1,6 @@
 ---
 name: abogado-diablo
-description: Consejero del agent council que ataca el sistema: busca los casos donde el score se equivoca, se puede gaming o da una decisión injusta. GPT-5.6 Sol.
+description: "Consejero del agent council que ataca el sistema: busca los casos donde el score se equivoca, se puede gaming o da una decisión injusta. GPT-5.6 Sol."
 model: gpt-5-6-sol-high
 allowed-tools:
   - read
