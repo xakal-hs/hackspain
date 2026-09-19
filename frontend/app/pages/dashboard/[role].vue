@@ -16,7 +16,7 @@ const route = useRoute()
 const role = computed(() => route.params.role as PerspectiveId)
 const profile = computed(() => perspectiveById(role.value)!)
 
-const treasurySections = ['flujo', 'score', 'colchon', 'divisa']
+const treasurySections = ['flujo', 'score', 'credito', 'divisa']
 const sectionsByRole: Record<PerspectiveId, string[]> = {
   empresa: [...treasurySections, 'ajustes'],
   embat: ['caja', 'crm'],
@@ -50,7 +50,7 @@ const sectionLabel = computed(
       crm: 'Financiación',
       score: 'X-Ray Score',
       flujo: 'Flujo de caja',
-      colchon: 'Colchón Dinámico',
+      credito: 'Crédito y caución',
       divisa: 'Divisa Inteligente',
       ajustes: 'Ajustes',
     })[section.value]!,
@@ -84,8 +84,10 @@ const sectionDescription = computed(() =>
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
     <WorkspaceSidebar :role="role" :section="section" />
 
-    <div class="wk__body" :class="{ 'wk__body--bare': section === 'flujo' }">
-      <header v-if="section !== 'flujo'" class="wk__top">
+    <!-- Flujo de caja y Crédito y caución son pantallas al estilo de Embat: van a sangre, sin la
+         cabecera ni el pie del panel. -->
+    <div class="wk__body" :class="{ 'wk__body--bare': section === 'flujo' || section === 'credito' }">
+      <header v-if="section !== 'flujo' && section !== 'credito'" class="wk__top">
         <p class="wk__crumb">
           {{ profile.name }}<span aria-hidden="true">/</span>{{ sectionLabel }}
         </p>
@@ -96,7 +98,10 @@ const sectionDescription = computed(() =>
       </header>
 
       <main id="main-content" class="wk__main" tabindex="-1">
-        <CompanyDataContext v-if="role === 'empresa' && isTreasury && section !== 'flujo'" :section="section" />
+        <CompanyDataContext
+          v-if="role === 'empresa' && isTreasury && section !== 'flujo' && section !== 'credito'"
+          :section="section"
+        />
         <div
           :key="`${section}-${role === 'empresa' ? activeCompanyId : 'portfolio'}`"
           class="wk__pane"
@@ -111,12 +116,12 @@ const sectionDescription = computed(() =>
           <EmbatCrmBoard v-else-if="section === 'crm'" />
           <XRayScoreApp v-else-if="section === 'score'" />
           <FlujoCajaApp v-else-if="section === 'flujo'" />
-          <ColchonDinamicoApp v-else-if="section === 'colchon'" />
+          <CreditoCaucionApp v-else-if="section === 'credito'" />
           <DivisaInteligenteApp v-else-if="section === 'divisa'" />
           <CompanySettings v-else-if="section === 'ajustes'" />
         </div>
 
-        <footer v-if="section !== 'flujo'" class="wk__foot">
+        <footer v-if="section !== 'flujo' && section !== 'credito'" class="wk__foot">
           <template v-if="role === 'embat'">
             Caja operativa y financiera desde Supabase. El CRM se llena cuando una empresa pide financiación.
           </template>

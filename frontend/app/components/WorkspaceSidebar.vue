@@ -5,9 +5,9 @@ import {
   CircleDollarSign,
   Landmark,
   LogOut,
-  PiggyBank,
   ScanLine,
   Settings,
+  ShieldCheck,
   Wallet,
   Check,
 } from '@lucide/vue'
@@ -22,7 +22,7 @@ const items = computed(() => {
   const treasury = [
     { id: 'flujo', label: 'Flujo de caja', icon: ArrowLeftRight },
     { id: 'score', label: 'X-Ray Score', icon: ScanLine },
-    { id: 'colchon', label: 'Colchón Dinámico', icon: PiggyBank },
+    { id: 'credito', label: 'Crédito y caución', icon: ShieldCheck },
     { id: 'divisa', label: 'Divisa Inteligente', icon: CircleDollarSign },
     { id: 'ajustes', label: 'Ajustes', icon: Settings },
   ]
