@@ -1,0 +1,228 @@
+{
+ "arm": "F",
+ "desc": "17 + 7 features del doc que el brazo D calibró con peso · calibradas",
+ "n_features": 24,
+ "minutos": 1.2,
+ "pm": 0.6288,
+ "auc": [
+  {
+   "evento": "tension_np_raw_6m",
+   "auc": 0.8487,
+   "se": 0.0147,
+   "ic95_lo": 0.8213,
+   "ic95_hi": 0.8753,
+   "n": 10926,
+   "positivos": 4822,
+   "grupos": 192
+  },
+  {
+   "evento": "incumplimiento_6m",
+   "auc": 0.6037,
+   "se": 0.0259,
+   "ic95_lo": 0.5567,
+   "ic95_hi": 0.6591,
+   "n": 6263,
+   "positivos": 408,
+   "grupos": 149
+  },
+  {
+   "evento": "caida_6m",
+   "auc": 0.5835,
+   "se": 0.0248,
+   "ic95_lo": 0.5369,
+   "ic95_hi": 0.6312,
+   "n": 5583,
+   "positivos": 552,
+   "grupos": 142
+  },
+  {
+   "evento": "expansion_6m",
+   "auc": 0.4793,
+   "se": 0.0323,
+   "ic95_lo": 0.4192,
+   "ic95_hi": 0.5402,
+   "n": 8013,
+   "positivos": 468,
+   "grupos": 159
+  },
+  {
+   "evento": "tension_6m",
+   "auc": 0.8237,
+   "se": 0.0139,
+   "ic95_lo": 0.7995,
+   "ic95_hi": 0.8516,
+   "n": 8453,
+   "positivos": 3000,
+   "grupos": 192
+  },
+  {
+   "evento": "entrada_estres_2m",
+   "auc": 0.653,
+   "se": 0.0211,
+   "ic95_lo": 0.6105,
+   "ic95_hi": 0.6868,
+   "n": 9198,
+   "positivos": 550,
+   "grupos": 220
+  },
+  {
+   "evento": "rompe_caja_2m",
+   "auc": 0.6621,
+   "se": 0.0349,
+   "ic95_lo": 0.6044,
+   "ic95_hi": 0.7342,
+   "n": 9198,
+   "positivos": 62,
+   "grupos": 220
+  },
+  {
+   "evento": "tension_entrada_6m",
+   "auc": 0.6201,
+   "se": 0.0422,
+   "ic95_lo": 0.5378,
+   "ic95_hi": 0.6975,
+   "n": 5918,
+   "positivos": 130,
+   "grupos": 165
+  },
+  {
+   "evento": "impago_nomina_6m",
+   "auc": 0.5333,
+   "se": 0.0474,
+   "ic95_lo": 0.4372,
+   "ic95_hi": 0.62,
+   "n": 3563,
+   "positivos": 347,
+   "grupos": 121
+  },
+  {
+   "evento": "impago_ss_6m",
+   "auc": 0.5679,
+   "se": 0.0489,
+   "ic95_lo": 0.4722,
+   "ic95_hi": 0.6537,
+   "n": 4400,
+   "positivos": 230,
+   "grupos": 123
+  },
+  {
+   "evento": "impago_iva_6m",
+   "auc": 0.6457,
+   "se": 0.0419,
+   "ic95_lo": 0.5576,
+   "ic95_hi": 0.7218,
+   "n": 4637,
+   "positivos": 123,
+   "grupos": 129
+  },
+  {
+   "evento": "impago_cuota_6m",
+   "auc": 0.4028,
+   "se": 0.0404,
+   "ic95_lo": 0.334,
+   "ic95_hi": 0.4806,
+   "n": 2688,
+   "positivos": 376,
+   "grupos": 116
+  },
+  {
+   "evento": "impago_ap_6m",
+   "auc": 0.5184,
+   "se": 0.0313,
+   "ic95_lo": 0.4593,
+   "ic95_hi": 0.5792,
+   "n": 8595,
+   "positivos": 5106,
+   "grupos": 160
+  },
+  {
+   "evento": "cura_3m",
+   "auc": 0.3267,
+   "se": 0.0212,
+   "ic95_lo": 0.2857,
+   "ic95_hi": 0.3666,
+   "n": 16986,
+   "positivos": 442,
+   "grupos": 247
+  },
+  {
+   "evento": "recaida_6m",
+   "auc": 0.5318,
+   "se": 0.0245,
+   "ic95_lo": 0.4772,
+   "ic95_hi": 0.5804,
+   "n": 649,
+   "positivos": 494,
+   "grupos": 124
+  },
+  {
+   "evento": "caida_3m_corto",
+   "auc": 0.5413,
+   "se": 0.0125,
+   "ic95_lo": 0.5203,
+   "ic95_hi": 0.5673,
+   "n": 14260,
+   "positivos": 2513,
+   "grupos": 245
+  },
+  {
+   "evento": "expansion_3m",
+   "auc": 0.5165,
+   "se": 0.0174,
+   "ic95_lo": 0.4843,
+   "ic95_hi": 0.5494,
+   "n": 14260,
+   "positivos": 2302,
+   "grupos": 245
+  },
+  {
+   "evento": "tension_grupo_6m",
+   "auc": 0.7049,
+   "se": 0.0256,
+   "ic95_lo": 0.6543,
+   "ic95_hi": 0.7502,
+   "n": 13000,
+   "positivos": 5472,
+   "grupos": 232
+  }
+ ],
+ "anticipacion": {
+  "entradas_en_estres": 349,
+  "avisadas": 71,
+  "cobertura": 0.203,
+  "meses_mediana": 3.0,
+  "meses_media": 3.85,
+  "con_2m_o_mas": 0.732
+ },
+ "pesos": {
+  "runway": 0.1599,
+  "payroll_continuity_6m": 0.0948,
+  "activity_trend": 0.0799,
+  "oper_persistence_6m": 0.0765,
+  "payroll_cv": 0.0744,
+  "tax_miss": 0.0666,
+  "cash_end_eur": 0.0647,
+  "burn_rate": 0.0585,
+  "payee_concentration": 0.0494,
+  "lost_share": 0.0389,
+  "billing_to_cash": 0.0358,
+  "lost_accel": 0.0318,
+  "ap_overdue_ratio": 0.0298,
+  "debt_burden": 0.021,
+  "ar_late_share": 0.0199,
+  "transfer_dep": 0.0139,
+  "ap_late_share": 0.0126,
+  "cust_trend": 0.0126,
+  "hhi_ar_6m": 0.0125,
+  "lc_util": 0.0122,
+  "net_vol_6m": 0.0122,
+  "refund_rate": 0.0111,
+  "ar_overdue_90_ratio": 0.0064,
+  "oper_growth_12m": 0.0048
+ },
+ "escala": [
+  -93.654,
+  2.679
+ ],
+ "cobertura_media": 0.7199
+}
