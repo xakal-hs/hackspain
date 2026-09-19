@@ -103,6 +103,16 @@ def test_two_notes_calibrate_on_their_own_events(panel, scorer, raw):
     assert np.allclose(s[[c for c in s.columns if c.startswith("ec_")]].sum(1), s.score, atol=1e-9)
 
 
+def test_liquidity_band_rule(panel, scorer):
+    """D35: con menos de medio mes de caja propia la nota publicada no es «sano», y la regla es una contribución aditiva."""
+    from xray import LIQ_RULE_CAP, LIQ_RULE_MONTHS
+    s = scorer.score_panel(panel)
+    short = panel.sort_values(["company_id", "month"]).reset_index(drop=True)["runway"] < np.log1p(LIQ_RULE_MONTHS)
+    assert (s.score[short.to_numpy()] <= LIQ_RULE_CAP + 1e-9).all()
+    assert (s.ec_regla_liquidez[~short.fillna(False).to_numpy()] == 0).all()
+    assert np.allclose(s[[c for c in s.columns if c.startswith("ec_")]].sum(1), s.score, atol=1e-9)
+
+
 def test_monotonicity(scorer):
     """Mejorar una señal nunca baja el score (pesos ≥ 0 y dirección económica)."""
     base = pd.DataFrame({f: [np.nanmedian(scorer.ref_[f])] for f in scorer.features_})

@@ -48,6 +48,9 @@ PRIOR_W = {"runway": 3, "lc_util": 1, "oper_growth_12m": 1.5, "debt_burden": 1, 
 CONTEXT = ["log_scale", "fx_share", "activity_log"]
 BANDS = [(0, 35, "riesgo"), (35, 65, "vigilar"), (65, 101, "sano")]  # ≈ cuartiles de la escala publicada (D17)
 DORMANT_CAP = 30.0
+# regla de banda del prestamista (D35): con menos de medio mes de caja propia (runway < log 1,5) la nota publicada no
+# puede ser «sano». Se aplica sobre la nota suavizada como contribución aditiva (ec_regla_liquidez), así Σec = nota.
+LIQ_RULE_MONTHS, LIQ_RULE_CAP = 0.5, 64.9
 POSITIVE_PREFIX = ("positive", "expansion")  # eventos de la cara positiva (nota de expansión)
 
 
@@ -228,14 +231,19 @@ class HealthScorer(BaseEstimator, TransformerMixin):
     def score_panel(self, panel: pd.DataFrame) -> pd.DataFrame:
         """transform + suavizado EWMA por empresa. El EWMA es lineal: EWMA(score) = Σ EWMA(contribución),
         así que la explicación sigue siendo exacta tras el suavizado."""
-        s = pd.concat([panel[["company_id", "group_id", "month"]].reset_index(drop=True),
-                       self.transform(panel.reset_index(drop=True))], axis=1)
+        p = panel.reset_index(drop=True)
+        s = pd.concat([p[["company_id", "group_id", "month"]], self.transform(p)], axis=1)
+        s["_runway"] = pd.to_numeric(p["runway"], errors="coerce") if "runway" in p else np.nan
         s = s.sort_values(["company_id", "month"]).reset_index(drop=True)
         ccols = [c for c in s.columns if c.startswith("c_")]
         e = s.groupby("company_id")[ccols].transform(lambda x: x.ewm(alpha=self.smooth_alpha, adjust=False).mean())
         for c in ccols:
             s["e" + c] = e[c]  # contribución suavizada: ec_*
-        s["score"] = e.sum(1)
+        lin = e.sum(1)
+        # regla de banda de liquidez (D35): menos de medio mes de caja propia no puede publicarse como «sano»
+        short = (s.pop("_runway") < np.log1p(LIQ_RULE_MONTHS)).to_numpy()
+        s["ec_regla_liquidez"] = np.where(short, np.minimum(0.0, LIQ_RULE_CAP - lin), 0.0)
+        s["score"] = lin + s["ec_regla_liquidez"]
         n = s.groupby("company_id").cumcount() + 1
         s["confidence"] = (s["coverage"] * (1 - s["ood_share"]) * np.minimum(1, n / 6)).clip(0, 1)
         if getattr(self, "proba_", None):
@@ -261,7 +269,7 @@ def explain(scored: pd.DataFrame, feats: pd.DataFrame | None, company_id: str, m
         key = c[3:]
         dp = float(cur[c] - prev[c])
         meta = SPEC.get(key)
-        label = meta[3] if meta else {"sin_datos": "Sin datos (neutro)", "regla_inactividad": "Regla: sin movimientos", "limite_0_100": "Límite de escala 0-100"}.get(key, key)
+        label = meta[3] if meta else {"sin_datos": "Sin datos (neutro)", "regla_inactividad": "Regla: sin movimientos", "regla_liquidez": "Regla: menos de medio mes de caja no es sano", "limite_0_100": "Límite de escala 0-100"}.get(key, key)
         vp = vn = None
         if fr is not None and key in fr.columns:
             vp, vn = fr[key].iloc[i - 1], fr[key].iloc[i]
