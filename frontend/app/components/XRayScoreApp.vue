@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { leadCompany } from '~/data/demo'
 
 const props = defineProps({
   accentColor: { type: String, default: 'var(--accent)' },
@@ -256,6 +257,16 @@ const stateOptions = computed(() =>
             <div style="font-size: 12px; color: var(--text-2); margin-top: 6px; line-height: 1.4;">Banda 80 % · {{ state.forecastHint }}</div>
           </div>
 
+        </div>
+
+        <div class="card" style="padding: 18px 22px;">
+          <div style="margin-bottom: 12px;">
+            <div style="font-size: 13.5px; font-weight: 600;">Frente al sector</div>
+            <div style="font-size: 11.5px; color: var(--text-3); margin-top: 2px;">
+              Score y plazos frente a la mediana de distribución alimentaria · comparativa anónima
+            </div>
+          </div>
+          <SectorCompare :company="leadCompany" :score="Number(state.score)" />
         </div>
 
         <!-- CHART + AGENT -->
