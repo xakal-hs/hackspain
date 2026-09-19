@@ -10,6 +10,10 @@ uv, el intérprete correcto, un servidor levantado y salida a internet (la SPA c
 CDN). Este fichero no necesita nada de eso — los datos van incrustados y el CSS y el JS son
 inline — así que se puede abrir en cualquier máquina y mandar por correo.
 
+Navega como el producto: cartera -> grupo -> empresa. Sin selección se ve la cartera entera en
+un mes; al elegir un grupo se ven sus empresas hermanas (que se prestan caja entre ellas antes que
+a un banco, así que se miran juntas); al elegir una empresa, su historia completa mes a mes.
+
 Reutiliza los tokens de app/DESIGN.md: el violeta es sólo acento de marca y nunca codifica un
 valor; las severidades usan los tokens de estado (riesgo=--crit, mejora=--good, ruido=--muted).
 """
@@ -45,10 +49,21 @@ def build_rows(ev: pd.DataFrame) -> list[dict]:
     for r in ev.itertuples(index=False):
         for t in COLS:
             if int(getattr(r, t, 0)) > 0:
-                rows.append({"c": r.company_id, "m": r.month, "t": t,
+                rows.append({"c": r.company_id, "g": r.group_id, "m": r.month, "t": t,
                              "x": TEXTS[t].format(c=r.company_id)})
     rows.sort(key=lambda e: (e["m"], e["c"], e["t"]))
     return rows
+
+
+def company_meta() -> dict[str, dict]:
+    """Moneda y ERP por empresa, de data/companies.csv (está en el repo, no es LFS)."""
+    f = ROOT.parent / "data" / "companies.csv"
+    if not f.exists():
+        return {}
+    c = pd.read_csv(f, usecols=["company_id", "group_id", "currency", "erp"])
+    return {r.company_id: {"g": r.group_id, "cur": r.currency,
+                           "erp": (r.erp if isinstance(r.erp, str) and r.erp else None)}
+            for r in c.itertuples(index=False)}
 
 
 CSS = """
@@ -104,7 +119,20 @@ details.cat summary{padding:14px 16px;cursor:pointer;font-weight:600}
 .card .excl{font-style:italic;color:var(--ink-2)}
 .note{margin-top:26px;padding:14px 16px;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;background:var(--surface);color:var(--ink-2);font-size:13px}
 .note b{color:var(--ink)}
-@media(max-width:900px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.catgrid{grid-template-columns:1fr}.row{grid-template-columns:1fr;gap:8px}}
+.pickers{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin:0 0 18px}
+.picker{display:flex;flex-direction:column;gap:4px}
+[hidden]{display:none!important}
+.picker label{font-size:12px;color:var(--muted)}
+.picker select{min-width:260px;max-width:min(420px,90vw)}
+.crumbs{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:12.5px}
+.crumb{border:0;background:none;font:inherit;font-size:12.5px;color:var(--muted);cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px}
+.crumb.on{color:var(--ink);font-weight:600;cursor:default;text-decoration:none}
+.crumbs .sep{color:var(--line-strong)}
+.metachips{display:inline-flex;gap:6px;margin-left:10px;flex-wrap:wrap}
+.mhead{margin:16px 0 8px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.link{border:0;background:none;padding:0;cursor:pointer;color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+.link:hover{color:var(--brand)}
+@media(max-width:900px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.catgrid{grid-template-columns:1fr}.row{grid-template-columns:1fr;gap:8px}.picker select{min-width:0;width:100%}.picker{width:100%}}
 """
 
 JS = """
@@ -114,45 +142,107 @@ const ico=(n,color)=>{const s=document.createElement('span');s.setAttribute('ari
 const SEV={riesgo:{l:'Riesgo',i:'alert',c:'var(--crit)'},mejora:{l:'Mejora',i:'up',c:'var(--good)'},ruido:{l:'Ruido',i:'flat',c:'var(--muted)'}};
 const BY=Object.fromEntries(D.catalog.map(c=>[c.type,c]));
 const NF=new Intl.NumberFormat('es-ES');
-const st={month:D.month,type:'',sev:'',limit:80};
+const st={group:'',company:'',month:D.month,type:'',sev:'',limit:60};
 const $=s=>document.querySelector(s);
-const el=(t,a,...k)=>{const n=document.createElement(t);for(const[p,v]of Object.entries(a||{})){if(p==='class')n.className=v;else if(p==='html')n.innerHTML=v;else if(p.startsWith('on'))n.addEventListener(p.slice(2),v);else n.setAttribute(p,v)}for(const c of k.flat())if(c!=null)n.append(c.nodeType?c:document.createTextNode(c));return n};
+const el=(t,a,...k)=>{const n=document.createElement(t);for(const[p,v]of Object.entries(a||{})){if(p==='class')n.className=v;else if(p.startsWith('on'))n.addEventListener(p.slice(2),v);else if(v!=null)n.setAttribute(p,v)}for(const c of k.flat())if(c!=null)n.append(c.nodeType?c:document.createTextNode(c));return n};
 const rate=t=>{const r=D.rates[t];if(!r)return'';return (r.tasa>=1?NF.format(Math.round(r.tasa)):r.tasa.toFixed(2).replace('.',','))+' % histórico'};
-const monthRows=()=>D.rows.filter(r=>r.m===st.month);
+const plural=(n,a,b)=>NF.format(n)+' '+(n===1?a:b);
+
+/* Ámbito: empresa (toda su historia) > grupo (todas sus hermanas) > cartera (un mes). */
+function scope(){
+  if(st.company) return {rows:D.rows.filter(r=>r.c===st.company),kind:'empresa'};
+  if(st.group)   return {rows:D.rows.filter(r=>r.g===st.group),kind:'grupo'};
+  return {rows:D.rows.filter(r=>r.m===st.month),kind:'cartera'};
+}
+
+function fillGroups(){
+  const g=$('#group');
+  g.replaceChildren(el('option',{value:''},'Toda la cartera ('+NF.format(D.groups.length)+' grupos)'),
+    ...D.groups.map(x=>el('option',{value:x.id},x.id+' — '+plural(x.n,'empresa','empresas')+', '+plural(x.ev,'evento','eventos'))));
+  g.value=st.group;
+}
+function fillCompanies(){
+  const c=$('#company');
+  const list=st.group?D.companies.filter(x=>x.g===st.group):D.companies;
+  c.replaceChildren(el('option',{value:''},st.group?'Todas las del grupo ('+list.length+')':'Todas las empresas ('+NF.format(list.length)+')'),
+    ...list.map(x=>el('option',{value:x.id},x.id+' — '+plural(x.ev,'evento','eventos'))));
+  c.value=st.company;
+  c.disabled=list.length===0;
+}
+
 function draw(){
-  const all=monthRows();
+  fillCompanies();
+  const {rows:all,kind}=scope();
+  const perMonth=kind==='cartera';
+  $('#monthwrap').hidden=!perMonth;
+
+  // Cabecera contextual: quién estoy mirando y qué abarca
+  const meta=st.company?D.meta[st.company]:null;
+  $('#crumb').replaceChildren(...[
+    el('button',{class:'crumb'+(st.group||st.company?'':' on'),type:'button',onclick:()=>{st.group='';st.company='';st.limit=60;draw()}},'Cartera'),
+    st.group?el('span',{class:'sep'},'/'):null,
+    st.group?el('button',{class:'crumb'+(st.company?'':' on'),type:'button',onclick:()=>{st.company='';st.limit=60;draw()}},st.group):null,
+    st.company?el('span',{class:'sep'},'/'):null,
+    st.company?el('span',{class:'crumb on'},st.company):null
+  ].filter(x=>x!=null));
+  $('#title').textContent=st.company||st.group||'Eventos de la cartera';
+  const uniq=new Set(all.map(r=>r.c)).size;
+  $('#sub').replaceChildren(...[
+    perMonth?plural(all.length,'evento','eventos')+' en '+plural(uniq,'empresa','empresas')+' · '+(D.labels[st.month]||st.month)
+      :plural(all.length,'evento','eventos')+' en toda la historia'+(kind==='grupo'?' · '+plural(uniq,'empresa con eventos','empresas con eventos'):''),
+    meta?el('span',{class:'metachips'},
+      el('span',{class:'chip ghost'},'Grupo '+meta.g),
+      el('span',{class:'chip ghost'},meta.cur||'—'),
+      el('span',{class:'chip ghost'},meta.erp?('ERP '+meta.erp.toUpperCase()):'Sin ERP')):null
+  ].filter(x=>x!=null));
+
+  // Tiles por tipo, sobre el ámbito elegido
   const counts={};D.catalog.forEach(c=>counts[c.type]=0);all.forEach(r=>counts[r.t]++);
   $('#tiles').replaceChildren(...D.catalog.map(c=>{
     const n=counts[c.type]||0,s=SEV[c.severity]||SEV.ruido,on=st.type===c.type;
-    return el('button',{class:'tile','aria-pressed':String(on),title:c.desc,onclick:()=>{st.type=on?'':c.type;st.limit=80;draw()}},
+    return el('button',{class:'tile','aria-pressed':String(on),title:c.desc,onclick:()=>{st.type=on?'':c.type;st.limit=60;draw()}},
       el('span',{class:'tile-label'},ico(s.i,s.c),c.label),
       el('span',{class:'tile-value'},NF.format(n)),
       el('span',{class:'tile-sub'},[rate(c.type),c.horizon].filter(Boolean).join(' · ')),
       el('span',{class:'bar','aria-hidden':'true'},el('i',{style:'width:'+(all.length?100*n/all.length:0)+'%;background:'+s.c})));
   }));
+
   const sevN=s=>all.filter(r=>(BY[r.t]||{}).severity===s).length;
-  const mk=(v,l,n)=>el('button',{type:'button','aria-pressed':String(st.sev===v),onclick:()=>{st.sev=v;st.limit=80;draw()}},l,el('span',{class:'n'},NF.format(n)));
+  const mk=(v,l,n)=>el('button',{type:'button','aria-pressed':String(st.sev===v),onclick:()=>{st.sev=v;st.limit=60;draw()}},l,el('span',{class:'n'},NF.format(n)));
   $('#seg').replaceChildren(mk('','Todas',all.length),...Object.keys(SEV).map(k=>mk(k,SEV[k].l,sevN(k))));
-  const shown=all.filter(r=>(!st.type||r.t===st.type)&&(!st.sev||(BY[r.t]||{}).severity===st.sev));
+
+  let shown=all.filter(r=>(!st.type||r.t===st.type)&&(!st.sev||(BY[r.t]||{}).severity===st.sev));
+  if(!perMonth) shown=[...shown].reverse();      // ficha: lo más reciente primero
   const page=shown.slice(0,st.limit);
-  $('#list').replaceChildren(...(page.length?page.map(r=>{
+
+  // En ámbito empresa/grupo la lista se agrupa por mes: es una historia, no un listado
+  const out=[];let last=null;
+  for(const r of page){
+    if(!perMonth&&r.m!==last){last=r.m;out.push(el('div',{class:'mhead'},D.labels[r.m]||r.m))}
     const c=BY[r.t]||{},s=SEV[c.severity]||SEV.ruido;
-    return el('article',{class:'row '+(c.severity||'ruido')},
+    out.push(el('article',{class:'row '+(c.severity||'ruido')},
       el('div',null,el('span',{class:'chip '+(c.severity||'ruido')},ico(s.i),s.l)),
       el('div',null,
-        el('div',{class:'top-line'},el('span',{class:'cid'},r.c),el('span',{class:'chip ghost'},(c.code||r.t)+' · '+(c.label||r.t)),el('span',{class:'when'},D.labels[r.m]||r.m)),
+        el('div',{class:'top-line'},
+          st.company?null:el('button',{class:'cid link',type:'button',onclick:()=>{st.company=r.c;st.group=r.g;st.limit=60;draw();window.scrollTo(0,0)}},r.c),
+          el('span',{class:'chip ghost'},(c.code||r.t)+' · '+(c.label||r.t)),
+          perMonth?el('span',{class:'when'},D.labels[r.m]||r.m):null),
         el('p',{class:'txt'},r.x),
         c.short?el('p',{class:'why'},c.short):null),
-      el('div',null));
-  }):[el('div',{class:'empty'},'No hay eventos de este tipo en este mes.')]));
+      el('div',null)));
+  }
+  $('#list').replaceChildren(...(page.length?out:[el('div',{class:'empty'},
+    st.company?'Esta empresa no tiene ningún evento en toda la serie.':'No hay eventos con este filtro.')]));
   $('#foot').replaceChildren(shown.length>page.length
-    ?el('button',{class:'btn',type:'button',onclick:()=>{st.limit+=80;draw()}},'Ver más ('+NF.format(shown.length-page.length)+' restantes)')
+    ?el('button',{class:'btn',type:'button',onclick:()=>{st.limit+=60;draw()}},'Ver más ('+NF.format(shown.length-page.length)+' restantes)')
     :el('span',{class:'when'},shown.length?NF.format(shown.length)+' eventos mostrados.':''));
-  $('#sub').textContent=NF.format(all.length)+' eventos en '+NF.format(new Set(all.map(r=>r.c)).size)+' empresas.';
 }
-const sel=$('#month');
-D.months.forEach(m=>sel.append(el('option',{value:m,...(m===st.month?{selected:'selected'}:{})},D.labels[m]||m)));
-sel.addEventListener('change',e=>{st.month=e.target.value;st.limit=80;draw()});
+
+const selM=$('#month');
+D.months.forEach(m=>selM.append(el('option',{value:m,...(m===st.month?{selected:'selected'}:{})},D.labels[m]||m)));
+selM.addEventListener('change',e=>{st.month=e.target.value;st.limit=60;draw()});
+$('#group').addEventListener('change',e=>{st.group=e.target.value;st.company='';st.limit=60;draw()});
+$('#company').addEventListener('change',e=>{st.company=e.target.value;if(st.company)st.group=D.meta[st.company]?D.meta[st.company].g:st.group;fillGroups();st.limit=60;draw()});
 $('#cat').replaceChildren(...D.catalog.map(c=>{
   const s=SEV[c.severity]||SEV.ruido,r=D.rates[c.type];
   return el('article',{class:'card'},
@@ -160,7 +250,7 @@ $('#cat').replaceChildren(...D.catalog.map(c=>{
     el('p',null,c.desc),el('p',{class:'why'},c.why),c.excl?el('p',{class:'excl'},c.excl):null,
     r?el('p',{class:'when'},NF.format(r.positivos)+' de '+NF.format(r.n)+' meses etiquetados.'):null);
 }));
-draw();
+fillGroups();draw();
 """
 
 
@@ -169,10 +259,28 @@ def main() -> None:
     ev = pd.read_parquet(ROOT / "data" / "events_export.parquet")
     rows = build_rows(ev)
     months = sorted({r["m"] for r in rows})
+    cmeta = company_meta()
+
+    # grupos y empresas con su recuento de eventos, para que los desplegables ya orienten
+    ev_by_company: dict[str, int] = {}
+    for r in rows:
+        ev_by_company[r["c"]] = ev_by_company.get(r["c"], 0) + 1
+    comp_group = {r["c"]: r["g"] for r in rows}
+    companies = [{"id": c, "g": comp_group[c], "ev": n}
+                 for c, n in sorted(ev_by_company.items(), key=lambda kv: (-kv[1], kv[0]))]
+    groups: dict[str, dict] = {}
+    for c in companies:
+        g = groups.setdefault(c["g"], {"id": c["g"], "n": 0, "ev": 0})
+        g["n"] += 1
+        g["ev"] += c["ev"]
+    groups = sorted(groups.values(), key=lambda g: (-g["ev"], g["id"]))
+
     data = {
         "month": meta["month"], "rows": rows, "months": months,
         "labels": {m: month_label(m) for m in months},
         "catalog": CATALOG, "rates": meta.get("rates_6m", {}),
+        "groups": groups, "companies": companies,
+        "meta": {c["id"]: cmeta.get(c["id"], {"g": c["g"]}) for c in companies},
         "last_observable": meta.get("last_observable", {}),
         "last_month_panel": meta.get("last_month_panel"),
     }
@@ -191,12 +299,16 @@ def main() -> None:
   <span class="tag">Eventos de salud financiera · previsión de la vista del front</span>
 </div></header>
 <div class="wrap">
-  <h1>Eventos</h1>
   <p class="lede">Las etiquetas con las que se entrenará el modelo, tal y como se verán en el
-  producto. <span id="sub"></span> Elige el mes para recorrer toda la historia.</p>
-  <div class="filterbar">
-    <label for="month" class="when">Mes</label><select id="month" aria-label="Mes"></select>
+  producto. Elige un grupo para ver sus empresas hermanas, o una empresa para su historia completa.</p>
+  <div class="pickers">
+    <div class="picker"><label for="group">Grupo</label><select id="group"></select></div>
+    <div class="picker"><label for="company">Empresa</label><select id="company"></select></div>
+    <div class="picker" id="monthwrap"><label for="month">Mes</label><select id="month"></select></div>
   </div>
+  <div class="crumbs" id="crumb"></div>
+  <h1 id="title"></h1>
+  <p class="lede" id="sub"></p>
   <div class="tiles" id="tiles"></div>
   <div class="filterbar"><div class="seg" id="seg" role="group" aria-label="Filtrar por severidad"></div></div>
   <div id="list"></div><div class="foot" id="foot"></div>
@@ -212,7 +324,8 @@ def main() -> None:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(html, encoding="utf-8")
     kb = len(html.encode("utf-8")) / 1024
-    print(f"{OUT.relative_to(ROOT)}  ({kb:.0f} KB, {len(rows)} eventos, {len(months)} meses)")
+    print(f"{OUT.relative_to(ROOT)}  ({kb:.0f} KB, {len(rows)} eventos, {len(months)} meses, "
+          f"{len(data['companies'])} empresas, {len(data['groups'])} grupos)")
     print("Se abre con doble clic: no necesita servidor, ni Python, ni conexión.")
 
 
