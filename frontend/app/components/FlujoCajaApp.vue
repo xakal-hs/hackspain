@@ -252,7 +252,6 @@ const initials = computed(() => {
   const words = (company.value?.top_sector || '').split(/\s+/).filter(Boolean)
   return (words.length ? words[0]!.slice(0, 2) : selectedId.value.slice(-2)).toUpperCase()
 })
-const hue = computed(() => (Number(selectedId.value.replace(/\D/g, '')) * 47) % 360)
 const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector.value.slice(1))
 </script>
 
@@ -262,7 +261,7 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
       <h1>Flujo de caja</h1>
       <div class="eb__title-side">
         <Transition name="eb-swap" mode="out-in">
-          <p :key="selectedId" class="eb__company" :style="{ '--hue': hue }">
+          <p :key="selectedId" class="eb__company">
             <i aria-hidden="true">{{ initials }}</i>
             <span>{{ selectedId }} · {{ sectorLabel }}</span>
           </p>
@@ -411,7 +410,7 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
 </template>
 
 <style scoped>
-/* Paleta del original, fija: la pantalla de Embat es clara en los dos temas. */
+/* Paleta muestreada de la captura de Embat, fija: la pantalla es clara en los dos temas. */
 .eb {
   --eb-bg: #ffffff;
   --eb-line: #e8eaee;
@@ -419,9 +418,12 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
   --eb-text: #1b1f2a;
   --eb-body: #3a4050;
   --eb-muted: #737a8a;
-  --eb-fill: #f4f5f7;
-  --eb-hover: #f1f2f5;
-  --eb-blue: #3b6cf5;
+  --eb-fill: #e8e8ed;
+  --eb-hover: #f1f3f5;
+  --eb-strong: #fafbfb;
+  --eb-navy: #131736;
+  --eb-blue: #3b77f6;
+  --eb-violet: #8754c2;
   --eb-ahead: #7a5af0;
 
   position: relative;
@@ -481,7 +483,7 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  background: oklch(0.56 0.17 var(--hue));
+  background: var(--eb-blue);
   color: #fff;
   font-size: 11.5px;
   font-style: normal;
@@ -496,7 +498,7 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
   padding: 0 12px;
   border: 0;
   border-radius: 5px;
-  background: #e9ebef;
+  background: var(--eb-fill);
   color: #7d8391;
   font: inherit;
   font-weight: 500;
@@ -590,11 +592,11 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
 }
 
 .eb__seg button[aria-checked='true'] {
-  background: #e9ebef;
+  background: var(--eb-fill);
 }
 
 .eb__seg button:not([aria-checked='true']):hover {
-  background: var(--eb-fill);
+  background: var(--eb-hover);
 }
 
 .eb__grow {
@@ -757,7 +759,7 @@ thead .eb__lead {
 }
 
 tr[data-tone='strong'] > * {
-  background: #f7f8fa;
+  background: var(--eb-strong);
   color: var(--eb-text);
   font-weight: 600;
 }
@@ -795,7 +797,7 @@ tbody tr:last-child > * {
 }
 
 .eb__all:hover {
-  background: var(--eb-fill);
+  background: var(--eb-hover);
 }
 
 .eb__toggle svg {
@@ -824,7 +826,7 @@ tbody tr:last-child > * {
   height: 52px;
   padding: 0 8px;
   border-radius: 10px;
-  background: #1e2334;
+  background: var(--eb-navy);
   box-shadow: 0 10px 28px -12px rgb(16 20 40 / 0.5);
 }
 
@@ -859,7 +861,7 @@ tbody tr:last-child > * {
 }
 
 .eb__atom {
-  color: #a58bff;
+  color: var(--eb-violet);
 }
 
 .eb__cta {
@@ -867,7 +869,7 @@ tbody tr:last-child > * {
   padding: 0 18px;
   border: 0;
   border-radius: 8px;
-  background: var(--eb-blue);
+  background: var(--eb-navy);
   color: #fff;
   font: inherit;
   font-size: 13.5px;
@@ -876,7 +878,7 @@ tbody tr:last-child > * {
 }
 
 .eb__cta:hover {
-  background: #2f5de0;
+  background: #1f2452;
 }
 
 .eb__action {
