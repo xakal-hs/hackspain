@@ -131,6 +131,7 @@ const drivers = computed(() => {
   <div v-if="!companyDetail.isPending.value" class="centinela tz">
     <TreasuryHead
       v-model="selected"
+      :simulate="false"
       :title="`X-Ray Score · ${companyName}`"
       :sync="`Mes del score: ${companyHealth?.month.slice(0, 7) || 'demo'}`"
     />
