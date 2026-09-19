@@ -24,6 +24,20 @@
   --ink-live-ink: #93a3ff;
   --ink-live-wash: rgba(91, 116, 255, 0.16);
   --ink-sheen: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+
+  /* Los acentos de estado sobre superficie oscura. Viven aquí, y no solo en el
+   * tema oscuro, porque el panel navy de las métricas del modelo los necesita
+   * también bajo el tema claro: allí un `--mint-ink` de tema claro es un verde
+   * oscuro que sobre navy no se lee. */
+  --ink-mint: #63dfa4;
+  --ink-mint-ink: #7ce8b4;
+  --ink-mint-wash: rgba(99, 223, 164, 0.13);
+  --ink-amber: #f2b33d;
+  --ink-amber-ink: #f6c464;
+  --ink-amber-wash: rgba(242, 179, 61, 0.14);
+  --ink-crimson: #f4626f;
+  --ink-crimson-ink: #ff8791;
+  --ink-crimson-wash: rgba(244, 98, 111, 0.14);
 }
 
 :root,
@@ -42,10 +56,10 @@
   --text-dim: var(--ink-dim);
 
   /* Graphic fills: bars, traces, dots. */
-  --mint: #63dfa4;
+  --mint: var(--ink-mint);
   --coral: #ff8f74;
-  --amber: #f2b33d;
-  --crimson: #f4626f;
+  --amber: var(--ink-amber);
+  --crimson: var(--ink-crimson);
   --live: var(--ink-live);
   --ahead: #c5b6ff;
 
@@ -53,18 +67,18 @@
   --live-solid: var(--ink-live-solid);
 
   /* Text-safe variants on this theme's panels. */
-  --mint-ink: #7ce8b4;
+  --mint-ink: var(--ink-mint-ink);
   --coral-ink: #ffa48d;
-  --amber-ink: #f6c464;
-  --crimson-ink: #ff8791;
+  --amber-ink: var(--ink-amber-ink);
+  --crimson-ink: var(--ink-crimson-ink);
   --live-ink: var(--ink-live-ink);
   --ahead-ink: #cfc2ff;
 
   /* Chip and well fills. */
-  --mint-wash: rgba(99, 223, 164, 0.13);
+  --mint-wash: var(--ink-mint-wash);
   --coral-wash: rgba(255, 143, 116, 0.13);
-  --amber-wash: rgba(242, 179, 61, 0.14);
-  --crimson-wash: rgba(244, 98, 111, 0.14);
+  --amber-wash: var(--ink-amber-wash);
+  --crimson-wash: var(--ink-crimson-wash);
   --live-wash: var(--ink-live-wash);
   --ahead-wash: rgba(197, 182, 255, 0.13);
   --neutral-wash: var(--ink-neutral-wash);

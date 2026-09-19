@@ -21,6 +21,21 @@ import {
   type SizeBand,
 } from '~/data/demo'
 import { portfolioCompanies } from '~/data/portfolio'
+import {
+  activeCompanies,
+  millions,
+  modelAllClear,
+  modelMetrics,
+  modelVersion,
+  opsAlerts,
+  opsPulse,
+  revenueAnnualised,
+  revenueGrowth,
+  revenueMonth,
+  revenueProducts,
+  share,
+  thousands,
+} from '~/data/internal'
 
 definePageMeta({
   middleware: [
@@ -46,13 +61,27 @@ const portfolioSource = computed(() => portfolioQuery.data.value?.source || 'dem
 /* Las pantallas de tesorería propia traen su propio encabezado y solo
  * existen para la perspectiva empresa. */
 const treasurySections = ['score', 'colchon', 'divisa']
-const allowed = ['resumen', 'cartera', 'senales', 'ofertas', ...treasurySections]
+
+/* Las vistas internas miran a Embat, no a una empresa de la cartera: revenue
+ * propio, alertas nominales del ecosistema y salud del modelo. Nunca se sirven
+ * a la perspectiva empresa. */
+const opsSections = ['monitor', 'revenue', 'modelo']
+
+const allowed = [
+  'resumen',
+  'cartera',
+  'senales',
+  'ofertas',
+  ...treasurySections,
+  ...opsSections,
+]
 const section = computed(() => {
   const requested = String(route.query.section || 'resumen')
   if (!allowed.includes(requested)) return 'resumen'
   if (requested === 'cartera' && role.value === 'empresa') return 'resumen'
   if (treasurySections.includes(requested) && role.value !== 'empresa')
     return 'resumen'
+  if (opsSections.includes(requested) && role.value !== 'embat') return 'resumen'
   return requested
 })
 
@@ -68,6 +97,9 @@ const sectionLabel = computed(
       score: 'X-Ray Score',
       colchon: 'Colchón Dinámico',
       divisa: 'Divisa Inteligente',
+      monitor: 'Monitor operativo',
+      revenue: 'Revenue por producto',
+      modelo: 'Métricas del modelo',
     })[section.value]!,
 )
 
@@ -211,8 +243,19 @@ const headline = computed(() =>
       role.value === 'empresa'
         ? 'Tres ofertas sobre la misma empresa.'
         : 'Capital contra oportunidad.',
+    monitor: 'Todo el ecosistema, en una pantalla.',
+    revenue: 'De dónde sale el dinero de este mes.',
+    modelo: 'Si el modelo sigue acertando, y por cuánto.',
   })[section.value]!,
 )
+
+const leadProduct = computed(
+  () => [...revenueProducts].sort((a, b) => b.amount - a.amount)[0]!,
+)
+
+const openAlerts = computed(() => opsAlerts.filter((a) => a.tone === 'crimson'))
+
+const connected = activeCompanies.toLocaleString('es-ES')
 </script>
 
 <template>
@@ -596,6 +639,159 @@ const headline = computed(() =>
         <XRayScoreApp v-else-if="section === 'score'" :chrome="false" />
         <ColchonDinamicoApp v-else-if="section === 'colchon'" :chrome="false" />
         <DivisaInteligenteApp v-else-if="section === 'divisa'" :chrome="false" />
+
+        <!-- Monitor operativo: Embat mirándose a sí mismo. -->
+        <div v-else-if="section === 'monitor'" class="wk__grid">
+          <section class="panel span-8 pulse">
+            <header class="panel__bar">
+              <h2 class="panel__title">El pulso del mes</h2>
+              <span class="chip chip--neutral">Mes en curso</span>
+            </header>
+            <dl>
+              <div
+                v-for="reading in opsPulse"
+                :key="reading.id"
+                :data-tone="reading.tone"
+              >
+                <dt>{{ reading.label }}</dt>
+                <dd class="pulse__value">
+                  {{ reading.value
+                  }}<small v-if="reading.unit">{{ reading.unit }}</small>
+                </dd>
+                <dd class="pulse__note">{{ reading.note }}</dd>
+              </div>
+            </dl>
+            <p class="pulse__read">
+              Siete avisos sobre {{ connected }} empresas conectadas. Los tres
+              que siguen sin contacto son los que cuestan dinero: el resto ya
+              está en manos de éxito de cliente.
+            </p>
+          </section>
+
+          <section class="panel span-4 feed">
+            <header class="panel__bar">
+              <h2 class="panel__title">Alertas abiertas</h2>
+              <NuxtLink
+                class="btn btn--quiet"
+                :to="`/dashboard/${role}?section=senales`"
+                >Ver las señales</NuxtLink
+              >
+            </header>
+            <AlertFeed :alerts="opsAlerts" />
+            <footer class="list__foot">
+              <span
+                >{{ openAlerts.length }} por deterioro,
+                {{ opsAlerts.length - openAlerts.length }} por oportunidad</span
+              >
+            </footer>
+          </section>
+
+          <section class="panel span-8">
+            <header class="panel__bar">
+              <h2 class="panel__title">Revenue del mes</h2>
+              <span class="chip chip--mint">{{ revenueGrowth }} sobre agosto</span>
+              <NuxtLink
+                class="btn btn--quiet"
+                :to="`/dashboard/${role}?section=revenue`"
+                >Abrir el desglose</NuxtLink
+              >
+            </header>
+            <RevenueSplit compact :products="revenueProducts" />
+          </section>
+
+          <section class="panel span-12">
+            <header class="panel__bar">
+              <h2 class="panel__title">Salud del modelo</h2>
+              <span v-if="modelAllClear" class="chip chip--mint"
+                >Todas por encima del objetivo</span
+              >
+              <NuxtLink
+                class="btn btn--quiet"
+                :to="`/dashboard/${role}?section=modelo`"
+                >Abrir las métricas</NuxtLink
+              >
+            </header>
+            <ModelMetrics compact :metrics="modelMetrics" />
+          </section>
+        </div>
+
+        <!-- Revenue por producto -->
+        <div v-else-if="section === 'revenue'" class="wk__grid">
+          <section class="panel span-8">
+            <header class="panel__bar">
+              <h2 class="panel__title">Reparto del mes</h2>
+              <span class="chip chip--mint">{{ revenueGrowth }} sobre agosto</span>
+            </header>
+            <p class="lead-line">
+              Cuatro formas de cobrar por lo mismo: ver la tesorería antes que
+              nadie. La suscripción es la única que no depende de que la empresa
+              mueva dinero.
+            </p>
+            <RevenueSplit :products="revenueProducts" />
+          </section>
+
+          <section class="panel span-4 runrate">
+            <h2 class="panel__title">Si el mes se repitiera</h2>
+            <p class="runrate__read">
+              {{ millions(revenueAnnualised) }}<small>al año</small>
+            </p>
+            <p class="runrate__why">
+              Es el mes en curso multiplicado por doce, no una previsión del
+              modelo. Lo ponemos porque es la cifra que se cita fuera, no porque
+              creamos que septiembre se repite.
+            </p>
+            <dl>
+              <div>
+                <dt>Mes en curso</dt>
+                <dd>{{ thousands(revenueMonth) }}</dd>
+              </div>
+              <div>
+                <dt>Producto que más pesa</dt>
+                <dd>
+                  {{ leadProduct.label }} ·
+                  {{ share(leadProduct.amount) }} %
+                </dd>
+              </div>
+              <div>
+                <dt>Empresas activas</dt>
+                <dd>{{ connected }}</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+
+        <!-- Métricas del modelo -->
+        <div v-else-if="section === 'modelo'" class="wk__grid">
+          <section class="panel panel--ink span-12 model">
+            <header class="panel__bar">
+              <h2 class="panel__title">Salud del modelo</h2>
+              <div class="panel__who">
+                <strong>{{ modelVersion }}</strong>
+                <span
+                  >Medido sobre las {{ connected }} empresas conectadas,
+                  ventana de 24 meses</span
+                >
+              </div>
+              <span v-if="modelAllClear" class="chip chip--mint"
+                >Todas por encima del objetivo</span
+              >
+              <span v-else class="chip chip--amber">Alguna por debajo</span>
+            </header>
+            <ModelMetrics :metrics="modelMetrics" />
+          </section>
+
+          <section class="panel span-12">
+            <header class="panel__bar">
+              <h2 class="panel__title">Por qué estas cinco y no otras</h2>
+            </header>
+            <p class="lead-line">
+              Las dos primeras dicen si el orden es correcto; la tercera, si
+              llega con tiempo; la cuarta, si callamos cuando toca. La quinta
+              existe para poder cerrar el producto: si el modelo no bate a
+              repetir el último mes, no hay nada que vender.
+            </p>
+          </section>
+        </div>
 
         <!-- Ofertas -->
         <div v-else class="wk__grid">

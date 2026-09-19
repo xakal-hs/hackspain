@@ -1205,6 +1205,489 @@
 }
 
 /* --------------------------------------------------------------------------
+   Vistas internas: monitor, revenue y modelo
+
+   El sujeto deja de ser una empresa de la cartera y pasa a ser Embat. El
+   lenguaje no cambia —mismos paneles, mismos acentos, mismas lecturas en
+   mono— porque quien lee es la misma persona en la misma pantalla.
+   ----------------------------------------------------------------------- */
+
+.pulse {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
+/* Tres lecturas en fila, separadas por filete y no por tarjetas: son el mismo
+ * mes visto por tres lados, no tres indicadores sueltos. */
+.pulse dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pulse dl > div {
+  padding-left: clamp(16px, 2vw, 26px);
+  border-left: 1px solid var(--line);
+}
+
+.pulse dl > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.pulse dt {
+  font-size: var(--t-small);
+  color: var(--text-muted);
+}
+
+.pulse__value {
+  margin-top: 6px;
+  font-family: var(--font-num);
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* La unidad vuelve a la tipografía de interfaz: la mono es para la cifra. */
+.pulse__value small {
+  margin-left: 8px;
+  font-family: var(--font-ui);
+  font-size: var(--t-small);
+  letter-spacing: 0;
+  color: var(--text-muted);
+}
+
+/* El número se queda en tinta neutra —es una lectura de instrumento— y el tono
+ * va en la línea que dice qué significa. */
+.pulse__note {
+  margin-top: 4px;
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+}
+
+.pulse dl > div[data-tone='mint'] .pulse__note {
+  color: var(--mint-ink);
+}
+
+.pulse dl > div[data-tone='crimson'] .pulse__note {
+  color: var(--crimson-ink);
+}
+
+.pulse dl > div[data-tone='amber'] .pulse__note {
+  color: var(--amber-ink);
+}
+
+/* La frase que ata las tres lecturas: los números dicen cuánto, esta dice cuál
+ * de los tres hay que mirar hoy. */
+.pulse__read {
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: var(--t-small);
+  color: var(--text-muted);
+  max-width: 72ch;
+}
+
+/* El feed es alto y el pulso es corto: sin esto el pulso se estiraría con una
+ * mitad vacía debajo. Ocupa las dos filas y deja que revenue se le ponga al
+ * lado, que es como se lee —qué pasa hoy, contra qué entra este mes. */
+.feed {
+  grid-row: span 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.afeed {
+  display: grid;
+  gap: 8px;
+}
+
+.afeed li {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--text-dim);
+  border-radius: var(--r-inner);
+}
+
+.afeed li[data-tone='crimson'] {
+  border-left-color: var(--crimson);
+}
+
+.afeed li[data-tone='mint'] {
+  border-left-color: var(--mint);
+}
+
+.afeed li[data-tone='amber'] {
+  border-left-color: var(--amber);
+}
+
+.afeed li[data-tone='coral'] {
+  border-left-color: var(--coral);
+}
+
+.afeed li[data-tone='live'] {
+  border-left-color: var(--live);
+}
+
+.afeed__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.afeed__head b {
+  font-size: var(--t-small);
+  font-weight: 500;
+}
+
+.afeed__head time {
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.afeed p {
+  font-size: var(--t-micro);
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* El filo ya lleva el color; la palabra lo repite para quien no lo distinga. */
+.afeed__tag {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.afeed li[data-tone='crimson'] .afeed__tag {
+  color: var(--crimson-ink);
+}
+
+.afeed li[data-tone='mint'] .afeed__tag {
+  color: var(--mint-ink);
+}
+
+.afeed li[data-tone='amber'] .afeed__tag {
+  color: var(--amber-ink);
+}
+
+.afeed li[data-tone='live'] .afeed__tag {
+  color: var(--live-ink);
+}
+
+/* --- Reparto del revenue ------------------------------------------------ */
+
+.rsplit {
+  display: grid;
+  gap: 14px;
+}
+
+.rsplit__bar {
+  display: flex;
+  height: 34px;
+  border-radius: var(--r-inner);
+  overflow: hidden;
+  background: var(--neutral-wash);
+}
+
+.rsplit__seg[data-tone='mint'] {
+  background: var(--mint);
+}
+.rsplit__seg[data-tone='live'] {
+  background: var(--live);
+}
+.rsplit__seg[data-tone='amber'] {
+  background: var(--amber);
+}
+.rsplit__seg[data-tone='coral'] {
+  background: var(--coral);
+}
+.rsplit__seg[data-tone='crimson'] {
+  background: var(--crimson);
+}
+
+.rsplit__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rsplit__rows li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'label amount'
+    'note amount';
+  align-items: center;
+  column-gap: 16px;
+  padding: 12px 0 12px 14px;
+  border-bottom: 1px solid var(--line);
+  border-left: 3px solid var(--text-dim);
+}
+
+.rsplit__rows li:last-child {
+  border-bottom: 0;
+}
+
+.rsplit__rows li[data-tone='mint'] {
+  border-left-color: var(--mint);
+}
+.rsplit__rows li[data-tone='live'] {
+  border-left-color: var(--live);
+}
+.rsplit__rows li[data-tone='amber'] {
+  border-left-color: var(--amber);
+}
+.rsplit__rows li[data-tone='coral'] {
+  border-left-color: var(--coral);
+}
+
+.rsplit__label {
+  grid-area: label;
+  font-size: var(--t-small);
+  font-weight: 500;
+}
+
+.rsplit__note {
+  grid-area: note;
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+}
+
+.rsplit__amount {
+  grid-area: amount;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-num);
+  font-size: var(--t-lead);
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.rsplit__amount small {
+  font-family: var(--font-ui);
+  font-size: var(--t-micro);
+  letter-spacing: 0;
+  color: var(--text-dim);
+}
+
+/* --- Proyección --------------------------------------------------------- */
+
+.runrate {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.runrate__read {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--font-num);
+  font-size: clamp(2.25rem, 3.6vw, 3rem);
+  line-height: 1.06;
+  letter-spacing: -0.055em;
+  font-variant-numeric: tabular-nums;
+}
+
+.runrate__read small {
+  font-family: var(--font-ui);
+  font-size: var(--t-small);
+  letter-spacing: 0;
+  color: var(--text-muted);
+}
+
+.runrate__why {
+  font-size: var(--t-small);
+  color: var(--text-muted);
+  max-width: 44ch;
+}
+
+.runrate dl {
+  display: grid;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.runrate dl > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.runrate dl > div:last-child {
+  border-bottom: 0;
+}
+
+.runrate dt {
+  font-size: var(--t-small);
+  color: var(--text-muted);
+}
+
+.runrate dd {
+  font-size: var(--t-small);
+  font-weight: 500;
+  text-align: right;
+}
+
+/* --- Salud del modelo ---------------------------------------------------- */
+
+/* El panel navy del mock. Re-apunta los tokens en vez de repintar colores, como
+ * hace el rail, así que todo lo que cuelga dentro —chips incluidos— lo sigue.
+ * Es la única superficie de la cabina que no cambia con el tema: un acento
+ * deliberado que funciona igual sobre lienzo claro que oscuro. */
+.panel--ink {
+  --panel: var(--ink-panel);
+  --panel-raised: var(--ink-raised);
+  --line: var(--ink-line);
+  --line-strong: var(--ink-line-strong);
+  --text: var(--ink-text);
+  --text-muted: var(--ink-muted);
+  --text-dim: var(--ink-dim);
+  --neutral-wash: var(--ink-neutral-wash);
+  --sheen: var(--ink-sheen);
+  --focus-ring: var(--ink-live-ink);
+  --live: var(--ink-live);
+  --live-solid: var(--ink-live-solid);
+  --live-ink: var(--ink-live-ink);
+  --live-wash: var(--ink-live-wash);
+  --mint: var(--ink-mint);
+  --mint-ink: var(--ink-mint-ink);
+  --mint-wash: var(--ink-mint-wash);
+  --amber: var(--ink-amber);
+  --amber-ink: var(--ink-amber-ink);
+  --amber-wash: var(--ink-amber-wash);
+  --crimson: var(--ink-crimson);
+  --crimson-ink: var(--ink-crimson-ink);
+  --crimson-wash: var(--ink-crimson-wash);
+
+  color-scheme: dark;
+  background: linear-gradient(
+    135deg,
+    var(--ink-raised) 0%,
+    var(--ink-canvas) 100%
+  );
+  border-color: var(--ink-line);
+  color: var(--ink-text);
+}
+
+.model .panel__title {
+  margin-right: 14px;
+}
+
+.mmetrics {
+  display: grid;
+  gap: 2px;
+}
+
+/* La cifra y su lectura en prosa cruzan las dos filas; a la izquierda, la
+ * etiqueta y contra qué se mide. */
+.mmetrics > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 7rem minmax(0, 1.5fr);
+  grid-template-areas:
+    'label  value meaning'
+    'target value meaning';
+  align-items: center;
+  column-gap: 20px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.mmetrics > div:last-child {
+  border-bottom: 0;
+}
+
+.mmetrics dt {
+  grid-area: label;
+  align-self: end;
+  font-size: var(--t-small);
+  font-weight: 500;
+}
+
+.mmetrics__value {
+  grid-area: value;
+  font-family: var(--font-num);
+  font-size: var(--t-h4);
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.mmetrics__value small {
+  margin-left: 6px;
+  font-family: var(--font-ui);
+  font-size: var(--t-micro);
+  letter-spacing: 0;
+  color: var(--text-muted);
+}
+
+.mmetrics__target {
+  grid-area: target;
+  align-self: start;
+  margin-top: 2px;
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+}
+
+.mmetrics__target[data-ok='true'] {
+  color: var(--mint-ink);
+}
+
+.mmetrics__meaning {
+  grid-area: meaning;
+  font-size: var(--t-micro);
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* En el monitor las cinco van en fila, separadas por filete: es un vistazo de
+ * conjunto —o están todas por encima del objetivo o no lo están—, no cinco
+ * lecturas que se comparen entre sí. */
+.mmetrics--compact {
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.mmetrics--compact > div {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'label'
+    'value'
+    'target';
+  align-items: start;
+  padding: 0 clamp(14px, 1.6vw, 24px);
+  border-bottom: 0;
+  border-left: 1px solid var(--line);
+}
+
+.mmetrics--compact > div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
+.mmetrics--compact dt {
+  align-self: start;
+}
+
+.mmetrics--compact .mmetrics__value {
+  margin-top: 4px;
+  text-align: left;
+  font-size: var(--t-h3);
+}
+
+/* --------------------------------------------------------------------------
    Narrow screens
    ----------------------------------------------------------------------- */
 
@@ -1230,6 +1713,19 @@
 
   .signals .spark {
     display: none;
+  }
+
+  /* La prosa de cada métrica pasa debajo en vez de estrangular la columna. */
+  .mmetrics > div {
+    grid-template-columns: minmax(0, 1fr) 7rem;
+    grid-template-areas:
+      'label   value'
+      'target  value'
+      'meaning meaning';
+  }
+
+  .mmetrics__meaning {
+    margin-top: 6px;
   }
 }
 
@@ -1295,6 +1791,36 @@
   .cover {
     grid-column: span 12;
   }
+
+  /* A una columna, el feed ya no tiene un vecino al lado que igualar. */
+  .feed {
+    grid-row: auto;
+  }
+
+  .mmetrics--compact {
+    grid-auto-flow: row;
+  }
+
+  .mmetrics--compact > div {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'label  value'
+      'target value';
+    align-items: center;
+    padding: 11px 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .mmetrics--compact > div:last-child {
+    border-bottom: 0;
+  }
+
+  .mmetrics--compact .mmetrics__value {
+    margin-top: 0;
+    text-align: right;
+    font-size: var(--t-h4);
+  }
 }
 
 @media (max-width: 720px) {
@@ -1321,5 +1847,21 @@
   .filters select {
     min-width: 0;
     width: 100%;
+  }
+
+  .pulse dl {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .pulse dl > div {
+    padding: 12px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .pulse dl > div:first-child {
+    padding-top: 0;
+    border-top: 0;
   }
 }

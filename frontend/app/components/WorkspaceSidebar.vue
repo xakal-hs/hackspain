@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import {
   Activity,
+  Banknote,
   ChevronsUpDown,
   CircleDollarSign,
   Gauge,
   Handshake,
   LogOut,
   PiggyBank,
+  Radar,
   Rows3,
   ScanLine,
+  Target,
   Check,
 } from '@lucide/vue'
 import { perspectives, perspectiveById, type PerspectiveId } from '~/data/demo'
@@ -34,9 +37,15 @@ const items = computed(() => {
     { id: 'colchon', label: 'Colchón Dinámico', icon: PiggyBank },
     { id: 'divisa', label: 'Divisa Inteligente', icon: CircleDollarSign },
   ]
+  /* Interno: el sujeto ya no es una empresa de la cartera, sino Embat. */
+  const ops = [
+    { id: 'monitor', label: 'Monitor operativo', icon: Radar },
+    { id: 'revenue', label: 'Revenue por producto', icon: Banknote },
+    { id: 'modelo', label: 'Métricas del modelo', icon: Target },
+  ]
   return props.role === 'empresa'
     ? [...all.filter((i) => i.id !== 'cartera'), ...treasury]
-    : all
+    : [...all, ...ops]
 })
 
 const open = ref(false)
