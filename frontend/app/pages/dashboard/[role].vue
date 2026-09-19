@@ -32,13 +32,20 @@ const route = useRoute()
 const role = computed(() => route.params.role as PerspectiveId)
 const profile = computed(() => perspectiveById(role.value)!)
 
-const allowed = ['resumen', 'cartera', 'senales', 'ofertas']
+/* Las tres pantallas de tesorería propia traen su propio encabezado y solo
+ * existen para la perspectiva empresa. */
+const treasurySections = ['score', 'colchon', 'divisa']
+const allowed = ['resumen', 'cartera', 'senales', 'ofertas', ...treasurySections]
 const section = computed(() => {
   const requested = String(route.query.section || 'resumen')
   if (!allowed.includes(requested)) return 'resumen'
   if (requested === 'cartera' && role.value === 'empresa') return 'resumen'
+  if (treasurySections.includes(requested) && role.value !== 'empresa')
+    return 'resumen'
   return requested
 })
+
+const isTreasury = computed(() => treasurySections.includes(section.value))
 
 const sectionLabel = computed(
   () =>
@@ -47,6 +54,9 @@ const sectionLabel = computed(
       cartera: 'Cartera',
       senales: role.value === 'empresa' ? 'Mis señales' : 'Señales',
       ofertas: role.value === 'empresa' ? 'Mis ofertas' : 'Mercado',
+      score: 'X-Ray Score',
+      colchon: 'Colchón Dinámico',
+      divisa: 'Divisa Inteligente',
     })[section.value]!,
 )
 
@@ -164,7 +174,7 @@ const headline = computed(() =>
       </header>
 
       <main id="main-content" class="wk__main" tabindex="-1">
-        <div class="wk__head">
+        <div v-if="!isTreasury" class="wk__head">
           <h1>{{ headline }}</h1>
           <p v-if="role === 'empresa'">
             {{ leadCompany.name }} · {{ leadCompany.sector }}
@@ -434,6 +444,12 @@ const headline = computed(() =>
             <span>Ordenado por cuánto se movió el score, en las dos direcciones</span>
           </footer>
         </section>
+
+        <!-- Tesorería propia: el mock trae su propio encabezado y su propio
+             layout, así que va sin la rejilla del panel. -->
+        <XRayScoreApp v-else-if="section === 'score'" :chrome="false" />
+        <ColchonDinamicoApp v-else-if="section === 'colchon'" :chrome="false" />
+        <DivisaInteligenteApp v-else-if="section === 'divisa'" :chrome="false" />
 
         <!-- Ofertas -->
         <div v-else class="wk__grid">

@@ -2,10 +2,13 @@
 import {
   Activity,
   ChevronsUpDown,
+  CircleDollarSign,
   Gauge,
   Handshake,
   LogOut,
+  PiggyBank,
   Rows3,
+  ScanLine,
   Check,
 } from '@lucide/vue'
 import {
@@ -35,7 +38,15 @@ const items = computed(() => {
       icon: Handshake,
     },
   ]
-  return props.role === 'empresa' ? all.filter((i) => i.id !== 'cartera') : all
+  /* Tesorería propia: solo tiene sentido mirándose a uno mismo. */
+  const treasury = [
+    { id: 'score', label: 'X-Ray Score', icon: ScanLine },
+    { id: 'colchon', label: 'Colchón Dinámico', icon: PiggyBank },
+    { id: 'divisa', label: 'Divisa Inteligente', icon: CircleDollarSign },
+  ]
+  return props.role === 'empresa'
+    ? [...all.filter((i) => i.id !== 'cartera'), ...treasury]
+    : all
 })
 
 const open = ref(false)
