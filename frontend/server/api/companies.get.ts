@@ -77,7 +77,9 @@ function alertFor(row: PanelRow) {
     return 'El dinero en la cuenta no cubre un mes de pagos.'
   if (row.margin_3m != null && row.margin_3m < 0)
     return 'En los últimos tres meses ha salido más dinero del que ha entrado.'
-  if (row.pct_vencido != null && row.pct_vencido >= 10)
+  // `pct_vencido` no es un porcentaje: es vencido acumulado / facturación de 3 meses,
+  // una fracción recortada a [0, 5]. El umbral 10 nunca se alcanzaba (0 filas de 10.054).
+  if (row.pct_vencido != null && row.pct_vencido >= 0.25)
     return 'Una parte relevante de las facturas sigue pendiente de cobro.'
   return null
 }
@@ -160,7 +162,9 @@ export default defineEventHandler(async () => {
         runway_prev: numberOrNull(previous?.runway_m),
         dso_now: numberOrNull(latest.dso),
         dso_prev: numberOrNull(previous?.dso),
-        overdue_share: numberOrNull(latest.pct_vencido),
+        // a porcentaje: la interfaz lo escribe con un «%» detrás, y la fracción hacía
+        // que un 43 % de vencido se leyera como «0,43 %»
+        overdue_share: latest.pct_vencido == null ? null : numberOrNull(latest.pct_vencido * 100),
         margin_3m: numberOrNull(latest.margin_3m),
         debt_service_ratio_3m: numberOrNull(latest.debt_service_ratio_3m),
         debt_outstanding: numberOrNull(company.debt_outstanding),
