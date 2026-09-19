@@ -770,6 +770,24 @@ table {
 .traj__plot {
   position: relative;
   height: clamp(180px, 18vw, 250px);
+  /* El plot entero es la zona de lectura: el puntero no tiene que acertarle a
+     la línea, le basta con estar sobre el mes. */
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+
+.traj__plot:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.traj__cursor {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px solid var(--text-muted);
+  opacity: 0.55;
 }
 
 .traj__svg {
@@ -801,6 +819,17 @@ table {
   box-shadow: 0 0 0 3px var(--panel);
 }
 
+/* El punto que sigue al puntero crece un poco sobre el que marca "hoy". */
+.traj__head.is-live {
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+}
+
+.traj__head[data-ahead] {
+  background: var(--ahead);
+}
+
 .traj__flag {
   position: absolute;
   bottom: 0;
@@ -808,6 +837,108 @@ table {
   font-size: var(--t-micro);
   color: var(--ahead-ink);
   white-space: nowrap;
+}
+
+/* --- The reading that follows the pointer, shared by every chart --- */
+
+.ctip {
+  position: absolute;
+  top: 10px;
+  z-index: 2;
+  min-width: 9.5rem;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-inner);
+  background: var(--panel);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
+.ctip[data-vertical='bottom'] {
+  top: auto;
+  bottom: 10px;
+}
+
+.ctip[data-align='center'] {
+  transform: translateX(-50%);
+}
+
+.ctip[data-align='end'] {
+  transform: translateX(-100%);
+}
+
+.ctip__title {
+  margin-bottom: 5px;
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.ctip__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--t-micro);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.ctip__row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ctip__row b {
+  margin-left: auto;
+  font-family: var(--font-num);
+  font-size: var(--t-small);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.ctip__mark {
+  flex-shrink: 0;
+  width: 12px;
+  height: 0;
+  border-top: 2.5px solid currentColor;
+  border-radius: 2px;
+}
+
+.ctip__row[data-tone='live'] {
+  color: var(--live-ink);
+}
+
+.ctip__row[data-tone='muted'] {
+  color: var(--text-dim);
+}
+
+.ctip__row[data-tone='muted'] .ctip__mark {
+  border-top-style: dashed;
+}
+
+.ctip__row[data-tone='ahead'] {
+  color: var(--ahead-ink);
+}
+
+.ctip__row[data-tone='ahead'] .ctip__mark {
+  border-top-style: dashed;
+}
+
+.ctip__foot {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid var(--line);
+  font-size: var(--t-micro);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* El mock Centinela pinta sobre `--card`, no sobre `--panel`. */
+.centinela .ctip {
+  background: var(--card);
+  border-color: var(--border);
 }
 
 /* --- Weighted signal bars --- */

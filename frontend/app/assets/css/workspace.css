@@ -636,15 +636,6 @@
   background: var(--panel-raised, var(--wash, rgba(190, 200, 255, 0.07)));
 }
 
-.compare__filters {
-  margin: 0;
-}
-
-.compare__filters .compare__place {
-  margin-left: auto;
-  align-self: center;
-}
-
 .filters__field {
   display: grid;
   gap: 5px;
@@ -712,15 +703,6 @@
   gap: 14px;
 }
 
-.compare__place {
-  font-family: var(--font-num);
-  font-size: var(--t-h3);
-  font-weight: 300;
-  letter-spacing: -0.05em;
-  font-variant-numeric: tabular-nums;
-  color: var(--text);
-}
-
 .compare__read {
   font-size: var(--t-small);
   color: var(--text-muted);
@@ -783,7 +765,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   Sector benchmark chart: this company against the median of its cut
+   Sector benchmark chart: this company against the median of its sector
    ----------------------------------------------------------------------- */
 
 .bench {
@@ -817,15 +799,15 @@
   border-radius: 2px;
 }
 
-.bench__key-item--you {
+.bench__key-item[data-tone='live'] {
   color: var(--live-ink);
 }
 
-.bench__key-item--median {
+.bench__key-item[data-tone='muted'] {
   color: var(--text-dim);
 }
 
-.bench__key-item--median i {
+.bench__key-item[data-tone='muted'] i {
   border-top-style: dashed;
 }
 
@@ -858,6 +840,15 @@
   height: clamp(170px, 16vw, 230px);
   border-radius: var(--r-inner);
   overflow: hidden;
+  /* El plot entero es la zona de lectura: el puntero no tiene que acertarle a
+     la línea, le basta con estar sobre el mes. */
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+
+.bench__plot:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .bench__zone {
@@ -902,12 +893,37 @@
   box-shadow: 0 0 0 2.5px var(--panel);
 }
 
-.bench__dot--you {
+.bench__dot[data-tone='live'] {
   background: var(--live);
 }
 
-.bench__dot--median {
+.bench__dot[data-tone='muted'] {
   background: var(--text-dim);
+}
+
+/* El punto que sigue al puntero crece un poco sobre el que marca "hoy". */
+.bench__dot.is-live {
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+}
+
+.bench__cursor {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px solid var(--text-muted);
+  opacity: 0.55;
+}
+
+.bench__flag {
+  position: absolute;
+  bottom: 2px;
+  transform: translateX(-50%);
+  font-size: var(--t-micro);
+  color: var(--ahead-ink);
+  white-space: nowrap;
 }
 
 .bench__axis {
@@ -942,36 +958,6 @@
 
 .centinela .bench__dot {
   box-shadow: 0 0 0 2.5px var(--card);
-}
-
-.centinela .filters {
-  background: var(--wash);
-  border-color: var(--border);
-}
-
-.centinela .filters__field {
-  color: var(--text-3);
-}
-
-.centinela .seg {
-  background: var(--bg);
-  border-color: var(--border);
-}
-
-.centinela .seg button {
-  color: var(--text-2);
-}
-
-.centinela .seg button.is-on {
-  background: var(--ok-chip);
-  color: var(--ok-strong);
-  border-color: var(--ok-border);
-}
-
-.centinela .filters select {
-  background: var(--card);
-  border-color: var(--border);
-  color: var(--text);
 }
 
 .list__foot {
@@ -1328,9 +1314,5 @@
   .filters select {
     min-width: 0;
     width: 100%;
-  }
-
-  .compare__place {
-    margin-left: 0;
   }
 }

@@ -28,9 +28,14 @@ const states = ref({
     delta3: '+20 pts', deltaHint: 'Mejora sostenida en 4 meses. Sin señales de reversión.',
     forecast: '68 · +3', forecastHint: 'sigue mejorando en h3',
     chartTag: 'Consolidada 3 meses', chartTagBg: 'var(--ok-bg)',
-    chartHistory: '20,160 60,158 100,155 140,153 180,150 220,148 260,140 300,132 340,120 380,110 420,100 460,88',
-    chartForecast: '460,88 490,80 520,72 550,68',
-    chartLastX: '460', chartLastY: '88', chartMarkerX: '260', chartMarkerY: '140',
+    // La subida de los últimos tres meses es la historia de este estado: los
+    // veinte anteriores son el suelo del que arrancó.
+    chartHistory: [
+      47, 46, 48, 47, 45, 46, 47, 46, 44, 45, 46, 45, 47, 46, 45, 46, 44, 45,
+      44, 45, 45, 52, 59, 65,
+    ],
+    chartForecast: [66, 67, 68],
+    chartMarker: null,
     agentStatus: 'Modo oportunidades', agentMessage: 'Vuestra trayectoria está limpia. Aquí van 3 movimientos para capitalizarla antes de que el mercado lo vea.',
     recommendations: [
       { n: '1', title: 'Ampliar línea de crédito', impact: 'Hasta 40k € · tipo preferente' },
@@ -57,9 +62,14 @@ const states = ref({
     delta3: '±2 pts', deltaHint: 'Dentro del margen de ruido esperado.',
     forecast: '62 · 0', forecastHint: 'trayectoria plana en h3',
     chartTag: 'Sin cambios significativos', chartTagBg: 'var(--warn-bg)',
-    chartHistory: '20,110 60,108 100,112 140,110 180,108 220,112 260,110 300,109 340,111 380,110 420,109 460,110',
-    chartForecast: '460,110 490,112 520,110 550,111',
-    chartLastX: '460', chartLastY: '110', chartMarkerX: '260', chartMarkerY: '110',
+    // Dos años de ruido de mes dentro de la misma banda: el estado "normal"
+    // se ve precisamente en que no hay nada que señalar.
+    chartHistory: [
+      61, 62, 61, 63, 62, 61, 62, 63, 61, 62, 63, 62, 61, 62, 63, 62, 61, 62,
+      63, 62, 61, 60, 62, 62,
+    ],
+    chartForecast: [62, 62, 62],
+    chartMarker: null,
     agentStatus: 'Modo silencio activo', agentMessage: 'Sin recomendaciones esta semana. El silencio también es una feature: te aviso cuando algo cambie de verdad.',
     recommendations: [
       { n: '1', title: 'Sin acciones sugeridas', impact: 'Vigilamos por ti · siguiente revisión: 26 sep' }
@@ -84,9 +94,14 @@ const states = ref({
     delta3: '−14 pts', deltaHint: 'Caída sostenida, no un mes suelto.',
     forecast: '64 · −4', forecastHint: 'sigue bajando en h3',
     chartTag: 'Detectado 3 meses antes', chartTagBg: 'var(--wash)',
-    chartHistory: '20,60 60,62 100,58 140,65 180,68 220,72 260,80 300,88 340,95 380,105 420,112 460,120',
-    chartForecast: '460,120 490,132 520,142 550,150',
-    chartLastX: '460', chartLastY: '120', chartMarkerX: '260', chartMarkerY: '80',
+    // Veinte meses planos y luego la caída de catorce puntos. El aviso sale
+    // en el primer mes de la pendiente, no cuando el nivel cruza la banda.
+    chartHistory: [
+      83, 84, 86, 85, 84, 86, 87, 86, 85, 86, 85, 84, 86, 85, 87, 86, 85, 85,
+      85, 84, 82, 78, 73, 68,
+    ],
+    chartForecast: [67, 66, 64],
+    chartMarker: { index: 20, label: 'avisamos aquí' },
     agentStatus: 'Alerta activa · esperando acción', agentMessage: 'Te escribí sin que preguntes. La caja aún no lo nota, pero el ritmo dice que llegará. Te propongo tres movimientos para pararlo.',
     recommendations: [
       { n: '1', title: 'Refinanciar la línea de circulante', impact: 'Ahorro est. 2.400 €/mes' },
@@ -266,7 +281,11 @@ const stateOptions = computed(() =>
               Score y plazos frente a la mediana de distribución alimentaria · comparativa anónima
             </div>
           </div>
-          <SectorCompare :company="leadCompany" :score="Number(state.score)" />
+          <SectorCompare
+            :company="leadCompany"
+            :score="Number(state.score)"
+            :series="{ history: state.chartHistory, forecast: state.chartForecast }"
+          />
         </div>
 
         <!-- CHART + AGENT -->
@@ -281,23 +300,12 @@ const stateOptions = computed(() =>
               </div>
               <span style="padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;" :style="{ background: state.chartTagBg, color: state.color }">{{ state.chartTag }}</span>
             </div>
-            <svg width="100%" height="220" viewBox="0 0 700 220" preserveAspectRatio="none">
-              <rect x="10" y="30" width="680" height="60" fill="var(--ok-bg)" opacity="0.4"></rect>
-              <rect x="10" y="90" width="680" height="60" fill="var(--warn-bg)" opacity="0.4"></rect>
-              <rect x="10" y="150" width="680" height="40" fill="var(--bad-bg)" opacity="0.4"></rect>
-
-              <text x="14" y="46" font-size="10" fill="var(--ok-strong)" style="font-family: var(--font-display);" font-weight="600">SANO ≥ 65</text>
-              <text x="14" y="106" font-size="10" fill="var(--warn-strong)" style="font-family: var(--font-display);" font-weight="600">VIGILANCIA</text>
-              <text x="14" y="166" font-size="10" fill="var(--bad-strong)" style="font-family: var(--font-display);" font-weight="600">RIESGO ≤ 35</text>
-
-              <polyline :points="state.chartHistory" fill="none" :stroke="state.color" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></polyline>
-              <polyline :points="state.chartForecast" fill="none" :stroke="state.color" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,6" opacity="0.6"></polyline>
-              <circle :cx="state.chartLastX" :cy="state.chartLastY" r="6" :fill="state.color" stroke="var(--card)" stroke-width="2.5"></circle>
-              <circle :cx="state.chartMarkerX" :cy="state.chartMarkerY" r="5" :fill="accent" stroke="var(--card)" stroke-width="2"></circle>
-            </svg>
-            <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3);">
-              <span>hace 24m</span><span>hace 12m</span><span>hoy</span><span>h3 →</span>
-            </div>
+            <ScoreBandChart
+              :traces="[{ key: 'score', label: 'Distribuciones Ibérica', history: state.chartHistory, forecast: state.chartForecast }]"
+              :marker="state.chartMarker"
+              note="Trazo discontinuo: previsión h1-h3"
+              caption="Score de Distribuciones Ibérica mes a mes durante 24 meses, con previsión a tres."
+            />
           </div>
 
           <!-- Agent panel -->
