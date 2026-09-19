@@ -26,23 +26,6 @@ const states = {
     deltaHint: 'Mejora sostenida en 4 meses. Sin señales de reversión.',
     forecast: '68 · +3',
     forecastHint: 'sigue mejorando',
-    chartTag: 'Consolidada 3 meses',
-    // La subida de los últimos tres meses es la historia de este estado: los
-    // veinte anteriores son el suelo del que arrancó.
-    chartHistory: [
-      47, 46, 48, 47, 45, 46, 47, 46, 44, 45, 46, 45, 47, 46, 45, 46, 44, 45, 44, 45, 45, 52,
-      59, 65,
-    ],
-    chartForecast: [66, 67, 68],
-    chartMarker: null,
-    agentStatus: 'Modo oportunidades',
-    agentMessage:
-      'Tu trayectoria está limpia. Aquí van 3 movimientos para capitalizarla antes de que el mercado lo vea.',
-    recommendations: [
-      { title: 'Ampliar línea de crédito', impact: 'Hasta 40k € · tipo preferente' },
-      { title: 'Cerrar precios a 12 meses', impact: 'Con proveedores clave · protege margen' },
-      { title: 'Entrar al marketplace', impact: 'Con score 65 accedes al mejor tramo' },
-    ],
     drivers: [
       { label: 'Cobros tardíos de clientes', contribution: '+4,8', value: '38 días vs. 60' },
       { label: 'Tendencia de cobros', contribution: '+3,2', value: '+18 % en 12 meses' },
@@ -67,21 +50,6 @@ const states = {
     deltaHint: 'Dentro del margen de ruido esperado.',
     forecast: '62 · 0',
     forecastHint: 'trayectoria plana',
-    chartTag: 'Sin cambios significativos',
-    // Dos años de ruido de mes dentro de la misma banda: el estado "normal"
-    // se ve precisamente en que no hay nada que señalar.
-    chartHistory: [
-      61, 62, 61, 63, 62, 61, 62, 63, 61, 62, 63, 62, 61, 62, 63, 62, 61, 62, 63, 62, 61, 60,
-      62, 62,
-    ],
-    chartForecast: [62, 62, 62],
-    chartMarker: null,
-    agentStatus: 'Modo silencio activo',
-    agentMessage:
-      'Sin recomendaciones esta semana. El silencio también es una señal: te aviso cuando algo cambie de verdad.',
-    recommendations: [
-      { title: 'Sin acciones sugeridas', impact: 'Vigilamos por ti · siguiente revisión: 26 sep' },
-    ],
     drivers: [
       { label: 'Meses de caja', contribution: '±0', value: '3,4 meses · estable' },
       { label: 'Pagos tardíos a proveedores', contribution: '+0,2', value: 'sin cambio' },
@@ -106,23 +74,6 @@ const states = {
     deltaHint: 'Caída sostenida, no un mes suelto.',
     forecast: '64 · −4',
     forecastHint: 'sigue bajando',
-    chartTag: 'Detectado 3 meses antes',
-    // Veinte meses planos y luego la caída de catorce puntos. El aviso sale
-    // en el primer mes de la pendiente, no cuando el nivel cruza la banda.
-    chartHistory: [
-      83, 84, 86, 85, 84, 86, 87, 86, 85, 86, 85, 84, 86, 85, 87, 86, 85, 85, 85, 84, 82, 78,
-      73, 68,
-    ],
-    chartForecast: [67, 66, 64],
-    chartMarker: { index: 20, label: 'avisamos aquí' },
-    agentStatus: 'Alerta activa · esperando acción',
-    agentMessage:
-      'Te escribí sin que preguntes. La caja aún no lo nota, pero el ritmo dice que llegará. Te propongo tres movimientos para pararlo.',
-    recommendations: [
-      { title: 'Refinanciar la línea de circulante', impact: 'Ahorro est. 2.400 €/mes' },
-      { title: 'Renegociar plazos con 3 proveedores', impact: 'Alivia tensión de caja' },
-      { title: 'Apretar el cobro a 2 clientes', impact: 'Libera ~18.000 €' },
-    ],
     drivers: [
       { label: 'Meses de caja', contribution: '−4,2', value: '3,1 vs. 4,2 meses' },
       { label: 'Facturación de clientes perdidos', contribution: '−5,2', value: '22 % vs. 8 %' },
@@ -135,7 +86,7 @@ const states = {
 const state = computed(() => {
   const mock = states[selected.value]
   const health = companyHealth.value
-  if (!health) return { ...mock, headline: 'Score de demostración · pendiente de datos', chartTag: 'Simulado' }
+  if (!health) return { ...mock, headline: 'Score de demostración · pendiente de datos' }
   const delta = health.score_delta_3m
   return { ...mock,
     drivers: (companyDetail.data.value?.drivers || []).map(driver => ({
@@ -146,18 +97,15 @@ const state = computed(() => {
     score: health.health_score.toFixed(1), chip: health.health_band.toUpperCase(),
     scoreColor: health.health_band === 'sano' ? 'var(--ok)' : health.health_band === 'riesgo' ? 'var(--bad)' : 'var(--warn)',
     headline: `Score de ${companyName.value}: ${health.health_score.toFixed(1)}`,
-    subhead: `Dato de Supabase · ${health.month.slice(0, 7)}. Las recomendaciones del agente son ejemplos simulados.`,
+    subhead: `Dato de Supabase · ${health.month.slice(0, 7)}. La previsión a tres meses sigue sin conectar.`,
     band: health.health_band, bandTitle: 'Clasificación registrada en Supabase',
     bandDesc: 'La banda y la nota proceden del mismo mes.',
     delta3: delta == null ? 'Sin dato' : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} pts`,
     deltaHint: 'Variación registrada frente a tres meses antes.',
     forecast: 'Pendiente', forecastHint: 'sin previsión conectada',
-    chartHistory: companyDetail.data.value?.health.map(row => row.health_score) || [],
-    chartForecast: [], chartMarker: null, chartTag: 'Historia real · Supabase',
     direction: (health.health_trend === 'improving' ? 'up' : health.health_trend === 'deteriorating' ? 'down' : 'flat') as AlertDirection,
   }
 })
-const scoreMonths = computed(() => companyHealth.value ? companyDetail.data.value?.health.map(row => row.month.slice(0, 7)) : undefined)
 const arrow = computed(
   () => ({ up: ArrowUp, flat: ArrowRight, down: ArrowDown, alert: ArrowDown })[state.value.direction],
 )
@@ -229,49 +177,6 @@ const drivers = computed(() => {
     </section>
 
     <SectorHealthCompare />
-
-    <div class="tz-split">
-      <section class="tz-card">
-        <header class="tz-card__bar">
-          <div>
-            <h2>Trayectoria del score</h2>
-            <p>{{ companyHealth ? 'Histórico registrado en Supabase' : 'Historia y previsión simuladas' }}</p>
-          </div>
-          <span class="tz-tag">{{ state.chartTag }}</span>
-        </header>
-        <ScoreBandChart
-          :traces="[
-            {
-              key: 'score',
-              label: companyName,
-              history: state.chartHistory,
-              forecast: state.chartForecast,
-            },
-          ]"
-          :marker="state.chartMarker"
-          :note="companyHealth ? 'Sin previsión conectada' : 'Previsión simulada'"
-          :month-labels="scoreMonths" :caption="`Score de ${companyName} mes a mes`"
-        />
-      </section>
-
-      <section class="xs-agent">
-        <header>
-          <span class="xs-agent__mark" aria-hidden="true">A</span>
-          <div>
-            <h2>Agente Centinela · demo</h2>
-            <p>{{ state.agentStatus }}</p>
-          </div>
-        </header>
-        <blockquote>«{{ state.agentMessage }}»</blockquote>
-        <h3>Recomendaciones de esta semana</h3>
-        <ol>
-          <li v-for="r in state.recommendations" :key="r.title">
-            <b>{{ r.title }}</b>
-            <span>{{ r.impact }}</span>
-          </li>
-        </ol>
-      </section>
-    </div>
 
     <section class="tz-card">
       <header class="tz-card__bar">
@@ -350,108 +255,6 @@ const drivers = computed(() => {
 
 .xs-arrow {
   color: var(--accent);
-}
-
-/* Panel navy: acento deliberado, igual sobre lienzo claro que oscuro. */
-.xs-agent {
-  display: grid;
-  gap: 12px;
-  padding: 20px 22px;
-  border-radius: var(--r-lg);
-  background: linear-gradient(160deg, var(--navy-1) 0%, var(--navy-2) 100%);
-  color: var(--on-navy);
-}
-
-.xs-agent header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.xs-agent__mark {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--r-md);
-  background: var(--accent-solid);
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.xs-agent h2 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.xs-agent header p {
-  margin: 0;
-  font-size: 12px;
-  color: var(--on-navy-3);
-}
-
-.xs-agent blockquote {
-  margin: 0;
-  padding: 14px;
-  border-radius: var(--r-lg);
-  background: rgba(255, 255, 255, 0.06);
-  font-size: 13.5px;
-  line-height: 1.5;
-}
-
-.xs-agent h3 {
-  margin: 4px 0 0;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--on-navy-2);
-}
-
-.xs-agent ol {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: rec;
-}
-
-.xs-agent li {
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  column-gap: 10px;
-  align-items: center;
-  padding: 10px 12px;
-  border-radius: var(--r-md);
-  background: rgba(255, 255, 255, 0.06);
-  counter-increment: rec;
-}
-
-.xs-agent li::before {
-  content: counter(rec);
-  grid-row: span 2;
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--on-navy-2);
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.xs-agent li b {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.xs-agent li span {
-  font-size: 12px;
-  color: var(--on-navy-2);
 }
 
 /* Tira con filetes: cuatro señales, ordenadas por lo que pesan. */
