@@ -1,55 +1,76 @@
 <script setup lang="ts">
-import { ArrowRight, Check } from "@lucide/vue";
-import { perspectives, type Perspective } from "~/data/demo";
-useHead({ title: "Acceso demo · X-Ray" });
-const route = useRoute();
-const selected = ref<Perspective>(
-  perspectives.find((p) => p.id === route.query.role)?.id ?? "embat",
-);
-const session = useCookie<Perspective | null>("xray-demo-role", {
-  sameSite: "lax",
-});
+import { perspectives, perspectiveById, type PerspectiveId } from '~/data/demo'
+
+useHead({ title: 'Entrar · X-Ray' })
+
+const route = useRoute()
+const chosen = ref<PerspectiveId>(
+  perspectiveById(String(route.query.role))?.id ?? 'banco',
+)
+
+const session = useCookie<PerspectiveId | null>('xray-demo-role', {
+  sameSite: 'lax',
+})
+
 function enter() {
-  session.value = selected.value;
-  navigateTo(`/dashboard/${selected.value}`);
+  session.value = chosen.value
+  return navigateTo(`/dashboard/${chosen.value}`)
 }
 </script>
+
 <template>
-  <div class="demo-login">
-    <NuxtLink to="/" class="brand"><BrandMark /> X-Ray</NuxtLink>
-    <main id="main-content" class="login-panel">
-      <span class="landing-tag">Acceso demo</span>
-      <h1>¿Desde dónde quieres mirar?</h1>
-      <p>
-        Elige un perfil para empezar. Podrás cambiarlo desde el panel de usuario
-        en cualquier momento.
-      </p>
-      <form @submit.prevent="enter">
+  <div class="entry">
+    <header class="entry__top">
+      <NuxtLink to="/" class="lp__brand">
+        <BrandMark />
+        <span>X-Ray<small>de Embat</small></span>
+      </NuxtLink>
+      <ThemeSwitch />
+    </header>
+
+    <main id="main-content" class="entry__main" tabindex="-1">
+      <div class="entry__intro">
+        <h1>¿Desde dónde vas a mirar?</h1>
+        <p>
+          Los datos son los mismos para los tres. Cambia el orden de lo que
+          verás primero y lo que puedes hacer con ello.
+        </p>
+      </div>
+
+      <form class="panel entry__panel" @submit.prevent="enter">
         <fieldset>
-          <legend class="sr-only">Selecciona tu perspectiva</legend>
+          <legend class="sr-only">Elige una vista</legend>
           <label
-            v-for="p in perspectives"
-            :key="p.id"
-            class="login-role"
-            :class="{ selected: selected === p.id }"
-            ><input
-              v-model="selected"
+            v-for="perspective in perspectives"
+            :key="perspective.id"
+            class="entry__role"
+            :class="{ 'is-chosen': chosen === perspective.id }"
+          >
+            <input
+              v-model="chosen"
               type="radio"
               name="perspective"
-              :value="p.id" /><span class="role-avatar">{{ p.initials }}</span
-            ><span
-              ><strong>{{ p.name }}</strong
-              ><small>{{ p.description }}</small></span
-            ><Check v-if="selected === p.id" :size="20" aria-hidden="true"
-          /></label>
+              :value="perspective.id"
+            />
+            <i aria-hidden="true">{{ perspective.initials }}</i>
+            <span>
+              <b>{{ perspective.name }}</b>
+              <em>{{ perspective.person }}</em>
+              <span>{{ perspective.reads }}</span>
+            </span>
+          </label>
         </fieldset>
-        <button class="button button--primary" type="submit">
-          Entrar como {{ perspectives.find((p) => p.id === selected)?.name }}
-          <ArrowRight :size="17" />
+
+        <button class="btn btn--live btn--lg" type="submit">
+          Entrar como {{ perspectiveById(chosen)?.name }}
         </button>
+        <p class="entry__note">
+          No hay credenciales ni operaciones reales. Puedes cambiar de vista
+          dentro del panel.
+        </p>
       </form>
-      <small>Sesión simulada, sin credenciales ni operaciones reales.</small>
     </main>
-    <NuxtLink to="/" class="back-link">Volver a la landing</NuxtLink>
+
+    <NuxtLink to="/" class="entry__back">Volver a la portada</NuxtLink>
   </div>
 </template>

@@ -1,299 +1,456 @@
 <script setup lang="ts">
+import { Check, Search } from '@lucide/vue'
 import {
-  ArrowUpRight,
-  ArrowDownRight,
-  ArrowRight,
-  Search,
-  Activity,
-  Check,
-  Building2,
-} from "@lucide/vue";
-import {
-  perspectives,
-  demoCompanies,
-  initialOffers,
+  companies,
+  companyById,
+  currentMonth,
+  decisionLabel,
   euros,
-  type Perspective,
-  type DemoOffer,
-} from "~/data/demo";
+  initialOffers,
+  leadCompany,
+  leadMonths,
+  months,
+  perspectiveById,
+  shapeLabel,
+  signed,
+  compactEuros,
+  type Offer,
+  type PerspectiveId,
+} from '~/data/demo'
+
 definePageMeta({
   middleware: [
     function (to) {
-      if (!perspectives.some((p) => p.id === to.params.role))
-        return navigateTo("/login");
-      const session = useCookie<string | null>("xray-demo-role");
-      if (!session.value) return navigateTo(`/login?role=${to.params.role}`);
+      if (!perspectiveById(String(to.params.role))) return navigateTo('/login')
+      const session = useCookie<string | null>('xray-demo-role')
+      if (!session.value) return navigateTo(`/login?role=${to.params.role}`)
     },
   ],
-});
-const route = useRoute();
-const role = computed(() => route.params.role as Perspective);
-const profile = computed(() => perspectives.find((p) => p.id === role.value)!);
-const section = computed(() =>
-  ["marketplace", "signals"].includes(String(route.query.section))
-    ? String(route.query.section)
-    : "overview",
-);
-useHead(() => ({ title: `${profile.value.name} · X-Ray` }));
-const query = ref("");
-const selectedId = ref("iberica");
-const selected = computed(
-  () => demoCompanies.find((c) => c.id === selectedId.value)!,
-);
-const filtered = computed(() =>
-  demoCompanies.filter((c) =>
-    `${c.name} ${c.sector}`
-      .toLocaleLowerCase("es")
-      .includes(query.value.toLocaleLowerCase("es")),
-  ),
-);
-const offers = useState<DemoOffer[]>("demo-offers", () =>
-  initialOffers.map((o) => ({ ...o })),
-);
-const sent = useState<string[]>("demo-sent", () => []);
-const notice = ref("");
-const confirmOffer = ref<string | null>(null);
-const company = demoCompanies[3]!;
-const title = computed(() =>
-  section.value === "signals"
-    ? "Cada cambio tiene una explicación."
-    : section.value === "marketplace"
-      ? role.value === "empresa"
-        ? "Financiación que encaja contigo."
-        : "Conecta capital con oportunidades."
-      : {
-          embat: "Una radiografía de tu ecosistema.",
-          empresa: "Tu próximo paso, con perspectiva.",
-          banco: "Más contexto. Mejores decisiones.",
-        }[role.value],
-);
-const subtitle = computed(
+})
+
+const route = useRoute()
+const role = computed(() => route.params.role as PerspectiveId)
+const profile = computed(() => perspectiveById(role.value)!)
+
+const allowed = ['resumen', 'cartera', 'senales', 'ofertas']
+const section = computed(() => {
+  const requested = String(route.query.section || 'resumen')
+  if (!allowed.includes(requested)) return 'resumen'
+  if (requested === 'cartera' && role.value === 'empresa') return 'resumen'
+  return requested
+})
+
+const sectionLabel = computed(
   () =>
     ({
-      embat:
-        "Supervisa empresas, señales y actividad de financiación desde un mismo lugar.",
-      empresa: "Distribuciones Ibérica · Distribución alimentaria",
-      banco: "Banco Meridiano · Oportunidades de financiación de circulante",
-    })[role.value],
-);
-const stats = computed(() =>
-  role.value === "empresa"
-    ? [
-        {
-          label: "Tu score actual",
-          value: "68 / 100",
-          detail: "↓ 14 puntos en 3 meses",
-          tone: "negative",
-        },
-        {
-          label: "Financiación disponible",
-          value: euros(offers.value.reduce((n, o) => n + o.amount, 0)),
-          detail: `${offers.value.length} ofertas para comparar`,
-          tone: "",
-        },
-        {
-          label: "Tipo más bajo ofertado",
-          value: "6,9 %",
-          detail: "Plazo de 18 meses",
-          tone: "",
-        },
-      ]
-    : [
-        {
-          label:
-            role.value === "embat"
-              ? "Empresas en el ecosistema"
-              : "Empresas disponibles",
-          value: "5",
-          detail: "Cartera de demostración en EUR",
-          tone: "",
-        },
-        {
-          label:
-            role.value === "embat"
-              ? "Ofertas en el marketplace"
-              : "Tus ofertas enviadas",
-          value: String(
-            role.value === "embat" ? offers.value.length : sent.value.length,
-          ),
-          detail:
-            role.value === "embat"
-              ? "Conexiones entre empresa y capital"
-              : "Simuladas durante esta sesión",
-          tone: "",
-        },
-        {
-          label: "Empresas que requieren atención",
-          value: "3",
-          detail: "2 a vigilar · 1 no prestar",
-          tone: "negative",
-        },
-      ],
-);
-function tone(score: number) {
-  return score >= 70 ? "positive" : score < 50 ? "negative" : "caution";
-}
-function trend(delta: number) {
-  return `${delta > 0 ? "+" : ""}${delta}`;
-}
-function points(history: number[]) {
-  return history.map((n, i) => `${i * 80},${125 - n}`).join(" ");
-}
-function sendOffer() {
-  if (sent.value.includes(selected.value.id)) return;
-  sent.value.push(selected.value.id);
-  if (selected.value.id === "iberica")
+      resumen: 'Resumen',
+      cartera: 'Cartera',
+      senales: role.value === 'empresa' ? 'Mis señales' : 'Señales',
+      ofertas: role.value === 'empresa' ? 'Mis ofertas' : 'Mercado',
+    })[section.value]!,
+)
+
+useHead(() => ({ title: `${sectionLabel.value} · ${profile.value.name} · X-Ray` }))
+
+/* A company view always has a subject. For the company perspective it is fixed;
+ * a lender picks it from the portfolio. */
+const pickedId = useState('wk-picked', () => 'iberica')
+const subject = computed(() =>
+  role.value === 'empresa' ? leadCompany : companyById(pickedId.value)!,
+)
+
+const query = ref('')
+const visible = computed(() => {
+  const needle = query.value.toLocaleLowerCase('es').trim()
+  if (!needle) return companies
+  return companies.filter((company) =>
+    `${company.name} ${company.sector} ${company.group}`
+      .toLocaleLowerCase('es')
+      .includes(needle),
+  )
+})
+
+const changed = computed(() =>
+  [...companies]
+    .filter((company) => Math.abs(company.delta3) > 0)
+    .sort((a, b) => Math.abs(b.delta3) - Math.abs(a.delta3)),
+)
+
+const offers = useState<Offer[]>('wk-offers', () =>
+  initialOffers.map((offer) => ({ ...offer })),
+)
+const sent = useState<string[]>('wk-sent', () => [])
+const notice = ref('')
+const confirming = ref<string | null>(null)
+
+function sendOffer(id: string) {
+  const company = companyById(id)!
+  if (sent.value.includes(id)) return
+  sent.value.push(id)
+  if (id === 'iberica')
     offers.value.push({
-      id: "new-iberica",
-      bank: "Banco Meridiano",
-      amount: selected.value.amount,
-      rate: selected.value.rate,
-      months: 12,
-      note: "Nueva oferta enviada desde la perspectiva Banco.",
+      id: 'meridiano-nueva',
+      bank: 'Banco Meridiano',
+      amount: company.amount,
+      rate: company.rate,
+      months: company.term,
+      note: 'Enviada desde la vista Banco durante esta demo.',
       accepted: false,
-    });
-  notice.value = `Oferta simulada para ${selected.value.name}. ${selected.value.id === "iberica" ? "Ya puedes verla en la perspectiva Empresa." : "Registrada en tus ofertas de esta sesión."}`;
-}
-function acceptOffer(id: string) {
-  const offer = offers.value.find((o) => o.id === id);
-  if (offer) offer.accepted = true;
-  confirmOffer.value = null;
+    })
   notice.value =
-    "Oferta aceptada en la demo. No se ha contratado financiación.";
+    id === 'iberica'
+      ? `Oferta enviada a ${company.name}. Cambia a la vista Empresa para verla llegar.`
+      : `Oferta enviada a ${company.name} dentro de la demo.`
 }
+
+function acceptOffer(id: string) {
+  const offer = offers.value.find((item) => item.id === id)
+  if (offer) offer.accepted = true
+  confirming.value = null
+  notice.value = 'Oferta aceptada en la demo. No se ha contratado nada.'
+}
+
 watch(
   () => route.fullPath,
   () => {
-    notice.value = "";
-    confirmOffer.value = null;
-    query.value = "";
+    notice.value = ''
+    confirming.value = null
+    query.value = ''
   },
-);
+)
+
+const detectedMonth = computed(() =>
+  subject.value.detectedAt !== null ? months[subject.value.detectedAt] : null,
+)
+const levelMonth = computed(() =>
+  subject.value.levelAt !== null ? months[subject.value.levelAt] : null,
+)
+
+const cheapest = computed(() =>
+  [...offers.value].sort(
+    (a, b) => Number(a.rate.replace(',', '.')) - Number(b.rate.replace(',', '.')),
+  )[0],
+)
+
+const headline = computed(() =>
+  ({
+    resumen:
+      role.value === 'empresa'
+        ? 'Esto es lo que ve quien te va a prestar.'
+        : role.value === 'banco'
+          ? 'Prestar, vigilar o no prestar.'
+          : 'Quién se mueve y desde cuándo.',
+    cartera: 'Ocho empresas, ordenadas por lo que puedes perder.',
+    senales: 'Qué se movió, cuánto pesó y cuándo lo dijimos.',
+    ofertas:
+      role.value === 'empresa'
+        ? 'Tres ofertas sobre la misma empresa.'
+        : 'Capital contra oportunidad.',
+  })[section.value]!,
+)
 </script>
+
 <template>
-  <div class="workspace-layout">
-    <a class="skip-link" href="#main-content">Saltar al contenido</a
-    ><WorkspaceSidebar :role="role" :section="section" />
-    <div class="workspace-body">
-      <header class="workspace-topbar">
-        <span
-          >{{ profile.name }} <span class="breadcrumb-slash">/</span>
-          {{
-            section === "overview"
-              ? "Resumen"
-              : section === "signals"
-                ? "Señales"
-                : "Marketplace"
-          }}</span
-        ><span class="demo-chip">Demo interactiva</span>
+  <div class="wk">
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <WorkspaceSidebar :role="role" :section="section" />
+
+    <div class="wk__body">
+      <header class="wk__top">
+        <p class="wk__crumb">
+          {{ profile.name }}<span aria-hidden="true">/</span>{{ sectionLabel }}
+        </p>
+        <span class="chip chip--neutral">{{ currentMonth }}</span>
       </header>
-      <main id="main-content" class="dashboard-main" tabindex="-1">
-        <div class="dashboard-heading">
-          <div>
-            <h1>{{ title }}</h1>
-            <p>{{ subtitle }}</p>
-          </div>
-          <span class="dashboard-date">Septiembre 2026</span>
+
+      <main id="main-content" class="wk__main" tabindex="-1">
+        <div class="wk__head">
+          <h1>{{ headline }}</h1>
+          <p v-if="role === 'empresa'">
+            {{ leadCompany.name }} · {{ leadCompany.sector }}
+          </p>
+          <p v-else>{{ profile.job }}</p>
         </div>
-        <div v-if="notice" class="feedback-banner" role="status">
-          <Check :size="18" />{{ notice }}
-        </div>
-        <section
-          v-if="section !== 'signals'"
-          class="dashboard-stats"
-          aria-label="Resumen"
-        >
-          <article v-for="stat in stats" :key="stat.label">
-            <p>{{ stat.label }}</p>
-            <strong>{{ stat.value }}</strong
-            ><small :class="stat.tone">{{ stat.detail }}</small>
-          </article>
-        </section>
-        <template v-if="role === 'empresa'">
-          <section v-if="section !== 'marketplace'" class="company-insight">
-            <div class="dashboard-card trajectory-card">
-              <div class="card-heading">
-                <div>
-                  <h2>Tu salud financiera</h2>
-                  <p>La trayectoria importa tanto como el nivel.</p>
-                </div>
-                <span class="status-label caution">Vigilar</span>
-              </div>
-              <div class="trajectory-score">
-                68<small>/ 100</small
-                ><span class="negative">↓ 14 puntos / 3 meses</span>
-              </div>
-              <svg
-                viewBox="0 0 400 120"
-                role="img"
-                aria-label="Score mensual: abril 85, mayo 84, junio 82, julio 78, agosto 73, septiembre 68"
-              >
-                <line
-                  x1="0"
-                  y1="80"
-                  x2="400"
-                  y2="80"
-                  stroke="#e5e5ec"
-                  stroke-dasharray="4 5"
-                />
-                <polyline
-                  :points="points(company.history)"
-                  fill="none"
-                  stroke="#6c47ff"
-                  stroke-width="3"
-                />
-                <circle
-                  v-for="(value, index) in company.history"
-                  :key="index"
-                  :cx="index * 80"
-                  :cy="125 - value"
-                  r="4"
-                  fill="#6c47ff"
-                />
-              </svg>
-              <div class="chart-months">
-                <span
-                  v-for="month in ['Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep']"
-                  :key="month"
-                  >{{ month }}</span
+
+        <p v-if="notice" class="notice" role="status">
+          <Check :size="16" aria-hidden="true" />{{ notice }}
+        </p>
+
+        <!-- Resumen -->
+        <div v-if="section === 'resumen'" class="wk__grid">
+          <section class="panel span-5 verdict">
+            <h2 class="panel__title">La decisión</h2>
+            <div class="verdict__read">
+              <b>{{ subject.score }}</b>
+              <span>
+                <DecisionTag :decision="subject.decision" />
+                <em
+                  :data-dir="subject.delta3 > 0 ? 'up' : subject.delta3 < 0 ? 'down' : 'flat'"
+                  >{{ signed(subject.delta3) }} puntos en tres meses</em
                 >
-              </div>
+              </span>
             </div>
-            <div class="dashboard-card explanation-card">
-              <span class="signal-icon"><Activity :size="22" /></span>
-              <h2>¿Qué ha cambiado?</h2>
-              <p>{{ company.why }}</p>
-              <div class="signal-callout">
-                <strong>Deterioro persistente</strong
-                ><span
-                  >La caída se mantiene desde julio. Revisa el coste de la deuda
-                  y prioriza los pagos pendientes.</span
-                >
-              </div>
-              <small
-                >Lectura ilustrativa del caso demo, no una evaluación
-                real.</small
-              >
-            </div>
+            <p class="verdict__shape">{{ shapeLabel[subject.shape] }}</p>
+            <p class="verdict__action">{{ subject.action }}</p>
           </section>
-          <section v-if="section !== 'signals'" aria-labelledby="offers-title">
-            <div class="card-heading offers-heading">
+
+          <section class="panel span-4 ahead">
+            <h2 class="panel__title">La ventaja</h2>
+            <template v-if="detectedMonth && levelMonth">
+              <p class="ahead__read">
+                {{ leadMonths(subject) }}<small>meses</small>
+              </p>
+              <p class="ahead__why">
+                Marcamos la trayectoria en {{ detectedMonth }}. El score no
+                cambió de tramo hasta {{ levelMonth }}.
+              </p>
+            </template>
+            <template v-else>
+              <p class="ahead__read ahead__read--none">—</p>
+              <p class="ahead__why">
+                Nada que anticipar: {{ subject.name }} no ha cambiado de tramo
+                en 24 meses.
+              </p>
+            </template>
+          </section>
+
+          <section class="panel span-3 cover">
+            <h2 class="panel__title">Lo que podemos ver</h2>
+            <dl>
               <div>
-                <h2 id="offers-title">Ofertas para tu empresa</h2>
-                <p>Compara importe, tipo anual y plazo antes de elegir.</p>
+                <dt>Contabilidad</dt>
+                <dd>{{ subject.erp ? 'Conectada' : 'Sin conectar' }}</dd>
               </div>
-              <span class="count-label">{{ offers.length }} ofertas</span>
+              <div>
+                <dt>Historial</dt>
+                <dd>{{ subject.monthsConnected }} meses</dd>
+              </div>
+              <div>
+                <dt>Movimientos con factura</dt>
+                <dd>{{ Math.round(subject.coverage * 100) }} %</dd>
+              </div>
+            </dl>
+            <p>Esto no mide su salud. Mide cuánto podemos afirmar.</p>
+          </section>
+
+          <section class="panel span-12 traject">
+            <header class="panel__bar">
+              <h2 class="panel__title">Trayectoria</h2>
+              <div class="panel__who">
+                <strong>{{ subject.name }}</strong>
+                <span>24 meses de tesorería · previsión a tres meses</span>
+              </div>
+              <span class="chip chip--ahead">Previsión</span>
+            </header>
+            <TrajectoryChart :company="subject" />
+          </section>
+
+          <section class="panel span-7 changed">
+            <header class="panel__bar">
+              <h2 class="panel__title">Qué ha cambiado</h2>
+              <span class="chip chip--neutral">Peso sobre el movimiento</span>
+            </header>
+            <p class="changed__why">{{ subject.why }}</p>
+            <SignalBars v-if="subject.signals" :signals="subject.signals" />
+            <p v-else class="empty">
+              Sin contabilidad conectada solo vemos los bancos, así que no
+              podemos repartir el movimiento entre cobros, margen y deuda.
+              Pídeles la conexión del ERP.
+            </p>
+          </section>
+
+          <section class="panel span-5 cash">
+            <header class="panel__bar">
+              <h2 class="panel__title">El dinero de la cuenta</h2>
+            </header>
+            <p class="cash__read">
+              {{ subject.runway.now.toLocaleString('es-ES') }}<small>meses cubiertos</small>
+            </p>
+            <p class="cash__was">
+              Eran {{ subject.runway.prev.toLocaleString('es-ES') }} meses en
+              marzo. Cobra a {{ subject.dso.now || '—' }} días y paga a
+              {{ subject.dpo.now || '—' }}.
+            </p>
+            <FlowBars v-if="subject.flows" :flows="subject.flows" />
+            <p v-else class="empty">
+              Solo tenemos once meses de banco para esta empresa. No dibujamos
+              lo que no podemos reconstruir.
+            </p>
+          </section>
+
+          <section v-if="role !== 'empresa'" class="panel span-12">
+            <header class="panel__bar">
+              <h2 class="panel__title">Cartera</h2>
+              <NuxtLink class="btn btn--quiet" :to="`/dashboard/${role}?section=cartera`"
+                >Abrir la cartera completa</NuxtLink
+              >
+            </header>
+            <CompanyTable
+              compact
+              :companies="companies"
+              :selected-id="subject.id"
+              @select="pickedId = $event"
+            />
+          </section>
+
+          <section v-else class="panel span-12">
+            <header class="panel__bar">
+              <h2 class="panel__title">Tus ofertas</h2>
+              <NuxtLink class="btn btn--quiet" :to="`/dashboard/${role}?section=ofertas`"
+                >Comparar las {{ offers.length }} ofertas</NuxtLink
+              >
+            </header>
+            <p class="lead-line">
+              La más barata está al {{ cheapest?.rate }} % a
+              {{ cheapest?.months }} meses. Hace un trimestre, con 85 puntos,
+              este mismo importe se ofrecía al 5,6 %.
+            </p>
+          </section>
+        </div>
+
+        <!-- Cartera -->
+        <div v-else-if="section === 'cartera'" class="wk__grid">
+          <section class="panel span-8 list">
+            <header class="panel__bar">
+              <h2 class="panel__title">Empresas</h2>
+              <label class="search">
+                <Search :size="15" aria-hidden="true" />
+                <input
+                  v-model="query"
+                  type="search"
+                  placeholder="Buscar empresa, sector o grupo"
+                  aria-label="Buscar empresa, sector o grupo"
+                />
+              </label>
+            </header>
+            <CompanyTable
+              :companies="visible"
+              :selected-id="subject.id"
+              @select="pickedId = $event"
+            />
+            <p v-if="!visible.length" class="empty">
+              Ninguna empresa coincide con «{{ query }}». Prueba con el sector o
+              el nombre del grupo.
+            </p>
+            <footer class="list__foot">
+              <span>{{ visible.length }} de {{ companies.length }} empresas</span>
+              <span>Los grupos se mantienen juntos al validar</span>
+            </footer>
+          </section>
+
+          <section class="panel span-4 sheet">
+            <header class="panel__bar">
+              <h2 class="panel__title">{{ subject.name }}</h2>
+              <DecisionTag :decision="subject.decision" />
+            </header>
+            <p class="sheet__sector">
+              {{ subject.sector }} · {{ subject.group }}
+            </p>
+            <div class="sheet__read">
+              <b>{{ subject.score }}</b>
+              <span>
+                <em
+                  :data-dir="subject.delta3 > 0 ? 'up' : subject.delta3 < 0 ? 'down' : 'flat'"
+                  >{{ signed(subject.delta3) }} en tres meses</em
+                >
+                <small>{{ signed(subject.delta12) }} en doce meses</small>
+              </span>
             </div>
-            <div class="warning-banner">
-              Tu score bajó 14 puntos. Los tipos de este ejemplo son más altos
-              que hace un trimestre. Una misma ficha permite comparar las
-              propuestas.
-            </div>
-            <article v-for="offer in offers" :key="offer.id" class="offer-row">
-              <span class="bank-avatar"><Building2 :size="23" /></span>
-              <div class="offer-bank">
-                <h3>{{ offer.bank }}</h3>
-                <p>{{ offer.note }}</p>
+            <h3>{{ subject.headline }}</h3>
+            <p class="sheet__why">{{ subject.why }}</p>
+            <TrajectoryChart :company="subject" />
+            <dl class="sheet__terms">
+              <div>
+                <dt>Importe orientativo</dt>
+                <dd>{{ euros(subject.amount) }}</dd>
+              </div>
+              <div>
+                <dt>Tipo sugerido</dt>
+                <dd>{{ subject.rate }} %</dd>
+              </div>
+              <div>
+                <dt>Plazo</dt>
+                <dd>{{ subject.term }} meses</dd>
+              </div>
+              <div>
+                <dt>Caja cubierta</dt>
+                <dd>{{ subject.runway.now.toLocaleString('es-ES') }} meses</dd>
+              </div>
+            </dl>
+            <p class="sheet__action">{{ subject.action }}</p>
+            <button
+              v-if="role === 'banco'"
+              class="btn btn--live"
+              type="button"
+              :disabled="sent.includes(subject.id) || subject.decision === 'no-prestar'"
+              @click="sendOffer(subject.id)"
+            >
+              {{
+                sent.includes(subject.id)
+                  ? 'Oferta enviada'
+                  : subject.decision === 'no-prestar'
+                    ? 'No recomendamos ofertar'
+                    : 'Enviar oferta'
+              }}
+            </button>
+          </section>
+        </div>
+
+        <!-- Señales -->
+        <section v-else-if="section === 'senales'" class="panel signals">
+          <header class="panel__bar">
+            <h2 class="panel__title">Monitor de cambios</h2>
+            <span class="chip chip--neutral">Últimos tres meses</span>
+          </header>
+          <ol>
+            <li v-for="company in changed" :key="company.id">
+              <div class="signals__id">
+                <b>{{ company.name }}</b>
+                <span>{{ company.sector }}</span>
+              </div>
+              <span
+                class="signals__delta"
+                :data-dir="company.delta3 > 0 ? 'up' : 'down'"
+                >{{ signed(company.delta3) }}<small>pts</small></span
+              >
+              <Sparkline
+                :values="company.history.slice(12)"
+                :domain="[34, 96]"
+                :tone="company.delta3 > 2 ? 'mint' : company.delta3 < -5 ? 'crimson' : 'muted'"
+                :label="`${company.name}: ${company.history.slice(12).join(', ')}`"
+              />
+              <div class="signals__read">
+                <b>{{ shapeLabel[company.shape] }}</b>
+                <span>{{ company.headline }}</span>
+              </div>
+              <span v-if="leadMonths(company)" class="chip chip--ahead"
+                >{{ leadMonths(company) }} meses antes</span
+              >
+              <span v-else class="chip chip--neutral">Sin cambio de tramo</span>
+              <DecisionTag :decision="company.decision" size="sm" />
+            </li>
+          </ol>
+          <footer class="list__foot">
+            <span>Ordenado por cuánto se movió el score, en las dos direcciones</span>
+          </footer>
+        </section>
+
+        <!-- Ofertas -->
+        <div v-else class="wk__grid">
+          <section v-if="role === 'empresa'" class="panel span-12 offers">
+            <header class="panel__bar">
+              <h2 class="panel__title">Ofertas recibidas</h2>
+              <span class="chip chip--amber">Tu score bajó 14 puntos</span>
+            </header>
+            <p class="lead-line">
+              Los tres tipos son más altos que en junio porque tu caja cubre
+              menos tiempo. Bajar los días de pago a proveedores es lo que más
+              pesa para recuperarlos.
+            </p>
+            <article v-for="offer in offers" :key="offer.id">
+              <div class="offers__bank">
+                <b>{{ offer.bank }}</b>
+                <span>{{ offer.note }}</span>
               </div>
               <dl>
                 <div>
@@ -308,251 +465,107 @@ watch(
                   <dt>Plazo</dt>
                   <dd>{{ offer.months }} meses</dd>
                 </div>
+                <div>
+                  <dt>Intereses totales</dt>
+                  <dd>
+                    {{
+                      euros(
+                        Math.round(
+                          (offer.amount *
+                            Number(offer.rate.replace(',', '.')) *
+                            offer.months) /
+                            1200,
+                        ),
+                      )
+                    }}
+                  </dd>
+                </div>
               </dl>
               <button
-                class="button"
-                :class="
-                  offer.accepted ? 'button--secondary' : 'button--primary'
-                "
+                class="btn"
+                :class="offer.accepted ? 'btn--quiet' : 'btn--live'"
+                type="button"
                 :disabled="offer.accepted"
-                @click="confirmOffer = offer.id"
+                @click="confirming = offer.id"
               >
-                {{ offer.accepted ? "Aceptada" : "Aceptar" }}
+                {{ offer.accepted ? 'Aceptada' : 'Aceptar' }}
               </button>
-              <div v-if="confirmOffer === offer.id" class="offer-confirm">
-                <span>¿Aceptar esta oferta en la demo?</span
-                ><button
-                  class="button button--primary"
-                  @click="acceptOffer(offer.id)"
+              <div v-if="confirming === offer.id" class="offers__confirm">
+                <span
+                  >Vas a aceptar {{ euros(offer.amount) }} al
+                  {{ offer.rate }} % en la demo.</span
                 >
-                  Confirmar aceptación</button
-                ><button
-                  class="button button--secondary"
-                  @click="confirmOffer = null"
-                >
+                <button class="btn btn--live" type="button" @click="acceptOffer(offer.id)">
+                  Aceptar la oferta
+                </button>
+                <button class="btn btn--quiet" type="button" @click="confirming = null">
                   Cancelar
                 </button>
               </div>
             </article>
           </section>
-        </template>
-        <template v-else-if="section !== 'signals'">
-          <section
-            v-if="role === 'embat' && section === 'overview'"
-            class="ecosystem-strip"
-          >
-            <div>
-              <span class="signal-icon"><Activity :size="22" /></span>
-              <h2>El cambio, a ambos lados del riesgo.</h2>
-              <p>
-                Talleres Vidal se recupera. Distribuciones Ibérica pierde
-                margen. Prioriza el seguimiento con el contexto de cada empresa.
-              </p>
-            </div>
-            <NuxtLink
-              class="button button--secondary"
-              to="/dashboard/embat?section=signals"
-              >Revisar señales <ArrowRight :size="16"
-            /></NuxtLink>
-          </section>
-          <div class="marketplace-layout">
-            <section class="dashboard-card company-list">
-              <div class="card-heading">
-                <div>
-                  <h2>
-                    {{
-                      role === "embat"
-                        ? "Empresas del ecosistema"
-                        : "Encuentra tu próxima oportunidad"
-                    }}
-                  </h2>
-                  <p>Score, trayectoria y criterio para decidir.</p>
-                </div>
-              </div>
-              <label class="company-search"
-                ><Search :size="17" /><input
-                  v-model="query"
-                  type="search"
-                  placeholder="Buscar empresa o sector"
-                  aria-label="Buscar empresa o sector"
-              /></label>
-              <div class="market-table-wrap">
-                <table class="market-table">
-                  <thead>
-                    <tr>
-                      <th>Empresa</th>
-                      <th>Score</th>
-                      <th>3 meses</th>
-                      <th>Tipo sugerido</th>
-                      <th><span class="sr-only">Ficha</span></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      v-for="c in filtered"
-                      :key="c.id"
-                      :class="{ selected: selectedId === c.id }"
-                    >
-                      <td>
-                        <strong>{{ c.name }}</strong
-                        ><small>{{ c.sector }}</small>
-                      </td>
-                      <td>
-                        <span class="table-score" :class="tone(c.score)">{{
-                          c.score
-                        }}</span>
-                      </td>
-                      <td>
-                        <span
-                          class="trend-cell"
-                          :class="c.delta > 0 ? 'positive' : 'negative'"
-                          ><ArrowUpRight
-                            v-if="c.delta > 0"
-                            :size="15"
-                          /><ArrowDownRight v-else :size="15" />{{
-                            trend(c.delta)
-                          }}</span
-                        >
-                      </td>
-                      <td>{{ c.rate }} %</td>
-                      <td>
-                        <button
-                          class="row-open"
-                          :aria-label="`Ver ficha de ${c.name}`"
-                          :aria-pressed="selectedId === c.id"
-                          @click="selectedId = c.id"
-                        >
-                          <ArrowRight :size="18" />
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <p v-if="!filtered.length" class="empty-search">
-                No hay empresas para «{{ query }}». Prueba otro nombre o sector.
-              </p>
-              <div class="table-footer">
-                {{ filtered.length }} empresas
-                <span>Datos de tesorería ilustrativos</span>
-              </div>
-            </section>
-            <aside
-              class="dashboard-card company-detail"
-              aria-label="Ficha de empresa"
-              aria-live="polite"
-            >
-              <div>
-                <span class="detail-eyebrow">Ficha de empresa</span>
-                <h2>{{ selected.name }}</h2>
-                <p>{{ selected.sector }}</p>
-              </div>
-              <div class="detail-rating">
-                <strong :class="tone(selected.score)">{{
-                  selected.score
-                }}</strong>
-                <div>
-                  <span class="status-label" :class="tone(selected.score)">{{
-                    selected.action
-                  }}</span
-                  ><small :class="selected.delta > 0 ? 'positive' : 'negative'"
-                    >{{ trend(selected.delta) }} puntos en 3 meses</small
-                  >
-                </div>
-              </div>
-              <h3>{{ selected.signal }}</h3>
-              <p class="detail-why">{{ selected.why }}</p>
-              <svg
-                class="detail-chart"
-                viewBox="0 0 400 110"
-                role="img"
-                :aria-label="`Score de abril a septiembre: ${selected.history.join(', ')}`"
+
+          <section v-else class="panel span-12 offers">
+            <header class="panel__bar">
+              <h2 class="panel__title">Dónde colocar los próximos 100.000 €</h2>
+              <span class="chip chip--neutral"
+                >{{ sent.length }} de {{ companies.length }} contactadas</span
               >
-                <polyline
-                  :points="points(selected.history)"
-                  fill="none"
-                  stroke="#6c47ff"
-                  stroke-width="3"
-                />
-              </svg>
-              <div class="evidence-months">
-                <span>Abril</span><span>Septiembre</span>
+            </header>
+            <p class="lead-line">
+              Ordenado por lo que un prestamista gana descontando el riesgo que
+              vemos en la caja. Las de «no prestar» aparecen para que quede
+              claro por qué no.
+            </p>
+            <article
+              v-for="company in companies"
+              :key="company.id"
+              :class="{ 'is-out': company.decision === 'no-prestar' }"
+            >
+              <div class="offers__bank">
+                <b>{{ company.name }}</b>
+                <span>{{ company.headline }}</span>
               </div>
-              <dl class="detail-terms">
+              <dl>
                 <div>
-                  <dt>Importe orientativo</dt>
-                  <dd>{{ euros(selected.amount) }}</dd>
+                  <dt>Score</dt>
+                  <dd>{{ company.score }}</dd>
                 </div>
                 <div>
-                  <dt>Tipo anual ilustrativo</dt>
-                  <dd>{{ selected.rate }} %</dd>
+                  <dt>Tipo sugerido</dt>
+                  <dd>{{ company.rate }} %</dd>
                 </div>
                 <div>
-                  <dt>Plazo</dt>
-                  <dd>12 meses</dd>
+                  <dt>Importe</dt>
+                  <dd>{{ compactEuros(company.amount) }}</dd>
+                </div>
+                <div>
+                  <dt>Decisión</dt>
+                  <dd>{{ decisionLabel[company.decision] }}</dd>
                 </div>
               </dl>
               <button
-                v-if="role === 'banco'"
-                class="button button--primary"
-                :disabled="
-                  sent.includes(selected.id) || selected.action === 'No prestar'
-                "
-                @click="sendOffer"
+                class="btn"
+                :class="sent.includes(company.id) ? 'btn--quiet' : 'btn--live'"
+                type="button"
+                :disabled="sent.includes(company.id) || company.decision === 'no-prestar'"
+                @click="sendOffer(company.id)"
               >
                 {{
-                  sent.includes(selected.id)
-                    ? "Oferta enviada en demo"
-                    : selected.action === "No prestar"
-                      ? "Financiación no recomendada"
-                      : "Enviar oferta demo"
-                }}<ArrowRight :size="16" /></button
-              ><NuxtLink
-                v-else
-                class="button button--secondary"
-                to="/dashboard/embat?section=signals"
-                >Ver señales del ecosistema</NuxtLink
-              >
-            </aside>
-          </div>
-        </template>
-        <section
-          v-if="section === 'signals' && role !== 'empresa'"
-          class="dashboard-card signals-list"
-        >
-          <div class="card-heading">
-            <div>
-              <h2>Monitor de cambios</h2>
-              <p>
-                Mejoras y deterioros, con su explicación y la acción sugerida.
-              </p>
-            </div>
-            <span class="count-label">Abril — septiembre</span>
-          </div>
-          <article v-for="c in demoCompanies" :key="c.id" class="signal-row">
-            <span
-              class="signal-icon"
-              :class="c.delta > 0 ? 'positive' : 'negative'"
-              ><ArrowUpRight v-if="c.delta > 0" /><ArrowDownRight v-else
-            /></span>
-            <div>
-              <h3>
-                {{ c.name }}
-                <span :class="c.delta > 0 ? 'positive' : 'negative'"
-                  >{{ trend(c.delta) }} pts / 3 meses</span
-                >
-              </h3>
-              <strong>{{ c.signal }}</strong>
-              <p>{{ c.why }}</p>
-            </div>
-            <span class="status-label" :class="tone(c.score)">{{
-              c.action
-            }}</span>
-          </article>
-        </section>
-        <footer class="dashboard-footer">
-          Datos y condiciones ficticios para explorar el producto. Las acciones
-          solo afectan a esta demo.
+                  sent.includes(company.id)
+                    ? 'Enviada'
+                    : company.decision === 'no-prestar'
+                      ? 'Descartada'
+                      : 'Enviar oferta'
+                }}
+              </button>
+            </article>
+          </section>
+        </div>
+
+        <footer class="wk__foot">
+          Cartera y condiciones ficticias. Lo que hagas aquí solo afecta a esta
+          sesión.
         </footer>
       </main>
     </div>

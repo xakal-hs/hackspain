@@ -29,9 +29,11 @@ Nitro then forwards `/api/companies` to the backend, keeping the browser on a sa
 - `app/components/`: reusable product surfaces.
 - `app/stores/`: Pinia UI state.
 - `app/composables/`: TanStack Query server-state hooks.
-- `app/assets/css/`: design tokens and global component foundations.
+- `app/assets/css/`: `tokens.css` (both themes), `main.css` (base, primitives,
+  charts, landing) and `workspace.css` (the cockpit layer), loaded in that order.
+- `app/utils/chart.ts`: scales and path builders shared by every chart.
 - `server/api/`: Nitro server endpoints and backend adapters.
-- `DESIGN_SYSTEM.md`: the translated X-Ray design system and usage rules.
+- `DESIGN_SYSTEM.md`: the palette, type, structure and motion rules.
 
 ## Checks
 
@@ -49,12 +51,15 @@ version error when the runtime is unsupported.
 
 ## Demo perspectives
 
-- `/`: public landing and entry points for each perspective.
+- `/`: public landing, built around the moment a deterioration is detected.
 - `/login`: simulated sign-in without credentials or real authentication.
-- `/dashboard/embat`: ecosystem overview, marketplace and signal monitor.
-- `/dashboard/empresa`: financial trajectory and financing offers.
-- `/dashboard/banco`: company search, decision details and simulated offers.
-- `/cartera`: original API-backed portfolio, preserved independently.
+- `/dashboard/banco`: decision, portfolio, signals and offers sent.
+- `/dashboard/empresa`: own trajectory, what changed, and offers received.
+- `/dashboard/embat`: both sides, with anticipation as the headline number.
+
+Each dashboard takes `?section=` with `resumen` (default), `cartera` (not for
+`empresa`), `senales` or `ofertas`. The earlier standalone routes `/cartera`,
+`/monitor`, `/escenarios` and `/empresas/:id` now redirect into these sections.
 
 Switch perspectives or exit using the user panel at the bottom of the desktop sidebar. On mobile, navigation and the user panel move above the content. Dashboard deep links redirect to demo sign-in when no demo-role cookie exists. This cookie is a UI convenience, not an authorization boundary.
 

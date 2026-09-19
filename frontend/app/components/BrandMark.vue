@@ -1,6 +1,22 @@
+<!-- One diagonal is drawn, the other is measured: what the treasury already shows
+     against what the score sees coming. -->
 <template>
-  <svg aria-hidden="true" viewBox="0 0 28 28" class="brand-mark">
-    <path d="M5 7.5h7L16 14l-4 6.5H5L9 14 5 7.5Z" fill="currentColor" />
-    <path d="M16 7.5h7L19 14l4 6.5h-7l-4-6.5 4-6.5Z" fill="currentColor" opacity=".42" />
+  <svg aria-hidden="true" viewBox="0 0 24 24" class="brand-mark">
+    <path
+      d="M5 4 19 20"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.4"
+      stroke-linecap="round"
+    />
+    <path
+      d="M19 4 5 20"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.4"
+      stroke-linecap="round"
+      stroke-dasharray="3.2 3.4"
+      opacity=".55"
+    />
   </svg>
 </template>

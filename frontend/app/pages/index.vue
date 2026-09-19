@@ -1,112 +1,308 @@
 <script setup lang="ts">
 import {
-  ArrowRight,
-  Activity,
-  Building2,
-  Landmark,
-  ScanLine,
-} from "@lucide/vue";
-useHead({ title: "X-Ray · La salud financiera, a la vista" });
+  companies,
+  companyById,
+  dipVsFall,
+  leadCompany,
+  leadMonths,
+  perspectives,
+  shapeLabel,
+  signed,
+  value as valueRows,
+} from '~/data/demo'
+
+useHead({
+  title: 'X-Ray · La caja avisa antes que las cuentas',
+})
+
+const sections = [
+  { id: 'deteccion', label: 'La detección' },
+  { id: 'lectura', label: 'Tres lecturas' },
+  { id: 'simetria', label: 'Mejora y caída' },
+  { id: 'bache', label: 'Bache o caída' },
+  { id: 'producto', label: 'Quién paga' },
+]
+
+const active = useSectionIndex(sections.map((section) => section.id))
+
+/* Six companies read at one shared scale: a recovery and a collapse have to be
+ * comparable by eye, not by caption. */
+const strip = computed(() =>
+  ['atlas-frio', 'solis', 'vidal', 'nortex', 'iberica', 'sureste']
+    .map((id) => companyById(id)!)
+    .map((company) => ({
+      ...company,
+      window: company.history.slice(12),
+    })),
+)
+
+const stripDomain: [number, number] = [34, 96]
+
+const readings = computed(() => {
+  const company = leadCompany
+  return [
+    {
+      perspective: perspectives.find((p) => p.id === 'banco')!,
+      figure: `${company.runway.now.toLocaleString('es-ES')}`,
+      unit: 'meses',
+      tone: 'plain',
+      reading: 'lo que dura el dinero que le queda en la cuenta',
+      before: `eran ${company.runway.prev.toLocaleString('es-ES')} meses en marzo`,
+    },
+    {
+      perspective: perspectives.find((p) => p.id === 'empresa')!,
+      figure: '+1,8',
+      unit: 'puntos',
+      tone: 'plain',
+      reading: 'lo que ha subido el interés de su deuda',
+      before: 'y paga a proveedores 23 días más tarde',
+    },
+    {
+      perspective: perspectives.find((p) => p.id === 'embat')!,
+      figure: `${leadMonths(company)}`,
+      unit: 'meses',
+      tone: 'ahead',
+      reading: 'de ventaja sobre el momento en que cayó el nivel',
+      before: 'aviso enviado a las dos partes en mayo',
+    },
+  ]
+})
 </script>
+
 <template>
-  <div class="landing">
-    <header class="landing-nav">
-      <NuxtLink to="/" class="brand"><BrandMark /> X-Ray</NuxtLink
-      ><span class="landing-by">Inteligencia de tesorería de Embat</span
-      ><NuxtLink class="button button--primary" to="/login"
-        >Entrar a la demo <ArrowRight :size="16"
-      /></NuxtLink>
-    </header>
-    <main id="main-content" class="landing-main">
-      <section class="landing-hero">
-        <div>
-          <span class="landing-tag"
-            ><ScanLine :size="16" /> Una nueva mirada al riesgo</span
-          >
-          <h1>La salud financiera.<br />Con perspectiva.</h1>
-          <p>
-            Lo que una foto no cuenta, la tesorería lo revela. Entiende cómo
-            cambia una empresa y conecta cada señal con una mejor decisión.
+  <div class="lp">
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+
+    <aside class="lp__rail">
+      <NuxtLink to="/" class="lp__brand">
+        <BrandMark />
+        <span>X-Ray<small>de Embat</small></span>
+      </NuxtLink>
+
+      <nav class="lp__index" aria-label="Secciones de la página">
+        <a
+          v-for="section in sections"
+          :key="section.id"
+          :href="`#${section.id}`"
+          :class="{ 'is-here': active === section.id }"
+          :aria-current="active === section.id ? 'true' : undefined"
+          >{{ section.label }}</a
+        >
+      </nav>
+
+      <div class="lp__rail-foot">
+        <ThemeSwitch />
+        <NuxtLink class="btn btn--live" to="/login">Abrir la demo</NuxtLink>
+        <p>Sin contraseña. Datos ficticios.</p>
+      </div>
+    </aside>
+
+    <main id="main-content" class="lp__main" tabindex="-1">
+      <section id="deteccion" class="lp__hero">
+        <h1 class="lp__head">
+          <span>Los problemas se ven en la caja</span>
+          <span>antes de verse en las cuentas.</span>
+        </h1>
+        <p class="lp__lead">
+          X-Ray lee mes a mes el dinero que una empresa tiene en la cuenta, lo
+          que tarda en cobrar y lo que retrasa en pagar. Con eso dice si
+          prestarle, vigilarla o no prestarle, por qué, y desde cuándo.
+        </p>
+
+        <div class="panel lp__evidence">
+          <header class="panel__bar">
+            <span class="chip chip--amber">En seguimiento</span>
+            <div class="panel__who">
+              <strong>{{ leadCompany.name }}</strong>
+              <span>{{ leadCompany.sector }} · {{ leadCompany.group }}</span>
+            </div>
+            <div class="panel__reading">
+              <b>{{ leadCompany.score }}</b>
+              <span
+                >{{ signed(leadCompany.delta3) }} en tres meses<small
+                  >de 100</small
+                ></span
+              >
+            </div>
+            <DecisionTag :decision="leadCompany.decision" />
+          </header>
+
+          <DetectionChart :company="leadCompany" />
+
+          <p class="lp__evidence-read">
+            Cuatro meses antes de que el score cayera por debajo de 70, el
+            dinero de la cuenta ya cubría la mitad de tiempo y el interés de la
+            deuda había subido 1,8 puntos. Eso es lo que X-Ray marcó en mayo.
           </p>
-          <NuxtLink class="button button--primary" to="/login"
-            >Explorar X-Ray <ArrowRight :size="18" /></NuxtLink
-          ><small
-            >Acceso demo sin contraseña. Tres perspectivas, un mismo
-            ecosistema.</small
-          >
         </div>
-        <div class="landing-evidence">
-          <div class="evidence-top">
-            <span><BrandMark /> Radiografía de empresa</span
-            ><span class="live-label">Demo</span>
-          </div>
-          <p>Distribuciones Ibérica</p>
-          <div class="evidence-score">
-            68 <span>/ 100 <small>↓ 14 puntos en 3 meses</small></span>
-          </div>
-          <svg
-            viewBox="0 0 440 120"
-            role="img"
-            aria-label="Score de 85 a 68 entre abril y septiembre"
-          >
-            <path
-              d="M0 20 L88 25 L176 36 L264 55 L352 81 L440 106"
-              fill="none"
-              stroke="#bdaaff"
-              stroke-width="3"
-            />
-            <path
-              d="M0 20 L88 25 L176 36 L264 55 L352 81 L440 106 L440 120 L0 120Z"
-              fill="#6c47ff"
-              opacity=".12"
-            />
-          </svg>
-          <div class="evidence-months">
-            <span>Abril</span><span>Septiembre 2026</span>
-          </div>
-          <div class="evidence-reason">
-            <Activity :size="20" /><span
-              ><strong>Una señal para actuar a tiempo</strong>Sube el coste de
-              la deuda. Se retrasa el pago a proveedores.</span
+      </section>
+
+      <section id="lectura" class="lp__section">
+        <div class="lp__section-head">
+          <h2>La misma caja, tres lecturas.</h2>
+          <p>
+            Ibérica es una sola empresa con un solo score. Lo que cambia es la
+            cifra que cada uno necesita mirar primero, porque no arriesgan lo
+            mismo.
+          </p>
+        </div>
+
+        <ul class="reads">
+          <li v-for="read in readings" :key="read.perspective.id">
+            <span class="reads__who">
+              <i aria-hidden="true">{{ read.perspective.initials }}</i>
+              <b>{{ read.perspective.name }}</b>
+              <em>{{ read.perspective.job }}</em>
+            </span>
+            <span class="reads__figure" :data-tone="read.tone"
+              >{{ read.figure }}<small>{{ read.unit }}</small></span
             >
+            <span class="reads__reading">
+              <b>{{ read.reading }}</b>
+              <em>{{ read.before }}</em>
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <section id="simetria" class="lp__section">
+        <div class="lp__section-head">
+          <h2>Una mejora pesa igual que un deterioro.</h2>
+          <p>
+            Las seis empresas, a la misma escala y en la misma ventana de doce
+            meses. Vidal sube veinte puntos y Sureste pierde veintitrés: el
+            mismo modelo detecta las dos cosas.
+          </p>
+        </div>
+
+        <ul class="multiples">
+          <li v-for="company in strip" :key="company.id">
+            <span class="multiples__name">{{ company.name }}</span>
+            <Sparkline
+              :values="company.window"
+              :domain="stripDomain"
+              :tone="company.delta3 > 2 ? 'mint' : company.delta3 < -5 ? 'crimson' : 'muted'"
+              :label="`${company.name}, score de los últimos doce meses: ${company.window.join(', ')}`"
+            />
+            <span class="multiples__foot">
+              <b>{{ company.score }}</b>
+              <em :data-dir="company.delta3 > 0 ? 'up' : company.delta3 < 0 ? 'down' : 'flat'"
+                >{{ signed(company.delta3) }} / 3 m</em
+              >
+              <span>{{ shapeLabel[company.shape] }}</span>
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <section id="bache" class="lp__section">
+        <div class="lp__section-head">
+          <h2>Un bache no es una caída.</h2>
+          <p>
+            Las dos perdieron cuatro puntos en un mes y venían de dos meses
+            idénticos. La línea de puntos es la otra empresa, para ver dónde se
+            separan.
+          </p>
+        </div>
+
+        <div class="verdicts">
+          <article>
+            <header>
+              <span class="chip chip--mint">{{ dipVsFall.bump.verdict }}</span>
+              <h3>{{ dipVsFall.bump.name }}</h3>
+              <p>{{ dipVsFall.bump.month }}</p>
+            </header>
+            <DipFallChart
+              :values="dipVsFall.bump.relative"
+              :ghost="dipVsFall.fall.relative"
+              :offsets="dipVsFall.offsets"
+              tone="mint"
+            />
+            <dl>
+              <div>
+                <dt>Qué pasó</dt>
+                <dd>{{ dipVsFall.bump.cause }}</dd>
+              </div>
+              <div>
+                <dt>Por qué no cambia nada</dt>
+                <dd>{{ dipVsFall.bump.evidence }}</dd>
+              </div>
+            </dl>
+            <footer>
+              <DecisionTag :decision="dipVsFall.bump.decision" />
+              <span>{{ dipVsFall.bump.outcome }}</span>
+            </footer>
+          </article>
+
+          <article>
+            <header>
+              <span class="chip chip--crimson">{{
+                dipVsFall.fall.verdict
+              }}</span>
+              <h3>{{ dipVsFall.fall.name }}</h3>
+              <p>{{ dipVsFall.fall.month }}</p>
+            </header>
+            <DipFallChart
+              :values="dipVsFall.fall.relative"
+              :ghost="dipVsFall.bump.relative"
+              :offsets="dipVsFall.offsets"
+              tone="crimson"
+            />
+            <dl>
+              <div>
+                <dt>Qué pasó</dt>
+                <dd>{{ dipVsFall.fall.cause }}</dd>
+              </div>
+              <div>
+                <dt>Por qué sí cambia todo</dt>
+                <dd>{{ dipVsFall.fall.evidence }}</dd>
+              </div>
+            </dl>
+            <footer>
+              <DecisionTag :decision="dipVsFall.fall.decision" />
+              <span>{{ dipVsFall.fall.outcome }}</span>
+            </footer>
+          </article>
+        </div>
+      </section>
+
+      <section id="producto" class="lp__section lp__close">
+        <div class="lp__section-head">
+          <h2>Quién paga por esto.</h2>
+          <p>
+            Quien pierde dinero cuando se entera tarde. Un banco con una línea
+            ya abierta descubre el deterioro en las cuentas del trimestre
+            siguiente; aquí lo ve en la caja del mes. Embat vende ese adelanto a
+            las dos partes a la vez, porque ya tiene los bancos y el ERP
+            conectados.
+          </p>
+        </div>
+
+        <dl class="worth">
+          <div v-for="row in valueRows" :key="row.label">
+            <dt>
+              <b>{{ row.label }}</b>
+              <span>{{ row.note }}</span>
+            </dt>
+            <dd>{{ row.figure }}</dd>
           </div>
+        </dl>
+
+        <div class="lp__cta">
+          <NuxtLink class="btn btn--live btn--lg" to="/login"
+            >Abrir la demo</NuxtLink
+          >
+          <p>
+            {{ companies.length }} empresas, 24 meses de tesorería y las tres
+            vistas del producto.
+          </p>
         </div>
       </section>
-      <section class="landing-perspectives">
-        <h2>La misma información. Tu decisión.</h2>
-        <div class="perspective-grid">
-          <NuxtLink to="/login?role=embat"
-            ><ScanLine />
-            <h3>Para Embat</h3>
-            <p>
-              Una visión del ecosistema: actividad, señales y oportunidades de
-              financiación.
-            </p>
-            <span>Ver el conjunto <ArrowRight :size="16" /></span></NuxtLink
-          ><NuxtLink to="/login?role=empresa"
-            ><Building2 />
-            <h3>Para tu empresa</h3>
-            <p>
-              Entiende qué cambia en tu salud financiera y compara ofertas en un
-              solo lugar.
-            </p>
-            <span
-              >Encontrar financiación <ArrowRight :size="16" /></span></NuxtLink
-          ><NuxtLink to="/login?role=banco"
-            ><Landmark />
-            <h3>Para tu banco</h3>
-            <p>
-              Evalúa empresas con contexto, trayectoria y motivos claros para
-              cada decisión.
-            </p>
-            <span>Explorar oportunidades <ArrowRight :size="16" /></span
-          ></NuxtLink>
-        </div>
-      </section>
+
+      <footer class="lp__foot">
+        <span>X-Ray · inteligencia de tesorería de Embat</span>
+        <span>HackSpain 2026 · datos ficticios, ninguna operación real</span>
+      </footer>
     </main>
-    <footer class="landing-footer">
-      X-Ray by Embat
-      <span>HackSpain 2026 · Demostración con datos ficticios</span>
-    </footer>
   </div>
 </template>
