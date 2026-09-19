@@ -4,3 +4,5 @@ __pycache__/
 analysis/cash.duckdb
 output_hackspain_data*.zip
 output/
+backend/artifacts/
+backend/oof.parquet

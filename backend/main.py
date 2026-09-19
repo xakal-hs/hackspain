@@ -1,0 +1,205 @@
+"""API del score. Arranca, entrena (o carga el artefacto) y sirve.
+
+    uv run uvicorn main:app --reload --port 8000
+
+El estado es una tabla en memoria: el panel puntuado. No hay base de datos porque no
+hace falta — son 21 000 filas y el modelo es un scorecard congelado.
+
+    GET /api/companies                     cartera: una fila por empresa (último mes)
+    GET /api/companies/{cid}               ficha: serie, pilares, probabilidades
+    GET /api/companies/{cid}/explain       por qué se movió la nota este mes
+    GET /api/model                         pesos, escala y diagnóstico del ajuste
+    GET /health
+"""
+from __future__ import annotations
+
+import os
+from contextlib import asynccontextmanager
+from functools import lru_cache
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+
+import predict as prd
+import preprocessing as pre
+
+ARTIFACT = Path(os.getenv("XRAY_ARTIFACT", Path(__file__).parent / "artifacts/scorer.joblib"))
+TREND_MONTHS = 3
+TREND_EPS = 2.0          # menos de 2 puntos en 3 meses es ruido, no tendencia
+ALERT_DROP = 10.0        # caída de 3 meses que dispara aviso
+
+
+class State:
+    panel: pd.DataFrame
+    scored: pd.DataFrame
+    scorer: prd.Scorer
+
+
+S = State()
+
+
+def train(force: bool = False) -> None:
+    """Carga el panel, ajusta (o recupera) el scorer y puntúa todo el histórico."""
+    S.panel = pre.build()
+    if ARTIFACT.exists() and not force:
+        S.scorer = prd.load(ARTIFACT)
+    else:
+        S.scorer = prd.fit(S.panel, pre.labels(S.panel))
+        prd.save(S.scorer, ARTIFACT)
+    S.scored = prd.score_panel(S.scorer, S.panel)
+    # trayectoria OBSERVADA, no prevista: cuánto se ha movido la nota en los últimos 3 meses
+    g = S.scored.sort_values(["company_id", "month"]).groupby("company_id")
+    S.scored["delta3"] = S.scored["score"] - g["score"].shift(TREND_MONTHS)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    train()
+    yield
+
+
+app = FastAPI(title="X-Ray score", version="1.0", lifespan=lifespan)
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+
+# ------------------------------------------------------------------ helpers
+def _num(v):
+    """NaN/NaT -> None: JSON no tiene NaN y el frontend no debe recibir 'NaN'."""
+    if v is None or (isinstance(v, float) and not np.isfinite(v)) or pd.isna(v):
+        return None
+    return v.item() if hasattr(v, "item") else v
+
+
+def _trend(delta: float | None) -> str:
+    if delta is None or abs(delta) < TREND_EPS:
+        return "estable"
+    return "mejora" if delta > 0 else "deterioro"
+
+
+def _alert(row: pd.Series) -> str | None:
+    if row.get("delta3") is not None and row["delta3"] <= -ALERT_DROP:
+        return f"Cae {abs(row['delta3']):.0f} puntos en {TREND_MONTHS} meses"
+    if row["band"] == "riesgo":
+        return "En banda de riesgo"
+    if _num(row.get("confidence")) is not None and row["confidence"] < 0.4:
+        return "Datos insuficientes: nota provisional"
+    return None
+
+
+def _company_row(cid: str) -> pd.DataFrame:
+    rows = S.scored[S.scored.company_id == cid].sort_values("month")
+    if rows.empty:
+        raise HTTPException(404, f"empresa desconocida: {cid}")
+    return rows
+
+
+@lru_cache(maxsize=1)
+def _static() -> pd.DataFrame:
+    """Atributos que no cambian con el mes (los toma de la última fila del panel)."""
+    cols = [c for c in ["company_id", "group_id", "currency", "has_erp"] if c in S.panel.columns]
+    return S.panel.sort_values("month").groupby("company_id")[cols].last().reset_index(drop=False, names="idx")
+
+
+# ------------------------------------------------------------------ endpoints
+@app.get("/health")
+def health():
+    return {"ok": True, "empresas": int(S.scored.company_id.nunique()),
+            "ultimo_mes": f"{S.scored.month.max():%Y-%m}", "features": S.scorer.features}
+
+
+@app.get("/api/companies")
+def companies(band: str | None = Query(None, pattern="^(sano|vigilar|riesgo)$"), limit: int = 2000):
+    """Cartera: el último mes de cada empresa, ordenada por nota ascendente (lo peor arriba)."""
+    last = S.scored.sort_values("month").groupby("company_id").last().reset_index()
+    n = S.scored.groupby("company_id").size()
+    st = _static().set_index("company_id")
+    if band:
+        last = last[last.band == band]
+    out = []
+    for _, r in last.sort_values("score").head(limit).iterrows():
+        extra = st.loc[r.company_id] if r.company_id in st.index else {}
+        out.append({
+            "company_id": r.company_id, "group_id": r.group_id,
+            "currency": _num(extra.get("currency")) or "EUR",
+            "has_erp": bool(extra.get("has_erp", False)),
+            "n_months": int(n[r.company_id]), "last_month": f"{r.month:%Y-%m}",
+            "score": round(float(r.score), 1), "band": r.band,
+            "delta3": _num(r.delta3) and round(float(r.delta3), 1),
+            "trend": _trend(_num(r.delta3)),
+            "alert": _alert(r), "dormant": bool(r.get("c_regla_inactividad", 0) != 0),
+            "confidence": round(float(r.confidence), 2),
+        })
+    return {"companies": out, "source": "api"}
+
+
+@app.get("/api/companies/{cid}")
+def company(cid: str):
+    """Ficha completa: serie histórica, pilares del último mes y probabilidades."""
+    rows = _company_row(cid)
+    cur = rows.iloc[-1]
+    probs = {c: round(float(cur[c]), 4) for c in rows.columns if c.startswith("prob_")}
+    return {
+        "company_id": cid, "group_id": cur.group_id,
+        "score": round(float(cur.score), 1), "band": cur.band,
+        "confidence": round(float(cur.confidence), 2),
+        "coverage": round(float(cur.coverage), 2),
+        "ood_share": round(float(cur.ood_share), 3),
+        "ood_features": [f for f in str(cur.ood_features).split(",") if f],
+        "delta3": _num(cur.delta3) and round(float(cur.delta3), 1),
+        "trend": _trend(_num(cur.delta3)),
+        "pillars": {p: _num(cur.get(f"p_{p}")) for p in prd.PILLARS},
+        "probabilities": probs,
+        "series": [{"month": f"{m:%Y-%m}", "score": round(float(s), 1), "band": b}
+                   for m, s, b in zip(rows.month, rows.score, rows.band)],
+        "signals": _signals(cid, rows),
+    }
+
+
+def _signals(cid: str, rows: pd.DataFrame) -> list[dict]:
+    """Las features del último mes, ordenadas por cuánto restan a la nota."""
+    cur = rows.iloc[-1]
+    f = S.panel[S.panel.company_id == cid].sort_values("month").iloc[-1]
+    out = []
+    for name in S.scorer.features:
+        spec = pre.FEATURES[name]
+        out.append({"feature": name, "label": spec["label"], "pillar": spec["pilar"],
+                    "formula": spec["formula"], "weight": round(S.scorer.weights[name], 3),
+                    "subscore": _num(cur.get(f"s_{name}")),
+                    "points": round(float(cur.get(f"ec_{name}", 0)), 2),
+                    "value": _num(f.get(name)), "value_text": prd.human(name, _num(f.get(name)))})
+    return sorted(out, key=lambda s: s["points"])
+
+
+@app.get("/api/companies/{cid}/explain")
+def explain(cid: str, month: str | None = None):
+    """Δnota del mes descompuesto por feature. Las contribuciones suman el delta, exacto."""
+    _company_row(cid)
+    try:
+        return prd.explain(S.scored, S.panel, cid, month)
+    except IndexError:
+        raise HTTPException(404, f"mes sin datos para {cid}: {month}")
+
+
+@app.get("/api/model")
+def model():
+    """Qué aprendió el modelo. Es todo: 17 pesos, dos números de escala y las curvas de probabilidad."""
+    return {
+        "target": S.scorer.target, "alpha_ewma": S.scorer.alpha,
+        "weights": {k: round(v, 4) for k, v in sorted(S.scorer.weights.items(), key=lambda kv: -kv[1])},
+        "scale": {"a": round(S.scorer.scale[0], 3), "b": round(S.scorer.scale[1], 3)},
+        "bands": [{"desde": lo, "hasta": hi, "banda": n} for lo, hi, n in prd.BANDS],
+        "calibration": {k: {"n": v["n"], "event_rate": round(v["event_rate"], 4), "converged": v["converged"]}
+                        for k, v in S.scorer.calibration.items()},
+        "probabilities": {k: {"a": round(a, 3), "b": round(b, 3), "tasa_base": round(r, 4)}
+                          for k, (a, b, r) in S.scorer.proba.items()},
+        "features": {f: pre.FEATURES[f] for f in S.scorer.features},
+    }
+
+
+@app.post("/api/retrain")
+def retrain():
+    train(force=True)
+    return health()
