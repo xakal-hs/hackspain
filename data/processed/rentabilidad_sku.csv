@@ -1,0 +1,763 @@
+company_id,group_id,sector,tipo,tenor,sku,on_mesa,in_book,notional,persist,take_y1_35,take_3y_35
+COMP_0001,GROUP_0147,servicios profesionales,servicio,6 meses,factoring,true,true,156000,0.166667,819.002,955.503
+COMP_0004,GROUP_0058,mayorista / distribución,producto,12 meses,factoring,true,true,191003,0.125,1002.77,1128.11
+COMP_0005,GROUP_0092,comercio minorista,producto,días,yield,true,true,68715,0.25,240.502,315.659
+COMP_0007,GROUP_0064,mayorista / distribución,producto,12 meses,fx,true,true,2.54463e+07,0.833333,13359.3,33769.4
+COMP_0008,GROUP_0195,comercio minorista,mixto,días,fx,true,true,635.405,0.0416667,0.333588,0.348066
+COMP_0010,GROUP_0013,servicios profesionales,mixto,6 meses,factoring,true,true,254687,0.375,1337.11,1838.52
+COMP_0014,GROUP_0173,software / suscripción,servicio,largo,factoring,true,true,826097,0.791667,4337.01,7770.48
+COMP_0014,GROUP_0173,software / suscripción,servicio,largo,reserve,true,true,255.53,0.333333,0.447177,0.645923
+COMP_0015,GROUP_0068,mayorista / distribución,producto,12 meses,yield,true,true,37531.7,0.708333,131.361,290.316
+COMP_0016,GROUP_0070,holding / tesorería,producto,largo,yield,true,true,7.57266e+06,1,26504.3,79513
+COMP_0017,GROUP_0073,comercio minorista,producto,días,yield,true,true,5721.58,0.708333,20.0255,44.2578
+COMP_0020,GROUP_0007,holding / tesorería,servicio,largo,fx,true,true,1.931e+07,0.333333,10137.7,14643.4
+COMP_0021,GROUP_0023,servicios profesionales,servicio,6 meses,factoring,true,true,111748,0.0833333,586.675,635.565
+COMP_0021,GROUP_0023,servicios profesionales,servicio,6 meses,yield,true,true,28937.1,0.291667,101.28,139.436
+COMP_0023,GROUP_0237,hostelería,servicio,6 meses,factoring,true,true,875512,0.541667,4596.44,7086.17
+COMP_0024,GROUP_0222,comercio minorista,mixto,días,yield,true,true,942600,0.5,3299.1,5773.42
+COMP_0025,GROUP_0211,servicios profesionales,servicio,6 meses,factoring,true,true,4.94554e+06,0.958333,25964.1,50846.3
+COMP_0027,GROUP_0241,transporte / logística,servicio,días,factoring,true,true,2.08995e+06,0.333333,10972.2,14629.6
+COMP_0028,GROUP_0218,construcción,mixto,6 meses,yield,true,true,11512.9,1,40.2951,120.885
+COMP_0030,GROUP_0126,comercio minorista,producto,días,fx,true,true,1.42799e+07,1,7496.94,22490.8
+COMP_0035,GROUP_0115,holding / tesorería,producto,largo,fx,true,true,1.09655e+07,0.375,5756.86,8725.25
+COMP_0035,GROUP_0115,holding / tesorería,producto,largo,yield,true,true,527451,1,1846.08,5538.24
+COMP_0036,GROUP_0103,servicios profesionales,servicio,6 meses,yield,true,true,234229,0.833333,819.803,2072.28
+COMP_0038,GROUP_0104,holding / tesorería,servicio,largo,fx,true,true,16909.2,0.166667,8.87732,10.6035
+COMP_0041,GROUP_0149,holding / tesorería,servicio,largo,factoring,true,true,529041,0.166667,2777.47,3240.38
+COMP_0042,GROUP_0162,comercio minorista,servicio,días,fx,true,true,352934,0.833333,185.29,468.373
+COMP_0043,GROUP_0185,holding / tesorería,producto,largo,fx,true,true,128450,0.291667,67.436,92.8416
+COMP_0044,GROUP_0241,holding / tesorería,servicio,largo,factoring,true,true,441569,0.208333,2318.24,2801.2
+COMP_0047,GROUP_0018,software / suscripción,producto,largo,factoring,true,true,381877,0.583333,2004.86,3174.36
+COMP_0048,GROUP_0241,servicios profesionales,servicio,6 meses,factoring,true,true,2.93226e+06,0.25,15394.4,19242.9
+COMP_0049,GROUP_0180,servicios profesionales,servicio,6 meses,factoring,true,true,514868,0.208333,2703.06,3266.2
+COMP_0049,GROUP_0180,servicios profesionales,servicio,6 meses,yield,true,true,405.29,0.666667,1.41852,2.99464
+COMP_0052,GROUP_0142,comercio minorista,producto,días,yield,true,true,10171.6,0.791667,35.6006,86.0967
+COMP_0054,GROUP_0217,holding / tesorería,servicio,largo,yield,true,true,8.38914e+06,0.791667,29362,71009.1
+COMP_0057,GROUP_0122,servicios profesionales,servicio,6 meses,factoring,true,true,1.37778e+06,0.375,7233.34,9945.84
+COMP_0057,GROUP_0122,servicios profesionales,servicio,6 meses,yield,true,true,12711.8,0.0833333,44.4915,48.5081
+COMP_0058,GROUP_0104,industria,producto,12 meses,factoring,true,true,7.59391e+06,1,39868,79736.1
+COMP_0058,GROUP_0104,industria,producto,12 meses,fx,true,true,481712,0.25,252.899,331.93
+COMP_0060,GROUP_0112,comercio minorista,mixto,días,yield,true,true,438902,1,1536.16,4608.47
+COMP_0067,GROUP_0064,holding / tesorería,mixto,largo,yield,true,true,980.11,0.75,3.43038,7.93277
+COMP_0069,GROUP_0175,servicios profesionales,mixto,6 meses,factoring,true,true,658318,0.666667,3456.17,5760.28
+COMP_0069,GROUP_0175,servicios profesionales,mixto,6 meses,yield,true,true,1.24129e+06,0.166667,4344.53,5189.3
+COMP_0070,GROUP_0230,comercio minorista,mixto,días,fx,true,true,359767,0.375,188.878,286.268
+COMP_0071,GROUP_0102,holding / tesorería,mixto,largo,yield,true,true,15266.5,0.583333,53.4328,102.784
+COMP_0073,GROUP_0101,transporte / logística,servicio,días,yield,true,true,75429.1,1,264.002,792.006
+COMP_0075,GROUP_0115,hostelería,servicio,6 meses,fx,true,true,3.59535e+07,0.541667,18875.6,34638
+COMP_0077,GROUP_0213,holding / tesorería,mixto,largo,yield,true,true,306272,1,1071.95,3215.86
+COMP_0079,GROUP_0203,servicios profesionales,servicio,6 meses,factoring,true,true,163949,0.375,860.734,1183.51
+COMP_0081,GROUP_0217,alquiler / inmobiliario,servicio,largo,factoring,true,true,1.77423e+06,0.25,9314.69,11643.4
+COMP_0081,GROUP_0217,alquiler / inmobiliario,servicio,largo,yield,true,true,79284.6,0.458333,277.496,462.975
+COMP_0083,GROUP_0133,holding / tesorería,servicio,largo,yield,true,true,192766,0.333333,674.68,974.538
+COMP_0085,GROUP_0155,alquiler / inmobiliario,servicio,largo,credit,true,true,1093.37,0.625,76.536,124.371
+COMP_0089,GROUP_0153,holding / tesorería,servicio,largo,factoring,true,true,110191,0.208333,578.501,699.022
+COMP_0093,GROUP_0149,servicios profesionales,servicio,6 meses,factoring,true,true,182389,0.125,957.544,1077.24
+COMP_0096,GROUP_0217,holding / tesorería,servicio,largo,yield,true,true,108552,0.791667,379.931,918.826
+COMP_0097,GROUP_0170,construcción,mixto,6 meses,yield,true,true,1.03749e+06,0.458333,3631.23,6058.36
+COMP_0098,GROUP_0132,servicios profesionales,servicio,6 meses,factoring,true,true,193798,0.416667,1017.44,1441.37
+COMP_0098,GROUP_0132,servicios profesionales,servicio,6 meses,reserve,true,true,3571.6,1,6.25029,18.7509
+COMP_0103,GROUP_0170,holding / tesorería,mixto,largo,yield,true,true,115240,0.208333,403.341,504.877
+COMP_0104,GROUP_0173,transporte / logística,servicio,días,factoring,true,true,201816,0.458333,1059.53,1545.15
+COMP_0104,GROUP_0173,transporte / logística,servicio,días,reserve,true,true,71.21,0.291667,0.124617,0.171565
+COMP_0105,GROUP_0079,servicios profesionales,servicio,6 meses,factoring,true,true,4.03912e+06,1,21205.4,42410.8
+COMP_0106,GROUP_0022,mayorista / distribución,producto,12 meses,yield,true,true,24226,1,84.791,254.373
+COMP_0107,GROUP_0094,comercio minorista,producto,días,factoring,true,true,71759,0.25,376.735,470.918
+COMP_0107,GROUP_0094,comercio minorista,producto,días,fx,true,true,538237,1,282.574,847.723
+COMP_0107,GROUP_0094,comercio minorista,producto,días,yield,true,true,176184,0.958333,616.644,1773.92
+COMP_0112,GROUP_0222,comercio minorista,mixto,días,yield,true,true,216768,0.583333,758.688,1459.42
+COMP_0113,GROUP_0070,mayorista / distribución,mixto,12 meses,factoring,true,true,340951,0.0833333,1789.99,1939.16
+COMP_0113,GROUP_0070,mayorista / distribución,mixto,12 meses,yield,true,true,4.30732e+06,1,15075.6,45226.8
+COMP_0117,GROUP_0101,servicios profesionales,servicio,6 meses,yield,true,true,56516.7,1,197.808,593.425
+COMP_0120,GROUP_0210,servicios profesionales,servicio,6 meses,factoring,true,true,185410,1,973.403,1946.81
+COMP_0120,GROUP_0210,servicios profesionales,servicio,6 meses,yield,true,true,1.15376e+06,0.333333,4038.17,5832.91
+COMP_0122,GROUP_0086,comercio minorista,servicio,días,yield,true,true,740820,0.25,2592.87,3403.14
+COMP_0123,GROUP_0153,holding / tesorería,servicio,largo,factoring,true,true,214516,0.5,1126.21,1689.31
+COMP_0125,GROUP_0250,holding / tesorería,mixto,largo,yield,true,true,75811.7,1,265.341,796.023
+COMP_0129,GROUP_0185,holding / tesorería,producto,largo,fx,true,true,53985.6,0.0416667,28.3425,29.5726
+COMP_0130,GROUP_0079,servicios profesionales,servicio,6 meses,factoring,true,true,1.33074e+07,0.958333,69864,136817
+COMP_0131,GROUP_0070,comercio minorista,producto,días,yield,true,true,522805,0.25,1829.82,2401.63
+COMP_0133,GROUP_0103,holding / tesorería,producto,largo,yield,true,true,4419.39,0.833333,15.4679,39.0993
+COMP_0135,GROUP_0050,comercio minorista,mixto,días,fx,true,true,2.28766e+07,1,12010.2,36030.7
+COMP_0136,GROUP_0142,servicios profesionales,servicio,6 meses,factoring,true,true,530525,0.291667,2785.25,3597.62
+COMP_0137,GROUP_0217,holding / tesorería,servicio,largo,yield,true,true,82039.9,0.791667,287.14,694.42
+COMP_0139,GROUP_0217,servicios profesionales,servicio,6 meses,factoring,true,true,9.30608e+06,0.416667,48856.9,69213.9
+COMP_0140,GROUP_0072,energía,servicio,12 meses,yield,true,true,6360.52,0.25,22.2618,29.2186
+COMP_0141,GROUP_0220,comercio minorista,producto,días,yield,true,true,6.62641e+06,0.25,23192.4,30440.1
+COMP_0142,GROUP_0217,servicios profesionales,servicio,6 meses,factoring,true,true,3.92816e+06,0.166667,20622.8,24060
+COMP_0145,GROUP_0007,holding / tesorería,servicio,largo,fx,true,true,199742,0.333333,104.864,151.471
+COMP_0148,GROUP_0016,servicios profesionales,servicio,6 meses,yield,true,true,32178,0.333333,112.623,162.678
+COMP_0149,GROUP_0132,servicios profesionales,mixto,6 meses,factoring,true,true,1.70774e+06,1,8965.64,17931.3
+COMP_0151,GROUP_0101,software / suscripción,mixto,largo,yield,true,true,31357.5,1,109.751,329.254
+COMP_0152,GROUP_0037,servicios profesionales,servicio,6 meses,factoring,true,true,500187,0.291667,2625.98,3391.9
+COMP_0152,GROUP_0037,servicios profesionales,servicio,6 meses,reserve,true,true,75506.3,1,132.136,396.408
+COMP_0153,GROUP_0115,servicios profesionales,servicio,6 meses,yield,true,true,778184,0.833333,2723.65,6884.77
+COMP_0157,GROUP_0146,comercio minorista,producto,días,yield,true,true,2287.18,0.208333,8.00513,10.0203
+COMP_0159,GROUP_0102,servicios profesionales,servicio,6 meses,factoring,true,true,56803.1,0.166667,298.216,347.919
+COMP_0159,GROUP_0102,servicios profesionales,servicio,6 meses,yield,true,true,122603,0.916667,429.112,1183.04
+COMP_0161,GROUP_0079,servicios profesionales,servicio,6 meses,factoring,true,true,513605,0.541667,2696.42,4156.99
+COMP_0163,GROUP_0094,servicios profesionales,servicio,6 meses,factoring,true,true,187911,0.333333,986.535,1315.38
+COMP_0166,GROUP_0149,comercio minorista,producto,días,fx,true,true,992.185,0.0416667,0.520897,0.543506
+COMP_0167,GROUP_0218,software / suscripción,servicio,largo,fx,true,true,454.371,0.708333,0.238545,0.5272
+COMP_0172,GROUP_0212,comercio minorista,producto,días,yield,true,true,4.46504e+06,0.625,15627.6,31499.4
+COMP_0176,GROUP_0225,servicios profesionales,mixto,6 meses,yield,true,true,77878.1,0.583333,272.573,524.325
+COMP_0177,GROUP_0185,comercio minorista,producto,días,fx,true,true,573773,0.208333,301.231,377.062
+COMP_0178,GROUP_0220,holding / tesorería,servicio,largo,fx,true,true,6.69113e+06,0.916667,3512.84,9684.71
+COMP_0178,GROUP_0220,holding / tesorería,servicio,largo,yield,true,true,62973.6,0.625,220.408,444.259
+COMP_0180,GROUP_0055,energía,servicio,6 meses,factoring,true,true,1.3755e+06,0.625,7221.35,11734.7
+COMP_0182,GROUP_0179,comercio minorista,servicio,días,fx,true,true,11582.3,0.166667,6.08073,7.26309
+COMP_0183,GROUP_0232,servicios profesionales,servicio,6 meses,factoring,true,true,70062.9,0.291667,367.83,475.114
+COMP_0183,GROUP_0232,servicios profesionales,servicio,6 meses,yield,true,true,3125.72,0.458333,10.94,18.2524
+COMP_0184,GROUP_0044,mayorista / distribución,mixto,12 meses,factoring,true,true,4.37454e+06,0.333333,22966.3,30621.8
+COMP_0184,GROUP_0044,mayorista / distribución,mixto,12 meses,yield,true,true,870678,0.333333,3047.37,4401.76
+COMP_0185,GROUP_0044,hostelería,servicio,6 meses,fx,true,true,6.59099e+06,0.333333,3460.27,4998.17
+COMP_0189,GROUP_0211,comercio minorista,producto,días,fx,true,true,2.18137e+06,0.625,1145.22,2308.33
+COMP_0191,GROUP_0132,servicios profesionales,servicio,6 meses,factoring,true,true,203383,0.125,1067.76,1201.23
+COMP_0193,GROUP_0224,comercio minorista,mixto,días,yield,true,true,201665,0.166667,705.828,843.073
+COMP_0200,GROUP_0224,comercio minorista,producto,días,factoring,true,true,85408.8,0.375,448.396,616.545
+COMP_0201,GROUP_0101,holding / tesorería,servicio,largo,fx,true,true,1.1191e+06,0.875,587.529,1551.44
+COMP_0201,GROUP_0101,holding / tesorería,servicio,largo,yield,true,true,79716.4,1,279.007,837.022
+COMP_0203,GROUP_0016,holding / tesorería,servicio,largo,factoring,true,true,1.09234e+06,0.875,5734.76,10752.7
+COMP_0208,GROUP_0003,mayorista / distribución,producto,12 meses,factoring,true,true,508545,0.208333,2669.86,3226.08
+COMP_0210,GROUP_0117,servicios profesionales,servicio,6 meses,yield,true,true,4.93942e+06,0.541667,17288,31724.6
+COMP_0215,GROUP_0070,servicios profesionales,servicio,6 meses,yield,true,true,2.26343e+06,0.958333,7922.02,22789.6
+COMP_0218,GROUP_0113,holding / tesorería,mixto,largo,yield,true,true,170878,0.125,598.073,682.177
+COMP_0219,GROUP_0132,transporte / logística,servicio,días,factoring,true,true,8.01894e+07,0.791667,420994,754281
+COMP_0219,GROUP_0132,transporte / logística,servicio,días,reserve,true,true,12369.2,1,21.6461,64.9384
+COMP_0220,GROUP_0124,mayorista / distribución,producto,12 meses,factoring,true,true,932159,0.25,4893.83,6117.29
+COMP_0222,GROUP_0064,comercio minorista,mixto,días,yield,true,true,282643,0.625,989.25,1993.96
+COMP_0226,GROUP_0013,servicios profesionales,servicio,6 meses,factoring,true,true,823145,0.875,4321.51,8102.84
+COMP_0229,GROUP_0101,servicios profesionales,servicio,6 meses,yield,true,true,3112.31,1,10.8931,32.6793
+COMP_0231,GROUP_0108,holding / tesorería,mixto,largo,fx,true,true,855109,0.375,448.932,680.413
+COMP_0232,GROUP_0038,mayorista / distribución,producto,12 meses,factoring,true,true,4.33942e+06,0.291667,22782,29426.7
+COMP_0233,GROUP_0150,comercio minorista,producto,días,fx,true,true,2.80853e+07,1,14744.8,44234.4
+COMP_0234,GROUP_0101,hostelería,servicio,6 meses,factoring,true,true,8.56712e+06,0.0833333,44977.4,48725.5
+COMP_0234,GROUP_0101,hostelería,servicio,6 meses,fx,true,true,1.21666e+07,0.875,6387.48,16866.9
+COMP_0235,GROUP_0028,comercio minorista,producto,12 meses,fx,true,true,7885.82,0.166667,4.14005,4.94507
+COMP_0236,GROUP_0243,servicios profesionales,servicio,6 meses,reserve,true,true,776044,0.291667,1358.08,1869.71
+COMP_0237,GROUP_0044,servicios profesionales,servicio,6 meses,factoring,true,true,229162,0.208333,1203.1,1453.75
+COMP_0238,GROUP_0149,servicios profesionales,servicio,6 meses,factoring,true,true,4.57002e+06,0.25,23992.6,29990.7
+COMP_0239,GROUP_0202,servicios profesionales,servicio,6 meses,factoring,true,true,208267,0.0833333,1093.4,1184.52
+COMP_0241,GROUP_0050,construcción,mixto,6 meses,yield,true,true,378340,0.166667,1324.19,1581.67
+COMP_0246,GROUP_0213,construcción,mixto,6 meses,factoring,true,true,2.97965e+06,0.75,15643.2,27375.5
+COMP_0246,GROUP_0213,construcción,mixto,6 meses,yield,true,true,2.89625e+06,0.916667,10136.9,27946.8
+COMP_0247,GROUP_0218,software / suscripción,producto,largo,factoring,true,true,64516.2,0.25,338.71,423.388
+COMP_0247,GROUP_0218,software / suscripción,producto,largo,fx,true,true,1.23135e+07,0.958333,6464.56,18596.8
+COMP_0248,GROUP_0095,hostelería,servicio,6 meses,factoring,true,true,729034,0.875,3827.43,7176.43
+COMP_0255,GROUP_0025,alquiler / inmobiliario,servicio,largo,factoring,true,true,675573,1,3546.76,7093.51
+COMP_0256,GROUP_0170,servicios profesionales,servicio,6 meses,yield,true,true,1.74716e+07,0.708333,61150.6,135147
+COMP_0257,GROUP_0023,hostelería,servicio,6 meses,fx,true,true,1.04378e+06,0.25,547.987,719.232
+COMP_0257,GROUP_0023,hostelería,servicio,6 meses,yield,true,true,343658,0.333333,1202.8,1737.38
+COMP_0259,GROUP_0198,servicios profesionales,servicio,6 meses,factoring,true,true,294281,0.0416667,1544.98,1609.35
+COMP_0262,GROUP_0211,comercio minorista,producto,días,fx,true,true,5.97153e+06,0.666667,3135.05,6618.44
+COMP_0263,GROUP_0250,holding / tesorería,mixto,largo,yield,true,true,78744,1,275.604,826.812
+COMP_0267,GROUP_0155,servicios profesionales,servicio,6 meses,factoring,true,true,2.38244e+07,0.583333,125078,198040
+COMP_0268,GROUP_0094,comercio minorista,mixto,días,fx,true,true,3.65105e+06,1,1916.8,5750.41
+COMP_0269,GROUP_0156,holding / tesorería,producto,largo,fx,true,true,210.386,0.0416667,0.110453,0.115247
+COMP_0270,GROUP_0116,holding / tesorería,servicio,largo,fx,true,true,230948,0.25,121.248,159.137
+COMP_0271,GROUP_0138,comercio minorista,servicio,días,fx,true,true,30.7543,0.25,0.016146,0.0211916
+COMP_0273,GROUP_0155,servicios profesionales,servicio,6 meses,factoring,true,true,1.5126e+06,0.166667,7941.16,9264.69
+COMP_0274,GROUP_0097,holding / tesorería,producto,largo,fx,true,true,3.35395e+06,0.875,1760.82,4649.67
+COMP_0274,GROUP_0097,holding / tesorería,producto,largo,yield,true,true,410309,0.875,1436.08,3792.16
+COMP_0277,GROUP_0236,holding / tesorería,servicio,largo,fx,true,true,56.7931,0.0833333,0.0298164,0.0325081
+COMP_0279,GROUP_0022,holding / tesorería,mixto,largo,credit,true,true,130.297,0.0416667,9.12079,9.50082
+COMP_0279,GROUP_0022,holding / tesorería,mixto,largo,yield,true,true,2757.02,1,9.64957,28.9487
+COMP_0283,GROUP_0089,servicios profesionales,servicio,6 meses,yield,true,true,2.20264e+06,0.333333,7709.26,11135.6
+COMP_0284,GROUP_0163,servicios profesionales,mixto,6 meses,yield,true,true,256269,1,896.942,2690.83
+COMP_0287,GROUP_0231,software / suscripción,servicio,largo,factoring,true,true,954385,0.0833333,5010.52,5428.06
+COMP_0287,GROUP_0231,software / suscripción,servicio,largo,fx,true,true,6.65834e+06,0.875,3495.63,9230.64
+COMP_0288,GROUP_0075,comercio minorista,mixto,días,yield,true,true,210754,1,737.641,2212.92
+COMP_0289,GROUP_0142,comercio minorista,producto,días,yield,true,true,106430,0.958333,372.505,1071.6
+COMP_0292,GROUP_0199,comercio minorista,producto,días,fx,true,true,3.80498e+06,0.166667,1997.61,2386.04
+COMP_0293,GROUP_0126,transporte / logística,producto,días,factoring,true,true,218167,0.125,1145.38,1288.55
+COMP_0294,GROUP_0217,mayorista / distribución,producto,12 meses,yield,true,true,89958.8,0.791667,314.856,761.448
+COMP_0296,GROUP_0199,servicios profesionales,servicio,6 meses,yield,true,true,358319,0.458333,1254.11,2092.37
+COMP_0300,GROUP_0144,servicios profesionales,servicio,6 meses,factoring,true,true,66258,0.0833333,347.855,376.843
+COMP_0300,GROUP_0144,servicios profesionales,servicio,6 meses,fx,true,true,146735,0.375,77.0357,116.757
+COMP_0301,GROUP_0009,comercio minorista,servicio,días,fx,true,true,2.96757e+06,0.458333,1557.97,2599.33
+COMP_0301,GROUP_0009,comercio minorista,servicio,días,yield,true,true,899342,0.375,3147.7,4770.73
+COMP_0306,GROUP_0094,hostelería,servicio,6 meses,factoring,true,true,79019,0.458333,414.85,604.989
+COMP_0306,GROUP_0094,hostelería,servicio,6 meses,yield,true,true,40262.4,0.666667,140.918,297.494
+COMP_0309,GROUP_0250,holding / tesorería,mixto,largo,yield,true,true,77777.9,1,272.223,816.668
+COMP_0313,GROUP_0094,servicios profesionales,mixto,6 meses,factoring,true,true,645774,0.125,3390.31,3814.1
+COMP_0313,GROUP_0094,servicios profesionales,mixto,6 meses,yield,true,true,510877,0.416667,1788.07,2843.53
+COMP_0314,GROUP_0101,servicios profesionales,servicio,6 meses,yield,true,true,89751.3,1,314.13,942.389
+COMP_0316,GROUP_0150,holding / tesorería,mixto,largo,fx,true,true,28742.8,0.375,15.09,22.8707
+COMP_0317,GROUP_0170,servicios profesionales,servicio,6 meses,yield,true,true,14954.5,0.5,52.3409,91.5965
+COMP_0318,GROUP_0226,servicios profesionales,servicio,6 meses,yield,true,true,54360.2,0.541667,190.261,349.142
+COMP_0320,GROUP_0246,mayorista / distribución,producto,12 meses,factoring,true,true,123577,0.291667,648.779,838.006
+COMP_0321,GROUP_0159,mayorista / distribución,mixto,12 meses,yield,true,true,235893,0.791667,825.626,1996.7
+COMP_0323,GROUP_0122,hostelería,servicio,6 meses,factoring,true,true,3.67142e+06,0.541667,19274.9,29715.5
+COMP_0326,GROUP_0018,energía,mixto,12 meses,factoring,true,true,1.23615e+06,0.5,6489.77,9734.66
+COMP_0328,GROUP_0136,servicios profesionales,servicio,6 meses,factoring,true,true,227982,0.208333,1196.91,1446.26
+COMP_0328,GROUP_0136,servicios profesionales,servicio,6 meses,yield,true,true,160014,0.25,560.048,735.064
+COMP_0329,GROUP_0161,comercio minorista,producto,días,yield,true,true,469069,0.916667,1641.74,4526.19
+COMP_0331,GROUP_0096,servicios profesionales,servicio,6 meses,yield,true,true,6724.12,1,23.5344,70.6033
+COMP_0333,GROUP_0217,holding / tesorería,producto,largo,yield,true,true,759221,0.0416667,2657.27,2772.61
+COMP_0334,GROUP_0159,comercio minorista,mixto,días,yield,true,true,235751,0.416667,825.13,1312.19
+COMP_0336,GROUP_0211,servicios profesionales,servicio,6 meses,factoring,true,true,2.1189e+06,0.583333,11124.2,17613.3
+COMP_0336,GROUP_0211,servicios profesionales,servicio,6 meses,fx,true,true,1.09871e+07,0.625,5768.21,11626.5
+COMP_0338,GROUP_0088,holding / tesorería,servicio,largo,factoring,true,true,587172,0.291667,3082.66,3981.76
+COMP_0340,GROUP_0116,servicios profesionales,servicio,6 meses,yield,true,true,7.0938e+06,0.208333,24828.3,31078.5
+COMP_0341,GROUP_0150,comercio minorista,mixto,días,fx,true,true,4.80612e+07,1,25232.1,75696.3
+COMP_0342,GROUP_0079,servicios profesionales,servicio,6 meses,factoring,true,true,4.07791e+06,0.583333,21409,33897.6
+COMP_0343,GROUP_0167,hostelería,mixto,6 meses,yield,true,true,1.12798e+07,0.833333,39479.5,99795.3
+COMP_0344,GROUP_0211,comercio minorista,producto,días,fx,true,true,4.7142e+06,0.625,2474.96,4988.59
+COMP_0345,GROUP_0069,servicios profesionales,servicio,6 meses,factoring,true,true,111180,0.208333,583.696,705.3
+COMP_0346,GROUP_0097,mayorista / distribución,producto,12 meses,factoring,true,true,1.48458e+06,0.125,7794.07,8768.33
+COMP_0346,GROUP_0097,mayorista / distribución,producto,12 meses,yield,true,true,34347.2,0.791667,120.215,290.729
+COMP_0347,GROUP_0117,servicios profesionales,servicio,6 meses,yield,true,true,592937,0.541667,2075.28,3808.28
+COMP_0349,GROUP_0101,comercio minorista,mixto,días,fx,true,true,340335,0.875,178.676,471.816
+COMP_0349,GROUP_0101,comercio minorista,mixto,días,yield,true,true,16162.3,1,56.5682,169.705
+COMP_0350,GROUP_0189,servicios profesionales,servicio,6 meses,factoring,true,true,723500,0.875,3798.37,7121.95
+COMP_0351,GROUP_0223,comercio minorista,producto,días,fx,true,true,2.41911e+06,0.166667,1270.03,1516.99
+COMP_0352,GROUP_0044,holding / tesorería,producto,largo,fx,true,true,364659,0.333333,191.446,276.533
+COMP_0354,GROUP_0220,mayorista / distribución,mixto,12 meses,factoring,true,true,1.00248e+06,0.833333,5263,9648.83
+COMP_0354,GROUP_0220,mayorista / distribución,mixto,12 meses,yield,true,true,628605,0.666667,2200.12,4644.69
+COMP_0357,GROUP_0036,servicios profesionales,servicio,6 meses,yield,true,true,54292.4,0.0833333,190.023,207.178
+COMP_0359,GROUP_0110,servicios profesionales,servicio,6 meses,factoring,true,true,164922,0.125,865.842,974.072
+COMP_0361,GROUP_0116,holding / tesorería,producto,largo,fx,true,true,412044,1,216.323,648.969
+COMP_0363,GROUP_0250,servicios profesionales,servicio,6 meses,factoring,true,true,127183,0.0833333,667.708,723.351
+COMP_0363,GROUP_0250,servicios profesionales,servicio,6 meses,yield,true,true,14915.7,0.125,52.2051,59.5464
+COMP_0364,GROUP_0195,comercio minorista,mixto,días,yield,true,true,615315,0.5,2153.6,3768.8
+COMP_0365,GROUP_0122,hostelería,servicio,6 meses,factoring,true,true,9.75923e+06,0.583333,51236,81123.6
+COMP_0365,GROUP_0122,hostelería,servicio,6 meses,fx,true,true,2.5048e+06,0.333333,1315.02,1899.47
+COMP_0366,GROUP_0119,servicios profesionales,servicio,6 meses,reserve,true,true,19669.6,0.0416667,34.4218,35.9158
+COMP_0367,GROUP_0187,comercio minorista,producto,días,yield,true,true,2.96435e+06,1,10375.2,31125.6
+COMP_0369,GROUP_0246,mayorista / distribución,mixto,12 meses,factoring,true,true,4.03568e+06,0.75,21187.3,37077.8
+COMP_0370,GROUP_0164,mayorista / distribución,producto,12 meses,yield,true,true,64202.5,0.0416667,224.709,234.462
+COMP_0372,GROUP_0144,servicios profesionales,servicio,6 meses,factoring,true,true,544520,0.958333,2858.73,5598.35
+COMP_0373,GROUP_0192,comercio minorista,servicio,días,yield,true,true,305154,0.0833333,1068.04,1164.46
+COMP_0374,GROUP_0020,mayorista / distribución,mixto,12 meses,yield,true,true,434160,0.416667,1519.56,2416.52
+COMP_0375,GROUP_0143,servicios profesionales,servicio,6 meses,factoring,true,true,331127,0.75,1738.42,3042.23
+COMP_0376,GROUP_0070,holding / tesorería,servicio,largo,factoring,true,true,4.29922e+06,0.458333,22570.9,32915.9
+COMP_0376,GROUP_0070,holding / tesorería,servicio,largo,yield,true,true,2.44931e+06,0.583333,8572.59,16490.3
+COMP_0377,GROUP_0009,comercio minorista,producto,días,fx,true,true,58.7759,0.125,0.0308573,0.0351966
+COMP_0378,GROUP_0234,servicios profesionales,servicio,6 meses,factoring,true,true,98529.6,0.0833333,517.281,560.387
+COMP_0378,GROUP_0234,servicios profesionales,servicio,6 meses,yield,true,true,39814.4,0.291667,139.35,191.848
+COMP_0381,GROUP_0079,servicios profesionales,servicio,6 meses,factoring,true,true,6.52137e+06,0.583333,34237.2,54208.8
+COMP_0383,GROUP_0078,servicios profesionales,servicio,6 meses,yield,true,true,280499,0.958333,981.747,2824.23
+COMP_0384,GROUP_0094,servicios profesionales,servicio,6 meses,factoring,true,true,997880,0.5,5238.87,7858.3
+COMP_0385,GROUP_0145,holding / tesorería,servicio,largo,fx,true,true,1.08822e+08,0.666667,57131.4,120611
+COMP_0386,GROUP_0020,holding / tesorería,servicio,largo,yield,true,true,6417.11,0.541667,22.4599,41.2154
+COMP_0387,GROUP_0097,servicios profesionales,mixto,6 meses,factoring,true,true,1.12419e+07,0.458333,59019.8,86070.6
+COMP_0388,GROUP_0187,servicios profesionales,servicio,6 meses,yield,true,true,844076,0.333333,2954.27,4267.28
+COMP_0389,GROUP_0150,servicios profesionales,servicio,6 meses,yield,true,true,465424,0.708333,1628.98,3600.17
+COMP_0392,GROUP_0222,comercio minorista,mixto,días,yield,true,true,425227,0.583333,1488.29,2862.9
+COMP_0393,GROUP_0054,servicios profesionales,servicio,6 meses,factoring,true,true,3.47005e+06,0.583333,18217.8,28844.8
+COMP_0393,GROUP_0054,servicios profesionales,servicio,6 meses,reserve,true,true,316858,0.458333,554.502,925.132
+COMP_0395,GROUP_0112,servicios profesionales,servicio,6 meses,factoring,true,true,110108,1,578.067,1156.13
+COMP_0395,GROUP_0112,servicios profesionales,servicio,6 meses,yield,true,true,39019.6,0.458333,136.569,227.852
+COMP_0397,GROUP_0155,transporte / logística,servicio,días,factoring,true,true,375952,0.916667,1973.75,3783.02
+COMP_0400,GROUP_0142,comercio minorista,producto,días,yield,true,true,363319,0.916667,1271.62,3505.77
+COMP_0404,GROUP_0094,servicios profesionales,servicio,6 meses,factoring,true,true,2.10171e+06,0.875,11034,20688.7
+COMP_0405,GROUP_0035,hostelería,servicio,6 meses,factoring,true,true,4.17206e+06,1,21903.3,43806.6
+COMP_0408,GROUP_0076,servicios profesionales,servicio,6 meses,yield,true,true,20428.9,0.291667,71.501,98.4381
+COMP_0415,GROUP_0204,alquiler / inmobiliario,servicio,largo,factoring,true,true,1.82351e+07,0.25,95734.2,119668
+COMP_0418,GROUP_0070,holding / tesorería,mixto,largo,yield,true,true,5.30193e+06,1,18556.8,55670.3
+COMP_0422,GROUP_0018,servicios profesionales,servicio,6 meses,factoring,true,true,118880,0.166667,624.122,728.143
+COMP_0425,GROUP_0097,construcción,producto,6 meses,yield,true,true,157046,0.833333,549.66,1389.42
+COMP_0427,GROUP_0214,servicios profesionales,servicio,6 meses,factoring,true,true,169076,0.458333,887.648,1294.49
+COMP_0428,GROUP_0213,holding / tesorería,mixto,largo,yield,true,true,544322,1,1905.13,5715.38
+COMP_0430,GROUP_0182,servicios profesionales,servicio,6 meses,factoring,true,true,93000,0.0416667,488.25,508.594
+COMP_0431,GROUP_0102,servicios profesionales,servicio,6 meses,factoring,true,true,384351,0.208333,2017.84,2438.23
+COMP_0431,GROUP_0102,servicios profesionales,servicio,6 meses,yield,true,true,156410,0.416667,547.435,870.574
+COMP_0432,GROUP_0095,servicios profesionales,servicio,6 meses,yield,true,true,1118.28,0.666667,3.91398,8.26285
+COMP_0434,GROUP_0134,holding / tesorería,mixto,largo,yield,true,true,161722,0.833333,566.026,1430.79
+COMP_0438,GROUP_0150,servicios profesionales,servicio,6 meses,factoring,true,true,230659,0.291667,1210.96,1564.16
+COMP_0439,GROUP_0236,comercio minorista,mixto,días,yield,true,true,96973.4,0.25,339.407,445.472
+COMP_0441,GROUP_0217,holding / tesorería,servicio,largo,yield,true,true,3.22036e+06,0.541667,11271.3,20683.6
+COMP_0443,GROUP_0143,servicios profesionales,servicio,6 meses,reserve,true,true,78216.3,0.375,136.879,207.456
+COMP_0447,GROUP_0190,comercio minorista,producto,días,fx,true,true,1.21717e+06,0.583333,639.013,1229.21
+COMP_0450,GROUP_0202,servicios profesionales,servicio,6 meses,yield,true,true,38397,0.958333,134.39,386.603
+COMP_0454,GROUP_0112,servicios profesionales,servicio,6 meses,yield,true,true,7423.17,1,25.9811,77.9433
+COMP_0455,GROUP_0222,comercio minorista,producto,días,yield,true,true,82614.6,0.666667,289.151,610.43
+COMP_0457,GROUP_0129,servicios profesionales,servicio,6 meses,factoring,true,true,1.62944e+06,0.458333,8554.56,12475.4
+COMP_0460,GROUP_0116,servicios profesionales,servicio,6 meses,yield,true,true,830250,0.25,2905.88,3813.96
+COMP_0461,GROUP_0070,comercio minorista,producto,días,yield,true,true,240940,0.875,843.291,2226.82
+COMP_0466,GROUP_0200,hostelería,servicio,6 meses,factoring,true,true,3.02938e+06,0.291667,15904.3,20543
+COMP_0469,GROUP_0149,comercio minorista,producto,días,fx,true,true,1.67578e+06,0.333333,879.787,1270.8
+COMP_0471,GROUP_0162,comercio minorista,producto,días,fx,true,true,449137,0.833333,235.797,596.043
+COMP_0473,GROUP_0185,holding / tesorería,producto,largo,fx,true,true,345974,0.291667,181.636,250.065
+COMP_0474,GROUP_0141,software / suscripción,servicio,largo,factoring,true,true,205159,0.833333,1077.09,1974.66
+COMP_0480,GROUP_0112,comercio minorista,mixto,días,yield,true,true,53900.6,0.125,188.652,215.181
+COMP_0482,GROUP_0211,comercio minorista,producto,días,yield,true,true,131683,0.666667,460.889,972.988
+COMP_0485,GROUP_0052,holding / tesorería,mixto,largo,factoring,true,true,196753,0.166667,1032.95,1205.11
+COMP_0491,GROUP_0146,hostelería,mixto,12 meses,factoring,true,true,1.4981e+06,0.166667,7865.05,9175.89
+COMP_0493,GROUP_0126,servicios profesionales,servicio,6 meses,yield,true,true,105178,0.25,368.124,483.163
+COMP_0495,GROUP_0124,mayorista / distribución,producto,12 meses,factoring,true,true,424292,0.666667,2227.53,3712.56
+COMP_0495,GROUP_0124,mayorista / distribución,producto,12 meses,fx,true,true,367086,0.416667,192.72,306.478
+COMP_0496,GROUP_0137,comercio minorista,producto,días,fx,true,true,74239.9,0.416667,38.976,61.9826
+COMP_0498,GROUP_0153,mayorista / distribución,producto,12 meses,factoring,true,true,84386.9,0.125,443.031,498.41
+COMP_0499,GROUP_0241,hostelería,servicio,6 meses,factoring,true,true,554990,0.5,2913.7,4370.54
+COMP_0500,GROUP_0079,servicios profesionales,servicio,6 meses,factoring,true,true,1.64522e+07,0.916667,86374,165550
+COMP_0500,GROUP_0079,servicios profesionales,servicio,6 meses,yield,true,true,788215,0.0833333,2758.75,3007.81
+COMP_0503,GROUP_0134,comercio minorista,producto,días,yield,true,true,1.03127e+06,0.833333,3609.43,9123.84
+COMP_0504,GROUP_0013,mayorista / distribución,producto,12 meses,factoring,true,true,1.1216e+07,1,58883.9,117768
+COMP_0505,GROUP_0092,comercio minorista,producto,días,fx,true,true,71411.1,0.125,37.4908,42.763
+COMP_0505,GROUP_0092,comercio minorista,producto,días,yield,true,true,8.32963e+06,0.875,29153.7,76984
+COMP_0506,GROUP_0217,software / suscripción,servicio,largo,factoring,true,true,2.86215e+07,0.416667,150263,212872
+COMP_0508,GROUP_0070,mayorista / distribución,mixto,12 meses,factoring,true,true,2.91519e+06,0.333333,15304.7,20406.3
+COMP_0508,GROUP_0070,mayorista / distribución,mixto,12 meses,yield,true,true,9.01581e+06,0.75,31555.3,72971.7
+COMP_0511,GROUP_0202,servicios profesionales,servicio,6 meses,factoring,true,true,619301,0.208333,3251.33,3928.69
+COMP_0515,GROUP_0117,comercio minorista,producto,12 meses,yield,true,true,3.24613e+06,0.333333,11361.5,16411
+COMP_0516,GROUP_0192,holding / tesorería,servicio,largo,yield,true,true,641944,0.541667,2246.8,4123.04
+COMP_0518,GROUP_0101,servicios profesionales,servicio,6 meses,factoring,true,true,61919.9,0.666667,325.08,541.799
+COMP_0518,GROUP_0101,servicios profesionales,servicio,6 meses,yield,true,true,163469,1,572.143,1716.43
+COMP_0519,GROUP_0233,industria,mixto,12 meses,factoring,true,true,792170,0.208333,4158.89,5025.33
+COMP_0521,GROUP_0073,construcción,producto,6 meses,factoring,true,true,160628,0.25,843.296,1054.12
+COMP_0522,GROUP_0066,transporte / logística,servicio,días,factoring,true,true,1.63983e+06,0.916667,8609.12,16500.8
+COMP_0523,GROUP_0122,hostelería,servicio,6 meses,factoring,true,true,4.38569e+06,0.541667,23024.9,35496.7
+COMP_0524,GROUP_0006,holding / tesorería,servicio,largo,fx,true,true,3.755e+06,0.208333,1971.37,2467.64
+COMP_0527,GROUP_0108,holding / tesorería,mixto,largo,fx,true,true,1.00431e+06,0.208333,527.263,659.994
+COMP_0528,GROUP_0192,comercio minorista,producto,días,fx,true,true,42439.2,0.291667,22.2806,30.6744
+COMP_0530,GROUP_0017,comercio minorista,mixto,días,yield,true,true,172555,1,603.944,1811.83
+COMP_0531,GROUP_0214,servicios profesionales,servicio,6 meses,factoring,true,true,207016,0.291667,1086.84,1403.83
+COMP_0533,GROUP_0079,servicios profesionales,servicio,6 meses,factoring,true,true,577151,0.666667,3030.04,5050.07
+COMP_0536,GROUP_0039,hostelería,mixto,6 meses,yield,true,true,13061.9,0.208333,45.7168,57.2254
+COMP_0540,GROUP_0048,servicios profesionales,servicio,6 meses,factoring,true,true,2.34291e+06,0.25,12300.3,15375.4
+COMP_0542,GROUP_0023,mayorista / distribución,producto,12 meses,factoring,true,true,5.21653e+06,0.208333,27386.8,33092.4
+COMP_0548,GROUP_0217,energía,servicio,12 meses,factoring,true,true,1.06841e+07,0.25,56091.6,70114.5
+COMP_0548,GROUP_0217,energía,servicio,12 meses,yield,true,true,5.50894e+06,0.583333,19281.3,37089.7
+COMP_0550,GROUP_0246,holding / tesorería,producto,largo,factoring,true,true,272539,0.75,1430.83,2503.95
+COMP_0551,GROUP_0184,mayorista / distribución,mixto,12 meses,yield,true,true,51676.8,0.291667,180.869,249.009
+COMP_0553,GROUP_0217,energía,servicio,12 meses,factoring,true,true,258098,0.166667,1355.01,1580.85
+COMP_0553,GROUP_0217,energía,servicio,12 meses,yield,true,true,91338.7,0.666667,319.685,674.891
+COMP_0556,GROUP_0237,hostelería,producto,6 meses,fx,true,true,7.5,0.0416667,0.0039375,0.0041084
+COMP_0560,GROUP_0097,comercio minorista,producto,días,fx,true,true,6.40321e+06,0.791667,3361.68,8129.91
+COMP_0560,GROUP_0097,comercio minorista,producto,días,yield,true,true,74878.8,0.541667,262.076,480.927
+COMP_0562,GROUP_0218,software / suscripción,servicio,largo,fx,true,true,4192.06,0.958333,2.20083,6.33121
+COMP_0563,GROUP_0200,holding / tesorería,producto,largo,yield,true,true,371853,0.333333,1301.49,1879.92
+COMP_0566,GROUP_0119,mayorista / distribución,mixto,12 meses,factoring,true,true,893208,0.708333,4689.34,8010.96
+COMP_0570,GROUP_0123,mayorista / distribución,producto,12 meses,factoring,true,true,653548,0.0833333,3431.13,3717.05
+COMP_0570,GROUP_0123,mayorista / distribución,producto,12 meses,yield,true,true,66405.7,0.25,232.42,305.051
+COMP_0573,GROUP_0132,alquiler / inmobiliario,mixto,largo,factoring,true,true,3.64021e+07,0.125,191111,215000
+COMP_0575,GROUP_0079,servicios profesionales,servicio,6 meses,factoring,true,true,1.97445e+06,0.875,10365.9,19436
+COMP_0575,GROUP_0079,servicios profesionales,servicio,6 meses,yield,true,true,1.05427e+06,0.958333,3689.95,10615
+COMP_0576,GROUP_0044,holding / tesorería,mixto,largo,factoring,true,true,1.63878e+06,0.75,8603.57,15056.3
+COMP_0576,GROUP_0044,holding / tesorería,mixto,largo,fx,true,true,3.03011e+07,0.333333,15908.1,22978.3
+COMP_0582,GROUP_0159,mayorista / distribución,mixto,12 meses,yield,true,true,32761,1,114.664,343.991
+COMP_0584,GROUP_0117,servicios profesionales,servicio,6 meses,yield,true,true,829225,0.541667,2902.29,5325.9
+COMP_0586,GROUP_0047,holding / tesorería,producto,largo,factoring,true,true,1.25741e+06,0.291667,6601.4,8526.8
+COMP_0587,GROUP_0108,comercio minorista,producto,días,yield,true,true,251.11,0.625,0.878885,1.7715
+COMP_0588,GROUP_0218,software / suscripción,servicio,largo,yield,true,true,51951.1,0.208333,181.829,227.602
+COMP_0591,GROUP_0185,mayorista / distribución,producto,12 meses,fx,true,true,3.17259e+06,0.208333,1665.61,2084.91
+COMP_0592,GROUP_0185,comercio minorista,producto,días,fx,true,true,39259.9,0.25,20.6114,27.0525
+COMP_0593,GROUP_0053,mayorista / distribución,producto,12 meses,credit,true,true,88475.8,0.166667,6193.31,7225.52
+COMP_0596,GROUP_0212,holding / tesorería,producto,largo,yield,true,true,2021.62,0.666667,7.07567,14.9375
+COMP_0597,GROUP_0029,comercio minorista,mixto,días,factoring,true,true,3.03794e+06,0.333333,15949.2,21265.6
+COMP_0598,GROUP_0200,hostelería,mixto,6 meses,factoring,true,true,2.91167e+06,0.333333,15286.3,20381.7
+COMP_0598,GROUP_0200,hostelería,mixto,6 meses,yield,true,true,3.37455e+06,0.291667,11810.9,16260.5
+COMP_0601,GROUP_0070,construcción,producto,6 meses,factoring,true,true,1.84767e+07,0.0416667,97002.7,101044
+COMP_0601,GROUP_0070,construcción,producto,6 meses,yield,true,true,476585,1,1668.05,5004.14
+COMP_0607,GROUP_0023,mayorista / distribución,producto,12 meses,factoring,true,true,57926.1,0.416667,304.112,430.826
+COMP_0607,GROUP_0023,mayorista / distribución,producto,12 meses,yield,true,true,2.06389e+06,0.833333,7223.63,18259.7
+COMP_0610,GROUP_0112,comercio minorista,mixto,días,yield,true,true,1.71714e+06,1,6009.97,18029.9
+COMP_0611,GROUP_0099,construcción,producto,6 meses,factoring,true,true,184735,0.75,969.86,1697.25
+COMP_0611,GROUP_0099,construcción,producto,6 meses,reserve,true,true,2.58951e+06,0.958333,4531.64,13036.3
+COMP_0612,GROUP_0218,holding / tesorería,servicio,largo,fx,true,true,2.05322e+06,0.666667,1077.94,2275.65
+COMP_0614,GROUP_0218,software / suscripción,servicio,largo,fx,true,true,65734,0.666667,34.5103,72.8552
+COMP_0615,GROUP_0079,servicios profesionales,servicio,6 meses,factoring,true,true,1.0097e+07,0.958333,53009.4,103810
+COMP_0616,GROUP_0017,comercio minorista,mixto,días,fx,true,true,9.97287e+06,1,5235.76,15707.3
+COMP_0618,GROUP_0013,mayorista / distribución,producto,12 meses,factoring,true,true,334447,0.833333,1755.85,3219.05
+COMP_0619,GROUP_0039,comercio minorista,servicio,días,factoring,true,true,103048,0.0833333,541,586.083
+COMP_0621,GROUP_0211,comercio minorista,producto,días,factoring,true,true,4.03136e+06,0.916667,21164.6,40565.5
+COMP_0621,GROUP_0211,comercio minorista,producto,días,fx,true,true,1.9913e+06,0.5,1045.43,1829.51
+COMP_0621,GROUP_0211,comercio minorista,producto,días,yield,true,true,4.96697e+06,0.625,17384.4,35040.4
+COMP_0625,GROUP_0159,servicios profesionales,mixto,6 meses,yield,true,true,6583.35,1,23.0417,69.1252
+COMP_0626,GROUP_0070,comercio minorista,producto,días,yield,true,true,8.58179e+06,1,30036.3,90108.8
+COMP_0628,GROUP_0013,comercio minorista,producto,días,factoring,true,true,1.29011e+06,0.791667,6773.05,12135.1
+COMP_0628,GROUP_0013,comercio minorista,producto,días,yield,true,true,17772.5,0.916667,62.2039,171.493
+COMP_0629,GROUP_0132,comercio minorista,mixto,6 meses,factoring,true,true,1.68788e+06,0.833333,8861.36,16245.8
+COMP_0631,GROUP_0222,comercio minorista,producto,días,yield,true,true,18680.9,0.25,65.3833,85.8156
+COMP_0633,GROUP_0130,comercio minorista,producto,días,fx,true,true,867606,0.375,455.493,690.357
+COMP_0636,GROUP_0037,hostelería,mixto,6 meses,factoring,true,true,3.82134e+06,0.125,20062,22569.8
+COMP_0637,GROUP_0132,servicios profesionales,servicio,6 meses,factoring,true,true,2.23054e+06,0.208333,11710.3,14150
+COMP_0637,GROUP_0132,servicios profesionales,servicio,6 meses,reserve,true,true,1419.04,1,2.48333,7.44998
+COMP_0640,GROUP_0022,servicios profesionales,servicio,6 meses,factoring,true,true,1.0003e+06,0.0833333,5251.57,5689.21
+COMP_0640,GROUP_0022,servicios profesionales,servicio,6 meses,yield,true,true,9.78402e+06,1,34244.1,102732
+COMP_0641,GROUP_0132,servicios profesionales,mixto,6 meses,factoring,true,true,99496.3,0.375,522.356,718.239
+COMP_0645,GROUP_0217,holding / tesorería,mixto,largo,yield,true,true,26854,0.791667,93.9889,227.303
+COMP_0646,GROUP_0118,servicios profesionales,servicio,6 meses,factoring,true,true,7.53789e+06,0.75,39573.9,69254.3
+COMP_0647,GROUP_0126,transporte / logística,producto,días,factoring,true,true,359918,0.541667,1889.57,2913.09
+COMP_0648,GROUP_0053,comercio minorista,mixto,días,yield,true,true,27048.9,0.291667,94.671,130.337
+COMP_0649,GROUP_0153,holding / tesorería,producto,largo,factoring,true,true,4.53855e+06,0.583333,23827.4,37726.7
+COMP_0650,GROUP_0038,mayorista / distribución,producto,12 meses,yield,true,true,4661.58,0.625,16.3155,32.886
+COMP_0652,GROUP_0222,comercio minorista,producto,días,yield,true,true,290372,0.458333,1016.3,1695.6
+COMP_0653,GROUP_0128,mayorista / distribución,producto,12 meses,yield,true,true,1.24567e+06,0.625,4359.86,8787.84
+COMP_0656,GROUP_0087,mayorista / distribución,mixto,12 meses,fx,true,true,3.03732e+07,0.458333,15945.9,26604.2
+COMP_0657,GROUP_0222,comercio minorista,producto,días,yield,true,true,79320.1,0.5,277.62,485.836
+COMP_0658,GROUP_0132,transporte / logística,mixto,días,factoring,true,true,2.47673e+06,0.625,13002.8,21129.6
+COMP_0658,GROUP_0132,transporte / logística,mixto,días,fx,true,true,6.29799e+06,1,3306.44,9919.33
+COMP_0660,GROUP_0175,construcción,producto,6 meses,yield,true,true,49631.1,0.125,173.709,198.137
+COMP_0661,GROUP_0222,comercio minorista,mixto,días,yield,true,true,723112,0.5,2530.89,4429.06
+COMP_0662,GROUP_0054,construcción,servicio,6 meses,factoring,true,true,1.62308e+06,0.666667,8521.17,14202
+COMP_0663,GROUP_0143,servicios profesionales,servicio,6 meses,reserve,true,true,66225.7,0.375,115.895,175.653
+COMP_0665,GROUP_0150,construcción,producto,6 meses,factoring,true,true,243155,0.291667,1276.56,1648.89
+COMP_0665,GROUP_0150,construcción,producto,6 meses,fx,true,true,1.45443e+07,0.5,7635.77,13362.6
+COMP_0666,GROUP_0013,hostelería,mixto,6 meses,factoring,true,true,232016,0.958333,1218.09,2385.42
+COMP_0666,GROUP_0013,hostelería,mixto,6 meses,fx,true,true,1.097e+06,0.958333,575.924,1656.78
+COMP_0667,GROUP_0068,hostelería,mixto,6 meses,factoring,true,true,94053,0.0416667,493.778,514.352
+COMP_0669,GROUP_0007,hostelería,servicio,6 meses,fx,true,true,1.1744e+07,0.333333,6165.63,8905.9
+COMP_0669,GROUP_0007,hostelería,servicio,6 meses,reserve,true,true,404909,0.333333,708.59,1023.52
+COMP_0670,GROUP_0101,holding / tesorería,servicio,largo,factoring,true,true,91072.1,0.375,478.129,657.427
+COMP_0670,GROUP_0101,holding / tesorería,servicio,largo,fx,true,true,459143,0.875,241.05,636.523
+COMP_0670,GROUP_0101,holding / tesorería,servicio,largo,yield,true,true,42916.9,1,150.209,450.628
+COMP_0671,GROUP_0250,servicios profesionales,servicio,6 meses,factoring,true,true,156824,1,823.325,1646.65
+COMP_0671,GROUP_0250,servicios profesionales,servicio,6 meses,yield,true,true,100824,1,352.884,1058.65
+COMP_0674,GROUP_0112,software / suscripción,servicio,largo,factoring,true,true,1.07716e+06,0.708333,5655.09,9660.79
+COMP_0674,GROUP_0112,software / suscripción,servicio,largo,yield,true,true,1.12421e+06,0.375,3934.75,5963.6
+COMP_0675,GROUP_0023,servicios profesionales,servicio,6 meses,factoring,true,true,210045,0.708333,1102.74,1883.84
+COMP_0676,GROUP_0104,servicios profesionales,servicio,6 meses,factoring,true,true,54361.4,0.583333,285.397,451.879
+COMP_0680,GROUP_0089,comercio minorista,producto,días,fx,true,true,27080.2,0.416667,14.2171,22.6092
+COMP_0681,GROUP_0176,mayorista / distribución,mixto,12 meses,yield,true,true,60555.5,0.875,211.944,559.666
+COMP_0682,GROUP_0200,energía,mixto,12 meses,factoring,true,true,1.19497e+06,0.25,6273.61,7842.01
+COMP_0682,GROUP_0200,energía,mixto,12 meses,yield,true,true,4.23933e+06,0.583333,14837.6,28541.9
+COMP_0686,GROUP_0139,software / suscripción,mixto,largo,factoring,true,true,221295,0.291667,1161.8,1500.66
+COMP_0687,GROUP_0212,servicios profesionales,servicio,6 meses,yield,true,true,120556,0.166667,421.944,503.989
+COMP_0689,GROUP_0200,hostelería,servicio,6 meses,factoring,true,true,160459,0.375,842.409,1158.31
+COMP_0689,GROUP_0200,hostelería,servicio,6 meses,yield,true,true,36374.4,0.75,127.311,294.406
+COMP_0691,GROUP_0010,servicios profesionales,servicio,6 meses,factoring,true,true,78445,0.291667,411.836,531.955
+COMP_0692,GROUP_0108,holding / tesorería,producto,largo,fx,true,true,28883.2,0.208333,15.1637,18.9809
+COMP_0693,GROUP_0116,holding / tesorería,servicio,largo,fx,true,true,2.34442e+07,1,12308.2,36924.6
+COMP_0695,GROUP_0084,transporte / logística,producto,días,factoring,true,true,302082,0.666667,1585.93,2643.21
+COMP_0695,GROUP_0084,transporte / logística,producto,días,yield,true,true,68396.5,0.333333,239.388,345.782
+COMP_0697,GROUP_0132,alquiler / inmobiliario,servicio,largo,factoring,true,true,2.10095e+06,0.416667,11030,15625.8
+COMP_0708,GROUP_0196,hostelería,producto,6 meses,yield,true,true,2.1529e+06,0.25,7535.16,9889.89
+COMP_0709,GROUP_0040,comercio minorista,producto,días,factoring,true,true,213587,0.291667,1121.33,1448.39
+COMP_0713,GROUP_0023,comercio minorista,producto,días,fx,true,true,134336,0.375,70.5266,106.892
+COMP_0716,GROUP_0178,comercio minorista,producto,días,yield,true,true,579474,0.291667,2028.16,2792.24
+COMP_0717,GROUP_0020,holding / tesorería,producto,largo,yield,true,true,82.78,0.583333,0.28973,0.557328
+COMP_0719,GROUP_0068,mayorista / distribución,producto,12 meses,factoring,true,true,570061,0.541667,2992.82,4613.93
+COMP_0721,GROUP_0113,comercio minorista,producto,días,yield,true,true,424812,0.0416667,1486.84,1551.38
+COMP_0723,GROUP_0230,mayorista / distribución,mixto,12 meses,factoring,true,true,122857,0.375,644.997,886.871
+COMP_0725,GROUP_0222,comercio minorista,producto,días,yield,true,true,702191,0.583333,2457.67,4727.6
+COMP_0726,GROUP_0055,servicios profesionales,servicio,6 meses,factoring,true,true,155940,0.25,818.686,1023.36
+COMP_0728,GROUP_0183,mayorista / distribución,mixto,12 meses,factoring,true,true,733795,0.583333,3852.43,6099.67
+COMP_0730,GROUP_0041,comercio minorista,producto,días,fx,true,true,1.41428e+07,0.375,7424.96,11253.5
+COMP_0731,GROUP_0149,mayorista / distribución,mixto,12 meses,factoring,true,true,142484,0.208333,748.039,903.88
+COMP_0731,GROUP_0149,mayorista / distribución,mixto,12 meses,yield,true,true,4393.77,0.208333,15.3782,19.2494
+COMP_0732,GROUP_0022,servicios profesionales,mixto,6 meses,yield,true,true,2860.45,1,10.0116,30.0347
+COMP_0737,GROUP_0205,servicios profesionales,servicio,6 meses,factoring,true,true,57336.6,0.875,301.017,564.407
+COMP_0737,GROUP_0205,servicios profesionales,servicio,6 meses,yield,true,true,108889,0.958333,381.111,1096.36
+COMP_0739,GROUP_0187,servicios profesionales,servicio,6 meses,yield,true,true,20860.8,0.791667,73.0127,176.574
+COMP_0740,GROUP_0044,comercio minorista,mixto,6 meses,factoring,true,true,212500,0.208333,1115.62,1348.05
+COMP_0740,GROUP_0044,comercio minorista,mixto,6 meses,fx,true,true,194096,0.333333,101.901,147.19
+COMP_0741,GROUP_0013,comercio minorista,mixto,días,yield,true,true,44836,0.375,156.926,237.841
+COMP_0742,GROUP_0047,holding / tesorería,mixto,largo,fx,true,true,311889,0.0833333,163.741,178.524
+COMP_0742,GROUP_0047,holding / tesorería,mixto,largo,reserve,true,true,892250,0.291667,1561.44,2149.69
+COMP_0743,GROUP_0033,software / suscripción,servicio,largo,factoring,true,true,91357.2,0.0833333,479.625,519.594
+COMP_0743,GROUP_0033,software / suscripción,servicio,largo,fx,true,true,5528.28,0.0416667,2.90234,3.02831
+COMP_0743,GROUP_0033,software / suscripción,servicio,largo,yield,true,true,712840,0.458333,2494.94,4162.56
+COMP_0744,GROUP_0032,comercio minorista,producto,días,fx,true,true,50.8253,0.125,0.0266833,0.0304356
+COMP_0744,GROUP_0032,comercio minorista,producto,días,yield,true,true,76713.4,0.125,268.497,306.254
+COMP_0746,GROUP_0222,comercio minorista,producto,días,yield,true,true,67936.1,0.5,237.776,416.108
+COMP_0748,GROUP_0074,comercio minorista,producto,días,fx,true,true,2.49437e+07,1,13095.4,39286.3
+COMP_0753,GROUP_0170,holding / tesorería,mixto,largo,yield,true,true,991515,0.375,3470.3,5259.68
+COMP_0754,GROUP_0211,comercio minorista,producto,días,fx,true,true,1.53345e+06,0.666667,805.063,1699.58
+COMP_0756,GROUP_0104,comercio minorista,producto,días,factoring,true,true,575747,1,3022.67,6045.34
+COMP_0757,GROUP_0133,servicios profesionales,mixto,6 meses,factoring,true,true,1.64704e+06,0.0833333,8646.95,9367.53
+COMP_0761,GROUP_0199,holding / tesorería,producto,largo,fx,true,true,1.61737e+08,0.708333,84912,187661
+COMP_0764,GROUP_0022,servicios profesionales,mixto,6 meses,factoring,true,true,231998,0.125,1217.99,1370.24
+COMP_0765,GROUP_0016,comercio minorista,producto,días,fx,true,true,1.31338e+06,0.875,689.527,1820.78
+COMP_0768,GROUP_0127,servicios profesionales,servicio,6 meses,yield,true,true,13906.4,0.541667,48.6725,89.3175
+COMP_0770,GROUP_0082,mayorista / distribución,producto,12 meses,factoring,true,true,54092,0.25,283.983,354.979
+COMP_0772,GROUP_0023,comercio minorista,producto,días,yield,true,true,202502,0.875,708.755,1871.56
+COMP_0773,GROUP_0112,servicios profesionales,servicio,6 meses,factoring,true,true,8.794e+06,1,46168.5,92337
+COMP_0775,GROUP_0211,comercio minorista,producto,días,factoring,true,true,1.55599e+06,0.458333,8168.97,11913.1
+COMP_0775,GROUP_0211,comercio minorista,producto,días,fx,true,true,18035.4,0.666667,9.46857,19.9892
+COMP_0775,GROUP_0211,comercio minorista,producto,días,yield,true,true,483761,0.541667,1693.16,3107.07
+COMP_0778,GROUP_0238,mayorista / distribución,mixto,12 meses,factoring,true,true,1.89963e+06,0.541667,9973.08,15375.2
+COMP_0779,GROUP_0108,holding / tesorería,producto,largo,yield,true,true,26216.3,0.708333,91.7569,202.789
+COMP_0783,GROUP_0122,servicios profesionales,servicio,6 meses,factoring,true,true,1.14289e+06,0.333333,6000.18,8000.24
+COMP_0784,GROUP_0149,mayorista / distribución,producto,12 meses,factoring,true,true,182844,0.125,959.931,1079.92
+COMP_0787,GROUP_0008,construcción,mixto,6 meses,factoring,true,true,205745,0.0833333,1080.16,1170.17
+COMP_0790,GROUP_0210,hostelería,producto,6 meses,yield,true,true,1.02714e+06,0.916667,3595.01,9911.23
+COMP_0791,GROUP_0065,comercio minorista,producto,días,yield,true,true,39648.3,0.166667,138.769,165.752
+COMP_0792,GROUP_0070,comercio minorista,producto,días,yield,true,true,4.4012e+06,1,15404.2,46212.6
+COMP_0795,GROUP_0039,comercio minorista,servicio,días,factoring,true,true,119752,0.166667,628.697,733.48
+COMP_0795,GROUP_0039,comercio minorista,servicio,días,yield,true,true,160841,0.208333,562.944,704.657
+COMP_0796,GROUP_0160,hostelería,producto,6 meses,credit,true,true,1592.24,0.0416667,111.457,116.101
+COMP_0796,GROUP_0160,hostelería,producto,6 meses,yield,true,true,893983,1,3128.94,9386.82
+COMP_0798,GROUP_0057,industria,mixto,12 meses,factoring,true,true,133402,0.125,700.363,787.909
+COMP_0799,GROUP_0183,comercio minorista,mixto,días,fx,true,true,9.63025e+06,0.416667,5055.88,8040.26
+COMP_0801,GROUP_0023,mayorista / distribución,mixto,12 meses,credit,true,true,917.909,0.708333,64.2536,109.767
+COMP_0803,GROUP_0231,software / suscripción,servicio,largo,factoring,true,true,1.66466e+06,0.333333,8739.46,11652.6
+COMP_0805,GROUP_0213,holding / tesorería,producto,largo,factoring,true,true,1.00017e+06,0.5,5250.89,7876.34
+COMP_0805,GROUP_0213,holding / tesorería,producto,largo,yield,true,true,290094,0.541667,1015.33,1863.2
+COMP_0808,GROUP_0015,servicios profesionales,servicio,6 meses,factoring,true,true,3.05041e+06,0.708333,16014.7,27358.4
+COMP_0809,GROUP_0250,mayorista / distribución,mixto,12 meses,factoring,true,true,204864,0.125,1075.53,1209.98
+COMP_0812,GROUP_0160,hostelería,servicio,6 meses,yield,true,true,7218.78,0.916667,25.2657,69.6562
+COMP_0813,GROUP_0155,mayorista / distribución,mixto,12 meses,factoring,true,true,5.13962e+06,0.375,26983,37101.6
+COMP_0815,GROUP_0250,holding / tesorería,producto,largo,yield,true,true,80956.6,1,283.348,850.045
+COMP_0817,GROUP_0070,comercio minorista,producto,días,yield,true,true,343934,1,1203.77,3611.31
+COMP_0819,GROUP_0250,servicios profesionales,servicio,6 meses,factoring,true,true,1.65643e+06,0.541667,8696.25,13406.7
+COMP_0825,GROUP_0043,comercio minorista,producto,días,yield,true,true,135106,1,472.872,1418.62
+COMP_0826,GROUP_0250,holding / tesorería,producto,largo,yield,true,true,71904.6,1,251.666,754.999
+COMP_0828,GROUP_0016,construcción,producto,6 meses,factoring,true,true,213715,0.708333,1122.01,1916.76
+COMP_0829,GROUP_0153,industria,mixto,12 meses,factoring,true,true,358407,0.5,1881.64,2822.46
+COMP_0830,GROUP_0016,comercio minorista,producto,días,fx,true,true,2.3652e+06,1,1241.73,3725.19
+COMP_0830,GROUP_0016,comercio minorista,producto,días,yield,true,true,253255,0.583333,886.394,1705.08
+COMP_0831,GROUP_0250,comercio minorista,producto,días,yield,true,true,308995,1,1081.48,3244.44
+COMP_0832,GROUP_0014,comercio minorista,producto,días,fx,true,true,974633,0.75,511.683,1183.27
+COMP_0834,GROUP_0096,servicios profesionales,servicio,6 meses,yield,true,true,5242.74,1,18.3496,55.0488
+COMP_0835,GROUP_0250,hostelería,mixto,6 meses,yield,true,true,357690,1,1251.92,3755.75
+COMP_0836,GROUP_0189,mayorista / distribución,producto,12 meses,factoring,true,true,1.72688e+06,1,9066.1,18132.2
+COMP_0837,GROUP_0070,comercio minorista,producto,días,yield,true,true,2.44461e+07,1,85561.2,256684
+COMP_0838,GROUP_0250,holding / tesorería,producto,largo,yield,true,true,78107.5,1,273.376,820.129
+COMP_0839,GROUP_0250,holding / tesorería,producto,largo,yield,true,true,78133.6,1,273.468,820.403
+COMP_0842,GROUP_0053,construcción,producto,6 meses,credit,true,true,638.96,0.166667,44.7272,52.1817
+COMP_0843,GROUP_0218,software / suscripción,servicio,largo,fx,true,true,71569.6,1,37.5741,112.722
+COMP_0845,GROUP_0222,comercio minorista,producto,días,yield,true,true,188210,0.625,658.735,1327.76
+COMP_0846,GROUP_0141,hostelería,servicio,6 meses,factoring,true,true,603369,0.833333,3167.69,5807.43
+COMP_0848,GROUP_0126,comercio minorista,mixto,días,fx,true,true,2.11195e+07,1,11087.7,33263.2
+COMP_0849,GROUP_0246,mayorista / distribución,mixto,12 meses,factoring,true,true,670516,0.125,3520.21,3960.24
+COMP_0852,GROUP_0090,comercio minorista,mixto,días,yield,true,true,229324,0.25,802.635,1053.46
+COMP_0854,GROUP_0131,software / suscripción,servicio,largo,factoring,true,true,1.07698e+06,0.958333,5654.13,11072.7
+COMP_0854,GROUP_0131,software / suscripción,servicio,largo,reserve,true,true,174376,0.666667,305.158,644.223
+COMP_0855,GROUP_0006,holding / tesorería,servicio,largo,fx,true,true,3.7553e+06,0.25,1971.53,2587.64
+COMP_0857,GROUP_0097,construcción,producto,12 meses,credit,true,true,110.064,0.25,7.70449,9.63062
+COMP_0858,GROUP_0048,holding / tesorería,producto,largo,factoring,true,true,60197.3,0.125,316.036,355.54
+COMP_0861,GROUP_0226,comercio minorista,producto,días,fx,true,true,67853.7,0.333333,35.6232,51.4557
+COMP_0862,GROUP_0132,servicios profesionales,mixto,6 meses,factoring,true,true,1.84968e+07,0.333333,97108.4,129478
+COMP_0862,GROUP_0132,servicios profesionales,mixto,6 meses,reserve,true,true,2802.76,1,4.90483,14.7145
+COMP_0863,GROUP_0142,comercio minorista,producto,días,fx,true,true,113158,0.25,59.408,77.9731
+COMP_0864,GROUP_0218,software / suscripción,servicio,largo,factoring,true,true,159164,0.5,835.613,1253.42
+COMP_0864,GROUP_0218,software / suscripción,servicio,largo,fx,true,true,4.88471e+06,1,2564.47,7693.42
+COMP_0865,GROUP_0230,industria,producto,12 meses,factoring,true,true,343195,0.25,1801.78,2252.22
+COMP_0867,GROUP_0103,holding / tesorería,producto,largo,yield,true,true,4763.62,0.833333,16.6727,42.1448
+COMP_0868,GROUP_0096,servicios profesionales,servicio,6 meses,factoring,true,true,76788.9,0.333333,403.141,537.522
+COMP_0869,GROUP_0228,comercio minorista,producto,días,factoring,true,true,1.01444e+07,0.583333,53258.3,84325.6
+COMP_0870,GROUP_0142,hostelería,servicio,6 meses,yield,true,true,178322,1,624.125,1872.38
+COMP_0873,GROUP_0023,mayorista / distribución,mixto,12 meses,factoring,true,true,510941,0.583333,2682.44,4247.2
+COMP_0873,GROUP_0023,mayorista / distribución,mixto,12 meses,fx,true,true,356.509,0.333333,0.187167,0.270352
+COMP_0875,GROUP_0141,hostelería,servicio,6 meses,factoring,true,true,703672,0.666667,3694.28,6157.13
+COMP_0875,GROUP_0141,hostelería,servicio,6 meses,yield,true,true,18713,1,65.4954,196.486
+COMP_0879,GROUP_0108,comercio minorista,producto,días,fx,true,true,728096,0.791667,382.251,924.436
+COMP_0879,GROUP_0108,comercio minorista,producto,días,yield,true,true,12238.2,0.666667,42.8336,90.4266
+COMP_0881,GROUP_0071,servicios profesionales,mixto,6 meses,yield,true,true,46120.9,0.666667,161.423,340.782
+COMP_0882,GROUP_0101,servicios profesionales,servicio,6 meses,yield,true,true,3112.31,1,10.8931,32.6793
+COMP_0883,GROUP_0194,comercio minorista,producto,días,yield,true,true,5644.35,1,19.7552,59.2657
+COMP_0884,GROUP_0222,comercio minorista,producto,días,yield,true,true,118751,0.5,415.63,727.353
+COMP_0887,GROUP_0048,holding / tesorería,producto,largo,factoring,true,true,109404,0.0833333,574.369,622.233
+COMP_0890,GROUP_0245,hostelería,servicio,6 meses,factoring,true,true,1.59894e+06,0.666667,8394.42,13990.7
+COMP_0891,GROUP_0081,comercio minorista,producto,días,yield,true,true,9005,0.416667,31.5175,50.1216
+COMP_0892,GROUP_0142,servicios profesionales,servicio,6 meses,yield,true,true,2298.25,0.208333,8.04388,10.0688
+COMP_0896,GROUP_0114,comercio minorista,servicio,días,fx,true,true,391699,0.375,205.642,311.676
+COMP_0903,GROUP_0079,alquiler / inmobiliario,mixto,largo,yield,true,true,4622.82,0.666667,16.1799,34.1575
+COMP_0904,GROUP_0129,comercio minorista,producto,días,yield,true,true,19121.2,0.583333,66.9243,128.736
+COMP_0907,GROUP_0022,construcción,producto,6 meses,credit,true,true,2.11665,0.0416667,0.148165,0.154339
+COMP_0908,GROUP_0022,alquiler / inmobiliario,mixto,largo,factoring,true,true,78262.8,0.166667,410.88,479.36
+COMP_0909,GROUP_0220,mayorista / distribución,producto,12 meses,factoring,true,true,2.86532e+07,0.791667,150429,269519
+COMP_0910,GROUP_0172,holding / tesorería,servicio,largo,reserve,true,true,71512.9,0.75,125.148,289.404
+COMP_0914,GROUP_0244,servicios profesionales,servicio,6 meses,reserve,true,true,631.63,0.791667,1.10535,2.67319
+COMP_0915,GROUP_0088,holding / tesorería,servicio,largo,fx,true,true,244984,0.5,128.617,225.079
+COMP_0919,GROUP_0230,mayorista / distribución,mixto,12 meses,factoring,true,true,3.07912e+06,1,16165.4,32330.8
+COMP_0921,GROUP_0183,construcción,producto,6 meses,factoring,true,true,126548,0.25,664.379,830.473
+COMP_0921,GROUP_0183,construcción,producto,6 meses,fx,true,true,298788,0.416667,156.864,249.457
+COMP_0923,GROUP_0126,comercio minorista,producto,días,factoring,true,true,65858.7,0.375,345.758,475.417
+COMP_0923,GROUP_0126,comercio minorista,producto,días,yield,true,true,511416,0.875,1789.96,4726.61
+COMP_0925,GROUP_0021,construcción,producto,6 meses,yield,true,true,8025.94,0.125,28.0908,32.0411
+COMP_0926,GROUP_0217,servicios profesionales,servicio,6 meses,factoring,true,true,5.64223e+06,0.25,29621.7,37027.1
+COMP_0926,GROUP_0217,servicios profesionales,servicio,6 meses,yield,true,true,2.40848e+06,0.583333,8429.68,16215.4
+COMP_0929,GROUP_0067,hostelería,servicio,6 meses,yield,true,true,1.17907e+06,0.833333,4126.76,10431.5
+COMP_0934,GROUP_0184,holding / tesorería,producto,largo,yield,true,true,30720.6,0.416667,107.522,170.99
+COMP_0935,GROUP_0018,alquiler / inmobiliario,mixto,largo,factoring,true,true,1.40568e+06,0.416667,7379.82,10454.7
+COMP_0936,GROUP_0046,construcción,mixto,6 meses,factoring,true,true,664033,0.0416667,3486.18,3631.43
+COMP_0936,GROUP_0046,construcción,mixto,6 meses,yield,true,true,84594.2,0.0833333,296.08,322.809
+COMP_0940,GROUP_0217,alquiler / inmobiliario,servicio,largo,yield,true,true,2.40814e+06,0.5,8428.5,14749.9
+COMP_0943,GROUP_0173,comercio minorista,producto,días,factoring,true,true,488310,0.458333,2563.63,3738.63
+COMP_0944,GROUP_0104,mayorista / distribución,producto,12 meses,factoring,true,true,2.12993e+06,0.875,11182.1,20966.5
+COMP_0945,GROUP_0162,mayorista / distribución,mixto,12 meses,factoring,true,true,670361,0.5,3519.4,5279.09
+COMP_0945,GROUP_0162,mayorista / distribución,mixto,12 meses,fx,true,true,91530.4,0.541667,48.0535,88.1814
+COMP_0950,GROUP_0082,industria,producto,12 meses,credit,true,true,75.017,0.166667,5.25119,6.12639
+COMP_0951,GROUP_0218,hostelería,mixto,6 meses,fx,true,true,1.67483e+07,1,8792.85,26378.6
+COMP_0955,GROUP_0035,mayorista / distribución,mixto,12 meses,factoring,true,true,278300,0.958333,1461.07,2861.27
+COMP_0958,GROUP_0200,construcción,producto,6 meses,factoring,true,true,1.43062e+06,0.333333,7510.74,10014.3
+COMP_0958,GROUP_0200,construcción,producto,6 meses,yield,true,true,1.5359e+06,0.625,5375.64,10835.3
+COMP_0959,GROUP_0013,construcción,producto,6 meses,factoring,true,true,369293,1,1938.79,3877.57
+COMP_0959,GROUP_0013,construcción,producto,6 meses,yield,true,true,32333.5,0.916667,113.167,311.996
+COMP_0960,GROUP_0137,holding / tesorería,servicio,largo,yield,true,true,19354.2,0.375,67.7395,102.668
+COMP_0963,GROUP_0159,mayorista / distribución,producto,12 meses,yield,true,true,9409.17,1,32.9321,98.7963
+COMP_0964,GROUP_0039,comercio minorista,mixto,días,yield,true,true,203129,0.208333,710.952,889.924
+COMP_0966,GROUP_0094,comercio minorista,mixto,6 meses,factoring,true,true,61230,0.25,321.458,401.822
+COMP_0967,GROUP_0142,mayorista / distribución,mixto,12 meses,factoring,true,true,85567.9,0.166667,449.231,524.103
+COMP_0971,GROUP_0152,construcción,producto,6 meses,yield,true,true,234059,0.291667,819.206,1127.83
+COMP_0972,GROUP_0170,construcción,producto,6 meses,yield,true,true,1.16027e+06,0.541667,4060.94,7452.1
+COMP_0973,GROUP_0013,comercio minorista,producto,días,factoring,true,true,2.1265e+06,1,11164.1,22328.2
+COMP_0974,GROUP_0195,construcción,producto,6 meses,factoring,true,true,508731,0.25,2670.84,3338.54
+COMP_0974,GROUP_0195,construcción,producto,6 meses,yield,true,true,4.57552e+06,0.5,16014.3,28025.1
+COMP_0976,GROUP_0149,mayorista / distribución,producto,12 meses,factoring,true,true,2.01659e+07,0.416667,105871,149984
+COMP_0977,GROUP_0080,software / suscripción,servicio,largo,factoring,true,true,1.05671e+06,0.75,5547.75,9708.56
+COMP_0977,GROUP_0080,software / suscripción,servicio,largo,yield,true,true,1.26698e+06,0.166667,4434.42,5296.67
+COMP_0978,GROUP_0142,comercio minorista,producto,días,factoring,true,true,463569,0.333333,2433.74,3244.98
+COMP_0979,GROUP_0018,servicios profesionales,servicio,6 meses,factoring,true,true,59700,0.0416667,313.425,326.484
+COMP_0986,GROUP_0044,holding / tesorería,mixto,largo,factoring,true,true,2.56481e+06,0.5,13465.3,20197.9
+COMP_0989,GROUP_0038,mayorista / distribución,producto,12 meses,factoring,true,true,435219,0.541667,2284.9,3522.55
+COMP_0990,GROUP_0211,servicios profesionales,mixto,6 meses,factoring,true,true,833193,0.458333,4374.26,6379.13
+COMP_0990,GROUP_0211,servicios profesionales,mixto,6 meses,fx,true,true,1.02234e+06,0.416667,536.731,853.551
+COMP_0994,GROUP_0037,servicios profesionales,producto,6 meses,fx,true,true,1.88935e+07,0.375,9919.08,15033.6
+COMP_0997,GROUP_0117,servicios profesionales,servicio,6 meses,yield,true,true,720597,0.541667,2522.09,4628.21
+COMP_0999,GROUP_0222,comercio minorista,producto,días,yield,true,true,700708,0.625,2452.48,4943.27
+COMP_1000,GROUP_0105,servicios profesionales,servicio,6 meses,factoring,true,true,4.84843e+06,0.625,25454.3,41363.2
+COMP_1003,GROUP_0132,alquiler / inmobiliario,producto,largo,factoring,true,true,3.67411e+06,0.833333,19289.1,35363.3
+COMP_1004,GROUP_0109,servicios profesionales,servicio,6 meses,yield,true,true,1.01806e+06,1,3563.2,10689.6
+COMP_1006,GROUP_0163,mayorista / distribución,producto,12 meses,factoring,true,true,2.54805e+06,0.416667,13377.3,18951.2
+COMP_1007,GROUP_0159,comercio minorista,producto,días,yield,true,true,104421,1,365.474,1096.42
+COMP_1016,GROUP_0069,hostelería,servicio,6 meses,factoring,true,true,336312,0.583333,1765.64,2795.6
+COMP_1017,GROUP_0108,mayorista / distribución,producto,12 meses,yield,true,true,728588,0.708333,2550.06,5635.81
+COMP_1018,GROUP_0060,software / suscripción,mixto,largo,fx,true,true,8.46924e+06,0.458333,4446.35,7418.3
+COMP_1018,GROUP_0060,software / suscripción,mixto,largo,reserve,true,true,558385,0.458333,977.173,1630.32
+COMP_1019,GROUP_0118,holding / tesorería,producto,largo,factoring,true,true,946432,0.333333,4968.77,6625.02
+COMP_1019,GROUP_0118,holding / tesorería,producto,largo,yield,true,true,52200.6,1,182.702,548.106
+COMP_1020,GROUP_0195,hostelería,mixto,6 meses,factoring,true,true,1.59396e+06,0.958333,8368.27,16387.9
+COMP_1022,GROUP_0126,comercio minorista,mixto,días,yield,true,true,668500,1,2339.75,7019.25
+COMP_1023,GROUP_0119,comercio minorista,producto,días,fx,true,true,2.9175e+06,0.333333,1531.69,2212.44
+COMP_1024,GROUP_0226,comercio minorista,producto,días,yield,true,true,300102,0.458333,1050.36,1752.42
+COMP_1026,GROUP_0186,comercio minorista,producto,días,factoring,true,true,116160,0.0416667,609.84,635.25
+COMP_1028,GROUP_0069,software / suscripción,servicio,largo,factoring,true,true,227369,0.833333,1193.69,2188.43
+COMP_1028,GROUP_0069,software / suscripción,servicio,largo,yield,true,true,11620.2,0.0416667,40.6707,42.436
+COMP_1032,GROUP_0023,construcción,producto,6 meses,credit,true,true,7.65705,0.0416667,0.535994,0.558327
+COMP_1038,GROUP_0018,alquiler / inmobiliario,producto,12 meses,factoring,true,true,277445,0.458333,1456.59,2124.19
+COMP_1040,GROUP_0056,comercio minorista,producto,días,yield,true,true,90001.6,0.5,315.006,551.26
+COMP_1041,GROUP_0007,holding / tesorería,producto,largo,fx,true,true,3.66802e+06,0.291667,1925.71,2651.2
+COMP_1042,GROUP_0012,software / suscripción,producto,largo,fx,true,true,1379.31,0.0416667,0.724138,0.755568
+COMP_1043,GROUP_0047,servicios profesionales,producto,6 meses,factoring,true,true,1.23545e+06,0.125,6486.1,7296.86
+COMP_1046,GROUP_0079,alquiler / inmobiliario,servicio,largo,factoring,true,true,2.65119e+07,0.625,139187,226179
+COMP_1048,GROUP_0067,hostelería,servicio,6 meses,yield,true,true,779769,0.291667,2729.19,3757.37
+COMP_1049,GROUP_0025,servicios profesionales,servicio,6 meses,factoring,true,true,696285,1,3655.5,7311
+COMP_1050,GROUP_0047,mayorista / distribución,mixto,12 meses,factoring,true,true,1.43269e+06,0.25,7521.64,9402.05
+COMP_1051,GROUP_0095,mayorista / distribución,producto,12 meses,yield,true,true,17001.6,0.875,59.5055,157.132
+COMP_1054,GROUP_0159,construcción,producto,6 meses,yield,true,true,43631,1,152.708,458.125
+COMP_1056,GROUP_0152,comercio minorista,producto,días,fx,true,true,9.43023e+07,0.291667,49508.7,68160.4
+COMP_1057,GROUP_0218,software / suscripción,servicio,largo,fx,true,true,273381,0.583333,143.525,276.086
+COMP_1061,GROUP_0111,comercio minorista,producto,días,yield,true,true,46145,0.0833333,161.507,176.088
+COMP_1062,GROUP_0048,holding / tesorería,producto,largo,factoring,true,true,157119,0.166667,824.875,962.354
+COMP_1063,GROUP_0222,comercio minorista,producto,días,yield,true,true,719834,0.541667,2519.42,4623.31
+COMP_1064,GROUP_0056,servicios profesionales,servicio,6 meses,factoring,true,true,302241,0.541667,1586.77,2446.26
+COMP_1067,GROUP_0211,comercio minorista,producto,días,fx,true,true,6.33189e+06,0.625,3324.24,6700.43
+COMP_1075,GROUP_0022,holding / tesorería,producto,largo,fx,true,true,1810.34,0.0416667,0.950431,0.991682
+COMP_1078,GROUP_0013,comercio minorista,producto,días,factoring,true,true,335581,0.625,1761.8,2862.93
+COMP_1079,GROUP_0141,servicios profesionales,servicio,6 meses,factoring,true,true,153721,0.208333,807.036,975.168
+COMP_1082,GROUP_0142,comercio minorista,producto,días,yield,true,true,28461.2,1,99.6141,298.842
+COMP_1083,GROUP_0199,comercio minorista,producto,días,fx,true,true,36328.7,0.25,19.0726,25.0327
+COMP_1083,GROUP_0199,comercio minorista,producto,días,yield,true,true,35411.6,0.458333,123.941,206.783
+COMP_1085,GROUP_0137,construcción,producto,6 meses,factoring,true,true,52073.6,0.583333,273.387,432.862
+COMP_1086,GROUP_0193,comercio minorista,servicio,días,fx,true,true,1176.1,0.458333,0.617454,1.03016
+COMP_1087,GROUP_0182,servicios profesionales,servicio,6 meses,reserve,true,true,905.79,0.458333,1.58513,2.64464
+COMP_1090,GROUP_0070,comercio minorista,producto,días,yield,true,true,1.5304e+06,1,5356.39,16069.2
+COMP_1095,GROUP_0118,servicios profesionales,servicio,6 meses,factoring,true,true,3.57506e+06,0.833333,18769.1,34410
+COMP_1097,GROUP_0044,servicios profesionales,servicio,6 meses,factoring,true,true,156244,0.208333,820.281,991.173
+COMP_1101,GROUP_0236,comercio minorista,producto,días,yield,true,true,432699,0.333333,1514.45,2187.53
+COMP_1104,GROUP_0107,comercio minorista,producto,días,factoring,true,true,1.91677e+06,0.333333,10063,13417.4
+COMP_1105,GROUP_0094,comercio minorista,producto,días,yield,true,true,395647,0.833333,1384.77,3500.38
+COMP_1106,GROUP_0056,mayorista / distribución,producto,12 meses,factoring,true,true,233334,0.333333,1225,1633.34
+COMP_1107,GROUP_0103,servicios profesionales,servicio,6 meses,yield,true,true,270551,0.541667,946.929,1737.68
+COMP_1108,GROUP_0119,mayorista / distribución,producto,12 meses,factoring,true,true,175811,0.958333,923.01,1807.56
+COMP_1110,GROUP_0182,construcción,producto,6 meses,factoring,true,true,152899,0.333333,802.717,1070.29
+COMP_1113,GROUP_0018,comercio minorista,producto,días,yield,true,true,507073,0.583333,1774.76,3413.94
+COMP_1114,GROUP_0236,holding / tesorería,mixto,largo,yield,true,true,85227.2,0.291667,298.295,410.674
+COMP_1115,GROUP_0064,construcción,producto,6 meses,fx,true,true,2.70638e+06,0.833333,1420.85,3591.59
+COMP_1122,GROUP_0132,comercio minorista,producto,días,factoring,true,true,286593,0.25,1504.61,1880.76
+COMP_1122,GROUP_0132,comercio minorista,producto,días,fx,true,true,3.99871e+06,1,2099.32,6297.96
+COMP_1123,GROUP_0126,comercio minorista,producto,días,factoring,true,true,682037,0.958333,3580.69,7012.19
+COMP_1123,GROUP_0126,comercio minorista,producto,días,yield,true,true,383804,1,1343.31,4029.94
+COMP_1124,GROUP_0148,comercio minorista,mixto,días,reserve,true,true,29700.1,0.833333,51.9752,131.382
+COMP_1126,GROUP_0149,comercio minorista,producto,días,factoring,true,true,1.31462e+06,0.166667,6901.74,8052.03
+COMP_1128,GROUP_0085,mayorista / distribución,producto,12 meses,yield,true,true,1.98797e+06,0.25,6957.89,9132.23
+COMP_1130,GROUP_0126,holding / tesorería,producto,largo,fx,true,true,1.42256e+06,0.125,746.843,851.868
+COMP_1132,GROUP_0114,comercio minorista,mixto,días,fx,true,true,266006,0.25,139.653,183.294
+COMP_1133,GROUP_0086,comercio minorista,producto,días,fx,true,true,1774.06,0.166667,0.931384,1.11249
+COMP_1136,GROUP_0222,comercio minorista,producto,días,yield,true,true,600338,0.583333,2101.18,4041.86
+COMP_1138,GROUP_0155,transporte / logística,producto,días,factoring,true,true,583513,0.791667,3063.44,5488.67
+COMP_1141,GROUP_0009,comercio minorista,producto,días,fx,true,true,7.254e+06,0.458333,3808.35,6353.86
+COMP_1141,GROUP_0009,comercio minorista,producto,días,yield,true,true,3.37829e+07,0.458333,118240,197272
+COMP_1142,GROUP_0202,construcción,mixto,6 meses,credit,true,true,15951,0.0833333,1116.57,1209.62
+COMP_1143,GROUP_0079,servicios profesionales,servicio,6 meses,factoring,true,true,2.81479e+07,0.583333,147776,233979
+COMP_1144,GROUP_0064,mayorista / distribución,producto,12 meses,yield,true,true,43599.9,0.833333,152.6,385.738
+COMP_1145,GROUP_0092,comercio minorista,producto,días,yield,true,true,7904.5,0.125,27.6657,31.5562
+COMP_1147,GROUP_0181,hostelería,mixto,6 meses,yield,true,true,87292.7,0.708333,305.524,675.23
+COMP_1154,GROUP_0023,construcción,producto,6 meses,yield,true,true,183075,0.666667,640.762,1352.72
+COMP_1155,GROUP_0150,construcción,producto,12 meses,factoring,true,true,534287,0.166667,2805,3272.51
+COMP_1156,GROUP_0141,servicios profesionales,producto,6 meses,yield,true,true,40993.7,0.708333,143.478,317.096
+COMP_1159,GROUP_0235,comercio minorista,producto,días,factoring,true,true,1.19701e+06,0.458333,6284.29,9164.58
+COMP_1159,GROUP_0235,comercio minorista,producto,días,fx,true,true,36920.5,0.0833333,19.3833,21.1331
+COMP_1159,GROUP_0235,comercio minorista,producto,días,yield,true,true,5.76446e+06,0.583333,20175.6,38810
+COMP_1161,GROUP_0047,mayorista / distribución,producto,12 meses,factoring,true,true,1.98115e+06,0.25,10401,13001.3
+COMP_1163,GROUP_0101,comercio minorista,producto,días,fx,true,true,444543,0.875,233.385,616.283
+COMP_1163,GROUP_0101,comercio minorista,producto,días,yield,true,true,112412,0.958333,393.443,1131.83
+COMP_1168,GROUP_0037,energía,servicio,12 meses,factoring,true,true,144763,0.0833333,760.005,823.339
+COMP_1169,GROUP_0095,mayorista / distribución,mixto,12 meses,factoring,true,true,276941,0.583333,1453.94,2302.07
+COMP_1171,GROUP_0139,construcción,producto,12 meses,factoring,true,true,107223,0.333333,562.92,750.56
+COMP_1174,GROUP_0148,hostelería,mixto,6 meses,factoring,true,true,215791,0.5,1132.9,1699.36
+COMP_1175,GROUP_0196,mayorista / distribución,producto,12 meses,factoring,true,true,303267,0.0833333,1592.15,1724.83
+COMP_1176,GROUP_0184,mayorista / distribución,mixto,12 meses,factoring,true,true,90872.7,0.375,477.082,655.987
+COMP_1179,GROUP_0239,comercio minorista,producto,días,yield,true,true,70661.2,0.333333,247.314,357.232
+COMP_1182,GROUP_0022,hostelería,producto,6 meses,factoring,true,true,1.77778e+07,0.625,93333.4,151667
+COMP_1182,GROUP_0022,hostelería,producto,6 meses,fx,true,true,3.39241e+06,0.458333,1781.01,2971.45
+COMP_1183,GROUP_0018,alquiler / inmobiliario,mixto,largo,yield,true,true,200027,0.833333,700.095,1769.69
+COMP_1184,GROUP_0211,hostelería,producto,6 meses,fx,true,true,2496.43,0.625,1.31063,2.64173
+COMP_1185,GROUP_0126,transporte / logística,producto,días,factoring,true,true,7.79291e+06,0.875,40912.8,76711.4
+COMP_1186,GROUP_0135,servicios profesionales,servicio,6 meses,yield,true,true,1.12564e+06,0.166667,3939.75,4705.81
+COMP_1189,GROUP_0159,hostelería,mixto,6 meses,yield,true,true,142758,1,499.652,1498.96
+COMP_1190,GROUP_0119,mayorista / distribución,producto,12 meses,factoring,true,true,1.05693e+06,0.708333,5548.86,9479.3
+COMP_1191,GROUP_0139,software / suscripción,producto,largo,factoring,true,true,391600,0.375,2055.9,2826.86
+COMP_1194,GROUP_0230,comercio minorista,producto,días,factoring,true,true,745979,0.583333,3916.39,6200.95
+COMP_1194,GROUP_0230,comercio minorista,producto,días,fx,true,true,123.177,0.333333,0.0646678,0.093409
+COMP_1194,GROUP_0230,comercio minorista,producto,días,reserve,true,true,419130,0.5,733.478,1283.59
+COMP_1195,GROUP_0171,mayorista / distribución,mixto,12 meses,factoring,true,true,1.1075e+06,0.333333,5814.38,7752.5
+COMP_1196,GROUP_0222,comercio minorista,producto,días,yield,true,true,64938.6,0.416667,227.285,361.447
+COMP_1197,GROUP_0217,energía,mixto,12 meses,factoring,true,true,1.37806e+07,0.291667,72348.2,93449.8
+COMP_1197,GROUP_0217,energía,mixto,12 meses,yield,true,true,6.00951e+06,0.75,21033.3,48639.5
+COMP_1198,GROUP_0218,software / suscripción,mixto,largo,fx,true,true,1.7576e+06,1,922.739,2768.22
+COMP_1200,GROUP_0138,holding / tesorería,mixto,6 meses,yield,true,true,32696.4,0.291667,114.438,157.55
+COMP_1201,GROUP_0211,mayorista / distribución,producto,12 meses,yield,true,true,2.03834e+06,0.625,7134.18,14379.8
+COMP_1204,GROUP_0100,software / suscripción,producto,largo,yield,true,true,2.00966e+06,0.375,7033.82,10660.6
+COMP_1205,GROUP_0011,comercio minorista,producto,días,reserve,true,true,9833.87,0.291667,17.2093,23.6926
+COMP_1207,GROUP_0132,construcción,producto,6 meses,factoring,true,true,3.0337e+06,0.333333,15926.9,21235.9
+COMP_1208,GROUP_0104,mayorista / distribución,mixto,12 meses,factoring,true,true,52154.1,0.333333,273.809,365.079
+COMP_1209,GROUP_0079,hostelería,servicio,6 meses,factoring,true,true,3.28407e+06,0.916667,17241.4,33046
+COMP_1210,GROUP_0015,construcción,producto,6 meses,credit,true,true,3.4335,0.0416667,0.240345,0.250359
+COMP_1211,GROUP_0103,comercio minorista,producto,días,yield,true,true,22885.2,0.833333,80.0982,202.47
+COMP_1212,GROUP_0118,servicios profesionales,servicio,6 meses,factoring,true,true,1.53918e+06,1,8080.7,16161.4
+COMP_1217,GROUP_0144,servicios profesionales,mixto,6 meses,factoring,true,true,135303,0.416667,710.341,1006.32
+COMP_1219,GROUP_0142,construcción,producto,6 meses,credit,true,true,323.305,0.25,22.6314,28.2892
+COMP_1221,GROUP_0169,comercio minorista,producto,días,yield,true,true,4.33575e+06,0.583333,15175.1,29191
+COMP_1222,GROUP_0137,alquiler / inmobiliario,producto,largo,fx,true,true,15474.3,0.25,8.12402,10.6628
+COMP_1224,GROUP_0143,servicios profesionales,servicio,6 meses,factoring,true,true,2.16152e+06,1,11348,22695.9
+COMP_1224,GROUP_0143,servicios profesionales,servicio,6 meses,reserve,true,true,5174.38,1,9.05516,27.1655
+COMP_1228,GROUP_0049,servicios profesionales,servicio,6 meses,yield,true,true,79392.4,0.125,277.873,316.949
+COMP_1232,GROUP_0237,hostelería,producto,6 meses,factoring,true,true,56327.3,0.208333,295.718,357.326
+COMP_1235,GROUP_0054,software / suscripción,servicio,largo,factoring,true,true,2.16799e+06,0.958333,11382,22289.7
+COMP_1237,GROUP_0206,comercio minorista,producto,días,factoring,true,true,6.19839e+06,0.916667,32541.5,62371.3
+COMP_1239,GROUP_0250,holding / tesorería,producto,largo,yield,true,true,79268.5,1,277.44,832.319
+COMP_1240,GROUP_0250,holding / tesorería,producto,largo,yield,true,true,77455.4,1,271.094,813.281
+COMP_1241,GROUP_0250,holding / tesorería,producto,largo,yield,true,true,77656.9,1,271.799,815.398
+COMP_1242,GROUP_0122,construcción,mixto,6 meses,factoring,true,true,266433,0.208333,1398.77,1690.18
+COMP_1243,GROUP_0104,construcción,producto,6 meses,factoring,true,true,4.54606e+07,0.625,238668,387835
+COMP_1244,GROUP_0013,construcción,producto,6 meses,factoring,true,true,370850,0.416667,1946.96,2758.19
+COMP_1245,GROUP_0022,hostelería,producto,6 meses,yield,true,true,454030,1,1589.1,4767.31
+COMP_1247,GROUP_0217,construcción,producto,6 meses,yield,true,true,93078.2,0.791667,325.774,787.852
+COMP_1248,GROUP_0066,comercio minorista,mixto,días,fx,true,true,3947.8,0.416667,2.0726,3.296
+COMP_1249,GROUP_0090,comercio minorista,producto,días,factoring,true,true,351549,0.458333,1845.63,2691.55
+COMP_1249,GROUP_0090,comercio minorista,producto,días,fx,true,true,73.4639,0.125,0.0385685,0.0439922
+COMP_1252,GROUP_0070,mayorista / distribución,producto,12 meses,factoring,true,true,806531,0.416667,4234.29,5998.57
+COMP_1253,GROUP_0096,servicios profesionales,servicio,6 meses,yield,true,true,11801.9,0.125,41.3068,47.1156
+COMP_1254,GROUP_0040,holding / tesorería,mixto,largo,fx,true,true,229216,0.333333,120.338,173.822
+COMP_1256,GROUP_0079,servicios profesionales,servicio,6 meses,factoring,true,true,367685,0.916667,1930.35,3699.83
+COMP_1256,GROUP_0079,servicios profesionales,servicio,6 meses,yield,true,true,275898,0.958333,965.643,2777.9
+COMP_1262,GROUP_0026,industria,mixto,12 meses,factoring,true,true,104060,0.0416667,546.315,569.078
+COMP_1264,GROUP_0155,transporte / logística,producto,días,factoring,true,true,1.04334e+06,1,5477.54,10955.1
+COMP_1267,GROUP_0095,mayorista / distribución,producto,12 meses,factoring,true,true,550618,0.458333,2890.75,4215.67
+COMP_1272,GROUP_0077,comercio minorista,mixto,días,fx,true,true,8.1644e+06,0.333333,4286.31,6191.33
+COMP_1272,GROUP_0077,comercio minorista,mixto,días,yield,true,true,809788,0.333333,2834.26,4093.93
+COMP_1273,GROUP_0241,construcción,producto,6 meses,factoring,true,true,471098,0.0833333,2473.26,2679.37
+COMP_1274,GROUP_0213,construcción,producto,6 meses,factoring,true,true,624386,0.125,3278.03,3687.78
+COMP_1277,GROUP_0200,construcción,producto,6 meses,factoring,true,true,77128.8,0.416667,404.926,573.645
+COMP_1277,GROUP_0200,construcción,producto,6 meses,yield,true,true,193802,0.833333,678.306,1714.61
+COMP_1278,GROUP_0222,mayorista / distribución,producto,12 meses,factoring,true,true,117669,0.0416667,617.763,643.503
+COMP_1280,GROUP_0159,mayorista / distribución,producto,12 meses,yield,true,true,19975.8,0.583333,69.9152,134.49
+COMP_1281,GROUP_0218,mayorista / distribución,producto,12 meses,factoring,true,true,67411.5,0.166667,353.911,412.896
+COMP_1282,GROUP_0218,software / suscripción,producto,largo,fx,true,true,5854.88,1,3.07381,9.22143
+COMP_1285,GROUP_0149,mayorista / distribución,producto,12 meses,factoring,true,true,183327,0.0833333,962.469,1042.67
+COMP_1286,GROUP_0030,comercio minorista,producto,días,fx,true,true,447206,0.125,234.783,267.799
