@@ -64,7 +64,7 @@ const overrides = (company: Company) => [...(company.vetos || []), ...(company.a
  * encabezado. Embat ve la cartera y, además, las vistas internas, que miran a
  * Embat y no a una empresa: revenue propio, alertas del ecosistema y salud del
  * modelo. Cada perspectiva entra por su primera sección. */
-const treasurySections = ['score', 'flujo', 'colchon', 'divisa']
+const treasurySections = ['flujo', 'score', 'colchon', 'divisa']
 const sectionsByRole: Record<PerspectiveId, string[]> = {
   empresa: treasurySections,
   embat: ['resumen', 'cartera', 'senales', 'ofertas', 'monitor', 'revenue', 'modelo'],
@@ -232,8 +232,9 @@ const connected = activeCompanies.toLocaleString('es-ES')
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
     <WorkspaceSidebar :role="role" :section="section" />
 
-    <div class="wk__body">
-      <header class="wk__top">
+    <!-- Flujo de caja es un clon de la pantalla de Embat: va a sangre, sin la cabecera ni el pie del panel. -->
+    <div class="wk__body" :class="{ 'wk__body--bare': section === 'flujo' }">
+      <header v-if="section !== 'flujo'" class="wk__top">
         <p class="wk__crumb">
           {{ profile.name }}<span aria-hidden="true">/</span>{{ sectionLabel }}
         </p>
@@ -814,7 +815,7 @@ const connected = activeCompanies.toLocaleString('es-ES')
 
         </div>
 
-        <footer class="wk__foot">
+        <footer v-if="section !== 'flujo'" class="wk__foot">
           <template v-if="role === 'embat' && portfolioSource === 'api'">
             Score, decisión, tesorería y flujos vienen del modelo X-Ray sobre las
             1.286 empresas. Nombres, sectores y condiciones de oferta son ficticios.

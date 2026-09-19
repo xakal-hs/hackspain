@@ -1,9 +1,12 @@
-import type { CashForecast, Cashflow, CashflowMonth } from '../../../shared/types/company'
+import type { CashForecast, Cashflow, CashflowCategories, CashflowMonth } from '../../../shared/types/company'
 
-interface Prevision { snapshot: string; companies: Record<string, CashForecast> }
+interface Prevision {
+  snapshot: string
+  companies: Record<string, { currency: string; categories: CashflowCategories; forecast: CashForecast | null }>
+}
 
 // server/assets/prevision.json lo genera scripts/build_prevision.py: se lee como asset de Nitro
-// para que el typecheck no tenga que inferir un JSON de 450 KB.
+// para que el typecheck no tenga que inferir un JSON de 2,6 MB.
 let prevision: Promise<Prevision | null> | undefined
 const loadPrevision = () => (prevision ??= useStorage('assets:server').getItem<Prevision>('prevision.json'))
 
@@ -19,5 +22,12 @@ export default defineEventHandler(async (event): Promise<Cashflow> => {
     }),
     loadPrevision(),
   ])
-  return { panel, forecast: forecasts?.companies[id] ?? null, snapshot: forecasts?.snapshot ?? '' }
+  const entry = forecasts?.companies[id]
+  return {
+    panel,
+    categories: entry?.categories ?? {},
+    currency: entry?.currency ?? null,
+    forecast: entry?.forecast ?? null,
+    snapshot: forecasts?.snapshot ?? '',
+  }
 })

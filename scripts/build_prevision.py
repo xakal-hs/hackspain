@@ -15,7 +15,8 @@ midieron peor. Con ese camino marca dos casos:
   guarda ese cobro: es el hueco de calendario que se cubre con financiación a corto.
 - excedente: sin rotura, lo que sobra por encima de un colchón de tres meses de gasto en el peor día.
 
-Solo entran facturas en la moneda de la empresa. Escribe frontend/server/assets/prevision.json (asset de Nitro).
+Guarda también el desglose por categoría bancaria de los últimos 12 meses, que Supabase no tiene. Solo entran
+facturas en la moneda de la empresa. Escribe frontend/server/assets/prevision.json (asset de Nitro).
 
     uv run --no-project --with duckdb --with pandas python scripts/build_prevision.py
 """
@@ -75,10 +76,28 @@ def main() -> None:
         select company_id, date, amount, category from '{DATA / 'transactions.parquet'}'
         where date >= '2026-03-01' and category in ('salary', 'social_security', 'debt_repayment')""").df()
 
+    # Desglose por categoría bancaria de los últimos 12 meses, con las mismas reglas que scripts/build_panel.py
+    # (solo cuentas de banco, importe / exchange_rate, winsorizado a p0,1 / p99,9): así cada mes suma el
+    # net_bank de panel_monthly y la tabla cuadra con la caja de Supabase.
+    cats = con.sql(f"""
+        with t as (
+            select t.company_id, date_trunc('month', t.date) as m, coalesce(nullif(t.category, '-'), 'sin_categoria') as cat,
+                   case when t.exchange_rate > 0 then t.amount / t.exchange_rate else t.amount end as a
+            from '{DATA / 'transactions.parquet'}' t
+            where t.product_id in (select product_id from '{DATA / 'banking_products.parquet'}')),
+        q as (select quantile_cont(a, 0.001) as lo, quantile_cont(a, 0.999) as hi from t)
+        select company_id, strftime(m, '%Y-%m') as month, cat, sum(least(greatest(a, lo), hi)) as amount
+        from t, q where m >= '2025-09-01' and m < '2026-09-01' group by all""").df()
+    by_company = {cid: {mm: {r.cat: round(float(r.amount), 2) for r in gm.itertuples() if abs(r.amount) >= 0.005}
+                        for mm, gm in g.groupby("month")}
+                  for cid, g in cats.groupby("company_id")}
+
     out: dict[str, dict] = {}
     for cid, row in last.iterrows():
         cash0 = float(row.cash_end)
         if pd.isna(cash0) or bool(row.saldo_inconsistente) or cash0 <= 0:
+            if cid in by_company:
+                out[cid] = {"currency": comp.currency.get(cid, "EUR"), "categories": by_company[cid], "forecast": None}
             continue
         m = med.loc[cid] if cid in med.index else None
         salary, ss, debt, spend = (float(m[k]) if m is not None and pd.notna(m[k]) else 0.0
@@ -128,19 +147,19 @@ def main() -> None:
         excedente = ({"amount": round(surplus, 2), "cushion": round(cushion, 2), "monthly_spend": round(spend, 2)}
                      if rotura is None and spend > 0 and surplus >= spend else None)
 
-        out[cid] = {"currency": comp.currency.get(cid, "EUR"), "cash": round(cash0, 2), "months": monthly,
-                    "rotura": rotura, "excedente": excedente}
+        out[cid] = {"currency": comp.currency.get(cid, "EUR"), "categories": by_company.get(cid, {}),
+                    "forecast": {"cash": round(cash0, 2), "months": monthly, "rotura": rotura, "excedente": excedente}}
 
     for cid, case in DEMO.items():
-        assert out.get(cid, {}).get(case), f"{cid} ya no cumple el caso {case}"
+        assert (out.get(cid, {}).get("forecast") or {}).get(case), f"{cid} ya no cumple el caso {case}"
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps({"snapshot": f"{SNAPSHOT:%Y-%m-%d}", "demo": DEMO, "companies": out},
                               ensure_ascii=False, separators=(",", ":"), allow_nan=False))
-    n_r = sum(v["rotura"] is not None for v in out.values())
-    n_e = sum(v["excedente"] is not None for v in out.values())
+    n_r = sum(bool((v["forecast"] or {}).get("rotura")) for v in out.values())
+    n_e = sum(bool((v["forecast"] or {}).get("excedente")) for v in out.values())
     print(f"{len(out)} empresas · {n_r} con rotura · {n_e} con excedente · {OUT.stat().st_size / 1024:.0f} KB")
     for cid in DEMO:
-        print(cid, json.dumps(out[cid], ensure_ascii=False, indent=1))
+        print(cid, json.dumps(out[cid]["forecast"], ensure_ascii=False))
 
 
 if __name__ == "__main__":

@@ -31,8 +31,8 @@ const items = computed(() => {
   ]
   /* Tesorería propia: solo tiene sentido mirándose a uno mismo. */
   const treasury = [
-    { id: 'score', label: 'X-Ray Score', icon: ScanLine },
     { id: 'flujo', label: 'Flujo de caja', icon: ArrowLeftRight },
+    { id: 'score', label: 'X-Ray Score', icon: ScanLine },
     { id: 'colchon', label: 'Colchón Dinámico', icon: PiggyBank },
     { id: 'divisa', label: 'Divisa Inteligente', icon: CircleDollarSign },
   ]

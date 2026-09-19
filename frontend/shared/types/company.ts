@@ -81,14 +81,17 @@ export interface CashSurplus {
   monthly_spend: number
 }
 export interface CashForecast {
-  currency: string
   cash: number
   months: ForecastMonth[]
   rotura: CashBreak | null
   excedente: CashSurplus | null
 }
+/** Mes → categoría bancaria → importe neto; cada mes suma el net_bank de panel_monthly. */
+export type CashflowCategories = Record<string, Record<string, number>>
 export interface Cashflow {
   panel: CashflowMonth[]
+  categories: CashflowCategories
+  currency: string | null
   forecast: CashForecast | null
   snapshot: string
 }
