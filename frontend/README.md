@@ -46,3 +46,18 @@ If Rolldown reports that `format` received `['underline', 'gray']`, the terminal
 another unsupported release. Run `nvm use` inside this directory, confirm `node --version` reports
 `v22.22.0`, and reinstall with `pnpm install`. The strict engine check now stops earlier with a clear
 version error when the runtime is unsupported.
+
+## Demo perspectives
+
+- `/`: public landing and entry points for each perspective.
+- `/login`: simulated sign-in without credentials or real authentication.
+- `/dashboard/embat`: ecosystem overview, marketplace and signal monitor.
+- `/dashboard/empresa`: financial trajectory and financing offers.
+- `/dashboard/banco`: company search, decision details and simulated offers.
+- `/cartera`: original API-backed portfolio, preserved independently.
+
+Switch perspectives or exit using the user panel at the bottom of the desktop sidebar. On mobile, navigation and the user panel move above the content. Dashboard deep links redirect to demo sign-in when no demo-role cookie exists. This cookie is a UI convenience, not an authorization boundary.
+
+The dashboards use explicitly fictional EUR fixtures from `app/data/demo.ts`, independently of `XRAY_API_BASE`. Sending an offer for Distribuciones Ibérica makes it available in Empresa; acceptance changes only demo state. Offers survive client-side navigation and reset on a full page reload. The role cookie survives reloads until logout/browser session expiry.
+
+Manual acceptance flow: enter as Banco, search/select a company, send an offer for Distribuciones Ibérica, switch to Empresa and confirm acceptance, then switch to Embat and inspect signals. Also check empty search, disabled financing for Recolectora Sureste, logout, direct-link redirect, and mobile/desktop layouts.
