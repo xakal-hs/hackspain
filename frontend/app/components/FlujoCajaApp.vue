@@ -2,25 +2,18 @@
 import { useQuery } from '@tanstack/vue-query'
 import {
   Atom,
-  Calendar,
-  ChartLine,
-  ChevronDown,
   ChevronRight,
   ChevronsUpDown,
-  Ellipsis,
-  Eye,
   ListChecks,
   RotateCcwClock,
-  ScanLine,
-  TrendingUp,
   TriangleAlert,
 } from '@lucide/vue'
-import type { Cashflow, CashflowMonth, ForecastMonth } from '../../shared/types/company'
+import type { Cashflow, CashflowAction, CashflowMonth } from '../../shared/types/company'
 
-/* Clon de la pantalla «Flujo de caja» de Embat: mismas filas, mismos controles y la misma barra
- * flotante abajo. Va siempre en claro, como el original. */
+/* Clon de la pantalla «Flujo de caja» de Embat: mismas filas y la misma barra flotante.
+ * Va siempre en claro, como el original. */
 
-const { selectedId, company, sector } = useSelectedCompany()
+const { selectedId, company } = useSelectedCompany()
 
 const flujo = useQuery({
   queryKey: computed(() => ['flujo', selectedId.value]),
@@ -28,13 +21,10 @@ const flujo = useQuery({
   staleTime: 60 * 1000,
 })
 
-type Period = 'custom' | '3M' | '6M' | 'AA' | 'YTD'
+type Period = '3M' | '6M' | 'YTD'
 const period = ref<Period>('3M')
-const projection = ref<'none' | '3m'>('none')
 
-type RealColumn = { key: string; month: string; ahead: false; start: number | null; m: CashflowMonth; cats: Record<string, number> }
-type AheadColumn = { key: string; month: string; ahead: true; start: number; f: ForecastMonth }
-type Column = RealColumn | AheadColumn
+type Column = { key: string; month: string; start: number | null; m: CashflowMonth; cats: Record<string, number> }
 
 const n = (v: number | null | undefined) => Number(v ?? 0)
 
@@ -45,34 +35,21 @@ const columns = computed<Column[]>(() => {
   const panel = data.panel.filter((m) => data.categories[m.month])
   const year = Number((panel.at(-1)?.month ?? '').slice(0, 4))
   const picked = {
-    custom: panel,
     '3M': panel.slice(-3),
     '6M': panel.slice(-6),
-    AA: panel.filter((m) => m.month.startsWith(String(year - 1))),
     YTD: panel.filter((m) => m.month.startsWith(String(year))),
   }[period.value]
   const all = data.panel
-  const real: Column[] = picked.map((m) => {
+  return picked.map((m) => {
     const i = all.indexOf(m)
     return {
       key: m.month,
       month: m.month,
-      ahead: false as const,
       start: i > 0 ? all[i - 1]!.cash_end : m.cash_end == null ? null : m.cash_end - n(m.net_bank),
       m,
       cats: data.categories[m.month] ?? {},
     }
   })
-  if (projection.value === 'none' || !data.forecast) return real
-  let start = data.forecast.cash
-  return [
-    ...real,
-    ...data.forecast.months.map((f) => {
-      const col = { key: `p-${f.month}`, month: f.month, ahead: true as const, start, f }
-      start += f.cobros + f.proveedores + f.nominas + f.seguridad_social + f.deuda
-      return col
-    }),
-  ]
 })
 
 /* Categorías bancarias → filas de Embat. Lo que no aparece aquí va a «Por categorizar». */
@@ -110,22 +87,8 @@ const groups: Record<string, [string, string][]> = {
 }
 const known = new Set(Object.values(groups).flat().map(([cat]) => cat))
 
-/* La previsión solo conoce facturas, nóminas y cuotas: el resto va en blanco, no a cero. */
-const forecastPart: Record<string, (f: ForecastMonth) => number> = {
-  collection: (f) => f.cobros,
-  payment: (f) => f.proveedores,
-  salary: (f) => f.nominas,
-  social_security: (f) => f.seguridad_social,
-  debt_repayment: (f) => f.deuda,
-}
-
-const sumCats = (c: RealColumn, cats: string[]) => cats.reduce((acc, cat) => acc + n(c.cats[cat]), 0)
-const groupValue = (c: Column, id: string): number | null => {
-  const cats = groups[id]!.map(([cat]) => cat)
-  if (!c.ahead) return sumCats(c, cats)
-  const parts = cats.filter((cat) => forecastPart[cat])
-  return parts.length ? parts.reduce((acc, cat) => acc + forecastPart[cat]!(c.f), 0) : null
-}
+const sumCats = (c: Column, cats: string[]) => cats.reduce((acc, cat) => acc + n(c.cats[cat]), 0)
+const groupValue = (c: Column, id: string) => sumCats(c, groups[id]!.map(([cat]) => cat))
 const operating = (c: Column) => n(groupValue(c, 'cobros')) + n(groupValue(c, 'pagos'))
 
 interface Row {
@@ -143,13 +106,12 @@ function groupRows(id: string, label: string, level: number, parent?: string): R
     { id, label, level, parent, value: (c) => groupValue(c, id) },
     ...names.map((name): Row => {
       const cats = groups[id]!.filter(([, other]) => other === name).map(([cat]) => cat)
-      const part = cats.map((cat) => forecastPart[cat]).find(Boolean)
       return {
         id: `${id}:${name}`,
         label: name,
         level: level + 1,
         parent: id,
-        value: (c) => (c.ahead ? (part ? part(c.f) : null) : sumCats(c, cats)),
+        value: (c) => sumCats(c, cats),
       }
     }),
   ]
@@ -166,18 +128,18 @@ const allRows: Row[] = [
   ...groupRows('intercompany', 'Cashflow Intercompany operations', 0),
   {
     id: 'uncat', label: 'Por categorizar', level: 0, tone: 'muted',
-    value: (c) => (c.ahead ? null : Object.entries(c.cats).reduce((acc, [cat, v]) => acc + (known.has(cat) ? 0 : v), 0)),
+    value: (c) => Object.entries(c.cats).reduce((acc, [cat, v]) => acc + (known.has(cat) ? 0 : v), 0),
   },
   // Los importes ya llegan convertidos a la moneda de la empresa, movimiento a movimiento.
-  { id: 'fx', label: 'Variación de divisa', level: 0, tone: 'muted', value: (c) => (c.ahead ? null : 0) },
+  { id: 'fx', label: 'Variación de divisa', level: 0, tone: 'muted', value: () => 0 },
   {
     id: 'ajustes', label: 'Ajustes de balance', level: 0, tone: 'muted',
-    value: (c) => (c.ahead || c.start == null || c.m.cash_end == null ? null
+    value: (c) => (c.start == null || c.m.cash_end == null ? null
       : c.m.cash_end - c.start - Object.values(c.cats).reduce((acc, v) => acc + v, 0)),
   },
   {
     id: 'final', label: 'Tesorería al final del mes', level: 0, tone: 'strong',
-    value: (c) => (c.ahead ? c.start + c.f.cobros + c.f.proveedores + c.f.nominas + c.f.seguridad_social + c.f.deuda : c.m.cash_end),
+    value: (c) => c.m.cash_end,
   },
 ]
 
@@ -221,7 +183,7 @@ const cell = (v: number | null) => (v == null || !Number.isFinite(v) ? '—' : a
 
 const monthNames = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC']
 const monthLabel = (ym: string) => `${monthNames[Number(ym.slice(5, 7)) - 1]} - ${ym.slice(2, 4)}`
-const lastReal = computed(() => [...columns.value].reverse().find((c) => !c.ahead)?.key)
+const lastReal = computed(() => columns.value.at(-1)?.key)
 
 const currency = computed(() => flujo.data.value?.currency || company.value?.currency || 'EUR')
 const money = (v: number) =>
@@ -240,6 +202,16 @@ const span = (from: string, to: string | null) => {
 }
 
 const rotura = computed(() => (flujo.data.value?.action === 'financiar' ? flujo.data.value.forecast?.rotura ?? null : null))
+const actionPanel = ref<Exclude<CashflowAction, null> | null>(null)
+const actionMode = ref<Exclude<CashflowAction, null>>('prestar')
+watch(selectedId, () => {
+  actionPanel.value = null
+})
+const openAction = (mode: Exclude<CashflowAction, null>) => {
+  if (flujo.data.value?.action !== mode) return
+  actionMode.value = mode
+  actionPanel.value = mode
+}
 /* El aviso de rotura vive en «Flujo de caja operativo»; con «Cashflow from operating activities»
  * plegado, sube a esa fila para que no se pierda. */
 const alertRow = computed(() => (open.value.has('op') ? 'flujo' : 'op'))
@@ -249,57 +221,18 @@ const scroller = ref<HTMLElement | null>(null)
 watch([columns, scroller], () => nextTick(() => scroller.value?.scrollTo({ left: scroller.value.scrollWidth })), {
   flush: 'post',
 })
-
-/* La empresa activa lleva su cuadrado de iniciales, como el «DE» de Embat. */
-const initials = computed(() => {
-  const words = (company.value?.top_sector || '').split(/\s+/).filter(Boolean)
-  return (words.length ? words[0]!.slice(0, 2) : selectedId.value.slice(-2)).toUpperCase()
-})
-const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector.value.slice(1))
 </script>
 
 <template>
   <div class="eb">
     <header class="eb__title">
       <h1>Flujo de caja</h1>
-      <div class="eb__title-side">
-        <Transition name="eb-swap" mode="out-in">
-          <p :key="selectedId" class="eb__company">
-            <i aria-hidden="true">{{ initials }}</i>
-            <span>{{ selectedId }} · {{ sectorLabel }}</span>
-          </p>
-        </Transition>
-        <button type="button" class="eb__ghost" disabled>
-          <ChartLine :size="15" aria-hidden="true" />Análisis de variaciones
-        </button>
-        <button type="button" class="eb__ghost" disabled>
-          <ScanLine :size="15" aria-hidden="true" />Capturas<ChevronDown :size="15" aria-hidden="true" />
-        </button>
-      </div>
     </header>
 
     <div class="eb__bar">
-      <label class="eb__drop eb__drop--wide">
-        <Eye :size="16" aria-hidden="true" />
-        <select aria-label="Vista" class="is-placeholder">
-          <option>Vista por defecto</option>
-        </select>
-        <ChevronDown :size="16" aria-hidden="true" />
-      </label>
-      <label class="eb__drop eb__drop--wide">
-        <TrendingUp :size="16" aria-hidden="true" />
-        <select v-model="projection" aria-label="Proyección" :class="{ 'is-placeholder': projection === 'none' }">
-          <option value="none">Sin proyección</option>
-          <option value="3m" :disabled="!flujo.data.value?.forecast">Proyección a 3 meses</option>
-        </select>
-        <ChevronDown :size="16" aria-hidden="true" />
-      </label>
       <div class="eb__seg" role="radiogroup" aria-label="Periodo">
-        <button type="button" role="radio" :aria-checked="period === 'custom'" @click="period = 'custom'">
-          <Calendar :size="15" aria-hidden="true" />Personalizado
-        </button>
         <button
-          v-for="p in (['3M', '6M', 'AA', 'YTD'] as const)"
+          v-for="p in (['3M', '6M', 'YTD'] as const)"
           :key="p"
           type="button"
           role="radio"
@@ -309,15 +242,6 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
           {{ p }}
         </button>
       </div>
-      <span class="eb__grow" />
-      <button type="button" class="eb__text">Añadir Filtros</button>
-      <label class="eb__drop">
-        <select aria-label="Visualización">
-          <option>Visualización</option>
-        </select>
-        <ChevronDown :size="16" aria-hidden="true" />
-      </label>
-      <button type="button" class="eb__icon" aria-label="Más opciones"><Ellipsis :size="18" aria-hidden="true" /></button>
     </div>
 
     <Transition name="eb-swap" mode="out-in">
@@ -346,10 +270,10 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
                   v-for="c in columns"
                   :key="c.key"
                   scope="col"
-                  :class="{ 'is-hover': hoverCol === c.key, 'is-current': c.key === lastReal, 'is-ahead': c.ahead }"
+                  :class="{ 'is-hover': hoverCol === c.key, 'is-current': c.key === lastReal }"
                   @mouseenter="hoverCol = c.key"
                 >
-                  {{ monthLabel(c.month) }}<small v-if="c.ahead">Previsión</small>
+                  {{ monthLabel(c.month) }}
                 </th>
               </tr>
             </thead>
@@ -377,8 +301,11 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
                       v-if="alertRow === row.id && rotura"
                       type="button"
                       class="eb__alert"
+                      :class="{ 'is-open': actionPanel === 'financiar' }"
+                      :aria-expanded="actionPanel === 'financiar'"
+                      aria-haspopup="dialog"
                       :aria-label="`Vas a romper caja ${span(rotura.from, rotura.to)}: ${money(rotura.low)}. Pedir financiación`"
-                      @click.stop
+                      @click.stop="openAction('financiar')"
                     >
                       <TriangleAlert :size="15" aria-hidden="true" /><span>Pedir financiación</span>
                     </button>
@@ -387,7 +314,7 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
                 <td
                   v-for="c in columns"
                   :key="c.key"
-                  :class="{ 'is-hover': hoverCol === c.key, 'is-ahead': c.ahead }"
+                  :class="{ 'is-hover': hoverCol === c.key }"
                   @mouseenter="hoverCol = c.key"
                 >
                   {{ cell(row.value(c)) }}
@@ -399,10 +326,25 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
         <!-- Abajo a la derecha, pegado a la tesorería final: prestar la caja, si el baremo del
              servidor lo permite (excedente y score sano). -->
         <div v-if="columns.length && flujo.data.value?.action === 'prestar'" class="eb__action">
-          <button type="button" class="eb__cta">Gana eficiencia prestando tu caja</button>
+          <button
+            type="button"
+            class="eb__cta"
+            :aria-expanded="actionPanel === 'prestar'"
+            aria-haspopup="dialog"
+            @click="openAction('prestar')"
+          >
+            Gana eficiencia prestando tu caja
+          </button>
         </div>
       </section>
     </Transition>
+
+    <FlujoActionPanel
+      :open="actionPanel !== null"
+      :mode="actionMode"
+      :flujo="flujo.data.value"
+      @close="actionPanel = null"
+    />
 
     <!-- La barra flotante de Embat. -->
     <div class="eb__dock">
@@ -432,7 +374,6 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
   --eb-navy: #131736;
   --eb-blue: #3b77f6;
   --eb-violet: #8754c2;
-  --eb-ahead: #7a5af0;
 
   position: relative;
   display: flex;
@@ -453,10 +394,7 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
 
 .eb__title {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px 16px;
   min-height: 56px;
   padding: 0 24px;
   border-bottom: 1px solid var(--eb-line);
@@ -469,49 +407,6 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
   letter-spacing: -0.01em;
 }
 
-.eb__title-side {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
-.eb__company {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 6px 0 0;
-  font-weight: 500;
-  color: var(--eb-body);
-}
-
-.eb__company i {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: var(--eb-blue);
-  color: #fff;
-  font-size: 11.5px;
-  font-style: normal;
-  font-weight: 600;
-}
-
-.eb__ghost {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  height: 30px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 5px;
-  background: var(--eb-fill);
-  color: #7d8391;
-  font: inherit;
-  font-weight: 500;
-}
-
 .eb__bar {
   display: flex;
   flex-wrap: nowrap;
@@ -519,60 +414,6 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
   gap: 10px 16px;
   padding: 12px 24px;
   border-bottom: 1px solid var(--eb-line);
-}
-
-.eb__drop {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 30px;
-  padding: 0 10px;
-  border: 1px solid #dfe2e7;
-  border-radius: 5px;
-  background: #fff;
-  color: var(--eb-body);
-}
-
-.eb__drop--wide {
-  flex: 0 1 240px;
-  min-width: 150px;
-}
-
-.eb__drop select {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  padding-right: 22px;
-  border: 0;
-  background: transparent;
-  color: var(--eb-text);
-  font: inherit;
-  appearance: none;
-  cursor: pointer;
-}
-
-.eb__drop select.is-placeholder {
-  color: var(--eb-muted);
-}
-
-.eb__drop select:focus {
-  outline: none;
-}
-
-.eb__drop > svg:first-child {
-  color: var(--eb-muted);
-}
-
-.eb__drop > svg:last-child {
-  position: absolute;
-  right: 10px;
-  color: var(--eb-body);
-  pointer-events: none;
-}
-
-.eb__drop:not(.eb__drop--wide) select {
-  width: 104px;
 }
 
 .eb__seg {
@@ -607,41 +448,7 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
   background: var(--eb-hover);
 }
 
-.eb__grow {
-  flex: 1 1 0;
-}
-
-.eb__text,
-.eb__icon,
-.eb__drop:not(.eb__drop--wide) {
-  flex: none;
-}
-
-.eb__text,
-.eb__icon {
-  border: 0;
-  background: none;
-  color: var(--eb-text);
-  font: inherit;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.eb__icon {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 5px;
-}
-
-.eb__text:hover,
-.eb__icon:hover {
-  color: var(--eb-blue);
-}
-
-.eb button:focus-visible,
-.eb__drop:focus-within {
+.eb button:focus-visible {
   outline: 2px solid var(--eb-blue);
   outline-offset: 2px;
 }
@@ -702,27 +509,13 @@ thead th.is-current {
   border-top-color: var(--eb-blue);
 }
 
-thead th.is-ahead {
-  border-top: 2px dashed var(--eb-ahead);
-}
-
-thead th small {
-  display: block;
-  font-size: 10.5px;
-  color: var(--eb-ahead);
-}
-
 td {
   min-width: 170px;
   text-align: right;
   color: var(--eb-body);
 }
 
-td.is-ahead {
-  background: #faf8ff;
-}
-
-/* Con más de cuatro meses (la previsión suma tres) la etiqueta cede ancho a los números. */
+/* Con más de cuatro meses la etiqueta cede ancho a los números. */
 table.is-wide td {
   min-width: 128px;
 }
@@ -936,6 +729,7 @@ tbody tr:last-child > * {
     opacity 0.2s ease-out;
 }
 
+.eb__alert.is-open,
 .eb__alert:hover,
 .eb__alert:focus-visible {
   gap: 6px;
@@ -943,6 +737,7 @@ tbody tr:last-child > * {
   border-radius: 6px;
 }
 
+.eb__alert.is-open span,
 .eb__alert:hover span,
 .eb__alert:focus-visible span {
   max-width: 180px;
@@ -989,10 +784,6 @@ tbody tr:last-child > * {
 
   .eb__sheet {
     padding: 12px 16px 24px;
-  }
-
-  .eb__drop--wide {
-    width: 100%;
   }
 
   .eb__lead {
