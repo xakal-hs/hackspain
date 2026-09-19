@@ -1,15 +1,25 @@
 <script setup lang="ts">
+import { demoCases } from '../../shared/demoCases'
 const { selectedId, directory, companies } = useSelectedCompany()
 const id = useId()
+/* Los casos reales de la demo van arriba: se cambia de uno a otro sin buscar entre 1.286. */
+const demo = computed(() => companies.value.filter(company => company.company_id in demoCases))
 </script>
 <template>
   <label class="company-selector" :for="id">
     <span>Empresa</span>
     <select :id="id" v-model="selectedId" :disabled="!companies.length" aria-label="Seleccionar empresa">
       <option v-if="!companies.length" :value="selectedId">{{ directory.isPending.value ? 'Cargando empresas…' : 'Empresas no disponibles' }}</option>
-      <option v-for="company in companies" :key="company.company_id" :value="company.company_id">
-        {{ company.company_id }} · {{ company.top_sector || 'Sin sector' }}
-      </option>
+      <optgroup v-if="demo.length" label="Casos de la demo">
+        <option v-for="company in demo" :key="`demo-${company.company_id}`" :value="company.company_id">
+          {{ company.company_id }} · {{ demoCases[company.company_id]!.label }}
+        </option>
+      </optgroup>
+      <optgroup :label="demo.length ? 'Todas las empresas' : undefined">
+        <option v-for="company in companies" :key="company.company_id" :value="company.company_id">
+          {{ company.company_id }} · {{ company.top_sector || 'Sin sector' }}
+        </option>
+      </optgroup>
     </select>
   </label>
   <p v-if="directory.isError.value" role="alert" class="company-selector-error">

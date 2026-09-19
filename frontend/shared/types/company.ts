@@ -42,3 +42,53 @@ export interface CompanyDetail {
   currencies: string[]
   warnings: string[]
 }
+
+/** Un mes de `panel_monthly`: se cumple net_bank = inflow_op − outflow_op − debt_service + transfer_net + inversión. */
+export interface CashflowMonth {
+  month: string
+  cash_end: number | null
+  net_bank: number | null
+  inflow_op: number | null
+  outflow_op: number | null
+  debt_service: number | null
+  transfer_net: number | null
+  out_salary: number | null
+  out_social_security: number | null
+  out_tax: number | null
+  out_fin_cost: number | null
+}
+/** Mes previsto por scripts/build_prevision.py: cobros en positivo, pagos en negativo. */
+export interface ForecastMonth {
+  month: string
+  cobros: number
+  proveedores: number
+  nominas: number
+  seguridad_social: number
+  deuda: number
+}
+export interface CashBreak {
+  from: string
+  to: string | null
+  low: number
+  low_date: string
+  paid_before: number
+  n_paid_before: number
+  rescue: { date: string; amount: number; counterparty: string | null; total_day: number } | null
+}
+export interface CashSurplus {
+  amount: number
+  cushion: number
+  monthly_spend: number
+}
+export interface CashForecast {
+  currency: string
+  cash: number
+  months: ForecastMonth[]
+  rotura: CashBreak | null
+  excedente: CashSurplus | null
+}
+export interface Cashflow {
+  panel: CashflowMonth[]
+  forecast: CashForecast | null
+  snapshot: string
+}

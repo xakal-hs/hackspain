@@ -184,7 +184,6 @@ const drivers = computed(() => {
     <TreasuryHead
       v-model="selected"
       :title="`X-Ray Score · ${companyName}`"
-      :lead="`Tu salud financiera explicada · ${companyDetail.data.value?.health.length || 0} meses de score conectados`"
       :sync="`Mes del score: ${companyHealth?.month.slice(0, 7) || 'demo'}`"
     />
 

@@ -64,7 +64,7 @@ const overrides = (company: Company) => [...(company.vetos || []), ...(company.a
  * encabezado. Embat ve la cartera y, además, las vistas internas, que miran a
  * Embat y no a una empresa: revenue propio, alertas del ecosistema y salud del
  * modelo. Cada perspectiva entra por su primera sección. */
-const treasurySections = ['score', 'colchon', 'divisa']
+const treasurySections = ['score', 'flujo', 'colchon', 'divisa']
 const sectionsByRole: Record<PerspectiveId, string[]> = {
   empresa: treasurySections,
   embat: ['resumen', 'cartera', 'senales', 'ofertas', 'monitor', 'revenue', 'modelo'],
@@ -78,6 +78,19 @@ const section = computed(() => {
 
 const isTreasury = computed(() => treasurySections.includes(section.value))
 
+/* En la demo, `?empresa=COMP_0829` deja preparada cada pestaña del navegador con su caso. */
+const selectedCompany = useState<string>('selected-company-id')
+const companyCookie = useCookie<string>('xray-company', { sameSite: 'lax' })
+watch(
+  () => route.query.empresa,
+  (id) => {
+    if (role.value !== 'empresa' || typeof id !== 'string' || !/^COMP_\d{4}$/.test(id)) return
+    selectedCompany.value = id
+    companyCookie.value = id
+  },
+  { immediate: true },
+)
+
 const sectionLabel = computed(
   () =>
     ({
@@ -86,6 +99,7 @@ const sectionLabel = computed(
       senales: 'Señales',
       ofertas: 'Mercado',
       score: 'X-Ray Score',
+      flujo: 'Flujo de caja',
       colchon: 'Colchón Dinámico',
       divisa: 'Divisa Inteligente',
       monitor: 'Monitor operativo',
@@ -238,7 +252,7 @@ const connected = activeCompanies.toLocaleString('es-ES')
       </header>
 
       <main id="main-content" class="wk__main" tabindex="-1">
-        <CompanyDataContext v-if="role === 'empresa'" :section="section" />
+        <CompanyDataContext v-if="role === 'empresa' && section !== 'flujo'" :section="section" />
         <div :key="`${section}-${role === 'empresa' ? activeCompanyId : 'portfolio'}`" class="wk__pane" :class="{ 'is-live': paneLive }">
         <div v-if="!isTreasury" class="wk__head">
           <h1>{{ headline }}</h1>
@@ -598,6 +612,7 @@ const connected = activeCompanies.toLocaleString('es-ES')
         <!-- Tesorería propia: el mock trae su propio encabezado y su propio
              layout, así que va sin la rejilla del panel. -->
         <XRayScoreApp v-else-if="section === 'score'" />
+        <FlujoCajaApp v-else-if="section === 'flujo'" />
         <ColchonDinamicoApp v-else-if="section === 'colchon'" />
         <DivisaInteligenteApp v-else-if="section === 'divisa'" />
 

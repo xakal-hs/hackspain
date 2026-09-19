@@ -1,7 +1,7 @@
 <script setup lang="ts">
 export type TreasuryState = 'bien' | 'normal' | 'mal'
 
-defineProps<{ title: string; lead: string; sync: string }>()
+defineProps<{ title: string; lead?: string; sync: string }>()
 const state = defineModel<TreasuryState>({ required: true })
 
 const options: { id: TreasuryState; label: string }[] = [
@@ -15,7 +15,7 @@ const options: { id: TreasuryState; label: string }[] = [
   <header class="tz__head">
     <div>
       <h1>{{ title }}</h1>
-      <p>{{ lead }}</p>
+      <p v-if="lead">{{ lead }}</p>
     </div>
     <div class="tz__meta">
       <!-- El simulador es una herramienta de demo, no parte del producto. -->
