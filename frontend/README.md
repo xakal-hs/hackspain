@@ -65,3 +65,25 @@ Switch perspectives or exit using the user panel at the bottom of the desktop si
 The dashboards use explicitly fictional EUR fixtures from `app/data/demo.ts`, independently of `XRAY_API_BASE`. Accepting an offer changes only demo state. Offers survive client-side navigation and reset on a full page reload. The role cookie survives reloads until logout/browser session expiry.
 
 Manual acceptance flow: enter as Empresa and confirm an offer, then switch to Embat, search/select a company and inspect signals. Also check empty search, logout, direct-link redirect, and mobile/desktop layouts.
+
+## Supabase configuration
+
+Keep local credentials in `frontend/.env`: Nuxt loads this file when run from
+this directory. The repository ignores environment files; `.env.example`
+contains placeholders only.
+
+Browser code can read `useRuntimeConfig().public.supabaseUrl` and
+`useRuntimeConfig().public.supabasePublishableKey`. The secret key is available
+only to server code as `useRuntimeConfig().supabaseSecretKey`; never copy it
+into public config or client code. `supabaseJwksUrl` is also configured on the server.
+The original `SUPABASE_*` names are accepted for local development.
+
+For deployed Nuxt servers, set `NUXT_PUBLIC_SUPABASE_URL`,
+`NUXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NUXT_SUPABASE_SECRET_KEY`, and
+`NUXT_SUPABASE_JWKS_URL` in the hosting environment. Production does not
+automatically load `.env`. This config prepares the connection; the demo
+sign-in and fixtures are still unchanged.
+
+The project `.mcp.json` configures the Supabase MCP server for Claude Code.
+Run `claude /mcp` in a regular terminal, select `supabase`, and choose
+Authenticate to complete the browser OAuth flow with your Supabase account.
