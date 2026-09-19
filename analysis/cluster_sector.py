@@ -10,6 +10,9 @@ como un único producto de comisión.
 Artefactos:
   analysis/cluster_sector.html
   data/processed/company_sector.csv
+  data/processed/empresa_sector.csv  (company_id, sector más probable, tipo)
+
+No reescribe los CSV de data/ ni cablea el score.
 
 No reescribe los CSV de data/ ni cablea el score.
 """
@@ -32,6 +35,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
 OUTPUT = ROOT / "analysis" / "cluster_sector.html"
 TABLE = ROOT / "data" / "processed" / "company_sector.csv"
+MAP = ROOT / "data" / "processed" / "empresa_sector.csv"
 PANEL = ROOT / "data" / "processed" / "panel_monthly.csv"
 ANALYSIS = Path(__file__).resolve().parent
 for _p in (str(ANALYSIS), str(ROOT / "src")):
@@ -1051,6 +1055,17 @@ def write_table(rows: list[dict]) -> None:
                 else:
                     out[field] = value
             writer.writerow(out)
+    with MAP.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["company_id", "sector", "tipo"])
+        writer.writeheader()
+        for row in sorted(rows, key=lambda item: item["company_id"]):
+            writer.writerow(
+                {
+                    "company_id": row["company_id"],
+                    "sector": row.get("top_sector") or "",
+                    "tipo": row.get("business_kind") or "",
+                }
+            )
 
 
 def kind_counts(rows: list[dict]) -> Counter:
@@ -1794,7 +1809,7 @@ def main() -> None:
     print(
         f"kind {dict(counts)} | k={result.k} silhouette={result.silhouette:.3f} "
         f"| sectors {dict(sector_counts(rows))} "
-        f"| wrote {OUTPUT} ({OUTPUT.stat().st_size / 1_000:.0f} KB) and {TABLE}"
+        f"| wrote {OUTPUT} ({OUTPUT.stat().st_size / 1_000:.0f} KB), {TABLE} and {MAP}"
     )
 
 
