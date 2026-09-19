@@ -2,7 +2,9 @@
 """Prioridad de los 5 SKUs de la SPA: bases medidas, take incremental, HTML autónomo.
 
 Reproduce el análisis de ``notebooks/02_productos.ipynb`` y escribe
-``analysis/productos.html``. No reescribe CSVs ni el pitch de monetización.
+``analysis/productos.html``. Netea excedente y agujero a nivel de grupo:
+el CFO mueve capital entre filiales antes de barrer o pedir crédito.
+No reescribe CSVs ni el pitch de monetización.
 """
 
 from __future__ import annotations
@@ -191,6 +193,25 @@ def setup_need(connection) -> None:
         LEFT JOIN inflow12 inf USING (company_id)
         LEFT JOIN debt_flags d USING (company_id)
         LEFT JOIN saving_flags sv USING (company_id)
+        """
+    )
+    # Tesorería de grupo: el excedente de una filial cubre el agujero de otra
+    # antes de barrer o pedir crédito. FX no se netea (es flujo, no saldo).
+    connection.execute(
+        """
+        CREATE OR REPLACE TEMP TABLE gnet AS
+        SELECT
+            group_id,
+            count(*) AS n_cos,
+            count(*) FILTER (WHERE elig_yield) AS n_surplus,
+            count(*) FILTER (WHERE NOT has_drift AND cash_eur < 0) AS n_hole,
+            coalesce(sum(excess_eur) FILTER (WHERE elig_yield), 0) AS excess_pool,
+            coalesce(-sum(cash_eur) FILTER (WHERE NOT has_drift AND cash_eur < 0), 0) AS hole_pool,
+            coalesce(sum(overdue_ar_eur) FILTER (
+                WHERE NOT has_drift AND cash_eur < 0 AND elig_factoring
+            ), 0) AS ar_of_holes
+        FROM need
+        GROUP BY 1
         """
     )
 
@@ -471,6 +492,132 @@ def collect(connection) -> dict:
         """
     ).fetchone()
     d["proxy"] = dict(zip(("proxy_spa", "fx_real", "ambos", "proxy_sin_fx", "fx_sin_proxy"), proxy))
+
+    g = connection.execute(
+        """
+        SELECT
+            count(*) AS n_groups,
+            count(*) FILTER (WHERE n_cos > 1) AS n_multi,
+            count(*) FILTER (WHERE n_cos > 1 AND n_surplus > 0 AND n_hole > 0) AS n_both,
+            count(*) FILTER (WHERE n_hole > 0 AND excess_pool >= hole_pool AND n_cos > 1) AS n_full,
+            count(*) FILTER (WHERE n_hole > 0 AND excess_pool > 0 AND excess_pool < hole_pool) AS n_cover_part,
+            count(*) FILTER (WHERE n_hole > 0 AND excess_pool = 0) AS n_no_sister,
+            coalesce(sum(least(excess_pool, hole_pool)) FILTER (WHERE n_cos > 1), 0) AS moved_eur,
+            coalesce(sum(excess_pool), 0) AS excess_gross,
+            coalesce(sum(greatest(excess_pool - hole_pool, 0)), 0) AS excess_net,
+            coalesce(sum(hole_pool), 0) AS hole_gross,
+            coalesce(sum(greatest(hole_pool - excess_pool, 0)), 0) AS hole_net
+        FROM gnet
+        """
+    ).fetchone()
+    d.update(
+        dict(
+            zip(
+                (
+                    "n_groups",
+                    "n_multi",
+                    "n_both",
+                    "n_full",
+                    "n_cover_part",
+                    "n_no_sister",
+                    "moved_eur",
+                    "excess_gross",
+                    "excess_net",
+                    "hole_gross",
+                    "hole_net",
+                ),
+                g,
+            )
+        )
+    )
+    hg = connection.execute(
+        """
+        SELECT
+            count(*) FILTER (
+                WHERE NOT has_drift AND cash_eur < 0
+                  AND g.n_cos > 1 AND g.excess_pool >= g.hole_pool
+            ) AS hole_full_n,
+            -coalesce(sum(n.cash_eur) FILTER (
+                WHERE NOT has_drift AND cash_eur < 0
+                  AND g.n_cos > 1 AND g.excess_pool >= g.hole_pool
+            ), 0) AS hole_full_eur,
+            count(*) FILTER (
+                WHERE NOT has_drift AND cash_eur < 0 AND g.n_cos = 1
+            ) AS hole_solo_n,
+            count(*) FILTER (WHERE elig_yield AND g.n_hole > 0) AS yield_sister_n,
+            coalesce(sum(n.excess_eur) FILTER (WHERE elig_yield AND g.n_hole > 0), 0)
+                AS yield_sister_eur,
+            count(*) FILTER (
+                WHERE elig_yield AND greatest(g.excess_pool - g.hole_pool, 0) > 0
+            ) AS yield_n_net,
+            count(*) FILTER (
+                WHERE NOT has_drift AND cash_eur < 0 AND elig_factoring
+                  AND g.n_cos > 1 AND g.excess_pool >= g.hole_pool
+            ) AS fact_hole_full_n,
+            count(*) FILTER (
+                WHERE NOT has_drift AND cash_eur < 0 AND elig_factoring
+                  AND g.hole_pool > g.excess_pool
+            ) AS fact_hole_open_n,
+            coalesce(sum(n.overdue_ar_eur) FILTER (
+                WHERE NOT has_drift AND cash_eur < 0 AND elig_factoring
+                  AND g.hole_pool > g.excess_pool
+            ), 0) AS ar_open_eur,
+            count(*) FILTER (
+                WHERE NOT has_drift AND cash_eur < 0 AND NOT has_line
+                  AND g.n_cos > 1 AND g.excess_pool >= g.hole_pool
+            ) AS noline_full_n,
+            count(*) FILTER (
+                WHERE NOT has_drift AND cash_eur < 0 AND NOT has_line
+                  AND g.hole_pool > g.excess_pool
+            ) AS noline_open_n,
+            count(*) FILTER (
+                WHERE elig_reserve AND elig_factoring AND g.n_cos > 1 AND g.n_surplus > 0
+            ) AS tense_fact_sister_n
+        FROM need n
+        JOIN gnet g USING (group_id)
+        """
+    ).fetchone()
+    d.update(
+        dict(
+            zip(
+                (
+                    "hole_full_n",
+                    "hole_full_eur",
+                    "hole_solo_n",
+                    "yield_sister_n",
+                    "yield_sister_eur",
+                    "yield_n_net",
+                    "fact_hole_full_n",
+                    "fact_hole_open_n",
+                    "ar_open_eur",
+                    "noline_full_n",
+                    "noline_open_n",
+                    "tense_fact_sister_n",
+                ),
+                hg,
+            )
+        )
+    )
+    d["yield_take_net_35"] = d["excess_net"] * YIELD_BPS * 0.35
+    d["hole_take_net_35"] = d["hole_net"] * RESERVE_BPS * 0.35
+    d["renta_net_35"] = d["yield_take_net_35"] + d["fx_take_35"]
+    d["mixed_groups"] = records(
+        connection,
+        """
+        SELECT group_id, n_cos, n_surplus, n_hole,
+               excess_pool / 1e6 AS excess_m,
+               hole_pool / 1e6 AS hole_m,
+               least(excess_pool, hole_pool) / 1e6 AS moved_m,
+               CASE
+                 WHEN excess_pool >= hole_pool THEN 'cubre'
+                 WHEN excess_pool > 0 THEN 'cubre en parte'
+                 ELSE 'sin caja hermana'
+               END AS cover
+        FROM gnet
+        WHERE n_cos > 1 AND n_surplus > 0 AND n_hole > 0
+        ORDER BY least(excess_pool, hole_pool) DESC
+        """,
+    )
     return d
 
 
@@ -544,13 +691,13 @@ def build_charts(d: dict) -> dict[str, str]:
     fig.update_layout(title="¿A cuántos SKUs es elegible cada empresa?", xaxis_title="SKUs", yaxis_title="Empresas")
     charts["nsku"] = chart_html(fig, 300)
 
-    wf_x = ["Yield", "FX", "Factoring<br>(one-shot)", "Seguro<br>residual", "Agujero<br>(41)"]
+    wf_x = ["Yield<br>tras grupo", "FX", "Factoring<br>(one-shot)", "Seguro<br>residual", "Agujero<br>neto"]
     wf_y = [
-        d["yield_take_35"] / 1e6,
+        d["yield_take_net_35"] / 1e6,
         d["fx_take_35"] / 1e6,
         d["factoring_take_35"] / 1e6,
         d["credit_residual_take_35"] / 1e6,
-        d["hole_take_35"] / 1e6,
+        d["hole_take_net_35"] / 1e6,
     ]
     fig = go.Figure(
         go.Waterfall(
@@ -622,6 +769,36 @@ def build_charts(d: dict) -> dict[str, str]:
         yaxis_title="M€ / año",
     )
     charts["sens_yield"] = chart_html(fig, 300)
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Bar(
+            name="Empresa a empresa",
+            x=["Excedente (yield)", "Agujero (crédito)"],
+            y=[d["excess_gross"] / 1e6, d["hole_gross"] / 1e6],
+            marker_color=COLORS["amber"],
+            text=[f"{d['excess_gross']/1e6:.1f}", f"{d['hole_gross']/1e6:.2f}"],
+            textposition="outside",
+            cliponaxis=False,
+        )
+    )
+    fig.add_trace(
+        go.Bar(
+            name="Tras movimiento de capital del grupo",
+            x=["Excedente (yield)", "Agujero (crédito)"],
+            y=[d["excess_net"] / 1e6, d["hole_net"] / 1e6],
+            marker_color=COLORS["blue"],
+            text=[f"{d['excess_net']/1e6:.1f}", f"{d['hole_net']/1e6:.2f}"],
+            textposition="outside",
+            cliponaxis=False,
+        )
+    )
+    fig.update_layout(
+        title="Notional colocable / financiable · bruto vs neteo de grupo (M€)",
+        barmode="group",
+        yaxis_title="M€",
+    )
+    charts["group_net"] = chart_html(fig, 360)
     return charts
 
 
@@ -641,6 +818,15 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
             "renta medida",
             money(d["yield_med"]),
             money(d["yield_p90"]),
+        ],
+        [
+            "yield (tras grupo)",
+            fmt(d["yield_n_net"], 0),
+            meur(d["excess_net"] / 1e6, 1),
+            meur(d["yield_take_net_35"] / 1e6, 2),
+            "excedente que no tapa un agujero hermana",
+            "—",
+            "—",
         ],
         [
             "fx",
@@ -679,14 +865,36 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
             "—",
         ],
         [
-            "reserve (agujero)",
+            "reserve (agujero bruto)",
             fmt(d["hole_n"], 0),
             meur(d["hole_notional"] / 1e6, 2),
             meur(d["hole_take_35"] / 1e6, 3),
-            "demanda medida",
+            "antes de pooling",
             "—",
             "—",
         ],
+        [
+            "reserve (agujero neto)",
+            fmt(d["hole_n"] - d["hole_full_n"], 0),
+            meur(d["hole_net"] / 1e6, 2),
+            meur(d["hole_take_net_35"] / 1e6, 3),
+            "tras movimiento de grupo",
+            "—",
+            "—",
+        ],
+    ]
+    mixed_rows = [
+        [
+            f"<code>{r['group_id']}</code>",
+            fmt(r["n_cos"], 0),
+            fmt(r["n_surplus"], 0),
+            fmt(r["n_hole"], 0),
+            f"{r['excess_m']:.2f}",
+            f"{r['hole_m']:.2f}",
+            f"{r['moved_m']:.2f}",
+            r["cover"],
+        ]
+        for r in d["mixed_groups"]
     ]
     pair_headers = ["SKU"] + d["pair_labels"]
     pair_rows = [[r["sku"]] + [fmt(r[lab], 0) for lab in d["pair_labels"]] for r in d["pair"]]
@@ -708,7 +916,7 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
         [money(r["thr"]), fmt(r["n"], 0), meur(r["ar_m"], 0), meur(r["take_35"], 2)] for r in d["sens_fac"]
     ]
     adopt_rows = [
-        [name, pct(100 * rate, 0), meur(d["renta_35"] / 0.35 * rate / 1e6, 2)]
+        [name, pct(100 * rate, 0), meur(d["renta_net_35"] / 0.35 * rate / 1e6, 2)]
         for name, rate in ADOPTION.items()
     ]
     px = d["proxy"]
@@ -729,16 +937,17 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
       <a href="#resumen">01 · Veredicto</a>
       <a href="#metodo">02 · Método</a>
       <a href="#universo">03 · Universo</a>
-      <a href="#tam">04 · TAM vs robusto</a>
-      <a href="#yield">05 · Yield</a>
-      <a href="#fx">06 · FX</a>
-      <a href="#factoring">07 · Factoring</a>
-      <a href="#credit">08 · Seguro</a>
-      <a href="#reserve">09 · Reserve</a>
-      <a href="#solape">10 · Solape</a>
-      <a href="#waterfall">11 · Incremental</a>
-      <a href="#sensibilidad">12 · Sensibilidad</a>
-      <a href="#conclusiones">13 · Orden</a>
+      <a href="#grupo">04 · Grupo</a>
+      <a href="#tam">05 · TAM vs robusto</a>
+      <a href="#yield">06 · Yield</a>
+      <a href="#fx">07 · FX</a>
+      <a href="#factoring">08 · Factoring</a>
+      <a href="#credit">09 · Seguro</a>
+      <a href="#reserve">10 · Reserve</a>
+      <a href="#solape">11 · Solape</a>
+      <a href="#waterfall">12 · Incremental</a>
+      <a href="#sensibilidad">13 · Sensibilidad</a>
+      <a href="#conclusiones">14 · Orden</a>
     </nav>
     <div class="side-note">Artefacto autónomo<br>Notebook: <code>notebooks/02_productos.ipynb</code><br>Corte {AS_OF}</div>
   </aside>
@@ -746,7 +955,7 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
     <section class="hero" id="resumen">
       <div class="eyebrow">EMBAT X-RAY · 5 SKUS DE LA SPA</div>
       <h1>Añadir yield, luego FX.<br><em>El crédito no lidera.</em></h1>
-      <p>Sobre 1.286 empresas, la renta que se puede defender es la misma que el pitch de tesorería: colocación de excedente más divisa. Factoring es una acción de cobros (one-shot). Seguro y línea preventiva hinchan el TAM con colas de gasto; no son P&amp;L de apertura.</p>
+      <p>Sobre 1.286 empresas, la renta defendible sigue siendo excedente más divisa. Antes de barrer o prestar, {fmt(d['n_both'], 0)} grupos con excedente y agujero moverían capital internamente: el TAM apenas se mueve; cambia a quién no hay que vender un SKU.</p>
       <div class="hero-meta">
         <span>Generado {datetime.now():%Y-%m-%d %H:%M}</span>
         <span>Adopción central 35 %</span>
@@ -756,12 +965,12 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
 
     <section class="section">
       <div class="kpis">
-        <div class="kpi"><small>Renta medida yield + FX</small><strong>{fmt(d['renta_35'] / 1e6, 2)} M€</strong><span>@ 35 % · 25–45 % = {fmt(d['renta_35'] / 0.35 * 0.25 / 1e6, 2)}–{fmt(d['renta_35'] / 0.35 * 0.45 / 1e6, 2)} M€</span></div>
-        <div class="kpi"><small>Excedente (yield)</small><strong>{fmt(d['yield_n'], 0)}</strong><span>{meur(d['yield_notional'] / 1e6, 0)} · {fmt(d['yield_white'], 0)} sin saving</span></div>
-        <div class="kpi"><small>Divisa real (no n_tx)</small><strong>{fmt(d['fx_n'], 0)}</strong><span>{meur(d['fx_notional'] / 1e6, 0)}/año · take {meur(d['fx_take_35'] / 1e6, 2)}</span></div>
-        <div class="kpi"><small>Agujero de crédito medido</small><strong>{fmt(d['hole_n'], 0)}</strong><span>{meur(d['hole_notional'] / 1e6, 2)} · take {meur(d['hole_take_35'] / 1e6, 3)}</span></div>
+        <div class="kpi"><small>Renta tras pooling</small><strong>{fmt(d['renta_net_35'] / 1e6, 2)} M€</strong><span>bruto {fmt(d['renta_35'] / 1e6, 2)} · 25–45 % = {fmt(d['renta_net_35'] / 0.35 * 0.25 / 1e6, 2)}–{fmt(d['renta_net_35'] / 0.35 * 0.45 / 1e6, 2)} M€</span></div>
+        <div class="kpi"><small>Excedente neto</small><strong>{fmt(d['yield_n_net'], 0)}</strong><span>{meur(d['excess_net'] / 1e6, 0)} tras cubrir hermanas · {fmt(d['yield_white'], 0)} sin saving</span></div>
+        <div class="kpi"><small>Divisa real (no n_tx)</small><strong>{fmt(d['fx_n'], 0)}</strong><span>{meur(d['fx_notional'] / 1e6, 0)}/año · take {meur(d['fx_take_35'] / 1e6, 2)} · no se netea</span></div>
+        <div class="kpi"><small>Agujero neto de grupo</small><strong>{meur(d['hole_net'] / 1e6, 2)}</strong><span>bruto {meur(d['hole_notional'] / 1e6, 2)} en {fmt(d['hole_n'], 0)} · {fmt(d['hole_full_n'], 0)} cubiertos internamente</span></div>
       </div>
-      <div class="callout insight"><b>Orden: yield → FX → factoring (acción) → seguro (upsell) → reserve (aviso).</b> Sumar take independiente de reserve ({meur(d['reserve_take_raw_35'] / 1e6, 0)}) o seguro crudo ({meur(d['credit_take_raw_35'] / 1e6, 1)}) es un error de cola, no una oportunidad.</div>
+      <div class="callout insight"><b>Orden: movimiento de capital del grupo → yield → FX → factoring (acción) → seguro (upsell) → reserve (aviso).</b> Sumar take independiente de reserve ({meur(d['reserve_take_raw_35'] / 1e6, 0)}) o seguro crudo ({meur(d['credit_take_raw_35'] / 1e6, 1)}) es un error de cola, no una oportunidad.</div>
     </section>
 
     <section class="section" id="metodo">
@@ -776,7 +985,7 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
               ["reserve", "sin yield y colchón < 2 m o tensión", "línea = gasto × clip(6−cob.) × 0,5", "50 pb", "<span class='bad'>notional no defendible</span>"],
           ],
       )}
-      <div class="callout">El módulo SaaS a 350 €/mes no entra en este ranking: ya está en el pitch. Yield y FX no se canibalizan. Yield y reserve sí. Factoring y seguro son la misma cola de cobros.</div>
+      <div class="callout">El módulo SaaS a 350 €/mes no entra en este ranking: ya está en el pitch. Yield y FX no se canibalizan. Yield y reserve sí. Factoring y seguro son la misma cola de cobros. El excedente de una sociedad del grupo cubre primero el agujero de otra: no se vende barrido ni crédito sobre esa caja.</div>
     </section>
 
     <section class="section" id="universo">
@@ -800,8 +1009,24 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
       <div class="panel">{charts['coverage']}</div>
     </section>
 
+    <section class="section" id="grupo">
+      <div class="section-head"><span>04</span><div><h2>Antes de un SKU, el grupo mueve capital</h2><p>{fmt(d['n_multi'], 0)} de {fmt(d['n_groups'], 0)} grupos tienen más de una sociedad. Donde una filial tiene excedente y otra agujero, el CFO no barre ni pide un préstamo: traspasa caja.</p></div></div>
+      <div class="kpis compact-kpis">
+        <div class="kpi"><small>Grupos con ambos lados</small><strong>{fmt(d['n_both'], 0)}</strong><span>{fmt(d['n_full'], 0)} cubren el agujero · {fmt(d['n_cover_part'], 0)} en parte</span></div>
+        <div class="kpi"><small>Capital que se movería</small><strong>{meur(d['moved_eur'] / 1e6, 2)}</strong><span>no es yield ni crédito: es pooling</span></div>
+        <div class="kpi"><small>Excedente 344 → {fmt(d['excess_net'] / 1e6, 0)}</small><strong>{meur(d['excess_net'] / 1e6, 0)}</strong><span>{fmt(d['yield_sister_n'], 0)} empresas yield con hermana en agujero</span></div>
+        <div class="kpi"><small>Agujero 11,38 → {fmt(d['hole_net'] / 1e6, 2)}</small><strong>{meur(d['hole_net'] / 1e6, 2)}</strong><span>{fmt(d['hole_full_n'], 0)} agujeros ({meur(d['hole_full_eur'] / 1e6, 2)}) cubiertos internamente</span></div>
+      </div>
+      <div class="panel">{charts['group_net']}</div>
+      <div class="panel">
+        <h3>Los {fmt(d['n_both'], 0)} grupos que no compran un producto: mueven capital</h3>
+        {table(["Grupo", "Sociedades", "Con excedente", "Con agujero", "Excedente M€", "Agujero M€", "Se mueve M€", "Cobertura"], mixed_rows)}
+      </div>
+      <div class="callout insight"><b>El TAM casi no cambia; la acción sí.</b> De {fmt(d['hole_n'], 0)} agujeros, {fmt(d['hole_full_n'], 0)} ({meur(d['hole_full_eur'] / 1e6, 2)}) no son demanda de crédito: la hermana puede taparlos. {fmt(d['noline_full_n'], 0)} de esos no tienen póliza —tampoco la necesitan si el grupo traspasa. FX no se netea (es flujo cruzado de moneda, no saldo). El factoring de cobros estructurales sigue: {fmt(d['fact_hole_full_n'], 0)} agujeros factorables quedan cubiertos por la hermana; {fmt(d['fact_hole_open_n'], 0)} siguen abiertos con {meur(d['ar_open_eur'] / 1e6, 0)} de AR vencido.</div>
+    </section>
+
     <section class="section" id="tam">
-      <div class="section-head"><span>04</span><div><h2>TAM independiente frente a take robusto</h2><p>Sin tope, reserve y seguro ganan. Con tope 100 M€/empresa en las fórmulas, la ordenación se invierte hacia lo medido.</p></div></div>
+      <div class="section-head"><span>05</span><div><h2>TAM independiente frente a take robusto</h2><p>Sin tope, reserve y seguro ganan. Con tope 100 M€/empresa en las fórmulas, la ordenación se invierte hacia lo medido. El neteo de grupo recorta yield y agujero, no FX.</p></div></div>
       {table(
           ["SKU", "N", "Notional", "Take @35 %", "Clase", "Mediana", "P90"],
           independent_rows,
@@ -811,19 +1036,19 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
     </section>
 
     <section class="section" id="yield">
-      <div class="section-head"><span>05</span><div><h2>1. Yield · colocación de excedente</h2><p>Reproduce la base del pitch: {fmt(d['yield_n'], 0)} empresas, {meur(d['yield_notional'] / 1e6, 0)} ociosos.</p></div></div>
+      <div class="section-head"><span>06</span><div><h2>1. Yield · colocación de excedente</h2><p>Reproduce la base del pitch: {fmt(d['yield_n'], 0)} empresas, {meur(d['yield_notional'] / 1e6, 0)} ociosos. Tras pooling quedan {meur(d['excess_net'] / 1e6, 0)} en {fmt(d['yield_n_net'], 0)} empresas cuyo grupo no tiene un agujero que tapar primero.</p></div></div>
       <div class="kpis compact-kpis">
-        <div class="kpi"><small>Elegibles</small><strong>{fmt(d['yield_n'], 0)}</strong><span>mediana {compact(d['yield_med'])}</span></div>
-        <div class="kpi"><small>Take central</small><strong>{fmt(d['yield_take_35'] / 1e6, 2)} M€</strong><span>100 pb × 35 %</span></div>
+        <div class="kpi"><small>Elegibles brutas</small><strong>{fmt(d['yield_n'], 0)}</strong><span>mediana {compact(d['yield_med'])}</span></div>
+        <div class="kpi"><small>Take tras grupo</small><strong>{fmt(d['yield_take_net_35'] / 1e6, 2)} M€</strong><span>bruto {fmt(d['yield_take_35'] / 1e6, 2)} · 100 pb × 35 %</span></div>
         <div class="kpi"><small>Sin cuenta saving</small><strong>{fmt(d['yield_white'], 0)}</strong><span>de {fmt(d['yield_n'], 0)} · espacio en blanco</span></div>
-        <div class="kpi"><small>P90 / mediana</small><strong>×{fmt(d['yield_p90'] / d['yield_med'], 0)}</strong><span>cola ancha, módulo de cartera</span></div>
+        <div class="kpi"><small>Con hermana en agujero</small><strong>{fmt(d['yield_sister_n'], 0)}</strong><span>{meur(d['yield_sister_eur'] / 1e6, 2)} que no se barren a ciegas</span></div>
       </div>
       <div class="panel">{charts['yield']}</div>
-      <div class="callout"><b>Abrir con esto.</b> No hay que desplazar un depósito: hay que crear el riel. El CFO mediano neto a 1,5 % gana ~{money(d['yield_med'] * 0.015)}/año.</div>
+      <div class="callout"><b>Abrir con esto, después de mirar el grupo.</b> No hay que desplazar un depósito: hay que crear el riel. El CFO mediano neto a 1,5 % gana ~{money(d['yield_med'] * 0.015)}/año. Si la hermana está en números rojos, primero se mueve capital.</div>
     </section>
 
     <section class="section" id="fx">
-      <div class="section-head"><span>06</span><div><h2>2. FX Shield · exposición real a divisa</h2><p>Moneda del producto ≠ moneda de la empresa. El proxy de la SPA (<code>n_tx &gt; 50</code>) no vale.</p></div></div>
+      <div class="section-head"><span>07</span><div><h2>2. FX Shield · exposición real a divisa</h2><p>Moneda del producto ≠ moneda de la empresa. El proxy de la SPA (<code>n_tx &gt; 50</code>) no vale.</p></div></div>
       <div class="kpis compact-kpis">
         <div class="kpi"><small>Con FX &gt; 0</small><strong>{fmt(d['fx_n'], 0)}</strong><span>{fmt(d['fx_n_100k'], 0)} por encima de 100 k€/año</span></div>
         <div class="kpi"><small>Notional anual</small><strong>{fmt(d['fx_notional'] / 1e6, 0)} M€</strong><span>mediana {compact(d['fx_med'])}</span></div>
@@ -835,7 +1060,7 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
     </section>
 
     <section class="section" id="factoring">
-      <div class="section-head"><span>07</span><div><h2>3. Factoring · acción sobre cobros, no renta</h2><p>{fmt(d['factoring_n'], 0)} empresas con AR vencido &gt; 50 k€. {fmt(d['factoring_white'], 0)} no tienen el producto.</p></div></div>
+      <div class="section-head"><span>08</span><div><h2>3. Factoring · acción sobre cobros, no renta</h2><p>{fmt(d['factoring_n'], 0)} empresas con AR vencido &gt; 50 k€. {fmt(d['factoring_white'], 0)} no tienen el producto.</p></div></div>
       <div class="kpis compact-kpis">
         <div class="kpi"><small>Elegibles</small><strong>{fmt(d['factoring_n'], 0)}</strong><span>de {fmt(d['n_erp'], 0)} con ERP</span></div>
         <div class="kpi"><small>AR vencido</small><strong>{fmt(d['factoring_notional'] / 1e6, 0)} M€</strong><span>mediana {compact(d['factoring_med'])}</span></div>
@@ -843,11 +1068,11 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
         <div class="kpi"><small>Sin producto hoy</small><strong>{fmt(d['factoring_white'], 0)}</strong><span>factoring en el catálogo: 19 empresas</span></div>
       </div>
       <div class="panel">{charts['ar']}</div>
-      <div class="callout">501 empresas sin ERP no pueden recibir esta recomendación. Eso es cobertura, no salud. Confirming ya está en 70 empresas: el dataset está sesgado a préstamo/póliza, no a cesión de cobros.</div>
+      <div class="callout">501 empresas sin ERP no pueden recibir esta recomendación. Eso es cobertura, no salud. Confirming ya está en 70 empresas: el dataset está sesgado a préstamo/póliza, no a cesión de cobros. Como liquidez de agujero, {fmt(d['fact_hole_full_n'], 0)} de los {fmt(d['fact_hole_full_n'] + d['fact_hole_open_n'], 0)} agujeros factorables los cubre el grupo; el AR que sigue pidiendo anticipo es {meur(d['ar_open_eur'] / 1e6, 0)} en {fmt(d['fact_hole_open_n'], 0)} sociedades.</div>
     </section>
 
     <section class="section" id="credit">
-      <div class="section-head"><span>08</span><div><h2>4. Seguro de impago · upsell de la misma cola</h2><p>{fmt(d['credit_x_factoring'], 0)} de {fmt(d['credit_n'], 0)} elegibles también lo son a factoring.</p></div></div>
+      <div class="section-head"><span>09</span><div><h2>4. Seguro de impago · upsell de la misma cola</h2><p>{fmt(d['credit_x_factoring'], 0)} de {fmt(d['credit_n'], 0)} elegibles también lo son a factoring.</p></div></div>
       <div class="kpis compact-kpis">
         <div class="kpi"><small>Elegibles</small><strong>{fmt(d['credit_n'], 0)}</strong><span>late mediana {pct(100 * d['credit_late_med'])}</span></div>
         <div class="kpi"><small>Take crudo @35 %</small><strong>{fmt(d['credit_take_raw_35'] / 1e6, 1)} M€</strong><span><span class="bad">no usar</span> · cola de inflow</span></div>
@@ -858,22 +1083,22 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
     </section>
 
     <section class="section" id="reserve">
-      <div class="section-head"><span>09</span><div><h2>5. Reserve · aviso, no marketplace</h2><p>La regla ancha (cobertura &lt; 6 meses) coge {fmt(d['reserve_broad_n'], 0)} empresas: casi el universo. La estrecha, {fmt(d['reserve_n'], 0)}.</p></div></div>
+      <div class="section-head"><span>10</span><div><h2>5. Reserve · aviso, no marketplace</h2><p>La regla ancha (cobertura &lt; 6 meses) coge {fmt(d['reserve_broad_n'], 0)} empresas: casi el universo. La estrecha, {fmt(d['reserve_n'], 0)}.</p></div></div>
       <div class="kpis compact-kpis">
         <div class="kpi"><small>Tensas (estrecha)</small><strong>{fmt(d['reserve_n'], 0)}</strong><span>{fmt(d['reserve_has_line'], 0)} ya tienen póliza</span></div>
         <div class="kpi"><small>Línea cruda</small><strong>{fmt(d['linea_raw'] / 1e6, 0)} M€</strong><span>take {meur(d['reserve_take_raw_35'] / 1e6, 0)} @35 %</span></div>
-        <div class="kpi"><small>Línea con tope</small><strong>{fmt(d['linea_cap'] / 1e6, 0)} M€</strong><span>sigue dominada por la cola</span></div>
-        <div class="kpi"><small>Agujero actual</small><strong>{fmt(d['hole_n'], 0)}</strong><span>{meur(d['hole_notional'] / 1e6, 2)} · {fmt(d['hole_no_line'], 0)} sin póliza</span></div>
+        <div class="kpi"><small>Agujero bruto</small><strong>{fmt(d['hole_n'], 0)}</strong><span>{meur(d['hole_notional'] / 1e6, 2)} · {fmt(d['hole_no_line'], 0)} sin póliza</span></div>
+        <div class="kpi"><small>Agujero neto de grupo</small><strong>{meur(d['hole_net'] / 1e6, 2)}</strong><span>{fmt(d['hole_full_n'], 0)} cubiertos por la hermana · take {meur(d['hole_take_net_35'] / 1e6, 3)}</span></div>
       </div>
       <div class="panel">
         <h3>Las series que rompen la fórmula de línea</h3>
         {table(["Empresa", "Gasto mens.", "Cobertura", "Diagnóstico", "Línea"], outlier_rows)}
       </div>
-      <div class="callout warning"><b>La cifra defendible de demanda de crédito es {meur(d['hole_notional'] / 1e6, 2)} en {fmt(d['hole_n'], 0)} agujeros, take {meur(d['hole_take_35'] / 1e6, 3)}.</b> Por eso el pitch no abre con un marketplace. Como acción («negocia la póliza antes del agujero») el n de tensión sí es real.</div>
+      <div class="callout warning"><b>La cifra defendible de demanda de crédito es {meur(d['hole_net'] / 1e6, 2)} tras pooling</b> (bruto {meur(d['hole_notional'] / 1e6, 2)} en {fmt(d['hole_n'], 0)} agujeros). {fmt(d['hole_full_n'], 0)} agujeros y {fmt(d['noline_full_n'], 0)} sin póliza no van al banco: van a tesorería de grupo. Por eso el pitch no abre con un marketplace.</div>
     </section>
 
     <section class="section" id="solape">
-      <div class="section-head"><span>10</span><div><h2>El TAM independiente cuenta la misma tesorería varias veces</h2><p>407 empresas caen en tres o más SKUs.</p></div></div>
+      <div class="section-head"><span>11</span><div><h2>El TAM independiente cuenta la misma tesorería varias veces</h2><p>407 empresas caen en tres o más SKUs.</p></div></div>
       <div class="grid two">
         <div class="panel">{charts['nsku']}</div>
         <div class="panel">{charts['overlap']}</div>
@@ -883,22 +1108,23 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
     </section>
 
     <section class="section" id="waterfall">
-      <div class="section-head"><span>11</span><div><h2>Impacto incremental, no ranking de comisiones de la SPA</h2><p>Yield y FX se suman. Seguro residual = elegible a seguro y no a factoring. Reserve entra solo como agujero medido.</p></div></div>
+      <div class="section-head"><span>12</span><div><h2>Impacto incremental, no ranking de comisiones de la SPA</h2><p>Yield y FX se suman, yield ya neto de pooling. Seguro residual = elegible a seguro y no a factoring. Reserve entra solo como agujero que el grupo no cubre.</p></div></div>
       <div class="panel">{charts['waterfall']}</div>
       {table(
           ["Paso", "SKU", "N", "Take @35 %", "Qué es"],
           [
-              ["1", "yield", fmt(d["yield_n"], 0), meur(d["yield_take_35"] / 1e6, 2), "renta medida"],
-              ["2", "fx", fmt(d["fx_n"], 0), meur(d["fx_take_35"] / 1e6, 2), "renta medida · no canibaliza"],
+              ["0", "pooling", fmt(d["n_both"], 0) + " grupos", meur(0, 2), "mover capital · no es un SKU"],
+              ["1", "yield neto", fmt(d["yield_n_net"], 0), meur(d["yield_take_net_35"] / 1e6, 2), "renta medida tras cubrir hermanas"],
+              ["2", "fx", fmt(d["fx_n"], 0), meur(d["fx_take_35"] / 1e6, 2), "renta medida · no se netea"],
               ["3", "factoring", fmt(d["factoring_n"], 0), meur(d["factoring_take_35"] / 1e6, 2), "one-shot · no sumar a la renta"],
               ["4", "credit residual", fmt(d["credit_residual_n"], 0), meur(d["credit_residual_take_35"] / 1e6, 3), "upsell · no solapar"],
-              ["5", "agujero 41", fmt(d["hole_n"], 0), meur(d["hole_take_35"] / 1e6, 3), "demanda de crédito medida"],
+              ["5", "agujero neto", fmt(d["hole_n"] - d["hole_full_n"], 0), meur(d["hole_take_net_35"] / 1e6, 3), "demanda de crédito que el grupo no tapa"],
           ],
       )}
     </section>
 
     <section class="section" id="sensibilidad">
-      <div class="section-head"><span>12</span><div><h2>Los umbrales mueven el n, no el take de la cola</h2><p>Yield a 2 meses es estable. FX casi todo el notional está por encima de 100 k€/año. Factoring a 200 k€ deja el AR casi intacto.</p></div></div>
+      <div class="section-head"><span>13</span><div><h2>Los umbrales mueven el n, no el take de la cola</h2><p>Yield a 2 meses es estable. FX casi todo el notional está por encima de 100 k€/año. Factoring a 200 k€ deja el AR casi intacto.</p></div></div>
       <div class="grid three">
         <div class="panel">
           <h3>Yield · k meses de colchón</h3>
@@ -914,19 +1140,20 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
         </div>
       </div>
       <div class="panel">{charts['sens_yield']}</div>
-      <h3>Adopción sobre la renta medida (yield + FX)</h3>
+      <h3>Adopción sobre la renta medida (yield neto + FX)</h3>
       {table(["Escenario", "Adopción", "Renta anual"], adopt_rows)}
     </section>
 
     <section class="section conclusions" id="conclusiones">
-      <div class="section-head"><span>13</span><div><h2>Qué añadir, y en qué orden</h2><p>Evidencia primero. Luego n. Luego fricción comercial.</p></div></div>
+      <div class="section-head"><span>14</span><div><h2>Qué añadir, y en qué orden</h2><p>Evidencia primero. Luego n. Luego fricción comercial. El grupo, antes que el SKU.</p></div></div>
       <div class="conclusion-list">
-        <article><span>01</span><div><h3>Yield</h3><p>{fmt(d['yield_n'], 0)} empresas, {meur(d['yield_notional'] / 1e6, 0)}, take {meur(d['yield_take_35'] / 1e6, 2)}/año. {fmt(d['yield_white'], 0)} sin saving. Es el hueco más limpio y la primera línea del pitch de tesorería.</p></div></article>
-        <article><span>02</span><div><h3>FX Shield</h3><p>{fmt(d['fx_n'], 0)} con exposición real, {meur(d['fx_notional'] / 1e6, 0)}/año, take {meur(d['fx_take_35'] / 1e6, 2)}. No usar <code>n_tx &gt; 50</code>. Umbral útil: &gt; 100 k€/año ({fmt(d['fx_n_100k'], 0)} empresas).</p></div></article>
-        <article><span>03</span><div><h3>Factoring como acción</h3><p>AR medido {meur(d['factoring_notional'] / 1e6, 0)} en {fmt(d['factoring_n'], 0)} empresas. Take one-shot {meur(d['factoring_take_35'] / 1e6, 2)} si se cede al 1,5 %. No sustituye la renta. 501 empresas no tienen ERP.</p></div></article>
+        <article><span>00</span><div><h3>Movimiento de capital</h3><p>{fmt(d['n_both'], 0)} grupos tienen excedente y agujero a la vez. Moverían {meur(d['moved_eur'] / 1e6, 2)}. No es un producto de la SPA: es la primera acción de tesorería. {fmt(d['hole_full_n'], 0)} agujeros y {fmt(d['yield_sister_n'], 0)} empresas yield se redirigen aquí.</p></div></article>
+        <article><span>01</span><div><h3>Yield</h3><p>{fmt(d['yield_n_net'], 0)} empresas con excedente neto, {meur(d['excess_net'] / 1e6, 0)}, take {meur(d['yield_take_net_35'] / 1e6, 2)}/año (bruto {fmt(d['yield_n'], 0)} / {meur(d['yield_notional'] / 1e6, 0)}). {fmt(d['yield_white'], 0)} sin saving. Es el hueco más limpio y la primera línea del pitch de tesorería.</p></div></article>
+        <article><span>02</span><div><h3>FX Shield</h3><p>{fmt(d['fx_n'], 0)} con exposición real, {meur(d['fx_notional'] / 1e6, 0)}/año, take {meur(d['fx_take_35'] / 1e6, 2)}. No se netea por grupo. No usar <code>n_tx &gt; 50</code>. Umbral útil: &gt; 100 k€/año ({fmt(d['fx_n_100k'], 0)} empresas).</p></div></article>
+        <article><span>03</span><div><h3>Factoring como acción</h3><p>AR medido {meur(d['factoring_notional'] / 1e6, 0)} en {fmt(d['factoring_n'], 0)} empresas. Take one-shot {meur(d['factoring_take_35'] / 1e6, 2)} si se cede al 1,5 %. Como liquidez de agujero, el grupo ya cubre {fmt(d['fact_hole_full_n'], 0)} casos; quedan {fmt(d['fact_hole_open_n'], 0)} con {meur(d['ar_open_eur'] / 1e6, 0)} de AR. 501 empresas no tienen ERP.</p></div></article>
         <article><span>04</span><div><h3>Seguro, después</h3><p>Misma cola que factoring ({fmt(d['credit_x_factoring'], 0)}). Take robusto {meur(d['credit_take_cap_35'] / 1e6, 2)}; el crudo {meur(d['credit_take_raw_35'] / 1e6, 1)} no se presenta. Upsell, no apertura.</p></div></article>
-        <article><span>05</span><div><h3>Reserve no es P&amp;L</h3><p>{fmt(d['reserve_n'], 0)} tensas es un n de aviso. {fmt(d['hole_n'], 0)} agujeros y {meur(d['hole_notional'] / 1e6, 2)} sí se pueden citar. La línea de {meur(d['linea_raw'] / 1e6, 0)} no.</p></div></article>
-        <article><span>06</span><div><h3>Demo de Productos</h3><p>No rankear por comisión simulada de la SPA (mezcla yield del CFO con take de Embat, y FX con n_tx). Mostrar necesidad tesorera medida.</p></div></article>
+        <article><span>05</span><div><h3>Reserve no es P&amp;L</h3><p>{fmt(d['reserve_n'], 0)} tensas es un n de aviso. Demanda de crédito neta: {meur(d['hole_net'] / 1e6, 2)} ({fmt(d['hole_n'] - d['hole_full_n'], 0)} agujeros que el grupo no tapa). La línea de {meur(d['linea_raw'] / 1e6, 0)} no se cita.</p></div></article>
+        <article><span>06</span><div><h3>Demo de Productos</h3><p>No rankear por comisión simulada de la SPA. Mostrar necesidad tesorera medida, y no recomendar barrido ni crédito si hay caja hermana.</p></div></article>
       </div>
       <div class="final-note">Reproducible con <code>python analysis/productos.py</code>. Exploración viva: <code>notebooks/02_productos.ipynb</code>. Usa <code>src/mapping</code> y, si existe, <code>analysis/cash.duckdb</code>. Los CSV de <code>data/</code> no se reescriben. El módulo SaaS y las cifras 3,0 / 4,2 / 5,4 M€ siguen en <code>context/monetizacion.md</code>.</div>
     </section>
@@ -948,7 +1175,8 @@ def main() -> None:
         f"({OUTPUT.stat().st_size / 1_000_000:.1f} MB) · "
         f"yield {data['yield_n']} / {data['yield_notional']/1e6:.0f} M€ · "
         f"FX {data['fx_n']} / {data['fx_notional']/1e6:.0f} M€ · "
-        f"renta central {data['renta_35']/1e6:.2f} M€"
+        f"renta central {data['renta_net_35']/1e6:.2f} M€ "
+        f"(pooling {data['moved_eur']/1e6:.2f} M€ · {data['n_both']} grupos)"
     )
 
 
