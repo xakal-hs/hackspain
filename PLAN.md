@@ -50,7 +50,8 @@ quiere hacer, se cambia: el reparto sirve para no pisarnos, no para encasillar.
 | Persona | De dónde viene, según el repo | Su terreno |
 |---|---|---|
 | **Álvaro** (`balalo`) | `xray.py`, `targets.py`, `evaluate.py`, `predict_submission.py`, los workflows de `.devin/` | **El motor.** Score, eventos, previsión, submission |
-| **Andrés** | Capa de mapeo, informe exploratorio, ERD, catálogo de features, `context/scoring.md` | **Datos y evidencia.** Features, validación, métricas, el marco del prestamista |
+| **Andrés** | Capa de mapeo, informe exploratorio, ERD, catálogo de features, `context/scoring.md` | **Métricas y validación.** Antelación, evidencia, el marco del prestamista |
+| **Jorge** | Sin rastro en el repo todavía: entra ahora | **Features y robustez.** Que entren las features que aportan y que el pipeline aguante datos que no hemos generado nosotros |
 | **César** | `app/DESIGN.md`, skills de frontend, README | **La demo.** SPA, lenguaje visual, que aquello abra |
 | **Manel** | Histórico de caja, `monetizacion.py`, productos financieros sobre el score | **Producto y pitch.** Qué se vende, a quién, por cuánto |
 
@@ -111,6 +112,23 @@ unas métricas que no son las del modelo que estamos presentando.
 
 **Hecho cuando:** otra persona del equipo puede dar el pitch leyéndolo.
 
+### Jorge — que el pipeline aguante datos que no hemos hecho nosotros
+
+Va en paralelo a la submission de Álvaro y no se pisan: él se ocupa del **formato**,
+Jorge de que **no reviente**. El test oculto son 60-80 empresas que nadie ha visto, y
+todo lo que hemos construido se ha ejecutado siempre contra ficheros que generamos
+nosotros. Hay manejo de OOD y publicamos `coverage` y `ood_share`, pero eso nunca se
+ha probado contra datos ajenos.
+
+- Correr `predict_submission.py` contra copias del train **deliberadamente
+  estropeadas**: empresas sin facturas de ERP, meses truncados, monedas que no salen
+  en el train, series con `has_drift`, saldos sentinela por encima de 100 M€.
+- Lo que pete, se arregla. Lo que no se pueda arreglar, **sale como baja cobertura,
+  no como un número inventado**: la observabilidad es cobertura, no salud.
+
+**Hecho cuando:** a una empresa le falta la mitad de los ficheros y el pipeline
+responde con `coverage` bajo en lugar de caerse o dar una nota de aspecto normal.
+
 > **Corte limpio F0** — Score que puntúa en empresas nunca vistas, señal en las dos
 > direcciones, trayectoria, explicación, producto con comprador identificado y demo
 > navegable. Los siete requisitos obligatorios del enunciado, cubiertos.
@@ -144,10 +162,28 @@ de la v5/v6.
 
 - Regenerar antelación con la v7 y publicarla en la UI como titular, no escondida
   en una tabla.
-- Si sobra tiempo: meter las features del brainstorming que ya tienen señal
-  (`payee_concentration`, `lost_accel`, `payroll_cv`, `hhi_ap_6m`,
-  `oper_persistence_6m`) **de una en una**, con ficha de evidencia. Entra solo la
-  que mejore el AUC out-of-fold y no rompa la monotonía.
+- Dejar el número redondo para el pitch: «lo vimos venir con N meses de mediana en
+  el X % de las caídas».
+
+**Hecho cuando:** el titular de antelación sale de la v7 y está en la primera
+pantalla del monitor.
+
+### Jorge — las features del brainstorming, de una en una
+
+Hay cinco features medidas que **tienen señal frente a los eventos v2 y no están en
+el score**: `payee_concentration`, `lost_accel`, `payroll_cv` /
+`payroll_continuity_6m`, `hhi_ap_6m` y `oper_persistence_6m`. Hasta ahora eran un «si
+sobra tiempo»; con dueño dejan de serlo.
+
+- Una por una, con **ficha de evidencia**: AUC out-of-fold antes y después, y qué
+  evento mejora.
+- Entra solo la que mejora el número y no rompe la monotonía. La que no entra, se
+  anota en `REFLEXIONES.md` con su medición, que también es resultado.
+- Validación con `GroupKFold` por `group_id`: si las filiales de un grupo caen a
+  ambos lados, el AUC miente.
+
+**Hecho cuando:** cada feature evaluada tiene su ficha, y las que entran están en
+`features.py` con el AUC nuevo publicado.
 
 ### César — las seis preguntas, literales, en la ficha de empresa
 
@@ -187,8 +223,19 @@ misma frase.
 
 ### Andrés — la explicación, en castellano
 
-Para las tres empresas que salen en el pitch, que el «por qué» se lea sin jerga.
-Una caja negra no vale para prestar, y un tecnicismo tampoco.
+Para las tres empresas que salen en el pitch, que el «por qué» se lea sin jerga: el
+dinero que queda en la cuenta, lo que tardan en cobrar, lo que tardan en pagar. Una
+caja negra no vale para prestar, y un tecnicismo tampoco.
+
+### Jorge — que esa explicación sea verdad
+
+Distinto trabajo que el anterior: Andrés la escribe, Jorge la contrasta. Para esas
+mismas tres empresas, abrir su tesorería mes a mes y comprobar que **la razón que
+damos es la razón que pasó**. Si decimos que cayó porque se concentró un pagador y
+resulta que fue estacionalidad, el jurado lo va a encontrar antes que nosotros.
+
+**Hecho cuando:** las tres explicaciones del pitch están contrastadas contra los
+movimientos reales, y las que no cuadraban están corregidas.
 
 > **Corte limpio F2** — El jurado ve una decisión de crédito completa sobre una
 > empresa que el modelo no había visto nunca.
@@ -205,7 +252,10 @@ minutos no queda claro quién compra y por qué, la propuesta está incompleta.
   demo no arranca delante del jurado.
 - Móvil y modo oscuro, estados vacíos, y que ninguna de esas cuatro pantallas tarde
   más de un segundo.
-- La sala de situaciones (`fase4_demo.md`), **solo si la F2 cerró**.
+- **Andrés:** cada cifra del pitch, con su fuente. Ninguna se dice en voz alta sin
+  un fichero detrás; empezando por los 12,1 M€.
+- **Jorge:** la sala de situaciones (`fase4_demo.md`), **solo si la F2 cerró**. Es lo
+  primero que se cae si el reloj aprieta, y no pasa nada.
 
 **Congelación a T-2h:** nadie toca `research/src/` ni `index.html`. Las dos últimas
 horas son para ensayar, no para programar.
@@ -235,7 +285,8 @@ dos personas a la vez, se pierde media hora en un conflicto.
 | Fichero | Lo escribe |
 |---|---|
 | `research/src/xray.py`, `targets.py`, `evaluate.py`, `predict_submission.py`, `proactive.py` | Álvaro |
-| `research/src/features.py`, `anticipation.py`, `analysis/*`, `reports/*`, `METRICS.md` | Andrés |
+| `research/src/anticipation.py`, `analysis/*`, `reports/*`, `METRICS.md` | Andrés |
+| `research/src/features.py`, `measure_events_v2.py`, las fichas de evidencia | Jorge |
 | `research/app/static/index.html`, `DESIGN.md` | **Solo César** |
 | `analysis/monetizacion.py`, `context/*` | Manel |
 
@@ -246,7 +297,7 @@ dos personas a la vez, se pierde media hora en un conflicto.
 
 ---
 
-## Los cinco riesgos, con dueño
+## Los seis riesgos, con dueño
 
 | # | Riesgo | Dueño | Cuándo |
 |---|---|---|---|
@@ -255,6 +306,7 @@ dos personas a la vez, se pierde media hora en un conflicto.
 | 3 | La SPA enseña métricas de la v6 con un modelo v7 | Andrés | F0 |
 | 4 | Bache frente a caída en 0,53: el jurado preguntará justo por eso | Álvaro | F1 |
 | 5 | El 23 % de alertas parpadea, y se ve durante la demo | Álvaro | F1 |
+| 6 | El pipeline nunca se ha ejecutado contra ficheros que no hayamos generado nosotros | Jorge | F0 |
 
 ---
 
