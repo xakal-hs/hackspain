@@ -37,7 +37,7 @@ const states = ref({
     autoMode: 'Colocación automática', autoBg: 'var(--ok)', autoOffset: '16px',
     autoHint: 'Activa: excedentes > 100k€ sostenidos 2m se colocan sin confirmación.',
     history: [
-      { date: '11 sep', title: 'Colocación automática 220k€', desc: '30 días · Banco Meridiano · tipo 3,1%', badge: 'Activa', badgeBg: 'var(--ok-bg)', badgeText: 'var(--ok-strong)' },
+      { date: '11 sep', title: 'Colocación automática 220k€', desc: 'Depósito 30 días · tipo 3,1%', badge: 'Activa', badgeBg: 'var(--ok-bg)', badgeText: 'var(--ok-strong)' },
       { date: '28 ago', title: 'Devolución al vencimiento', desc: 'Depósito de 180k€ recuperado en tiempo · sin ruptura', badge: 'Cerrada', badgeBg: 'var(--wash)', badgeText: 'var(--text-2)' },
       { date: '14 ago', title: 'Colocación manual 150k€', desc: 'CFO ejecutó desde el chat del agente', badge: 'Cerrada', badgeBg: 'var(--wash)', badgeText: 'var(--text-2)' }
     ]

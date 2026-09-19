@@ -5,7 +5,7 @@ useHead({ title: 'Entrar · X-Ray' })
 
 const route = useRoute()
 const chosen = ref<PerspectiveId>(
-  perspectiveById(String(route.query.role))?.id ?? 'banco',
+  perspectiveById(String(route.query.role))?.id ?? 'empresa',
 )
 
 const session = useCookie<PerspectiveId | null>('xray-demo-role', {
@@ -32,7 +32,7 @@ function enter() {
       <div class="entry__intro">
         <h1>¿Desde dónde vas a mirar?</h1>
         <p>
-          Los datos son los mismos para los tres. Cambia el orden de lo que
+          Los datos son los mismos para ambas. Cambia el orden de lo que
           verás primero y lo que puedes hacer con ello.
         </p>
       </div>
