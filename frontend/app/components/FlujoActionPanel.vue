@@ -74,6 +74,34 @@ const bandLabel = computed(() => {
   if (band.value === 'vigilar') return 'en vigilancia'
   return null
 })
+
+const asking = ref(false)
+const asked = ref<'new' | 'open' | 'error' | null>(null)
+
+watch(
+  () => [props.open, props.mode, selectedId.value] as const,
+  () => {
+    asked.value = null
+  },
+)
+
+async function requestFinancing() {
+  if (!selectedId.value || asking.value) return
+  asking.value = true
+  asked.value = null
+  try {
+    const result = await $fetch<{ alreadyOpen?: boolean }>('/api/embat/leads', {
+      method: 'POST',
+      body: { company_id: selectedId.value },
+    })
+    asked.value = result.alreadyOpen ? 'open' : 'new'
+    await refreshNuxtData('embat-leads')
+  } catch {
+    asked.value = 'error'
+  } finally {
+    asking.value = false
+  }
+}
 </script>
 
 <template>
@@ -224,9 +252,28 @@ const bandLabel = computed(() => {
             Recomendación: colocar {{ money(excedente.amount) }} y dejar
             {{ money(excedente.cushion) }} de colchón.
           </p>
-          <p v-else-if="mode === 'financiar' && rotura">
-            Recomendación: un puente de {{ money(hole) }}{{ rotura.rescue ? ` hasta el ${monthLong(rotura.rescue.date)}` : '' }}.
-          </p>
+          <template v-else-if="mode === 'financiar' && rotura">
+            <p>
+              Recomendación: un puente de {{ money(hole) }}{{ rotura.rescue ? ` hasta el ${monthLong(rotura.rescue.date)}` : '' }}.
+            </p>
+            <button
+              class="sheet__ask"
+              type="button"
+              :disabled="asking || asked === 'new' || asked === 'open'"
+              @click="requestFinancing"
+            >
+              {{
+                asked === 'new'
+                  ? 'Tu asesor ya tiene el aviso'
+                  : asked === 'open'
+                    ? 'Este aviso ya estaba en la cola'
+                    : asking
+                      ? 'Avisando al asesor…'
+                      : 'Quiero pedir financiación'
+              }}
+            </button>
+            <p v-if="asked === 'error'" class="sheet__ask-error">No se pudo avisar. Inténtalo de nuevo.</p>
+          </template>
         </footer>
       </aside>
     </dialog>
@@ -459,6 +506,37 @@ const bandLabel = computed(() => {
   font-size: 13.5px;
   font-weight: 600;
   line-height: 1.45;
+}
+
+.sheet__ask {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--sheet-navy);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sheet__ask:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.sheet__ask:focus-visible {
+  outline: 2px solid var(--sheet-navy);
+  outline-offset: 2px;
+}
+
+.sheet__ask-error {
+  margin-top: 8px !important;
+  color: var(--sheet-bad);
+  font-weight: 500 !important;
 }
 
 @keyframes sheet-in {
