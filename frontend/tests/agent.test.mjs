@@ -73,3 +73,24 @@ test('el prompt lleva la empresa abierta y la regla de no inventar cifras', () =
   assert.match(p, /sale de una herramienta/)
   assert.match(p, /No decides préstamos/)
 })
+
+import { resolveModel } from '../server/agent/model.ts'
+
+test('resolveModel: sin nada configurado no hay modelo', () => {
+  assert.equal(resolveModel({}), null)
+})
+
+test('resolveModel: AGENT_BASE_URL manda sobre el Gateway y no exige clave (Ollama)', () => {
+  const m = resolveModel({ agentBaseUrl: 'http://localhost:11434/v1/', agentModel: 'qwen3:8b', gatewayKey: 'x' })
+  assert.equal(typeof m, 'object')
+  assert.equal(m.modelId, 'qwen3:8b')
+})
+
+test('resolveModel: AGENT_BASE_URL sin AGENT_MODEL cuenta como no configurado', () => {
+  assert.equal(resolveModel({ agentBaseUrl: 'http://localhost:11434/v1' }), null)
+})
+
+test('resolveModel: con clave del Gateway usa un id proveedor/modelo', () => {
+  assert.equal(resolveModel({ gatewayKey: 'k' }), 'anthropic/claude-opus-5')
+  assert.equal(resolveModel({ oidcToken: 't', agentModel: 'zai/glm-5.3' }), 'zai/glm-5.3')
+})

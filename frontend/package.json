@@ -21,6 +21,7 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@ai-sdk/openai-compatible": "^3.0.53",
     "@ai-sdk/vue": "^4.0.107",
     "@lucide/vue": "^1.47.0",
     "@pinia/nuxt": "^1.0.2",
