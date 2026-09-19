@@ -440,6 +440,32 @@ def build():
         decision="Comprador: Embat. Integra X-Ray en su plataforma como (1) un monitor de alertas proactivas sobre sus clientes y (2) un simulador de escenarios para tesorería. Con el score y la confianza puede derivar operaciones a financiadores (circulante, factoring o pólizas) con un riesgo medido, y cobrar por origen o por suscripción.",
         why="Embat ya tiene los datos y la relación con la pyme. El score la convierte en un canal de crédito con información que el banco no tiene: caja diaria, disciplina de facturas y anticipación de 1 a 3 meses.",
         status="a confirmar con la organización")
+
+    # --- autoresearch (fase 3, rama autoresearch/2026-09-19): bucle testear→diagnosticar→cambiar sobre las premisas del consejo
+    ar = {t: load_metrics(t) or {} for t in ("ar000", "ar002b", "ar004", "ar006", "ar007")}
+    pm = lambda m: (sum(m.get(f"auc_level_vs_{e}", 0) for e in E.EVENTS) / 4) if m else float("nan")
+    add(category="features", title="La nómina puntúa por su regularidad a la baja (payroll_cv), no por su peso sobre las entradas",
+        question="¿Por qué payroll_burden tenía peso 0 y la explicación no podía nombrar la nómina ausente? (premisa P172 del consejo)",
+        decision="Se sustituye payroll_burden (nóminas/entradas 3m) por payroll_cv: semidesviación a la baja de las nóminas respecto a su media de 6 meses, dividida por esa media. Solo penaliza nóminas que faltan o bajan; contratar no resta. Sin nóminas sigue siendo «no aplica».",
+        why="Con dirección «más peso de nómina = peor», payroll_burden tenía AUC 0,41 frente a tensión y 0,43 frente a incumplimiento: quien paga más nómina relativa tiene menos eventos. Era un proxy del tamaño (rho −0,46 con log_scale) y la logística con signo restringido hacía lo correcto al darle peso 0. La señal está en la regularidad: payroll_cv separa incumplimiento (0,58) y caída (0,61) y es neutra al tamaño (−0,05).",
+        alternatives="Coeficiente de variación total (std/media): más AUC en incumplimiento (0,607) pero penaliza la expansión (−0,025), porque contratar también hace variar la nómina. payroll_continuity_6m: correlaciona con el tamaño (+0,27). payroll_gap binaria: cobertura 35 %.",
+        evidence=f"GroupKFold por grupo × 3 cortes: PM {pm(ar['ar000']):.3f} → {pm(ar['ar002b']):.3f}; incumplimiento {ar['ar000'].get('auc_level_vs_incumplimiento_6m', float('nan')):.3f} → {ar['ar002b'].get('auc_level_vs_incumplimiento_6m', float('nan')):.3f}, caída {ar['ar000'].get('auc_level_vs_caida_6m', float('nan')):.3f} → {ar['ar002b'].get('auc_level_vs_caida_6m', float('nan')):.3f}; guardarraíles de trayectoria mejoran. Peso calibrado de payroll_cv: 0,10 (tercera feature). Detalle: .devin/workflows/autoresearch/salida/iteraciones/iter_002/.")
+    add(category="features", title="El margen de caja a 6 meses sale del score (queda como contexto)",
+        question="¿Rescatar net_margin_6m o retirarla? (premisa P199)",
+        decision="Se retira del catálogo del score. Se sigue calculando como contexto para el forecaster.",
+        why="AUC 0,46-0,49 frente a los cuatro eventos (a más margen, ligeramente más eventos adversos: reversión a la media) y peso calibrado 0 en los cuatro. La explicación mostraba un «Margen de caja 6m» que nunca movía nada.",
+        evidence=f"La nota es idéntica en todas las filas (PM {pm(ar['ar002b']):.3f} = {pm(ar['ar004']):.3f}). Detalle: iter_004.")
+    add(category="features", title="Entra la persistencia de cobros operativos (oper_persistence_6m)",
+        question="¿Qué feature del brainstorming (R07) entra sin empeorar ningún evento?",
+        decision="oper_persistence_6m = meses de los últimos 6 con cobros operativos ≥ 50 % de su mediana anual (pilar estabilidad, dirección +1).",
+        why="Dirección coherente en los cuatro eventos (menos caída e incumplimiento, más expansión), neutra al tamaño (rho 0,04) y cinco veces menos ruidosa que activity_trend (2,9 frente a 13,6 puntos de percentil al mes), a la que quita peso (0,18 → 0,16) y acerca la criticidad de la caja (P173: +1,60 → +0,88).",
+        alternatives="lost_accel y yoy_inflow: ruidosas (17-25 puntos al mes) y de poca cobertura. payee_concentration y hhi_ap_6m: exigen rehacer el panel; pendientes.",
+        evidence=f"PM {pm(ar['ar004']):.3f} → {pm(ar['ar006']):.3f}: tensión {ar['ar004'].get('auc_level_vs_tension_6m', float('nan')):.3f} → {ar['ar006'].get('auc_level_vs_tension_6m', float('nan')):.3f}, caída {ar['ar004'].get('auc_level_vs_caida_6m', float('nan')):.3f} → {ar['ar006'].get('auc_level_vs_caida_6m', float('nan')):.3f}, expansión igual. Detalle: iter_006.")
+    add(category="datos", title="Con caja centinela, la liquidez es «sin dato»",
+        question="¿Qué hacer con las 9 empresas cuya caja reconstruida es un artefacto del generador (saldo o transacción > 1e8 €)?",
+        decision="runway pasa a nulo cuando dq_cash_sentinel: la nota va al neutro en liquidez y la confianza baja. La caja implausible por riqueza real (dq_cash_implausible: holdings con mucha caja y poco flujo, eventos a la mitad) no se toca.",
+        why="La caja falsa movía la nota ±20-30 puntos en las dos direcciones (COMP_1068: 83,7 «sano» con 87 000 M€ falsos; COMP_0420: 25,3 con −2 000 M€). Marcar no bastaba: el sub-score de runway era alto o bajo, no neutro. La deriva de reconstrucción (has_drift) queda pendiente de un flag por fila y de la exclusión simétrica en los eventos.",
+        evidence=f"PM idéntica fuera de las filas centinela (0,6143 = 0,6143 en todas las filas OOF); en cortes {pm(ar['ar006']):.3f} → {pm(ar['ar007']):.3f} (ruido). Detalle: iter_007 y salida/datos_limpieza.md A02/A16.")
     return D, its
 
 
@@ -461,12 +487,18 @@ DESCS = {
     "v5e": "v5b + sin dato = neutro (sin renormalizar)",
     "v5f": "v5e + escala publicada lineal (P5→15, P95→85) y alertas Δ≥10",
     "v6": "Final: inactividad causal, intragrupo fuera, FX en facturas, clientes perdidos, calibración 2 caras, EPS relativo",
+    "v7": "Eventos v2 (tensión, incumplimiento, caída, expansión) calibran los pesos; probabilidades publicadas",
+    "ar000": "Base del autoresearch: v7 sobre el panel con flags de calidad (fase 0)",
+    "ar002b": "+ payroll_cv (regularidad de nóminas a la baja) en lugar de payroll_burden",
+    "ar004": "− net_margin_6m (sin señal, peso 0)",
+    "ar006": "+ oper_persistence_6m (persistencia de cobros operativos)",
+    "ar007": "runway sin dato con caja centinela (final del bucle)",
 }
 
 
 def iterations():
     out = []
-    for tag in ["v1", "v2", "v3a", "v3b", *VARIANTS, "v6"]:
+    for tag in ["v1", "v2", "v3a", "v3b", *VARIANTS, "v6", "v7", "ar000", "ar002b", "ar004", "ar006", "ar007"]:
         m = load_metrics(tag)
         if not m:
             continue
