@@ -554,6 +554,11 @@ class ProactiveEngine:
                 val = None if val is None or pd.isna(val) else float(val) + 0.0  # + 0.0: sin −0
                 contrib.append({"feature": feat, "label": SPEC[feat][3], "pillar": SPEC[feat][0], "puntos": round(float(row[c]) - neutro, 2),
                                 "valor": _num(val), "valor_texto": fmt_feature(feat, val)})
+            # reglas de negocio (D15 inactividad, D36 liquidez): contribución aditiva sin neutro, solo si actúan
+            for key, label in (("regla_inactividad", "Regla: sin movimientos"), ("regla_liquidez", "Regla: menos de medio mes de caja no es sano")):
+                c = f"ec_{key}"
+                if c in row and pd.notna(row[c]) and abs(float(row[c])) >= 0.05:
+                    contrib.append({"feature": key, "label": label, "pillar": "regla", "puntos": round(float(row[c]), 2), "valor": None, "valor_texto": "activa"})
             contrib.sort(key=lambda x: -abs(x["puntos"]))
         try:
             exp = explain(scored, self.feats, cid, month=_month(T), scorer=self.scorer)

@@ -132,7 +132,7 @@ Sala de situaciones: las premisas del consejo (fase 2) evaluadas contra el panel
 `.devin/workflows/autoresearch/salida/situaciones.json` (`premisas.py export`). Si el fichero no existe responde **200** con lista vacía y `aviso`.
 ```jsonc
 {
-  "resumen": {"total": 150, "pasan": 98, "fallan": 29, "no_verificables": 23, "centrales": 19, "centrales_fallan": 14},
+  "resumen": {"total": 270, "pasan": 123, "fallan": 54, "no_verificables": 93, "centrales": 54, "centrales_fallan": 19},
   "fuente": ".devin/workflows/autoresearch/salida/situaciones.json",
   "aviso": "string opcional (solo si no hay fichero)",
   "situaciones": [{
@@ -180,11 +180,13 @@ decisión y producto según la política de la fase 1, score del **modelo vigent
     "modo": "facturas" | "bancario",                    // bancario = sin ERP: medianas bancarias en lugar de facturas
     "variante": "completa" | "estricta",
     "caja_inicial": 269235.7, "poliza_disponible": 1.0e6, "gasto_mensual": 956946.2, "umbral_tension": 239236.6, "meses_caja": 1.33,
+    "cobertura_facturas": 0.49 | null,                   // facturas liquidadas 6m / flujos bancarios 6m
+    "fiabilidad": "alta" | "media" | "baja" | "sin facturas" | "sin dato",   // alta = cobertura 0,4-1,0
     "formula": "caja(T+h) = caja(T) + cobros pendientes(T,T+h] − pagos pendientes(T,T+h] − nóminas×h − cuotas×h",
     "lineas": [{"clave": "cobros_pendientes", "signo": 1, "label": "string", "fuente": "de dónde sale el número",
                 "por_mes": [114417.5, 267638.7], "total": 1414754.9, "n": 39 | null}],
     "meses": [{"h": 1, "month": "2026-07", "caja": 252626.5, "liquidez": 1252626.5, "rotura": false, "tension": false}],
-    "rotura_h": null | 2, "tension_h": null | 1, "hueco": 0.0,
+    "rotura_h": null | 2, "tension_h": null | 1, "hueco": 0.0, "hueco_2m": 0.0,   // hueco = lo que falta para no romper/tensionar en el horizonte; hueco_2m, a 2 meses
     "anticipable": {"total": 1414754.9, "por_vencer_h": 1414754.9, "n": 39, "anticipo_estimado": 1131803.9, "n_contrapartes": 8},  // facturas emitidas NO vencidas
     "ap_pendiente": {"total": 423984.9, "n": 96},
     "efectos": {"n_6m": 65, "importe_6m": 4445.7, "share_cobros_6m": 0.0},   // «pagaré/efecto/remesa» en la descripción bancaria
@@ -192,7 +194,8 @@ decisión y producto según la política de la fase 1, score del **modelo vigent
   },
   "panel_T": {"cash_end": 0, "inflow": 0, "outflow": 0, "payroll": 0, "debt_service": 0, "lc_drawn": 0, "lc_limit": 0, "...": 0},
   "senales": {"runway": {"valor": 0.25, "texto": "0,3 meses", "label": "Meses de caja"}, "mc": {"...": 0}},
-  "contribuciones": [{"feature": "lc_util", "label": "string", "pillar": "liquidez", "puntos": 9.9, "valor": 0.0, "valor_texto": "0 %"}],  // explain(): puntos frente al neutro
+  "contribuciones": [{"feature": "lc_util", "label": "string", "pillar": "liquidez", "puntos": 9.9, "valor": 0.0, "valor_texto": "0 %"},  // explain(): puntos frente al neutro
+                     {"feature": "regla_liquidez", "label": "Regla: menos de medio mes de caja no es sano", "pillar": "regla", "puntos": -12.3, "valor": null, "valor_texto": "activa"}],  // reglas D15/D36 solo si actúan
   "explicacion": { /* igual que /api/company.explanation, en T */ },
   "desenlace": {"disponible": true, "rotura_real": false, "tension_real": false,
                 "meses": [{"month": "2026-07", "caja_real": 79219.8, "liquidez_real": 1079219.8, "rotura": false, "tension": false,
@@ -206,14 +209,19 @@ Validación no circular: empresas de un fold de GroupKFold por `group_id`, puntu
 `T` sin ver el futuro y comprobadas en `T+1..T+2`. Sirve `salida/demo/validacion_proactiva.json` (`proactive.py validate`); si no existe, 200 con `aviso`.
 ```jsonc
 {
-  "fold": 0, "n_splits": 5, "h": 2, "n_empresas": 250, "n_grupos": 50, "n_empresa_mes": 3500,
-  "metricas": {"rotura_2m": {"n": 0, "tasa_base": 0.05, "precision": 0.6, "recall": 0.4, "npv": 0.97, "tp": 0, "fp": 0, "fn": 0, "tn": 0},
-               "tension_2m": {}, "necesita_deuda_vs_rotura_o_tension": {}, "rotura_2m_variante_estricta": {}, "baseline_mc<0.5_vs_rotura": {}},
-  "por_modo": {"facturas": {"rotura_2m": {}, "tension_2m": {}}, "bancario": {}},
+  "fold": 0, "n_splits": 5, "h": 2, "n_empresas": 236, "n_grupos": 46, "n_empresa_mes": 3190,
+  "lectura": "string: cómo leer las métricas",
+  // cada métrica: {"n", "positivos_pred", "positivos_real", "tasa_base", "precision", "recall", "npv", "lift", "tp", "fp", "fn", "tn"}
+  "metricas": {"tension_2m_sanas_hoy": {"n": 1833, "tasa_base": 0.0895, "precision": 0.2968, "recall": 0.2805, "npv": 0.9297, "lift": 3.32, "tp": 46, "fp": 109, "fn": 118, "tn": 1560},
+               "tension_2m_todas": {}, "necesita_deuda_2m_vs_tension": {}, "rotura_2m_sanas_hoy": {}, "rotura_2m_todas": {},
+               "variante_completa_tension_2m_sanas_hoy": {}, "baseline_mc<0.5_tension_2m_todas": {}, "baseline_mc<0.5_tension_2m_sanas_hoy": {}},
+  "por_modo": {"facturas": {"tension_2m_sanas_hoy": {}, "tension_2m_todas": {}}, "bancario": {}},
+  "por_fiabilidad": {"alta": {}, "media": {}, "baja": {}, "sin facturas": {}},   // tension_2m_sanas_hoy por fiabilidad de la proyección
+  "error_caja_h_eur_estricta": {"mediana_abs": 0, "p75_abs": 0, "mediana": 0, "mediana_abs_en_meses_de_gasto": 0},
   "error_caja_h_eur_completa": {"mediana_abs": 0, "p75_abs": 0, "mediana": 0, "mediana_abs_en_meses_de_gasto": 0},
-  "casos": [{"tipo": "acierto" | "control_sano" | "falsa_alarma" | "no_detectada", "company_id": "COMP_0001", "month": "2026-01",
-             "modo": "facturas", "accion": "watch", "producto": "factoring", "mc_T": 0.4, "hueco": 12000.0, "score_oof": 41.2,
-             "pred_rotura": true, "real_rotura": true, "real_tension": true}],
+  "casos": [{"tipo": "acierto" | "control_sano" | "falsa_alarma" | "no_detectada", "company_id": "COMP_0001", "group_id": "GROUP_0001", "month": "2026-01",
+             "modo": "facturas", "fiabilidad": "alta", "accion": "watch", "producto": "factoring", "mc_T": 0.4, "hueco": 12000.0, "score_oof": 41.2,
+             "pred_tension": true, "pred_rotura": false, "real_rotura": false, "real_tension": true}],
   "empresas_held_out": ["COMP_0001"]
 }
 ```
