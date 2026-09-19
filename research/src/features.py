@@ -37,6 +37,7 @@ def add_features(p: pl.DataFrame) -> pl.DataFrame:
     EPSC = pl.col("eps")
     # base de gasto robusta: la mayor entre la media reciente y la anual -> encogerse no infla la liquidez (D09)
     burn = pl.max_horizontal(pl.col("out3") / 3, pl.col("out12") / 12) + EPSC
+    pay6 = pl.col("payroll").rolling_mean(6, min_samples=3).over(**KEY)
     f = p.with_columns(
         # Liquidez
         runway=pl.col("cash_end").sign() * (pl.col("cash_end").abs() / burn + 1).log(),
@@ -44,9 +45,10 @@ def add_features(p: pl.DataFrame) -> pl.DataFrame:
         # Rentabilidad (ventanas largas: menos reversión a la media, D08)
         net_margin_6m=(pl.col("in6") - pl.col("out6")) / (pl.col("in6") + pl.col("out6") + EPSC),
         growth_vs_12m=pl.when(pl.col("month_idx") >= 2).then(_safe_log_ratio(pl.col("in3") / 3, pl.col("in12") / 12, EPSC)),
-        # Solvencia: cero = "no aplica" en nóminas (D10); en deuda y reembolsos cero es bueno (two-part en el scorer)
+        # Solvencia: en deuda y reembolsos cero es bueno (two-part en el scorer). La nómina puntúa por su regularidad,
+        # no por su peso: nóminas/entradas dependía del tamaño (rho −0,46) y su signo contradecía a los eventos (D26)
         debt_burden=pl.col("debt3") / (pl.col("in3") + EPSC),
-        payroll_burden=pl.when(pl.col("pay3") > 0).then(pl.col("pay3") / (pl.col("in3") + EPSC)),
+        pay6=pay6,
         # Disciplina (ERP)
         ap_late_share=pl.col("late_share_ap"), ar_late_share=pl.col("late_share_ar"),
         ap_overdue_ratio=pl.col("overdue_ap") / (pl.col("out3") / 3 + EPSC),
@@ -67,17 +69,20 @@ def add_features(p: pl.DataFrame) -> pl.DataFrame:
         dormant=(pl.col("months_since_last_tx") > 0).cast(pl.Float64),
     )
     # volatilidad a la baja: semidesviación de los meses con flujo neto negativo / gasto mensual (D25)
-    f = f.with_columns(neg2=pl.min_horizontal(pl.col("net"), pl.lit(0.0)) ** 2)
+    f = f.with_columns(neg2=pl.min_horizontal(pl.col("net"), pl.lit(0.0)) ** 2,
+                       payneg2=pl.min_horizontal(pl.col("payroll") - pl.col("pay6"), pl.lit(0.0)) ** 2)
     f = f.with_columns(
         net_vol_6m=(pl.col("neg2").rolling_mean(6, min_samples=3).over(**KEY).sqrt()
                     / (pl.max_horizontal(pl.col("out3") / 3, pl.col("out12") / 12) + pl.col("eps"))),
+        # nóminas que faltan o bajan frente a su media 6m (semidesviación a la baja / media); la subida (contratar) no penaliza
+        payroll_cv=pl.when(pl.col("pay6") > 0).then(pl.col("payneg2").rolling_mean(6, min_samples=3).over(**KEY).sqrt() / pl.col("pay6")),
     )
     # 0/0 (empresa sin flujos) = sin dato, no NaN numérico
     return f.with_columns([pl.col(c).fill_nan(None) for c in SCORE_FEATURES + CONTEXT_FEATURES
                            if c in f.columns and f.schema[c] in (pl.Float64, pl.Float32)])
 
 
-SCORE_FEATURES = ["runway", "lc_util", "net_margin_6m", "growth_vs_12m", "debt_burden", "payroll_burden",
+SCORE_FEATURES = ["runway", "lc_util", "net_margin_6m", "growth_vs_12m", "debt_burden", "payroll_cv",
                   "ap_late_share", "ar_late_share", "ap_overdue_ratio", "ar_overdue_90_ratio", "refund_rate",
                   "activity_trend", "transfer_dep", "hhi_ar_6m", "net_vol_6m", "cust_trend", "lost_share"]
 CONTEXT_FEATURES = ["log_scale", "fx_share", "uncat_share", "activity_log", "month_idx", "dormant", "months_since_last_tx"]
