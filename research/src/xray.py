@@ -25,7 +25,7 @@ from mlforecast.lag_transforms import RollingMean, RollingStd, ExpandingMean, Ex
 SPEC = {
     "runway": ("liquidez", +1, False, "Meses de caja", "log(1+caja/gasto mensual), con signo; gasto = máx(media 3m, media 12m)"),
     "lc_util": ("liquidez", -1, True, "Uso de líneas de crédito", "Dispuesto / límite de las pólizas de crédito"),
-    "growth_vs_12m": ("rentabilidad", +1, False, "Tendencia de cobros", "log(entradas medias 3m / entradas medias 12m)"),
+    "oper_growth_12m": ("rentabilidad", +1, False, "Tendencia de cobros", "log(cobros operativos medios 3m / cobros operativos medios 12m), en euros"),
     "debt_burden": ("solvencia", -1, True, "Carga de deuda", "Cuotas + intereses / entradas (3m)"),
     "payroll_cv": ("solvencia", -1, False, "Regularidad de nóminas", "Semidesviación a la baja de las nóminas / media (6m): nóminas que faltan o bajan; sin nóminas = no aplica"),
     "ap_late_share": ("disciplina", -1, True, "Pagos tardíos a proveedores", "% facturas recibidas vencidas >15 días sin pagar o pagadas tarde (3m)"),
@@ -42,7 +42,7 @@ SPEC = {
     "oper_persistence_6m": ("estabilidad", +1, False, "Persistencia de cobros", "Meses de los últimos 6 con cobros operativos ≥ 50 % de su mediana anual"),
 }
 PILLARS = ["liquidez", "rentabilidad", "solvencia", "disciplina", "estabilidad"]
-PRIOR_W = {"runway": 3, "lc_util": 1, "growth_vs_12m": 1.5, "debt_burden": 1, "payroll_cv": 0.5,
+PRIOR_W = {"runway": 3, "lc_util": 1, "oper_growth_12m": 1.5, "debt_burden": 1, "payroll_cv": 0.5,
            "ap_late_share": 1.5, "ar_late_share": 1, "ap_overdue_ratio": 1, "ar_overdue_90_ratio": 0.5, "refund_rate": 0.5,
            "activity_trend": 1.5, "transfer_dep": 0.5, "hhi_ar_6m": 0.5, "net_vol_6m": 0.5, "cust_trend": 1.0, "lost_share": 1.0, "oper_persistence_6m": 1.0}
 CONTEXT = ["log_scale", "fx_share", "activity_log"]
@@ -291,7 +291,7 @@ def fmt_feature(f: str, v) -> str:
         return f"{es(m, 1)} meses" if abs(m) < 100 else ">100 meses"
     if f in PCT:
         return f"{es(100 * v, 0)} %"
-    if f in ("growth_vs_12m", "activity_trend", "cust_trend"):
+    if f in ("growth_vs_12m", "oper_growth_12m", "activity_trend", "cust_trend"):
         return f"{es(100 * (np.exp(v) - 1), 0, True)} %"
     if f == "net_margin_6m":
         return f"{es(100 * v, 0, True)} %"
