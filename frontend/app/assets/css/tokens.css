@@ -128,3 +128,44 @@
 
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
+
+/* Paleta de los mocks Centinela (Colchón Dinámico, Divisa Inteligente, X-Ray
+ * Score). Va acotada a `.centinela` en lugar de a `:root` por dos razones: el
+ * diseño es claro de origen y no tiene variante oscura, y `--text` ya existe
+ * arriba con otro valor por tema. Redefinirlo en `:root` rompería el resto de
+ * la app. */
+.centinela {
+  --bg: #f3f4f8;
+  --card: #ffffff;
+  --border: #e4e6f0;
+
+  --text: #12142b;
+  --text-2: #565a7a;
+  --text-3: #9298b5;
+
+  --accent: #3b5bff;
+  --navy-1: #171b4c;
+  --navy-2: #0b0e2a;
+
+  --ok: #1fa971;
+  --ok-bg: #e9f7f0;
+  --ok-border: #bfe3c8;
+
+  --warn: #c08a1e;
+  --warn-bg: #fff7e5;
+  --warn-border: #f1e4c0;
+
+  --bad: #e14c43;
+  --bad-bg: #fde9e7;
+  --bad-border: #f5b8b4;
+
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 12px;
+
+  color: var(--text);
+  font-family: var(--font-body);
+}
