@@ -2,9 +2,9 @@
 
 ## Planteamiento (skill data-science, paso 1)
 
-- **Objetivo de negocio**: que Embat (y sus socios financieros) sepa cada mes qué empresas están sanas, cuáles mejoran, cuáles se tuercen, si es un bache o una caída, por qué, y con cuánta antelación. Marco: [`../context/scoring.md`](../context/scoring.md) — la caja que se evapora en poco tiempo tiene que pesar más que un DSO/DPO que se mueve un poco; el output no puede ser solo el número; la métrica cambia con la oferta y con quien la mira; el valor frente a bancos es el dato de tesorería que ellos no tienen.
+- **Objetivo de negocio**: que Embat priorice cada mes qué CFO necesita atención, explique qué cambió y proponga la siguiente acción antes de que el deterioro o la oportunidad sean evidentes. Marco: [`../context/scoring.md`](../context/scoring.md) y [`../context/auditoria_comercial.md`](../context/auditoria_comercial.md). El banco o bróker puede ejecutar una acción, pero Embat es el comprador y el CFO el usuario.
 - **Tarea de ML**: no hay etiquetas, así que el problema se divide en dos piezas:
-  1. **Nivel**: `HealthScorer`, un score de 0 a 100 interpretable y aditivo. Sus pesos se calibran contra eventos futuros observables (apagado, tensión de caja, declive y crecimiento), que funcionan como ancla externa.
+  1. **Nivel**: `HealthScorer`, un score de 0 a 100 interpretable y aditivo. Sus pesos v7 se calibran contra eventos futuros observables de tensión de liquidez, incumplimiento, caída estructural de cobros y expansión. Son proxies, no etiquetas de quiebra; apagado ya no calibra.
   2. **Trayectoria**: `TrajectoryForecaster`, que prevé el score publicado a 1-3 meses con cuantiles q10/q50/q90.
 - **Restricciones**: explicación exacta (el score es la suma de contribuciones), generalización a 60-80 empresas nunca vistas y robustez OOD (escala, moneda, historia corta, sin ERP).
 
@@ -20,7 +20,7 @@ Umbral de "movimiento real": **15 puntos** en la escala publicada, coherente con
 | `prec_top5_down/up` | Precisión en el 5 % de series con mayor caída o subida prevista | Dónde actuar |
 | `mae_h{1,2,3}` frente a `mae_ar1_h*` y `mae_naive_ewma_h1` | Error de la trayectoria frente al AR(1) agrupado (regresión a la media) y frente al arrastre mecánico del EWMA | Trayectoria, no foto |
 | `coverage80_h*`, `width80_h*`, `pinball_h3` | Calibración de los intervalos cuantílicos | Confianza |
-| `auc_level_vs_{adverse,churn,cash_stress,decline,positive}_6m` | Validez externa del nivel frente a eventos a 6 meses | Quién está sano |
+| `auc_level_vs_{tension,incumplimiento,caida,expansion}_6m` | Discriminación del nivel frente a los eventos proxy v2 a 6 meses | Quién está sano |
 | `p_sigue_sano_3m` | Persistencia de la banda sana | Quién está sano |
 
 ## Bloque "si llega a tiempo" (`anticipation.py`, origen móvil mensual out-of-fold)

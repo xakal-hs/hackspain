@@ -49,7 +49,7 @@ DEPOSIT_BPS = 0.01
 FX_BPS = 0.0015
 MODULE_EUR_MONTH = 350
 N_COMPANIES = 1286
-N_EMBAT_CLIENTS = 400
+N_REFERENCE_CLIENTS = 400
 
 CLAIMED = {
     "flow_annual_m": 275_160.0,
@@ -720,8 +720,8 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
     central = next(r for r in corr_rev if r["name"] == "central")
     low = next(r for r in corr_rev if r["name"] == "conservador")
     high = next(r for r in corr_rev if r["name"] == "agresivo")
-    embat400 = revenue_rows(d["excess_m"], d["fx_eur_annual_m"], N_EMBAT_CLIENTS)
-    central400 = next(r for r in embat400 if r["name"] == "central")
+    reference400 = revenue_rows(d["excess_m"], d["fx_eur_annual_m"], N_REFERENCE_CLIENTS)
+    central400 = next(r for r in reference400 if r["name"] == "central")
 
     compare_rows = [
         [
@@ -1058,8 +1058,8 @@ def build_html(d: dict, charts: dict[str, str]) -> str:
           <p>Central corregido: <b>{meur(central['total'], 2)}/año</b> ({money(1e6 * central['total'] / N_COMPANIES)} por empresa). El módulo aporta {meur(central['module'], 2)}, el excedente {meur(central['deposit'], 2)}, la divisa {meur(central['fx'], 2)}.</p>
         </div>
         <div class="panel narrative">
-          <h3>Sobre 400 clientes de Embat</h3>
-          <p>El brief argumentaba que el 76 % del ingreso iba con el flujo, no con las cabezas. Con bases limpias el módulo pesa más, así que recortar a 400 clientes duele: central ≈ <b>{meur(central400['total'], 2)}</b>. Sigue siendo expansión sobre instalada, no captación.</p>
+          <h3>Escenario ilustrativo de 400 clientes</h3>
+          <p>No representa la cartera actual de Embat ni se usa como previsión. Sirve solo para mostrar sensibilidad al número de empresas: con bases limpias el módulo pesa más y el escenario central baja a <b>{meur(central400['total'], 2)}</b>.</p>
         </div>
       </div>
       <div class="callout"><b>El cliente sigue ganando.</b> Una empresa con el excedente mediano corregido ({money(d['excess_median'])}) coloca al 2–3 % y paga 100 pb. Neto +1.200 a +2.400 €/año sobre ~{money(d['excess_median'] * DEPOSIT_BPS)} de margen. La objeción de precio no aparece. Lo que desaparece es vender 2.378 M€ de notional que no están.</div>
@@ -1100,7 +1100,7 @@ def main() -> None:
         f"({OUTPUT.stat().st_size / 1_000_000:.1f} MB) · "
         f"excedente {data['excess_m']:.1f} M€ · "
         f"divisa anual {data['fx_eur_annual_m']:.1f} M€ · "
-        f"central {next(r['total'] for r in revenue_rows(data['excess_m'], data['fx_eur_annual_m'], N_COMPANIES)):.2f} M€"
+        f"central {next(r['total'] for r in revenue_rows(data['excess_m'], data['fx_eur_annual_m'], N_COMPANIES) if r['name'] == 'central'):.2f} M€"
     )
 
 

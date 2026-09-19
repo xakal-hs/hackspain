@@ -1179,10 +1179,10 @@
   {
    "id": "D27",
    "category": "producto",
-   "title": "Producto y comprador: monitor y simulador para Embat y sus socios financieros",
+   "title": "Producto y comprador: capa de decisión de Embat para el CFO",
    "question": "¿Quién paga y por qué?",
-   "decision": "Comprador: Embat. Integra X-Ray en su plataforma como (1) un monitor de alertas proactivas sobre sus clientes y (2) un simulador de escenarios para tesorería. Con el score y la confianza puede derivar operaciones a financiadores (circulante, factoring o pólizas) con un riesgo medido, y cobrar por origen o por suscripción.",
-   "why": "Embat ya tiene los datos y la relación con la pyme. El score la convierte en un canal de crédito con información que el banco no tiene: caja diaria, disciplina de facturas y anticipación de 1 a 3 meses.",
+   "decision": "Comprador e integrador: Embat. Usuario: CFO o equipo de tesorería. X-Ray ordena la cartera, explica qué cambió y propone la siguiente acción con un colchón dinámico. Banco, bróker o BaaS quedan como ejecutores opcionales cuando la recomendación requiere capital o licencia.",
+   "why": "Embat ya ofrece previsión, alertas, riesgo y pagos. La aportación incremental de X-Ray es comparabilidad, explicación aditiva y priorización transversal: convertir el rastro que Embat ya tiene en una cola de decisiones, no duplicar el forecast.",
    "status": "a confirmar con la organización",
    "chart": null,
    "alternatives": "",
