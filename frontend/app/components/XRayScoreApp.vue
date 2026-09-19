@@ -16,11 +16,11 @@ const selectedState = ref('mal')
 const states = ref({
   bien: {
     color: 'var(--ok)', chip: 'BIEN', dotColor: 'var(--ok)', tag: 'Mejora sostenida',
-    bannerBg: 'var(--ok-bg)', bannerBorder: 'var(--ok-border)', iconBg: '#D0EFDD', icon: '↑',
+    bannerBg: 'var(--ok-bg)', bannerBorder: 'var(--ok-border)', iconBg: 'var(--ok-chip)', icon: '↑',
     headline: 'Tu score subió 20 puntos en 4 meses',
     subhead: 'La mejora es sostenible: viene de mejor gestión de cobro con facturación estable. Hay una ventana para pedir mejores condiciones.',
     ctaLabel: 'Ver 3 oportunidades',
-    ctaBg: 'var(--ok)', ctaText: 'var(--card)', ctaBorder: 'var(--ok)',
+    ctaBg: 'var(--ok)', ctaText: 'var(--on-status)', ctaBorder: 'var(--ok)',
     score: '65', bandText: 'Banda: SANO', bandTitle: 'Trayectoria ascendente confirmada',
     bandDesc: 'Salta al tramo preferente del marketplace. Score consolidado por 3 meses seguidos.',
     heroBg: 'var(--ok-bg)',
@@ -45,7 +45,7 @@ const states = ref({
   },
   normal: {
     color: 'var(--warn)', chip: 'NORMAL', dotColor: 'var(--warn)', tag: 'Score estable',
-    bannerBg: 'var(--warn-bg)', bannerBorder: 'var(--warn-border)', iconBg: '#F5E4B8', icon: '→',
+    bannerBg: 'var(--warn-bg)', bannerBorder: 'var(--warn-border)', iconBg: 'var(--warn-chip)', icon: '→',
     headline: 'Sin novedades desde tu última revisión',
     subhead: 'El score se mantiene en su banda. Sin cambios significativos en las señales que lo componen. No pasa nada, y eso también es una señal.',
     ctaLabel: 'Explorar detalle',
@@ -72,17 +72,17 @@ const states = ref({
   },
   mal: {
     color: 'var(--bad)', chip: 'MAL', dotColor: 'var(--bad)', tag: 'Deterioro sostenido',
-    bannerBg: 'var(--bad-bg)', bannerBorder: 'var(--bad-border)', iconBg: '#F7CFCC', icon: '↓',
+    bannerBg: 'var(--bad-bg)', bannerBorder: 'var(--bad-border)', iconBg: 'var(--bad-chip)', icon: '↓',
     headline: 'Vuestro score bajó 14 puntos en 3 meses',
     subhead: 'Detectado 3 meses antes de que se note en caja. Coste de circulante +15 % y 3 proveedores concentran el 60 % del retraso en los pagos.',
     ctaLabel: 'Abrir chat del agente',
-    ctaBg: 'var(--bad)', ctaText: 'var(--card)', ctaBorder: 'var(--bad)',
+    ctaBg: 'var(--bad)', ctaText: 'var(--on-status)', ctaBorder: 'var(--bad)',
     score: '68', bandText: 'Banda: VIGILANCIA', bandTitle: 'Trayectoria descendente detectada',
     bandDesc: 'Bajaste desde banda SANA (≥ 65) en 3 meses. El forecaster h3 predice más caída si no actúas.',
     heroBg: 'var(--bad-bg)',
     delta3: '−14 pts', deltaHint: 'Caída sostenida, no un mes suelto.',
     forecast: '64 · −4', forecastHint: 'sigue bajando en h3',
-    chartTag: 'Detectado 3 meses antes', chartTagBg: '#EEF0F7',
+    chartTag: 'Detectado 3 meses antes', chartTagBg: 'var(--wash)',
     chartHistory: '20,60 60,62 100,58 140,65 180,68 220,72 260,80 300,88 340,95 380,105 420,112 460,120',
     chartForecast: '460,120 490,132 520,142 550,150',
     chartLastX: '460', chartLastY: '120', chartMarkerX: '260', chartMarkerY: '80',
@@ -133,15 +133,15 @@ const stateOptions = computed(() =>
         <div style="width: 30px; height: 30px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center;" :style="{ background: accent }">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 6V12C4 17 7.5 20.5 12 22C16.5 20.5 20 17 20 12V6L12 2Z" stroke="var(--card)" stroke-width="1.8" stroke-linejoin="round"></path></svg>
         </div>
-        <span style="font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--card);">Centinela</span>
+        <span style="font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--on-navy);">Centinela</span>
       </div>
 
       <a href="WebAppScore.dc.html" class="nav-link"><span style="width: 16px;">◈</span> Inicio</a>
 
       <!-- Active -->
-      <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-sm); background: rgba(255,255,255,0.12); color: var(--card); font-size: 13.5px; font-weight: 600;" :style="{ borderLeft: `3px solid ${accent}` }">
+      <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-sm); background: rgba(255,255,255,0.12); color: var(--on-navy); font-size: 13.5px; font-weight: 600;" :style="{ borderLeft: `3px solid ${accent}` }">
         <span style="width: 16px;">☰</span> X-Ray Score
-        <span style="margin-left: auto; padding: 2px 7px; color: var(--card); border-radius: 999px; font-size: 10px; font-weight: 700;" :style="{ background: state.dotColor }">{{ state.chip }}</span>
+        <span style="margin-left: auto; padding: 2px 7px; color: var(--on-status); border-radius: 999px; font-size: 10px; font-weight: 700;" :style="{ background: state.dotColor }">{{ state.chip }}</span>
       </div>
 
       <a href="WebApp.dc.html" class="nav-link"><span style="width: 16px;">◇</span> Colchón Dinámico</a>
@@ -150,16 +150,16 @@ const stateOptions = computed(() =>
       <a href="Marketplace.dc.html" class="nav-link"><span style="width: 16px;">◉</span> Marketplace</a>
 
       <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 10px 8px;"></div>
-      <span style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6970A6; padding: 0 12px 4px;">Embat</span>
+      <span style="font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--on-navy-4); padding: 0 12px 4px;">Embat</span>
       <div class="nav-sub"><span style="width: 16px;">⇄</span> Conectividad</div>
       <div class="nav-sub"><span style="width: 16px;">▤</span> Pagos</div>
       <div class="nav-sub"><span style="width: 16px;">⧉</span> Conciliación</div>
 
       <div style="margin-top: auto; padding: 12px; background: rgba(255,255,255,0.06); border-radius: var(--r-lg); display: flex; align-items: center; gap: 10px;">
-        <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--card); font-size: 12px; font-weight: 700; font-family: var(--font-display);" :style="{ background: accent }">CA</div>
+        <div style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--on-navy); font-size: 12px; font-weight: 700; font-family: var(--font-display);" :style="{ background: accent }">CA</div>
         <div style="flex-grow: 1; min-width: 0;">
-          <div style="font-size: 12.5px; font-weight: 600; color: var(--card);">César Álvarez</div>
-          <div style="font-size: 11px; color: #8990C4;">Distribuciones Ibérica</div>
+          <div style="font-size: 12.5px; font-weight: 600; color: var(--on-navy);">César Álvarez</div>
+          <div style="font-size: 11px; color: var(--on-navy-3);">Distribuciones Ibérica</div>
         </div>
       </div>
     </div>
@@ -174,7 +174,7 @@ const stateOptions = computed(() =>
           ? { padding: '16px 32px', background: 'var(--card)', borderBottom: '1px solid var(--border)', justifyContent: 'space-between' }
           : { padding: '22px 24px 0', justifyContent: 'flex-end' }"
       >
-        <div v-if="chrome" style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #6B7089;">
+        <div v-if="chrome" style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--meta);">
           <span>Análisis</span><span>›</span>
           <span style="color: var(--text); font-weight: 600;">X-Ray Score</span>
         </div>
@@ -199,7 +199,7 @@ const stateOptions = computed(() =>
         <div style="display: flex; justify-content: space-between; align-items: flex-end;">
           <div>
             <h1 style="margin: 0 0 6px; font-family: var(--font-display); font-size: 26px; font-weight: 600;">X-Ray Score · Distribuciones Ibérica</h1>
-            <p style="margin: 0; font-size: 13.5px; color: #6B7089;">Tu salud financiera explicada · basado en 24 meses de rastro financiero.</p>
+            <p style="margin: 0; font-size: 13.5px; color: var(--meta);">Tu salud financiera explicada · basado en 24 meses de rastro financiero.</p>
           </div>
           <div style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; font-size: 12.5px; color: var(--text-2);">
             <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--ok);"></span>
@@ -216,7 +216,7 @@ const stateOptions = computed(() =>
           <div style="flex-grow: 1;">
             <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2px;" :style="{ color: state.color }">{{ state.tag }}</div>
             <div style="font-family: var(--font-display); font-size: 16.5px; font-weight: 600; margin-bottom: 3px;">{{ state.headline }}</div>
-            <div style="font-size: 13px; color: #23253F; line-height: 1.5;">{{ state.subhead }}</div>
+            <div style="font-size: 13px; color: var(--body); line-height: 1.5;">{{ state.subhead }}</div>
           </div>
           <button
             type="button"
@@ -245,13 +245,13 @@ const stateOptions = computed(() =>
           </div>
 
           <div class="card" style="padding: 20px 22px;">
-            <div style="font-size: 12.5px; color: #6B7089;">Cambio 3 meses</div>
+            <div style="font-size: 12.5px; color: var(--meta);">Cambio 3 meses</div>
             <div style="font-family: var(--font-display); font-size: 30px; font-weight: 700; margin-top: 8px;" :style="{ color: state.color }">{{ state.delta3 }}</div>
             <div style="font-size: 12px; color: var(--text-2); margin-top: 6px; line-height: 1.4;">{{ state.deltaHint }}</div>
           </div>
 
           <div class="card" style="padding: 20px 22px;">
-            <div style="font-size: 12.5px; color: #6B7089;">Predicción h3</div>
+            <div style="font-size: 12.5px; color: var(--meta);">Predicción h3</div>
             <div style="font-family: var(--font-display); font-size: 30px; font-weight: 700; margin-top: 8px;" :style="{ color: state.color }">{{ state.forecast }}</div>
             <div style="font-size: 12px; color: var(--text-2); margin-top: 6px; line-height: 1.4;">Banda 80 % · {{ state.forecastHint }}</div>
           </div>
@@ -275,9 +275,9 @@ const stateOptions = computed(() =>
               <rect x="10" y="90" width="680" height="60" fill="var(--warn-bg)" opacity="0.4"></rect>
               <rect x="10" y="150" width="680" height="40" fill="var(--bad-bg)" opacity="0.4"></rect>
 
-              <text x="14" y="46" font-size="10" fill="#17805A" style="font-family: var(--font-display);" font-weight="600">SANO ≥ 65</text>
-              <text x="14" y="106" font-size="10" fill="#8A6410" style="font-family: var(--font-display);" font-weight="600">VIGILANCIA</text>
-              <text x="14" y="166" font-size="10" fill="#B0322A" style="font-family: var(--font-display);" font-weight="600">RIESGO ≤ 35</text>
+              <text x="14" y="46" font-size="10" fill="var(--ok-strong)" style="font-family: var(--font-display);" font-weight="600">SANO ≥ 65</text>
+              <text x="14" y="106" font-size="10" fill="var(--warn-strong)" style="font-family: var(--font-display);" font-weight="600">VIGILANCIA</text>
+              <text x="14" y="166" font-size="10" fill="var(--bad-strong)" style="font-family: var(--font-display);" font-weight="600">RIESGO ≤ 35</text>
 
               <polyline :points="state.chartHistory" fill="none" :stroke="state.color" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></polyline>
               <polyline :points="state.chartForecast" fill="none" :stroke="state.color" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6,6" opacity="0.6"></polyline>
@@ -290,21 +290,21 @@ const stateOptions = computed(() =>
           </div>
 
           <!-- Agent panel -->
-          <div style="background: linear-gradient(160deg, var(--navy-1) 0%, var(--navy-2) 100%); border-radius: var(--r-lg); padding: 20px 22px; color: var(--card); display: flex; flex-direction: column; gap: 12px;">
+          <div style="background: linear-gradient(160deg, var(--navy-1) 0%, var(--navy-2) 100%); border-radius: var(--r-lg); padding: 20px 22px; color: var(--on-navy); display: flex; flex-direction: column; gap: 12px;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <div style="width: 32px; height: 32px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 13px; font-weight: 700;" :style="{ background: accent }">A</div>
               <div style="flex-grow: 1;">
                 <div style="font-family: var(--font-display); font-size: 14px; font-weight: 600;">Agente Centinela</div>
-                <div style="font-size: 11.5px; color: #8990C4;">{{ state.agentStatus }}</div>
+                <div style="font-size: 11.5px; color: var(--on-navy-3);">{{ state.agentStatus }}</div>
               </div>
               <span style="width: 8px; height: 8px; border-radius: 50%;" :style="{ background: state.dotColor }"></span>
             </div>
 
-            <div style="background: rgba(255,255,255,0.06); border-radius: var(--r-lg); padding: 14px; font-size: 13px; line-height: 1.5; color: var(--card);">
+            <div style="background: rgba(255,255,255,0.06); border-radius: var(--r-lg); padding: 14px; font-size: 13px; line-height: 1.5; color: var(--on-navy);">
               "{{ state.agentMessage }}"
             </div>
 
-            <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #8990C4; margin-top: 4px;">Recomendaciones esta semana</div>
+            <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--on-navy-3); margin-top: 4px;">Recomendaciones esta semana</div>
 
             <div style="display: flex; flex-direction: column; gap: 8px;">
               <div
@@ -312,10 +312,10 @@ const stateOptions = computed(() =>
                 :key="r.n"
                 style="background: rgba(255,255,255,0.06); border-radius: var(--r-md); padding: 10px 12px; display: flex; align-items: center; gap: 10px;"
               >
-                <span style="width: 24px; height: 24px; border-radius: 6px; color: var(--card); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; font-family: var(--font-display);" :style="{ background: accent }">{{ r.n }}</span>
+                <span style="width: 24px; height: 24px; border-radius: 6px; color: var(--on-navy); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; font-family: var(--font-display);" :style="{ background: accent }">{{ r.n }}</span>
                 <div style="flex-grow: 1; min-width: 0;">
                   <div style="font-size: 12.5px; font-weight: 600;">{{ r.title }}</div>
-                  <div style="font-size: 11px; color: #B7BEE8; margin-top: 1px;">{{ r.impact }}</div>
+                  <div style="font-size: 11px; color: var(--on-navy-2); margin-top: 1px;">{{ r.impact }}</div>
                 </div>
               </div>
             </div>
@@ -339,7 +339,7 @@ const stateOptions = computed(() =>
               style="border-radius: var(--r-md); padding: 12px 14px;"
               :style="{ background: d.bg, border: `1px solid ${d.border}` }"
             >
-              <div style="font-size: 11.5px; color: #6B7089; margin-bottom: 4px;">{{ d.label }}</div>
+              <div style="font-size: 11.5px; color: var(--meta); margin-bottom: 4px;">{{ d.label }}</div>
               <div style="display: flex; justify-content: space-between; align-items: baseline;">
                 <span style="font-family: var(--font-display); font-size: 18px; font-weight: 700;" :style="{ color: d.color }">{{ d.contribution }}</span>
                 <span style="font-size: 11px; color: var(--text-2); font-weight: 600;">{{ d.value }}</span>
@@ -362,7 +362,7 @@ const stateOptions = computed(() =>
   gap: 10px;
   padding: 10px 12px;
   border-radius: var(--r-sm);
-  color: #8990C4;
+  color: var(--on-navy-3);
   font-size: 13.5px;
   text-decoration: none;
 }
@@ -373,7 +373,7 @@ const stateOptions = computed(() =>
   gap: 10px;
   padding: 8px 12px;
   border-radius: var(--r-sm);
-  color: #8990C4;
+  color: var(--on-navy-3);
   font-size: 13px;
 }
 

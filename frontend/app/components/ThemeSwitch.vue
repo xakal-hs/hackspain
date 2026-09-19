@@ -1,26 +1,31 @@
 <script setup lang="ts">
-const { theme, setTheme } = useTheme()
+import { Moon, Sun } from '@lucide/vue'
+
+const { theme, toggle } = useTheme()
+
+const nextLabel = computed(() =>
+  theme.value === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro',
+)
 </script>
 
 <template>
-  <div class="theme-switch" role="group" aria-label="Tema de la interfaz">
-    <button
-      type="button"
-      class="theme-switch__opt"
-      data-value="light"
-      :aria-pressed="theme === 'light'"
-      @click="setTheme('light')"
-    >
-      Claro
-    </button>
-    <button
-      type="button"
-      class="theme-switch__opt"
-      data-value="dark"
-      :aria-pressed="theme === 'dark'"
-      @click="setTheme('dark')"
-    >
-      Oscuro
-    </button>
-  </div>
+  <!-- Un solo botón: cualquier punto de la pastilla alterna. Los glifos no son
+       destinos, solo marcan de qué lado está el pulgar. -->
+  <button
+    type="button"
+    class="theme-switch"
+    role="switch"
+    :aria-checked="theme === 'dark'"
+    :aria-label="nextLabel"
+    :title="nextLabel"
+    @click="toggle"
+  >
+    <span class="theme-switch__thumb" aria-hidden="true"></span>
+    <span class="theme-switch__opt" data-value="light">
+      <Sun :size="15" />
+    </span>
+    <span class="theme-switch__opt" data-value="dark">
+      <Moon :size="15" />
+    </span>
+  </button>
 </template>

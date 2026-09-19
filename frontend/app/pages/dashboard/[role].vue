@@ -62,6 +62,12 @@ const sectionLabel = computed(
 
 useHead(() => ({ title: `${sectionLabel.value} · ${profile.value.name} · X-Ray` }))
 
+/* The pane only settles after a tab change, never on the first paint. */
+const paneLive = ref(false)
+watch(section, () => {
+  paneLive.value = true
+})
+
 /* A company view always has a subject. For the company perspective it is fixed;
  * a lender picks it from the portfolio. */
 const pickedId = useState('wk-picked', () => 'iberica')
@@ -174,6 +180,7 @@ const headline = computed(() =>
       </header>
 
       <main id="main-content" class="wk__main" tabindex="-1">
+        <div :key="section" class="wk__pane" :class="{ 'is-live': paneLive }">
         <div v-if="!isTreasury" class="wk__head">
           <h1>{{ headline }}</h1>
           <p v-if="role === 'empresa'">
@@ -577,6 +584,8 @@ const headline = computed(() =>
               </button>
             </article>
           </section>
+        </div>
+
         </div>
 
         <footer class="wk__foot">

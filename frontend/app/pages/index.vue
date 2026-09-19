@@ -74,10 +74,13 @@ const readings = computed(() => {
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
 
     <aside class="lp__rail">
-      <NuxtLink to="/" class="lp__brand">
-        <BrandMark />
-        <span>X-Ray<small>de Embat</small></span>
-      </NuxtLink>
+      <div class="lp__rail-head">
+        <NuxtLink to="/" class="lp__brand">
+          <BrandMark />
+          <span>X-Ray<small>de Embat</small></span>
+        </NuxtLink>
+        <ThemeSwitch />
+      </div>
 
       <nav class="lp__index" aria-label="Secciones de la página">
         <a
@@ -91,7 +94,6 @@ const readings = computed(() => {
       </nav>
 
       <div class="lp__rail-foot">
-        <ThemeSwitch />
         <NuxtLink class="btn btn--live" to="/login">Abrir la demo</NuxtLink>
         <p>Sin contraseña. Datos ficticios.</p>
       </div>
