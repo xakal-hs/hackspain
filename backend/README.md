@@ -89,7 +89,7 @@ pueda esconder, y la vía para arreglarlo (percentiles por tramo de tamaño) sig
 |---|---|---|
 | caída → `caida_3m_corto` como ancla | +3,6σ en su propio juez, **−5,3σ en mora AP** | descartado |
 | crecimiento → `expansion_3m` como ancla | **0,000** sobre la nota adversa (no la calibra); empate en la de expansión (0,631 → 0,622) | descartado |
-| percentiles por mes calendario | con el ancla nueva, ≤ 0,005 de AUC en todo. Con el ancla vieja daba +0,017/+0,025/+0,033 | **descartado — y explica por qué**: aquella «estacionalidad» era en gran parte un parche al ancla mal puesta. Queda como opción medida y apagada: `fit(..., seasonal=(...))` |
+| percentiles por mes calendario | con el ancla nueva, ≤ 0,005 de AUC en todo. Con el ancla vieja daba +0,017/+0,025/+0,033 | **descartado — y explica por qué**: aquella «estacionalidad» era en gran parte un parche al ancla mal puesta. No queda código de la opción |
 
 ---
 

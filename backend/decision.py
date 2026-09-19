@@ -59,30 +59,17 @@ VETOS = {
 # Veto que se puede levantar con un documento, frente a los que no.
 LEVANTABLES = {"veto_cuota_ausente", "veto_iva_ausente"}
 
-# No todos los vetos de docs/eventos.md se ganan el puesto. Medido sobre el panel
-# (`veto_report`): `lift` = tasa de tensión futura de las filas vetadas / tasa base 0,439.
-#
-#   veto_caja_negativa    706 filas   lift 2,17   0 sanas vetadas   -> bloquea
-#   veto_poliza_agotada   390 filas   lift 2,12   0 sanas vetadas   -> bloquea
-#   veto_iva_ausente      176 filas   lift 1,24                     -> bloquea
-#   veto_nomina_ausente   291 filas   lift 1,13                     -> bloquea
-#   veto_ss_ausente       247 filas   lift 1,10                     -> bloquea
-#   veto_grupo_en_estres 6748 filas   lift 1,67   688 sanas         -> AVISO
-#   veto_cuota_ausente    394 filas   lift 0,98    52 sanas         -> AVISO
-#
-# `veto_grupo_en_estres` ordena bien pero toca el 31 % del panel: vetar a un tercio de la
-# cartera no es una regla de crédito, es no dar crédito. Y `docs/eventos.md:3` lo llama
-# explícitamente diagnóstico. Baja a aviso: mueve a «vigilar», no bloquea.
-# `veto_cuota_ausente` tiene lift 0,98 — las filas que bloquea NO acaban peor que la media.
-# Es la misma conclusión que sacó D35 al echar la cuota del evento de incumplimiento: sin
-# calendario de cuotas (3 % de cobertura) no se distingue un impago de un vencimiento.
+# No todos se ganan el puesto: `veto_report()` mide el lift de cada uno (tensión futura de
+# las filas vetadas / tasa base). Dos bajan a aviso — mueven a «vigilar», no bloquean:
+#   veto_grupo_en_estres  lift 1,67, pero veta el 31 % del panel; eventos.md lo llama diagnóstico
+#   veto_cuota_ausente    lift 0,98: las filas que bloquea no acaban peor que la media
 BLOQUEAN = {"veto_caja_negativa", "veto_nomina_ausente", "veto_ss_ausente",
             "veto_iva_ausente", "veto_poliza_agotada"}
 AVISAN = {"veto_grupo_en_estres", "veto_cuota_ausente"}
 
 ACCIONES = {"prestar": "Prestar", "vigilar": "Vigilar", "no_prestar": "No prestar", "sin_nota": "Sin nota"}
 MIN_TX, MAX_DORMANT, MIN_CONFIDENCE = 5, 2, 0.30
-LEND_BAND, LEND_SCORE = "sano", 65.0
+LEND_BAND = "sano"
 
 
 def decide(row: pd.Series) -> dict:

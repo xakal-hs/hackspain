@@ -81,24 +81,12 @@ CONTEXT = ["net_margin_6m", "growth_vs_12m", "log_scale", "fx_share", "uncat_sha
 OOD_CONTEXT = ["log_scale", "fx_share", "activity_log"]  # los únicos de contexto con banda OOD
 
 # Eventos que CALIBRAN los pesos (tres adversos + la cara positiva).
-#
-# El estrés de liquidez se mide con la CAJA PROPIA (`tension_np_raw_6m`), no con caja + póliza
-# (docs/eventos.md:3). Sumar la póliza tenía dos problemas: premiaba estar ya endeudado —
-# cuanto más dispuesto tienes, más «sano» pareces y más te queremos prestar — y dejaba el
-# 65,6 % de los casos sin nada que predecir, porque la empresa ya estaba en tensión.
-# Medido (bootstrap pareado, mismos grupos): juez limpio 0,800 -> 0,833 (+10,3 se),
-# entrada en estrés a 2 meses 0,597 -> 0,621 (+5,0 se), y sube incluso frente a la etiqueta
-# vieja con póliza (0,785 -> 0,803). Antelación mediana 2 -> 4 meses.
-# Precio declarado: incumplimiento −2,2 se, mora AP −2,1 se, y la neutralidad al tamaño
-# empeora (Spearman tamaño-nota −0,132 -> −0,199): con caja propia, las grandes — que tienen
-# diez veces menos meses de caja — salen peor paradas.
+# El estrés se mide con la CAJA PROPIA, no con caja + póliza (docs/eventos.md:3): sumar la
+# póliza premiaba estar ya endeudado y dejaba el 65,6 % de los casos sin nada que predecir.
+# Evidencia y precio en README.md §2.
 EVENTS = ["tension_np_raw_6m", "incumplimiento_6m", "caida_6m", "expansion_6m"]
 POSITIVE_PREFIX = ("expansion", "cura")
 # Jueces: se miden, nunca calibran.
-# Medidos y NO adoptados como ancla, con su número, para no volver a discutirlos de memoria:
-#   caida_3m_corto  como ancla: +3,6 se en su propio juez pero −5,3 se en mora AP.
-#   expansion_3m    como ancla: 0,000 sobre la nota adversa (no la calibra) y empate en la
-#                   de expansión (0,631 -> 0,622). Se queda expansion_6m.
 JUDGES = ["tension_6m", "entrada_estres_2m", "rompe_caja_2m", "tension_entrada_6m",
           "impago_nomina_6m", "impago_ss_6m", "impago_iva_6m", "impago_cuota_6m", "impago_ap_6m",
           "cura_3m", "recaida_6m", "caida_3m_corto", "expansion_3m", "tension_grupo_6m"]
@@ -398,9 +386,9 @@ def observable(d: pd.DataFrame, cutoff: pd.Timestamp | None = None) -> pd.Series
     return d.month <= cutoff - pd.DateOffset(months=H)
 
 
-def labels(d: pd.DataFrame, cutoff: pd.Timestamp | None = None, events: list[str] | None = None) -> pd.DataFrame:
+def labels(d: pd.DataFrame, cutoff: pd.Timestamp | None = None) -> pd.DataFrame:
     """Las columnas de evento enmascaradas por `observable` — lo que se le pasa a fit()."""
-    return d[events or EVENTS].where(observable(d, cutoff), axis=0)
+    return d[EVENTS].where(observable(d, cutoff), axis=0)
 
 
 if __name__ == "__main__":
