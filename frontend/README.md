@@ -6,8 +6,8 @@ The production frontend lives here. It is a Nuxt 4 application built on Vue 3's 
 
 ```bash
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 The app works with a small Nitro-hosted development portfolio out of the box. To use the existing FastAPI service, copy `.env.example` to `.env`, start the backend on port 8080, and set:
@@ -31,6 +31,6 @@ Nitro then forwards `/api/companies` to the backend, keeping the browser on a sa
 ## Checks
 
 ```bash
-npm run typecheck
-npm run build
+pnpm typecheck
+pnpm build
 ```
