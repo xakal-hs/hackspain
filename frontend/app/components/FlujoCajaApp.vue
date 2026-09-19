@@ -240,7 +240,6 @@ const span = (from: string, to: string | null) => {
 }
 
 const rotura = computed(() => flujo.data.value?.forecast?.rotura ?? null)
-const excedente = computed(() => flujo.data.value?.forecast?.excedente ?? null)
 
 /* Al cambiar de periodo o de empresa, la tabla se abre por el final. */
 const scroller = ref<HTMLElement | null>(null)
@@ -384,8 +383,9 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
             </tbody>
           </table>
         </div>
-        <!-- La acción del caso, abajo a la derecha, pegada a la tesorería final. -->
-        <div v-if="columns.length && (rotura || excedente)" class="eb__action">
+        <!-- Abajo a la derecha, pegado a la tesorería final: si va a romper caja, el aviso;
+             si no, prestar la caja. -->
+        <div v-if="columns.length" class="eb__action">
           <template v-if="rotura">
             <p>Vas a romper caja {{ span(rotura.from, rotura.to) }}: {{ money(rotura.low) }}</p>
             <button type="button" class="eb__alert" aria-label="Pedir financiación">
