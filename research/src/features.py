@@ -71,7 +71,11 @@ def add_features(p: pl.DataFrame) -> pl.DataFrame:
     # volatilidad a la baja: semidesviación de los meses con flujo neto negativo / gasto mensual (D25)
     f = f.with_columns(neg2=pl.min_horizontal(pl.col("net"), pl.lit(0.0)) ** 2,
                        payneg2=pl.min_horizontal(pl.col("payroll") - pl.col("pay6"), pl.lit(0.0)) ** 2)
+    med12 = pl.col("oper_in").rolling_median(12, min_samples=6).over(**KEY)
     f = f.with_columns(
+        # persistencia operativa: meses de los últimos 6 con cobros operativos ≥ 50 % de su mediana anual (R07)
+        oper_persistence_6m=pl.when(med12.is_not_null()).then((pl.col("oper_in") >= 0.5 * med12).cast(pl.Float64))
+                            .rolling_mean(6, min_samples=3).over(**KEY),
         net_vol_6m=(pl.col("neg2").rolling_mean(6, min_samples=3).over(**KEY).sqrt()
                     / (pl.max_horizontal(pl.col("out3") / 3, pl.col("out12") / 12) + pl.col("eps"))),
         # nóminas que faltan o bajan frente a su media 6m (semidesviación a la baja / media); la subida (contratar) no penaliza
@@ -84,7 +88,7 @@ def add_features(p: pl.DataFrame) -> pl.DataFrame:
 
 SCORE_FEATURES = ["runway", "lc_util", "growth_vs_12m", "debt_burden", "payroll_cv",
                   "ap_late_share", "ar_late_share", "ap_overdue_ratio", "ar_overdue_90_ratio", "refund_rate",
-                  "activity_trend", "transfer_dep", "hhi_ar_6m", "net_vol_6m", "cust_trend", "lost_share"]
+                  "activity_trend", "transfer_dep", "hhi_ar_6m", "net_vol_6m", "cust_trend", "lost_share", "oper_persistence_6m"]
 # net_margin_6m sale del score (AUC 0,47-0,53 frente a E1-E4, peso 0; D27) y queda como contexto para el forecaster
 CONTEXT_FEATURES = ["net_margin_6m", "log_scale", "fx_share", "uncat_share", "activity_log", "month_idx", "dormant", "months_since_last_tx"]
 DRIVERS = ["inflow", "outflow", "cash_end", "payroll", "debt_service", "overdue_ap", "overdue_ar",
