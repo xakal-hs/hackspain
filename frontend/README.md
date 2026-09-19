@@ -58,39 +58,23 @@ version error when the runtime is unsupported.
 - `/`: public landing, built around the moment a deterioration is detected.
 - `/login`: simulated sign-in without credentials or real authentication.
 - `/dashboard/empresa`: the company's own treasury — X-Ray Score, Colchón Dinámico and Divisa Inteligente.
-- `/dashboard/embat`: both sides, with anticipation as the headline number.
+- `/dashboard/embat`: Equipo Embat — caja del portfolio and the financing CRM.
 
-Each dashboard takes `?section=`. Empresa has `score` (default), `colchon` and
-`divisa`; Embat has `resumen` (default), `cartera`, `senales`, `ofertas`, `monitor`,
-`revenue` and `modelo`. A section the perspective does not have falls back to its
-default. The earlier standalone routes `/cartera`, `/monitor`, `/escenarios` and
-`/empresas/:id` now redirect into these sections.
+Each dashboard takes `?section=`. Empresa has `flujo` (default), `score`, `colchon` and
+`divisa`; Embat has `caja` (default) and `crm`. A section the perspective does not have
+falls back to its default. The earlier standalone routes `/cartera`, `/monitor`,
+`/escenarios` and `/empresas/:id` now redirect into Equipo Embat.
 
 Switch perspectives or exit using the user panel at the bottom of the desktop sidebar. On mobile, navigation and the user panel move above the content. Dashboard deep links redirect to demo sign-in when no demo-role cookie exists. This cookie is a UI convenience, not an authorization boundary.
 
-The Empresa perspective and all product-only fields use explicit fixtures from
-`app/data/demo.ts`. In the Embat perspective, `/api/companies` resolves three sources in
-order, and the header chip says which one is live:
+Empresa treasury screens read Supabase (`company-directory`, `flujo`). Equipo Embat:
 
-1. **`XRAY_API_BASE`** (`source: 'api'`) — the X-Ray backend. Real for all 1,286 companies:
-   score, band, 3-month change, confidence, lender decision with its written reason, cash,
-   months of cash, DSO, overdue invoices, margin and monthly flows. Names, sectors, the
-   three-month forecast and the offer terms are still fixtures.
-2. **Supabase** (`source: 'supabase'`) — treasury facts for the five featured companies,
-   with mocked scores. Two caveats in `data/processed/panel_monthly.csv`: `pct_vencido` is
-   overdue stock over three-month sales (a ratio clipped to `[0, 5]`, not the share of
-   pending invoices past 60 days that the backend sends), and `runway_m` is unsanitised —
-   it ranges from −812,870 to 35,208,424 months because sentinel cash balances are not
-   removed. The backend path drops runway for those companies instead of scoring them.
-3. **Fixtures** (`source: 'demo'`) — when neither is configured.
-
-Missing values arrive as `null` and stay missing: a company without enough invoices shows
-"no hay facturas suficientes", not a borrowed number. Roughly half the portfolio has no
-DSO, so this matters more than it sounds.
+1. **Caja** (`GET /api/embat/caja`) — the 20 `featured_companies`, with operational cash (`cash_end`, `net_op`, runway) and financial cash (debt service, outstanding, utilisation) from `panel_monthly` / `company_static`. Alert vs opportunity comes from the same rotura/excedente forecast Flujo de caja uses.
+2. **Financiación** (`GET/POST /api/embat/leads`) — CRM pipeline. When the company clicks **Quiero pedir financiación**, a lead is assigned to an account manager with a generic email draft (no company data, fake Calendly). Apply `supabase/embat_crm_schema.sql` on the frontend project so leads persist in Postgres; until then the server keeps a local file under `frontend/.data/`.
 
 The role cookie survives reloads until logout/browser session expiry.
 
-Manual acceptance flow: enter as Empresa and walk its three treasury screens, then switch to Embat, search/select a company and inspect signals. Also check empty search, logout, direct-link redirect, and mobile/desktop layouts.
+Manual acceptance flow: enter as Empresa, open Flujo de caja, request financing; switch to Embat and find the lead in Financiación. Walk Caja filters (alerta / oportunidad). Also check logout, direct-link redirect, and mobile/desktop layouts.
 
 ## Supabase configuration
 

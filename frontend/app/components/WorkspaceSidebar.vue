@@ -1,19 +1,14 @@
 <script setup lang="ts">
 import {
-  Activity,
   ArrowLeftRight,
-  Banknote,
   ChevronsUpDown,
   CircleDollarSign,
-  Gauge,
-  Handshake,
+  Landmark,
   LogOut,
-  PiggyBank,
-  Radar,
-  Rows3,
   ScanLine,
   Settings,
-  Target,
+  ShieldCheck,
+  Wallet,
   Check,
 } from '@lucide/vue'
 import { perspectives, perspectiveById, type PerspectiveId } from '~/data/demo'
@@ -24,27 +19,18 @@ const { name: companyName } = useSelectedCompany()
 const profile = computed(() => perspectiveById(props.role)!)
 
 const items = computed(() => {
-  const portfolio = [
-    { id: 'resumen', label: 'Resumen', icon: Gauge },
-    { id: 'cartera', label: 'Cartera', icon: Rows3 },
-    { id: 'senales', label: 'Señales', icon: Activity },
-    { id: 'ofertas', label: 'Mercado', icon: Handshake },
-  ]
-  /* Tesorería propia: solo tiene sentido mirándose a uno mismo. */
   const treasury = [
     { id: 'flujo', label: 'Flujo de caja', icon: ArrowLeftRight },
     { id: 'score', label: 'X-Ray Score', icon: ScanLine },
-    { id: 'colchon', label: 'Colchón Dinámico', icon: PiggyBank },
+    { id: 'credito', label: 'Crédito y caución', icon: ShieldCheck },
     { id: 'divisa', label: 'Divisa Inteligente', icon: CircleDollarSign },
     { id: 'ajustes', label: 'Ajustes', icon: Settings },
   ]
-  /* Interno: el sujeto ya no es una empresa de la cartera, sino Embat. */
   const ops = [
-    { id: 'monitor', label: 'Monitor operativo', icon: Radar },
-    { id: 'revenue', label: 'Revenue por producto', icon: Banknote },
-    { id: 'modelo', label: 'Métricas del modelo', icon: Target },
+    { id: 'caja', label: 'Caja', icon: Wallet },
+    { id: 'crm', label: 'Financiación', icon: Landmark },
   ]
-  return props.role === 'empresa' ? treasury : [...portfolio, ...ops]
+  return props.role === 'empresa' ? treasury : ops
 })
 
 const open = ref(false)

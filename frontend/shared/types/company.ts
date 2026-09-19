@@ -102,3 +102,41 @@ export interface Cashflow {
   forecast: CashForecast | null
   snapshot: string
 }
+
+/** Un cliente del ERP con su comportamiento de pago y la decisión de cobertura. */
+export interface ClientRow {
+  cliente: string
+  ventas_12m: number
+  expuesto: number
+  vencido: number
+  vencido_90: number
+  retraso_medio: number | null
+  pct_tarde: number | null
+  n_facturas: number
+  n_pagadas: number
+  meses_relacion: number
+  pico: number
+  limite: number
+  prima: number
+  estado: 'preautorizado' | 'estudio' | 'denegado'
+  motivo: string
+}
+export interface SuretyLine {
+  linea: number
+  afianzado: number
+  productos: number
+}
+export interface ClientBook {
+  ventas_12m: number
+  clientes: ClientRow[]
+  caucion?: SuretyLine
+}
+export interface ClientBookResponse {
+  snapshot: string
+  cover: number
+  premiumRate: number
+  ventas12m: number
+  clientes: ClientRow[]
+  caucion: SuretyLine | null
+  excedente: number | null
+}
