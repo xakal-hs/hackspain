@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "xray-frontend",
+      "runtimeExecutable": "/Users/cesaralvarez/.nvm/versions/node/v22.22.0/bin/node",
+      "runtimeArgs": ["./node_modules/nuxt/bin/nuxt.mjs", "dev"],
+      "port": 3100,
+      "autoPort": true
+    }
+  ]
+}

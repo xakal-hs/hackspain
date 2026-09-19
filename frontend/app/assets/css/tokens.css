@@ -216,6 +216,10 @@
   --body: #23253f;
 
   --accent: #3b5bff;
+  /* El acento plano no aguanta texto blanco encima a 13,5px: para un botón
+   * relleno va este tono, el mismo que `--live-solid` usa en la cabina. */
+  --accent-solid: #3552e8;
+  --accent-on: #ffffff;
 
   /* Los paneles navy no se tematizan: son un acento deliberado que funciona
    * igual sobre lienzo claro que oscuro. Su tinta va aparte de `--card` para
@@ -280,6 +284,8 @@
   --body: var(--ink-text);
 
   --accent: var(--ink-live);
+  --accent-solid: var(--ink-live-solid);
+  --accent-on: #ffffff;
 
   /* Sobre un verde o un rojo claros, la tinta legible es el lienzo. */
   --on-status: var(--ink-canvas);
