@@ -1,5 +1,7 @@
 """Panel empresa x mes -> features + eventos.
 
+El panel lo construye etl.py (CSV crudos -> data/panel.parquet). Aquí empieza el modelo.
+
 Una sola entrada: `build()` lee `panel.parquet` y devuelve un DataFrame pandas con
 una fila por (company_id, month) que contiene:
 
@@ -20,7 +22,7 @@ import numpy as np
 import pandas as pd
 import polars as pl
 
-PANEL = Path(__file__).resolve().parents[1] / "research/data/panel.parquet"
+PANEL = Path(__file__).resolve().parent / "data/panel.parquet"
 
 # ---------------------------------------------------------------------------
 # Catálogo de features que puntúan.

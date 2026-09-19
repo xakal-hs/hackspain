@@ -1,12 +1,14 @@
 # backend · el score X-Ray
 
-Cinco ficheros. El modelo es un **scorecard aditivo**: media ponderada de 17 percentiles,
+Seis ficheros, y el primero es el ETL: desde los CSV del reto todo está aquí dentro.
+El modelo es un **scorecard aditivo**: media ponderada de 17 percentiles,
 suavizada con EWMA. No es una caja negra, y esa es la decisión de producto central — la nota
 se descompone al céntimo en las features que la movieron. Encima va una capa de **vetos**,
 que son hechos de hoy y mandan sobre la nota.
 
 | fichero | qué hace |
 |---|---|
+| `etl.py` | CSV crudos → `data/panel.parquet`: una fila por (empresa, mes) |
 | `preprocessing.py` | panel → 17 features (polars) + eventos + vetos |
 | `predict.py` | `fit` → percentiles → pesos → escala → EWMA. `score_panel`, `explain` |
 | `decision.py` | de la nota a prestar / vigilar / no prestar. Los vetos y su evidencia |
@@ -15,6 +17,7 @@ que son hechos de hoy y mandan sobre la nota.
 
 ```bash
 cd backend
+uv run --project ../research python etl.py                # CSV → panel (12 s)
 uv run --project ../research python predict.py            # entrena e imprime pesos y bandas
 uv run --project ../research python decision.py           # informe de vetos
 uv run --project ../research python metrics.py --temporal # validación completa
@@ -27,17 +30,32 @@ uv run --project ../research uvicorn main:app --port 8000
 
 ```
 output_hackspain_data.zip
-  └─ output/*.csv            8 ficheros, los del reto
-      └─ research/src/ingest.py     → research/data/*.parquet
-          └─ research/src/panel.py  → research/data/panel.parquet   21.538 × 49
-              └─ backend/preprocessing.py  → features + eventos + vetos
+  └─ output/*.csv                 8 ficheros, los del reto
+      └─ etl.py ingest            → data/*.parquet        las mismas tablas
+          └─ etl.py panel         → data/panel.parquet    21.538 × 49
+              └─ preprocessing.py → features + eventos + vetos
 ```
 
-`ingest.py` lee de `output/` y **rechaza los punteros LFS** de `data/` (ahí `invoices.csv` y
-`transactions.csv` son punteros de 134 bytes). Verificado al regenerar: 2.556.437
-transacciones, 897.894 facturas, 7.996 saldos, 1.286 empresas, 250 grupos.
+`etl.py` lee de `output/` y **rechaza los punteros LFS** de `data/` del repo (ahí
+`invoices.csv` y `transactions.csv` son punteros de 134 bytes que se leerían como CSV vacíos
+sin avisar). Verificado al regenerar: 2.556.437 transacciones, 897.894 facturas, 7.996
+saldos, 1.286 empresas, 250 grupos.
 
-Panel: **21.538 empresa-mes**, 2024-09 → 2026-08.
+Tres cosas que el ETL hace y no son obvias:
+
+- **La caja histórica no existe en el dataset.** `balances.csv` es solo la foto de 2026-09;
+  el saldo de cada mes se reconstruye hacia atrás producto a producto, restando los flujos
+  posteriores, y se **redondea a céntimos**: sin redondear, las cuentas que vuelven a cero
+  quedan en ±1e-13 y cambian el signo de «caja negativa» entre ejecuciones.
+- **Los tipos de cambio son reales**, descargados del BCE y de currency-api. El tipo del
+  fichero se acepta solo si está a ±10 % del real (98,7 % de los casos); el resto viene con
+  `fx = 1` o `0`. `to_eur` existe porque los umbrales absolutos (centinelas > 1e8) hay que
+  medirlos en EUR: en moneda cruda, 478 de las 491 transacciones > 1e8 son AOA/COP/VND/CLP.
+- **La disciplina de facturas se recalcula mes a mes**, no sobre la foto final: cada cierre
+  ve solo las facturas ya emitidas. Es el bucle que hace que el ETL tarde 12 s en vez de 1.
+
+Panel: **21.538 empresa-mes**, 2024-09 → 2026-08. Reproducible salvo ~1e-16 en `hhi_ar_6m` y
+`lost_share`, que es el orden de suma multihilo de polars y no afecta a ninguna nota.
 
 ---
 
