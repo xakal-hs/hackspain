@@ -26,12 +26,6 @@
     --ink-live: #5b74ff;
     --ink-live-ink: #93a3ff;
     --ink-live-wash: rgba(91, 116, 255, 0.16);
-    --ink-mint: #63dfa4;
-    --ink-mint-wash: rgba(99, 223, 164, 0.13);
-    --ink-amber: #f2b33d;
-    --ink-amber-wash: rgba(242, 179, 61, 0.14);
-    --ink-crimson: #f4626f;
-    --ink-crimson-wash: rgba(244, 98, 111, 0.14);
 
     /* El tema claro, que es el que llevan diez de las diez diapositivas. */
     --bg: #f4f5fb;
@@ -49,15 +43,17 @@
     --accent-dim: rgba(53, 82, 232, 0.09);
     --accent-soft: rgba(53, 82, 232, 0.09);
 
-    --green: #16a672;               /* --mint: dinero que entra, mejora, prestar */
-    --green-ink: #0d7d55;
-    --green-wash: rgba(22, 166, 114, 0.1);
-    --gold: #e09612;                /* --amber: vigilar */
-    --gold-ink: #8a5a00;
-    --gold-wash: rgba(224, 150, 18, 0.13);
-    --red: #e0364b;                 /* --crimson: riesgo, no prestar */
-    --red-ink: #b8253a;
-    --red-wash: rgba(224, 54, 75, 0.09);
+    /* Sin verde, ámbar ni carmesí: los tres registros son pasos tonales de la
+       misma familia fría, y el significado lo lleva la etiqueta, no el tono. */
+    --tier1: #3552e8;               /* lo que sobra · sano · el pasivo */
+    --tier1-ink: #2a42c9;
+    --tier1-wash: rgba(53, 82, 232, 0.08);
+    --tier2: #7a5af0;               /* la divisa · vigilar · intermediación */
+    --tier2-ink: #5b3fd6;
+    --tier2-wash: rgba(122, 90, 240, 0.08);
+    --tier3: #151833;               /* lo que falta · riesgo · el activo */
+    --tier3-ink: #151833;
+    --tier3-wash: rgba(21, 24, 51, 0.045);
     --neutral-wash: rgba(21, 24, 51, 0.045);
 
     --r-panel: 18px;
@@ -117,15 +113,15 @@
     --accent: var(--ink-live);
     --accent-ink: var(--ink-live-ink);
     --accent-dim: var(--ink-live-wash);
-    --green: var(--ink-mint);
-    --green-ink: var(--ink-mint);
-    --green-wash: var(--ink-mint-wash);
-    --gold: var(--ink-amber);
-    --gold-ink: var(--ink-amber);
-    --gold-wash: var(--ink-amber-wash);
-    --red: var(--ink-crimson);
-    --red-ink: var(--ink-crimson);
-    --red-wash: var(--ink-crimson-wash);
+    --tier1: var(--ink-live);
+    --tier1-ink: var(--ink-live-ink);
+    --tier1-wash: var(--ink-live-wash);
+    --tier2: #c5b6ff;
+    --tier2-ink: #cfc2ff;
+    --tier2-wash: rgba(197, 182, 255, 0.13);
+    --tier3: var(--ink-text);
+    --tier3-ink: var(--ink-text);
+    --tier3-wash: rgba(190, 200, 255, 0.09);
     --neutral-wash: rgba(190, 200, 255, 0.07);
     color: var(--ink-text);
   }
@@ -232,9 +228,9 @@
   .bar-label { font-size: 0.72em; color: var(--muted); width: 180px; flex-shrink: 0; }
   .bar { flex: 1; height: 6px; background: var(--neutral-wash); border-radius: 999px; }
   .bar-fill { height: 100%; border-radius: 999px; background: var(--accent); }
-  .bar-fill.red { background: var(--red); }
-  .bar-fill.gold { background: var(--gold); }
-  .bar-fill.green { background: var(--green); }
+  .bar-fill.t3 { background: var(--tier3); }
+  .bar-fill.t2 { background: var(--tier2); }
+  .bar-fill.t1 { background: var(--tier1); }
   .bar-val {
     font-family: var(--font-num);
     font-size: 0.7em;
@@ -354,6 +350,20 @@
 
   /* Chivo Mono separa mucho el punto decimal en una lectura grande. */
   [style*="var(--font-num)"] { letter-spacing: -0.045em; }
+
+  /* El diagrama de arquitectura: una diapositiva que es casi toda dibujo. */
+  .slide.diagram { padding: 44px 60px 34px; justify-content: center; }
+  .slide.diagram h2 { font-size: 2.1em; margin-bottom: 4px; }
+  .slide.diagram .section-label { margin-bottom: 14px; }
+  .arch { width: 100%; height: auto; max-height: 74vh; display: block; margin-top: 10px; }
+  .arch text { font-family: var(--font); }
+  .arch .n { font-family: var(--font-num); font-size: 15px; fill: var(--ink-live); }
+  .arch .t { font-size: 15px; font-weight: 600; letter-spacing: 0.1em; fill: var(--ink-text); }
+  .arch .s { font-size: 12px; fill: var(--ink-dim); }
+  .arch .big { font-family: var(--font-num); font-size: 17px; letter-spacing: -0.04em; fill: var(--ink-live-ink); }
+  .arch .big.v { fill: #c5b6ff; }
+  .arch .d { font-size: 11.5px; fill: var(--ink-muted); }
+  .arch .f { font-size: 11px; fill: var(--ink-dim); }
 </style>
 <style>
   /* Schibsted Grotesk (variable 400-700) y Chivo Mono, empotradas en base64
@@ -379,9 +389,9 @@
     <p style="margin-top: 2.5em; font-size: 0.72em; color: var(--faint); letter-spacing: 0.1em; text-transform: uppercase;">
       HackSpain 2026 · Hecho por Xakal
     </p>
-    <div class="page-num">1 / 10</div>
+    <div class="page-num">1 / 11</div>
     <div class="nav-hint">← → para navegar · F para pantalla completa</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 10%;"></div></div>
+    <div class="progress-track"><div class="progress-fill" style="width: 9%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -396,36 +406,33 @@
           Las 1,286 empresas del dataset tienen un <strong>pulso financiero oculto</strong>. Sus cajas se vacían, sus clientes se van, sus pagos se retrasan — pero nadie lo ve a tiempo.
         </p>
         <div class="health-meter">
-          <div class="hm-emoji">😊</div>
           <div class="hm-info">
             <div class="hm-name">Empresa sana</div>
-            <div class="hm-bar" style="width: 120px;"><div class="hm-bar-fill" style="width: 100%; background: var(--green);"></div></div>
+            <div class="hm-bar" style="width: 120px;"><div class="hm-bar-fill" style="width: 100%; background: var(--tier1);"></div></div>
           </div>
-          <div class="hm-score" style="color: var(--green);">82</div>
+          <div class="hm-score" style="color: var(--tier1);">82</div>
         </div>
         <div class="health-meter">
-          <div class="hm-emoji">😐</div>
           <div class="hm-info">
             <div class="hm-name">Empresa preocupante</div>
-            <div class="hm-bar" style="width: 120px;"><div class="hm-bar-fill" style="width: 52%; background: var(--gold);"></div></div>
+            <div class="hm-bar" style="width: 120px;"><div class="hm-bar-fill" style="width: 52%; background: var(--tier2);"></div></div>
           </div>
-          <div class="hm-score" style="color: var(--gold);">48</div>
+          <div class="hm-score" style="color: var(--tier2);">48</div>
         </div>
         <div class="health-meter">
-          <div class="hm-emoji">🤕</div>
           <div class="hm-info">
             <div class="hm-name">Empresa en riesgo</div>
-            <div class="hm-bar" style="width: 120px;"><div class="hm-bar-fill" style="width: 20%; background: var(--red);"></div></div>
+            <div class="hm-bar" style="width: 120px;"><div class="hm-bar-fill" style="width: 20%; background: var(--tier3);"></div></div>
           </div>
-          <div class="hm-score" style="color: var(--red);">23</div>
+          <div class="hm-score" style="color: var(--tier3);">23</div>
         </div>
       </div>
       <div class="quote" style="font-size: 1.3em;">
         "El problema no es que no haya datos. Es que nadie pregunta: <strong>¿cuál es la salud real de esta empresa hoy?</strong>"
       </div>
     </div>
-    <div class="page-num">2 / 10</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 20%;"></div></div>
+    <div class="page-num">2 / 11</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 18%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -458,8 +465,8 @@
         <p style="font-size: 0.85em; color: var(--muted);">Cada empresa sabe su runway.<br>Embat actúa antes.<br>El dinero fluye.</p>
       </div>
     </div>
-    <div class="page-num">3 / 10</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 30%;"></div></div>
+    <div class="page-num">3 / 11</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 27%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -474,14 +481,14 @@
     </p>
 
     <div class="g2">
-      <div style="padding: 20px; border-left: 3px solid var(--green); border-radius: 12px; background: var(--green-wash);">
-        <p style="font-size: 0.65em; color: var(--green); font-weight: 600; margin-bottom: 4px;">PREGUNTAS DE SALUD</p>
+      <div style="padding: 20px; border-left: 3px solid var(--tier1); border-radius: 12px; background: var(--tier1-wash);">
+        <p style="font-size: 0.65em; color: var(--tier1); font-weight: 600; margin-bottom: 4px;">PREGUNTAS DE SALUD</p>
         <p style="font-size: 0.82em;">¿Quién está sano? → <strong>Score ≥ 65</strong></p>
         <p style="font-size: 0.82em;">¿Quién mejora? → <strong>Δ3m &gt; +2 pts</strong></p>
         <p style="font-size: 0.82em;">¿Quién se torce? → <strong>Δ3m ≤ −10 pts: aviso</strong></p>
       </div>
-      <div style="padding: 20px; border-left: 3px solid var(--gold); border-radius: 12px; background: var(--gold-wash);">
-        <p style="font-size: 0.65em; color: var(--gold); font-weight: 600; margin-bottom: 4px;">PREGUNTAS DE DIAGNÓSTICO</p>
+      <div style="padding: 20px; border-left: 3px solid var(--tier2); border-radius: 12px; background: var(--tier2-wash);">
+        <p style="font-size: 0.65em; color: var(--tier2); font-weight: 600; margin-bottom: 4px;">PREGUNTAS DE DIAGNÓSTICO</p>
         <p style="font-size: 0.82em;">¿Bache o caída estructural? → <strong>EWMA α=0,5 sobre contribuciones</strong></p>
         <p style="font-size: 0.82em;">¿Qué cambió y cuándo? → <strong>Descomposición al céntimo</strong></p>
         <p style="font-size: 0.82em;">¿Cuántos meses de anticipación? → <strong>Mediana 4 meses</strong></p>
@@ -494,8 +501,139 @@
       </p>
       <p style="font-size: 0.72em; color: var(--faint);">Scorecard aditivo, no caja negra. AUC 0,849 en tensión de liquidez, fuera de grupo y fuera del futuro.</p>
     </div>
-    <div class="page-num">4 / 10</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 40%;"></div></div>
+    <div class="page-num">4 / 11</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 36%;"></div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       SLIDE 5 — ARQUITECTURA (tecnología profunda)
+       ═══════════════════════════════════════ -->
+  <div class="slide dark diagram">
+    <div class="section-label">4 · La tecnología</div>
+    <h2>De un CSV a una decisión<br>que se puede discutir.</h2>
+    <svg viewBox="0 0 1400 566" class="arch" role="img" aria-label="Arquitectura de X-Ray, del CSV a la decisión">
+    <defs><linearGradient id="core" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#5b74ff" stop-opacity=".22"/><stop offset="1" stop-color="#5b74ff" stop-opacity=".04"/>
+    </linearGradient>
+    <marker id="ar" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+    <path d="M0 1 L6 4 L0 7" fill="none" stroke="#5b74ff" stroke-width="1.3" stroke-linecap="round"/></marker></defs>
+    <rect x="12" y="20" width="254" height="262" rx="14" fill="#10142f" stroke="rgba(190,200,255,.19)" stroke-width="1"/>
+    <text x="30" y="50" class="n">01</text>
+    <text x="60" y="50" class="t">DATOS</text>
+    <text x="30" y="70" class="s">Lo que hay debajo</text>
+    <text x="30" y="98" class="big">8</text>
+    <text x="30" y="113" class="d">CSV del reto, sin reescribir</text>
+    <text x="30" y="130" class="big">2.556.437</text>
+    <text x="30" y="145" class="d">transacciones · 897.894 facturas</text>
+    <text x="30" y="162" class="big">1.286</text>
+    <text x="30" y="177" class="d">empresas en 250 grupos</text>
+    <text x="30" y="194" class="big">21.538</text>
+    <text x="30" y="209" class="d">filas empresa-mes, 24 meses</text>
+    <line x1="30" y1="224" x2="248" y2="224" stroke="rgba(190,200,255,.14)"/>
+    <text x="30" y="242" class="f">La caja histórica no existe en el</text>
+    <text x="30" y="255" class="f">dataset: se reconstruye hacia</text>
+    <text x="30" y="268" class="f">atrás, producto a producto, con FX</text>
+    <line x1="271" y1="151.0" x2="286" y2="151.0" stroke="#5b74ff" stroke-width="1.3" marker-end="url(#ar)" opacity=".85"/>
+    <rect x="292" y="20" width="254" height="262" rx="14" fill="#10142f" stroke="rgba(190,200,255,.19)" stroke-width="1"/>
+    <text x="310" y="50" class="n">02</text>
+    <text x="340" y="50" class="t">SEÑALES</text>
+    <text x="310" y="70" class="s">Lo que se mira</text>
+    <text x="310" y="98" class="big">18</text>
+    <text x="310" y="113" class="d">features, todas orientadas</text>
+    <text x="310" y="130" class="big">4</text>
+    <text x="310" y="145" class="d">anclas que calibran los pesos</text>
+    <text x="310" y="162" class="big">8</text>
+    <text x="310" y="177" class="d">vetos: 5 bloquean, 3 avisan</text>
+    <line x1="310" y1="224" x2="528" y2="224" stroke="rgba(190,200,255,.14)"/>
+    <text x="310" y="242" class="f">El veto es un hecho de hoy,</text>
+    <text x="310" y="255" class="f">verificable y asimétrico. Vive</text>
+    <text x="310" y="268" class="f">fuera de la nota a propósito.</text>
+    <line x1="551" y1="151.0" x2="566" y2="151.0" stroke="#5b74ff" stroke-width="1.3" marker-end="url(#ar)" opacity=".85"/>
+    <rect x="572" y="20" width="254" height="262" rx="14" fill="url(#core)" stroke="#5b74ff" stroke-width="1.4"/>
+    <text x="590" y="50" class="n">03</text>
+    <text x="620" y="50" class="t">SCORECARD</text>
+    <text x="590" y="70" class="s">Lo que decide</text>
+    <text x="590" y="98" class="big">Σ</text>
+    <text x="590" y="113" class="d">peso × percentil, 5 pilares</text>
+    <text x="590" y="130" class="big">−65,75 + 2,22×</text>
+    <text x="590" y="145" class="d">compuesto → P5=15, P95=85</text>
+    <text x="590" y="162" class="big">α = 0,5</text>
+    <text x="590" y="177" class="d">EWMA sobre las contribuciones</text>
+    <text x="590" y="194" class="big">2</text>
+    <text x="590" y="209" class="d">notas: adversa y expansión</text>
+    <line x1="590" y1="224" x2="808" y2="224" stroke="rgba(190,200,255,.14)"/>
+    <text x="590" y="242" class="f">El suavizado va sobre las</text>
+    <text x="590" y="255" class="f">contribuciones, no sobre la nota:</text>
+    <text x="590" y="268" class="f">la descomposición sobrevive.</text>
+    <line x1="831" y1="151.0" x2="846" y2="151.0" stroke="#5b74ff" stroke-width="1.3" marker-end="url(#ar)" opacity=".85"/>
+    <rect x="852" y="20" width="254" height="262" rx="14" fill="#10142f" stroke="rgba(190,200,255,.19)" stroke-width="1"/>
+    <text x="870" y="50" class="n">04</text>
+    <text x="900" y="50" class="t">DECISIÓN</text>
+    <text x="870" y="70" class="s">Lo que se responde</text>
+    <text x="870" y="98" class="big">174</text>
+    <text x="870" y="113" class="d">prestar</text>
+    <text x="870" y="130" class="big">715</text>
+    <text x="870" y="145" class="d">vigilar</text>
+    <text x="870" y="162" class="big">124</text>
+    <text x="870" y="177" class="d">no prestar</text>
+    <text x="870" y="194" class="big">273</text>
+    <text x="870" y="209" class="d">sin nota: no se puntúa lo que no se ve</text>
+    <line x1="870" y1="224" x2="1088" y2="224" stroke="rgba(190,200,255,.14)"/>
+    <text x="870" y="242" class="f">Un veto manda sobre la nota. Nota</text>
+    <text x="870" y="255" class="f">78 y la nómina no ha salido: no se</text>
+    <text x="870" y="268" class="f">presta.</text>
+    <line x1="1111" y1="151.0" x2="1126" y2="151.0" stroke="#5b74ff" stroke-width="1.3" marker-end="url(#ar)" opacity=".85"/>
+    <rect x="1132" y="20" width="254" height="262" rx="14" fill="#10142f" stroke="rgba(190,200,255,.19)" stroke-width="1"/>
+    <text x="1150" y="50" class="n">05</text>
+    <text x="1180" y="50" class="t">PRODUCTO</text>
+    <text x="1150" y="70" class="s">Lo que ve el CFO</text>
+    <text x="1150" y="98" class="big">API</text>
+    <text x="1150" y="113" class="d">FastAPI → SPA Nuxt</text>
+    <text x="1150" y="130" class="big">€</text>
+    <text x="1150" y="145" class="d">colchón: necesitas, sobra, cuándo</text>
+    <text x="1150" y="162" class="big">2–4</text>
+    <text x="1150" y="177" class="d">opciones en la mesa, con su porqué</text>
+    <text x="1150" y="194" class="big">4 m</text>
+    <text x="1150" y="209" class="d">de antelación mediana al estrés</text>
+    <line x1="1150" y1="224" x2="1368" y2="224" stroke="rgba(190,200,255,.14)"/>
+    <text x="1150" y="242" class="f">Cada nota se descompone al céntimo</text>
+    <text x="1150" y="255" class="f">en las features que la movieron.</text>
+    <rect x="12" y="312" width="1376" height="104" rx="14" fill="#0b0e26" stroke="#5b74ff" stroke-width="1" stroke-dasharray="5 5"/>
+    <text x="34" y="340" class="t">VALIDACIÓN</text>
+    <text x="164" y="340" class="s">fuera de grupo y fuera del futuro — y al quitar el futuro el AUC del ancla subió</text>
+    <text x="34" y="376" class="big">~120</text>
+    <text x="34" y="395" class="d">scorers, uno por (fold, mes)</text>
+    <text x="377" y="376" class="big">0,849</text>
+    <text x="377" y="395" class="d">AUC del ancla de liquidez</text>
+    <text x="720" y="376" class="big">20.547</text>
+    <text x="720" y="395" class="d">filas activas puntuadas</text>
+    <text x="1063" y="376" class="big">200</text>
+    <text x="1063" y="395" class="d">réplicas bootstrap sobre grupos enteros</text>
+    <text x="14" y="448" class="t">MEDIDO Y DESCARTADO</text>
+    <text x="250" y="448" class="s">el listón es que una idea gane en pareado, no que suene bien</text>
+    <rect x="12.0" y="462" width="264" height="76" rx="10" fill="#10142f" stroke="rgba(190,200,255,.14)"/>
+    <text x="26.0" y="489" class="big v">−9,7 σ</text>
+    <text x="26.0" y="506" class="f">los 42 pesos a priori del</text>
+    <text x="26.0" y="519" class="f">catálogo, sobre el ancla</text>
+    <rect x="290.0" y="462" width="264" height="76" rx="10" fill="#10142f" stroke="rgba(190,200,255,.14)"/>
+    <text x="304.0" y="489" class="big v">−10,3 σ</text>
+    <text x="304.0" y="506" class="f">sumar la póliza a la liquidez:</text>
+    <text x="304.0" y="519" class="f">premiaba estar endeudado</text>
+    <rect x="568.0" y="462" width="264" height="76" rx="10" fill="#10142f" stroke="rgba(190,200,255,.14)"/>
+    <text x="582.0" y="489" class="big v">−5,3 σ</text>
+    <text x="582.0" y="506" class="f">la caída de cobros como ancla,</text>
+    <text x="582.0" y="519" class="f">medida en mora de proveedores</text>
+    <rect x="846.0" y="462" width="264" height="76" rx="10" fill="#10142f" stroke="rgba(190,200,255,.14)"/>
+    <text x="860.0" y="489" class="big v">0,000</text>
+    <text x="860.0" y="506" class="f">el sector como listón: ningún</text>
+    <text x="860.0" y="519" class="f">sector se separa del global</text>
+    <rect x="1124.0" y="462" width="264" height="76" rx="10" fill="#10142f" stroke="rgba(190,200,255,.14)"/>
+    <text x="1138.0" y="489" class="big v">≤ 0,005</text>
+    <text x="1138.0" y="506" class="f">percentiles por mes calendario:</text>
+    <text x="1138.0" y="519" class="f">era un parche al ancla mal</text>
+    </svg>
+    <div class="page-num">5 / 11</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 45%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -511,41 +649,38 @@
 
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
       <!-- Fuga 1 -->
-      <div style="padding: 20px; border: 1px solid var(--green); border-radius: 12px; background: var(--green-wash);">
-        <p style="font-size: 1.6em; margin-bottom: 6px;">💤</p>
+      <div style="padding: 20px; border: 1px solid var(--tier1); border-radius: 12px; background: var(--tier1-wash);">
         <p style="font-size: 0.82em; font-weight: 700; color: var(--text); margin-bottom: 4px;">El dinero que sobra</p>
         <p style="font-size: 0.7em; color: var(--muted); margin-bottom: 12px;">Duerme al 0% porque nadie sabe <strong style="color: var(--text);">hasta cuándo</strong> hace falta. Colocarlo a ciegas es temerario.</p>
         <p style="font-size: 0.62em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--faint); margin-bottom: 2px;">Escala</p>
-        <p style="font-family: var(--font-num); font-size: 1.5em; font-weight: 700; color: var(--green);">€344M</p>
+        <p style="font-family: var(--font-num); font-size: 1.5em; font-weight: 700; color: var(--tier1);">€344M</p>
         <p style="font-size: 0.65em; color: var(--muted); margin-bottom: 8px;">ociosos en 370 empresas<br>(mediana €108.7K)</p>
         <p style="font-size: 0.68em; border-top: 1px solid var(--border); padding-top: 8px;">
-          La empresa gana al colocar: <strong style="color: var(--green);">€1.1–2.2K/año netos</strong><br>
+          La empresa gana al colocar: <strong style="color: var(--tier1);">€1.1–2.2K/año netos</strong><br>
           Embat puede ganar: <strong style="color: var(--accent);">€1.2M/año</strong>
         </p>
       </div>
       <!-- Fuga 2 -->
-      <div style="padding: 20px; border: 1px solid var(--gold); border-radius: 12px; background: var(--gold-wash);">
-        <p style="font-size: 1.6em; margin-bottom: 6px;">🌍</p>
+      <div style="padding: 20px; border: 1px solid var(--tier2); border-radius: 12px; background: var(--tier2-wash);">
         <p style="font-size: 0.82em; font-weight: 700; color: var(--text); margin-bottom: 4px;">El dinero que cruza fronteras</p>
         <p style="font-size: 0.7em; color: var(--muted); margin-bottom: 12px;">La divisa se compra <strong style="color: var(--text);">el día del pago</strong>, al peor spread. No es un problema de precio: de antelación.</p>
         <p style="font-size: 0.62em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--faint); margin-bottom: 2px;">Escala</p>
-        <p style="font-family: var(--font-num); font-size: 1.5em; font-weight: 700; color: var(--gold);">€2,108M</p>
+        <p style="font-family: var(--font-num); font-size: 1.5em; font-weight: 700; color: var(--tier2);">€2,108M</p>
         <p style="font-size: 0.65em; color: var(--muted); margin-bottom: 8px;">año en divisa real (1.6% del flujo EUR)</p>
         <p style="font-size: 0.68em; border-top: 1px solid var(--border); padding-top: 8px;">
-          La empresa ahorra: <strong style="color: var(--gold);">€28.5M/año</strong> (135pb × notional)<br>
+          La empresa ahorra: <strong style="color: var(--tier2);">€28.5M/año</strong> (135pb × notional)<br>
           Embat puede ganar: <strong style="color: var(--accent);">€1.1M/año</strong>
         </p>
       </div>
       <!-- Fuga 3 -->
-      <div style="padding: 20px; border: 1px solid var(--red); border-radius: 12px; background: var(--red-wash);">
-        <p style="font-size: 1.6em; margin-bottom: 6px;">⏳</p>
+      <div style="padding: 20px; border: 1px solid var(--tier3); border-radius: 12px; background: var(--tier3-wash);">
         <p style="font-size: 0.82em; font-weight: 700; color: var(--text); margin-bottom: 4px;">El dinero que falta</p>
         <p style="font-size: 0.7em; color: var(--muted); margin-bottom: 12px;">41 empresas tienen caja negativa <strong style="color: var(--text);">hoy</strong> (157 la tocaron alguna vez) y financian a ciegas: sin fecha, sin importe, con prisa.</p>
         <p style="font-size: 0.62em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--faint); margin-bottom: 2px;">Escala</p>
-        <p style="font-family: var(--font-num); font-size: 1.5em; font-weight: 700; color: var(--red);">€11.4M</p>
+        <p style="font-family: var(--font-num); font-size: 1.5em; font-weight: 700; color: var(--tier3);">€11.4M</p>
         <p style="font-size: 0.65em; color: var(--muted); margin-bottom: 8px;">de agujero de caja ahora mismo</p>
         <p style="font-size: 0.68em; border-top: 1px solid var(--border); padding-top: 8px;">
-          La empresa pierde: <strong style="color: var(--red);">el negocio</strong><br>
+          La empresa pierde: <strong style="color: var(--tier3);">el negocio</strong><br>
           Embat puede ganar: <strong style="color: var(--accent);">€105K/año</strong> (+ retención)
         </p>
       </div>
@@ -554,8 +689,8 @@
     <p style="text-align: center; margin-top: 1.5em; font-size: 0.82em; color: var(--muted);">
       Tres fugas distintas. Pero fíjate: <strong style="color: var(--accent);">las tres son la misma pregunta</strong> — ¿cuánto necesitas, cuánto te sobra y cuándo?
     </p>
-    <div class="page-num">5 / 10</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 50%;"></div></div>
+    <div class="page-num">6 / 11</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 55%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -579,29 +714,25 @@
       <div class="arrow" style="align-self: center;">→</div>
       <!-- Tres productos -->
       <div style="flex: 3; display: flex; flex-direction: column; gap: 10px;">
-        <div style="display: flex; align-items: center; gap: 12px; padding: 13px 16px; border: 1px solid var(--green); border-radius: 12px; background: var(--green-wash);">
-          <span style="font-size: 1.3em;">💤</span>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 13px 16px; border: 1px solid var(--tier1); border-radius: 12px; background: var(--tier1-wash);">
           <div style="flex: 1;">
             <p style="font-size: 0.8em; font-weight: 600; color: var(--text);">Si sobra → se coloca al 2-3%</p>
-            <p style="font-size: 0.68em; color: var(--muted);">370 empresas ganan <strong style="color: var(--green);">€1.1–2.2K/año netas</strong> · Embat <strong style="color: var(--accent);">€1.2M</strong></p>
+            <p style="font-size: 0.68em; color: var(--muted);">370 empresas ganan <strong style="color: var(--tier1);">€1.1–2.2K/año netas</strong> · Embat <strong style="color: var(--accent);">€1.2M</strong></p>
           </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 12px; padding: 13px 16px; border: 1px solid var(--gold); border-radius: 12px; background: var(--gold-wash);">
-          <span style="font-size: 1.3em;">🌍</span>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 13px 16px; border: 1px solid var(--tier2); border-radius: 12px; background: var(--tier2-wash);">
           <div style="flex: 1;">
             <p style="font-size: 0.8em; font-weight: 600; color: var(--text);">Si cruza fronteras → se anticipa 60 días</p>
-            <p style="font-size: 0.68em; color: var(--muted);">las empresas ahorran <strong style="color: var(--gold);">~€28.5M/año</strong> · Embat <strong style="color: var(--accent);">€1.1M</strong></p>
+            <p style="font-size: 0.68em; color: var(--muted);">las empresas ahorran <strong style="color: var(--tier2);">~€28.5M/año</strong> · Embat <strong style="color: var(--accent);">€1.1M</strong></p>
           </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 12px; padding: 13px 16px; border: 1px solid var(--red); border-radius: 12px; background: var(--red-wash);">
-          <span style="font-size: 1.3em;">⏳</span>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 13px 16px; border: 1px solid var(--tier3); border-radius: 12px; background: var(--tier3-wash);">
           <div style="flex: 1;">
             <p style="font-size: 0.8em; font-weight: 600; color: var(--text);">Si falta → se financia con fecha e importe</p>
-            <p style="font-size: 0.68em; color: var(--muted);">41 empresas en riesgo <strong style="color: var(--red);">€11.4M agujero</strong> · Embat <strong style="color: var(--accent);">€105K</strong></p>
+            <p style="font-size: 0.68em; color: var(--muted);">41 empresas en riesgo <strong style="color: var(--tier3);">€11.4M agujero</strong> · Embat <strong style="color: var(--accent);">€105K</strong></p>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 12px; padding: 13px 16px; border: 1px solid var(--border); border-radius: 12px;">
-          <span style="font-size: 1.3em;">📊</span>
           <div style="flex: 1;">
             <p style="font-size: 0.8em; font-weight: 600; color: var(--text);">Y todas lo ven → Monitor Embat</p>
             <p style="font-size: 0.68em; color: var(--muted);">1,286 empresas con visibilidad total · Embat <strong style="color: var(--accent);">€1.9M</strong></p>
@@ -613,8 +744,8 @@
     <p style="text-align: center; margin-top: 1.5em; font-size: 0.8em; color: var(--muted); font-style: italic;">
       Se crean ~€50M de valor al año para las empresas. Embat captura €4.2M — sin captar un solo cliente nuevo.
     </p>
-    <div class="page-num">6 / 10</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 60%;"></div></div>
+    <div class="page-num">7 / 11</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 64%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -630,22 +761,22 @@
 
     <div style="margin-bottom: 1.5em;">
       <div class="bar-row">
-        <span class="bar-label" style="width: 220px;">📊 Monitor Embat (módulo)</span>
-        <div class="bar"><div class="bar-fill green" style="width: 45%;"></div></div>
-        <span class="bar-val" style="color: var(--green);">€1.9M · 45%</span>
+        <span class="bar-label" style="width: 220px;">Monitor Embat (módulo)</span>
+        <div class="bar"><div class="bar-fill t1" style="width: 45%;"></div></div>
+        <span class="bar-val" style="color: var(--tier1);">€1.9M · 45%</span>
       </div>
       <div class="bar-row">
-        <span class="bar-label" style="width: 220px;">💤 Colocación del excedente</span>
+        <span class="bar-label" style="width: 220px;">Colocación del excedente</span>
         <div class="bar"><div class="bar-fill" style="width: 29%;"></div></div>
         <span class="bar-val" style="color: var(--accent);">€1.2M · 29%</span>
       </div>
       <div class="bar-row">
-        <span class="bar-label" style="width: 220px;">🌍 Divisa anticipada</span>
-        <div class="bar"><div class="bar-fill gold" style="width: 26%;"></div></div>
-        <span class="bar-val" style="color: var(--gold);">€1.1M · 26%</span>
+        <span class="bar-label" style="width: 220px;">Divisa anticipada</span>
+        <div class="bar"><div class="bar-fill t2" style="width: 26%;"></div></div>
+        <span class="bar-val" style="color: var(--tier2);">€1.1M · 26%</span>
       </div>
       <div class="bar-row">
-        <span class="bar-label" style="width: 220px; color: var(--faint);">⏳ Financiación (fuga pequeña)</span>
+        <span class="bar-label" style="width: 220px; color: var(--faint);">Financiación (fuga pequeña)</span>
         <div class="bar"><div class="bar-fill" style="width: 1%; opacity: 0.3;"></div></div>
         <span class="bar-val" style="color: var(--faint);">€105K · ~2%</span>
       </div>
@@ -656,8 +787,8 @@
       <p style="font-size: 0.72em; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px;">Revenue anual medido sobre la cartera (banda €3.0–5.4M)</p>
       <p style="font-size: 0.65em; color: var(--faint); margin-top: 8px;">Con las hipótesis del brief sobre bases convertidas a EUR. Crudo sin convertir: €12.1M — <strong style="color: #fff;">nosotros lo presentamos corregido</strong>.</p>
     </div>
-    <div class="page-num">7 / 10</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 70%;"></div></div>
+    <div class="page-num">8 / 11</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 73%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -673,23 +804,23 @@
 
     <div class="g2" style="gap: 14px;">
       <!-- Palanca 1 · pasivo -->
-      <div style="padding: 18px; border: 1px solid var(--green); border-radius: 12px; background: var(--green-wash);">
-        <p style="font-size: 0.58em; text-transform: uppercase; letter-spacing: 0.12em; color: var(--green); font-weight: 600; margin-bottom: 5px;">1 · Barrer el excedente · el pasivo</p>
+      <div style="padding: 18px; border: 1px solid var(--tier1); border-radius: 12px; background: var(--tier1-wash);">
+        <p style="font-size: 0.58em; text-transform: uppercase; letter-spacing: 0.12em; color: var(--tier1); font-weight: 600; margin-bottom: 5px;">1 · Barrer el excedente · el pasivo</p>
         <p style="font-size: 0.86em; font-weight: 700; color: var(--text); margin-bottom: 5px;">Creamos un producto que el CFO no tiene delante</p>
         <p style="font-size: 0.68em; color: var(--muted); margin-bottom: 10px;"><strong style="color: var(--text);">€344M</strong> ociosos en 370 empresas y <strong style="color: var(--text);">368 sin cuenta de ahorro</strong>. No hay que desplazar un depósito: hay que crear el riel.</p>
         <div style="display: flex; justify-content: space-between; font-size: 0.7em; border-top: 1px solid var(--border); padding-top: 7px;">
-          <span>Gana el CFO <strong style="color: var(--green);">€1.1–2.2K/año</strong></span>
+          <span>Gana el CFO <strong style="color: var(--tier1);">€1.1–2.2K/año</strong></span>
           <span>Gana Embat <strong style="color: var(--accent);">€1.2M/año</strong></span>
         </div>
         <p style="font-size: 0.63em; color: var(--faint); margin-top: 7px;">El cliente gana más que Embat: impacto primero, spread después. Mañana este riel es <strong>el depósito</strong>.</p>
       </div>
       <!-- Palanca 2 · activo -->
-      <div style="padding: 18px; border: 1px solid var(--red); border-radius: 12px; background: var(--red-wash);">
-        <p style="font-size: 0.58em; text-transform: uppercase; letter-spacing: 0.12em; color: var(--red); font-weight: 600; margin-bottom: 5px;">2 · Anticipar cobros · el activo</p>
+      <div style="padding: 18px; border: 1px solid var(--tier3); border-radius: 12px; background: var(--tier3-wash);">
+        <p style="font-size: 0.58em; text-transform: uppercase; letter-spacing: 0.12em; color: var(--tier3); font-weight: 600; margin-bottom: 5px;">2 · Anticipar cobros · el activo</p>
         <p style="font-size: 0.86em; font-weight: 700; color: var(--text); margin-bottom: 5px;">Caja hoy sin pedir un préstamo nuevo</p>
         <p style="font-size: 0.68em; color: var(--muted); margin-bottom: 10px;"><strong style="color: var(--text);">€795M</strong> de factura vencida factorable en 320 empresas tensas. Un banco ya presta; nadie ve a la vez <strong style="color: var(--text);">caja viva + factura impagada + que no hay póliza</strong>.</p>
         <div style="display: flex; justify-content: space-between; font-size: 0.7em; border-top: 1px solid var(--border); padding-top: 7px;">
-          <span>Agujero real <strong style="color: var(--red);">€11.4M</strong></span>
+          <span>Agujero real <strong style="color: var(--tier3);">€11.4M</strong></span>
           <span>Factoring <strong style="color: var(--accent);">€6.7M</strong> <span style="color: var(--faint);">(one-shot)</span></span>
         </div>
         <p style="font-size: 0.63em; color: var(--faint); margin-top: 7px;">22 de 26 agujeros factorables siguen abiertos: €129M de cobros frente a €8,05M que el grupo no cubre. Mañana este libro es <strong>el activo</strong>.</p>
@@ -697,16 +828,16 @@
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 10px;">
-      <div style="padding: 12px 14px; border: 1px solid var(--gold); border-radius: 12px; background: var(--gold-wash);">
-        <p style="font-size: 0.68em; font-weight: 600; color: var(--text); margin-bottom: 3px;">🌍 Divisa · caja inmediata</p>
+      <div style="padding: 12px 14px; border: 1px solid var(--tier2); border-radius: 12px; background: var(--tier2-wash);">
+        <p style="font-size: 0.68em; font-weight: 600; color: var(--text); margin-bottom: 3px;">Divisa · caja inmediata</p>
         <p style="font-size: 0.63em; color: var(--muted);">€2,108M/año de notional · Embat <strong style="color: var(--accent);">€1.1M</strong>. Dinero real, pero <strong>no crea libro</strong>: Embat ya vende el riel.</p>
       </div>
       <div style="padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;">
-        <p style="font-size: 0.68em; font-weight: 600; color: var(--text); margin-bottom: 3px;">🤝 El punto dulce · 110 empresas</p>
+        <p style="font-size: 0.68em; font-weight: 600; color: var(--text); margin-bottom: 3px;">El punto dulce · 110 empresas</p>
         <p style="font-size: 0.63em; color: var(--muted);">Con excedente <strong>y</strong> cobros vencidos (€141M + €275M). Aquí no hay un producto suelto: <strong>cobrar primero, colocar el resto</strong>.</p>
       </div>
       <div style="padding: 12px 14px; border: 1px dashed var(--border); border-radius: 12px;">
-        <p style="font-size: 0.68em; font-weight: 600; color: var(--faint); margin-bottom: 3px;">⛔ Lo que NO lidera</p>
+        <p style="font-size: 0.68em; font-weight: 600; color: var(--faint); margin-bottom: 3px;">Lo que NO lidera</p>
         <p style="font-size: 0.63em; color: var(--faint);">Reserve (€37M) y seguro (€15M) crudos son <strong>cola del generador</strong>, no identidad. Y factoring ∩ seguro = 405: no se suman.</p>
       </div>
     </div>
@@ -714,8 +845,8 @@
     <p style="text-align: center; margin-top: 0.6em; font-size: 0.78em; color: var(--muted); font-style: italic;">
       Hoy un partner ejecuta. El score ya es la política del banco que Embat todavía no es.
     </p>
-    <div class="page-num">8 / 10</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 80%;"></div></div>
+    <div class="page-num">9 / 11</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 82%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -730,9 +861,9 @@
     </p>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
-      <div style="padding: 20px; border: 1px solid var(--green); border-radius: 12px; background: var(--green-wash);">
-        <p style="font-size: 0.62em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--green); font-weight: 600; margin-bottom: 6px;">Capa 1 · El cliente</p>
-        <p style="font-family: var(--font-num); font-size: 1.5em; font-weight: 700; color: var(--green);">~€50M</p>
+      <div style="padding: 20px; border: 1px solid var(--tier3); border-radius: 12px; background: var(--tier3-wash);">
+        <p style="font-size: 0.62em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--tier3); font-weight: 600; margin-bottom: 6px;">Capa 1 · El cliente</p>
+        <p style="font-family: var(--font-num); font-size: 1.5em; font-weight: 700; color: var(--tier3);">~€50M</p>
         <p style="font-size: 0.68em; color: var(--muted);">al año de valor creado para las empresas: €28.5M de divisa + €7–10M de rendimiento + €11.4M de impagos evitados</p>
         <p style="font-size: 0.66em; color: var(--faint); margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px;">El cliente no paga: gana. Es lo que hace la venta.</p>
       </div>
@@ -742,9 +873,9 @@
         <p style="font-size: 0.68em; color: var(--muted);">al año (banda €3.0–5.4M) sin captar un cliente nuevo: módulo + 100pb de excedente + 15pb de divisa</p>
         <p style="font-size: 0.66em; color: var(--faint); margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px;">Es lo que sostiene el negocio hoy.</p>
       </div>
-      <div style="padding: 20px; border: 1px solid var(--gold); border-radius: 12px; background: var(--gold-wash);">
-        <p style="font-size: 0.62em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); font-weight: 600; margin-bottom: 6px;">Capa 3 · Intermediación</p>
-        <p style="font-family: var(--font-num); font-size: 1.5em; font-weight: 700; color: var(--gold);">4×</p>
+      <div style="padding: 20px; border: 1px solid var(--tier2); border-radius: 12px; background: var(--tier2-wash);">
+        <p style="font-size: 0.62em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--tier2); font-weight: 600; margin-bottom: 6px;">Capa 3 · Intermediación</p>
+        <p style="font-family: var(--font-num); font-size: 1.5em; font-weight: 700; color: var(--tier2);">4×</p>
         <p style="font-size: 0.68em; color: var(--muted);">el margen cuando Embat deje de ser intermediario y tome <strong>el depósito del barrido (pasivo)</strong> y <strong>el libro de anticipos (activo)</strong>: mismo score, mismo dato, con balance propio</p>
         <p style="font-size: 0.66em; color: var(--faint); margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px;">Es lo que justifica la valoración.</p>
       </div>
@@ -763,18 +894,18 @@
         <p style="font-size: 0.66em; color: var(--muted);">balance del socio · €2.3M</p>
       </div>
       <div class="arrow" style="align-self: center;">→</div>
-      <div style="flex: 1; padding: 14px 16px; border: 1px solid var(--gold); border-radius: 12px; background: var(--gold-wash); text-align: center;">
-        <p style="font-size: 0.58em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 4px;">Futuro · Banco</p>
+      <div style="flex: 1; padding: 14px 16px; border: 1px solid var(--tier2); border-radius: 12px; background: var(--tier2-wash); text-align: center;">
+        <p style="font-size: 0.58em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--tier2); margin-bottom: 4px;">Futuro · Banco</p>
         <p style="font-size: 0.78em; font-weight: 600; color: var(--text);">Capturamos el NIM</p>
-        <p style="font-size: 0.66em; color: var(--muted);">balance propio · <strong style="color: var(--gold);">€4.8M</strong></p>
+        <p style="font-size: 0.66em; color: var(--muted);">balance propio · <strong style="color: var(--tier2);">€4.8M</strong></p>
       </div>
     </div>
 
     <p style="text-align: center; margin-top: 1.2em; font-size: 0.76em; color: var(--muted); font-style: italic;">
       Con €120M colocados al 35% de adopción: €1.2M de fee como intermediario → €4.8M de NIM como banco. El score es el mismo.
     </p>
-    <div class="page-num">9 / 10</div>
-    <div class="progress-track"><div class="progress-fill" style="width: 90%;"></div></div>
+    <div class="page-num">10 / 11</div>
+    <div class="progress-track"><div class="progress-fill" style="width: 91%;"></div></div>
   </div>
 
   <!-- ═══════════════════════════════════════
@@ -793,7 +924,7 @@
     <p style="font-size: 0.72em; color: var(--faint); letter-spacing: 0.12em; text-transform: uppercase;">
       Xakal · Embat · HackSpain 2026
     </p>
-    <div class="page-num">10 / 10</div>
+    <div class="page-num">11 / 11</div>
     <div class="progress-track"><div class="progress-fill" style="width: 100%;"></div></div>
   </div>
 
