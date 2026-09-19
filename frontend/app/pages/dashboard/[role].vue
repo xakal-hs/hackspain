@@ -271,9 +271,11 @@ const connected = activeCompanies.toLocaleString('es-ES')
         <div class="wk__source">
           <span v-if="role === 'embat'" class="chip chip--neutral">
             {{
-              portfolioSource === 'supabase'
-                ? 'Tesorería real · producto simulado'
-                : 'Datos de demostración'
+              portfolioSource === 'api'
+                ? 'Score real · condiciones simuladas'
+                : portfolioSource === 'supabase'
+                  ? 'Tesorería real · producto simulado'
+                  : 'Datos de demostración'
             }}
           </span>
           <span class="chip chip--neutral">{{ currentMonth }}</span>
@@ -907,7 +909,11 @@ const connected = activeCompanies.toLocaleString('es-ES')
         </div>
 
         <footer class="wk__foot">
-          <template v-if="role === 'embat' && portfolioSource === 'supabase'">
+          <template v-if="role === 'embat' && portfolioSource === 'api'">
+            Score, decisión, tesorería y flujos vienen del modelo X-Ray sobre las
+            1.286 empresas. Nombres, sectores y condiciones de oferta son ficticios.
+          </template>
+          <template v-else-if="role === 'embat' && portfolioSource === 'supabase'">
             Tesorería desde Supabase. Score, nombres, sectores, decisiones y
             condiciones todavía son simulados.
           </template>

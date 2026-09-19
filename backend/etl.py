@@ -316,6 +316,20 @@ def _invoices_monthly(months: pl.DataFrame) -> pl.DataFrame:
         b = o.group_by("company_id", "side").agg(
             overdue=pl.col("abs_amt").sum(),
             overdue_90=pl.col("abs_amt").filter(pl.col("due_date") < pl.Series([m]).dt.offset_by("-2mo")[0]).sum())
+        # DSO: días que tardan en pagar los clientes, sobre las facturas AR cobradas en 3 meses.
+        # Solo cuenta lo cobrado ANTES del cierre: es el dato que el tesorero tenía ese día.
+        # se excluyen las facturas cobradas ANTES de emitirse (dato incoherente del generador):
+        # un retraso negativo no es un retraso, y arrastraba la media a -40 días
+        ar_paid = inv.filter(pl.col("side") == "ar", paid_by, pl.col("issuance_date") < m_end,
+                             pl.col("payment_date") >= pl.col("issuance_date"),
+                             pl.col("payment_date") >= pl.Series([m_end]).dt.offset_by("-3mo")[0])
+        ds = ar_paid.group_by("company_id").agg(
+            dso_ar_3m=(pl.col("payment_date") - pl.col("issuance_date")).dt.total_days().mean())
+        # AR pendiente de cobro al cierre: el denominador del «% vencido» (mismo filtro que `o`
+        # pero sin exigir que ya haya vencido, así lo vencido es un subconjunto de lo pendiente)
+        oa = (inv.filter(pl.col("side") == "ar", pl.col("issuance_date") < m_end, ~paid_by,
+                         pl.col("due_date") >= pl.Series([m_end]).dt.offset_by("-12mo")[0])
+                 .group_by("company_id").agg(open_ar=pl.col("abs_amt").sum()))
         # concentración de clientes (HHI de las facturas AR emitidas en 6 meses)
         ar6 = inv.filter(pl.col("side") == "ar", pl.col("issuance_date") < m_end,
                          pl.col("issuance_date") >= pl.Series([m_end]).dt.offset_by("-6mo")[0],
@@ -341,7 +355,9 @@ def _invoices_monthly(months: pl.DataFrame) -> pl.DataFrame:
                     .with_columns(lost_share=pl.when(pl.col("n_prev") >= 3).then(pl.col("lost_share"))).drop("n_prev"))
         h = (h.join(cu, on="company_id", how="full", coalesce=True)
               .join(lost, on="company_id", how="full", coalesce=True)
-              .join(cov, on="company_id", how="full", coalesce=True))
+              .join(cov, on="company_id", how="full", coalesce=True)
+              .join(ds, on="company_id", how="full", coalesce=True)
+              .join(oa, on="company_id", how="full", coalesce=True))
         ab = a.join(b, on=["company_id", "side"], how="full", coalesce=True)
         ab = ab.pivot(on="side", index="company_id", values=["late_share", "overdue", "overdue_90"])
         rows.append(ab.join(h, on="company_id", how="full", coalesce=True).with_columns(month=pl.lit(m)))

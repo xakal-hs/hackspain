@@ -26,6 +26,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import decision as dcs
 import predict as prd
 import preprocessing as pre
+from models import CompanyDetail, CompanySummary, Explanation, MonthFlow, PortfolioResponse
 
 ARTIFACT = Path(os.getenv("XRAY_ARTIFACT", Path(__file__).parent / "artifacts/scorer.joblib"))
 TREND_MONTHS = 3
@@ -33,9 +34,13 @@ TREND_EPS = 2.0          # menos de 2 puntos en 3 meses es ruido, no tendencia
 ALERT_DROP = 10.0        # caída de 3 meses que dispara aviso
 
 
+FLOW_MONTHS = 12         # meses de flujos y de serie de nota que se envían al frontend
+
+
 class State:
     panel: pd.DataFrame
     scored: pd.DataFrame
+    cartera: pd.DataFrame     # una fila por empresa, ya con el contrato del frontend
     scorer: prd.Scorer        # nota adversa: la publicada
     expansion: prd.Scorer     # nota de expansión: mismas features, calibrada con la cara positiva
 
@@ -62,8 +67,9 @@ def train(force: bool = False) -> None:
     g = S.scored.sort_values(["company_id", "month"]).groupby("company_id")
     S.scored["delta3"] = S.scored["score"] - g["score"].shift(TREND_MONTHS)
     # la decisión: vetos por encima de la nota
-    dec = dcs.decide_panel(S.scored, S.panel)[["company_id", "month", "accion", "vetos", "avisos"]]
+    dec = dcs.decide_panel(S.scored, S.panel)[["company_id", "month", "accion", "vetos", "avisos", "razon"]]
     S.scored = S.scored.merge(dec, on=["company_id", "month"])
+    S.cartera = _cartera()
 
 
 @asynccontextmanager
@@ -82,6 +88,11 @@ def _num(v):
     if v is None or (isinstance(v, float) and not np.isfinite(v)) or pd.isna(v):
         return None
     return v.item() if hasattr(v, "item") else v
+
+
+def _round(v, nd: int):
+    v = _num(v)
+    return None if v is None else round(float(v), nd)
 
 
 def _trend(delta: float | None) -> str:
@@ -114,6 +125,41 @@ def _static() -> pd.DataFrame:
     return S.panel.sort_values("month").groupby("company_id")[cols].last().reset_index(drop=False, names="idx")
 
 
+def _cartera() -> pd.DataFrame:
+    """Una fila por empresa con el contrato `CompanySummary` del frontend.
+
+    Las magnitudes se publican en la unidad que el producto enseña, no en la del modelo:
+    `runway` puntúa como log(1 + caja/gasto) pero aquí van **meses de caja**, que es lo
+    que lee un CFO. Lo que el panel no mide se queda en null: inventar un denominador
+    para llenar un hueco de la interfaz es peor que decir «sin dato».
+    """
+    p = S.panel.sort_values(["company_id", "month"]).copy()
+    burn = np.maximum(p.out3 / 3, p.out12 / 12).replace(0, np.nan)
+    p["meses_caja"] = p.cash_end / burn
+    p["margin_3m"] = (p.in3 - p.out3) / (p.in3 + p.out3).replace(0, np.nan)
+    # % del pendiente de cobro con más de 60 días de retraso. El vencido total no sirve:
+    # el generador acumula AR que nunca se cobra y la ratio se satura (97 % de mediana).
+    p["overdue_share"] = 100 * p.overdue_90_ar / p.open_ar.replace(0, np.nan)
+    g = p.groupby("company_id")
+    p["meses_caja_prev"] = g["meses_caja"].shift(TREND_MONTHS)
+    p["dso_prev"] = g["dso_ar_3m"].shift(TREND_MONTHS)
+
+    flows = {c: [MonthFlow(month=f"{m:%Y-%m}", **{"in": _num(i) or 0.0, "out": _num(o) or 0.0}, cash=_num(k) or 0.0)
+                 for m, i, o, k in zip(d.month, d.inflow, d.outflow, d.cash_end)]
+             for c, d in p.groupby("company_id")[["month", "inflow", "outflow", "cash_end"]].tail(FLOW_MONTHS).groupby(p.company_id)}
+
+    s = S.scored.sort_values(["company_id", "month"])
+    hist = {c: [round(float(v), 1) for v in d] for c, d in s.groupby("company_id")["score"].apply(list).items()}
+    n = s.groupby("company_id").size()
+
+    last_p = p.groupby("company_id").last()
+    out = s.groupby("company_id").last().join(last_p, rsuffix="_p")
+    out["n_months"] = n
+    out["flows"] = out.index.map(flows)
+    out["history"] = out.index.map(lambda c: hist[c][-FLOW_MONTHS:])
+    return out.reset_index()
+
+
 # ------------------------------------------------------------------ endpoints
 @app.get("/health")
 def health():
@@ -121,36 +167,38 @@ def health():
             "ultimo_mes": f"{S.scored.month.max():%Y-%m}", "features": S.scorer.features}
 
 
-@app.get("/api/companies")
+@app.get("/api/companies", response_model=PortfolioResponse)
 def companies(band: str | None = Query(None, pattern="^(sano|vigilar|riesgo)$"), limit: int = 2000):
     """Cartera: el último mes de cada empresa, ordenada por nota ascendente (lo peor arriba)."""
-    last = S.scored.sort_values("month").groupby("company_id").last().reset_index()
-    n = S.scored.groupby("company_id").size()
-    st = _static().set_index("company_id")
+    c = S.cartera
     if band:
-        last = last[last.band == band]
+        c = c[c.band == band]
     out = []
-    for _, r in last.sort_values("score").head(limit).iterrows():
-        extra = st.loc[r.company_id] if r.company_id in st.index else {}
-        out.append({
-            "company_id": r.company_id, "group_id": r.group_id,
-            "currency": _num(extra.get("currency")) or "EUR",
-            "has_erp": bool(extra.get("has_erp", False)),
-            "n_months": int(n[r.company_id]), "last_month": f"{r.month:%Y-%m}",
-            "score": round(float(r.score), 1), "band": r.band,
-            "score_expansion": round(float(r.score_expansion), 1),
-            "delta3": _num(r.delta3) and round(float(r.delta3), 1),
-            "trend": _trend(_num(r.delta3)),
-            "accion": r.accion, "accion_label": dcs.ACCIONES[r.accion],
-            "vetos": [v for v in str(r.vetos).split(",") if v],
-            "avisos": [v for v in str(r.avisos).split(",") if v],
-            "alert": _alert(r), "dormant": bool(r.get("c_regla_inactividad", 0) != 0),
-            "confidence": round(float(r.confidence), 2),
-        })
-    return {"companies": out, "source": "api"}
+    for _, r in c.sort_values("score").head(limit).iterrows():
+        d3 = _num(r.delta3)
+        out.append(CompanySummary(
+            company_id=r.company_id, group_id=r.group_id,
+            currency=r.get("currency") or "EUR", has_erp=bool(r.get("has_erp", False)),
+            n_months=int(r.n_months), last_month=f"{r.month:%Y-%m}",
+            score=round(float(r.score), 1), band=r.band,
+            delta3_q50=round(float(d3), 1) if d3 is not None else 0.0, trend=_trend(d3),
+            alert=_alert(r), dormant=bool(r.get("c_regla_inactividad", 0) != 0),
+            confidence=round(float(r.confidence), 2),
+            history=r.history, flows=r.flows,
+            cash_end=_num(r.cash_end),
+            runway_now=_round(r.meses_caja, 1), runway_prev=_round(r.meses_caja_prev, 1),
+            dso_now=_round(r.dso_ar_3m, 0), dso_prev=_round(r.dso_prev, 0),
+            overdue_share=_round(r.overdue_share, 1),
+            margin_3m=_round(r.margin_3m, 4), debt_service_ratio_3m=_round(r.debt_burden, 4),
+            accion=r.accion, accion_label=dcs.ACCIONES[r.accion], razon=r.razon,
+            vetos=[v for v in str(r.vetos).split(",") if v],
+            avisos=[v for v in str(r.avisos).split(",") if v],
+            score_expansion=round(float(r.score_expansion), 1),
+        ))
+    return PortfolioResponse(companies=out)
 
 
-@app.get("/api/companies/{cid}")
+@app.get("/api/companies/{cid}", response_model=CompanyDetail)
 def company(cid: str):
     """Ficha completa: serie histórica, pilares del último mes y probabilidades."""
     rows = _company_row(cid)
@@ -210,7 +258,7 @@ def _signals(cid: str, rows: pd.DataFrame) -> list[dict]:
     return sorted(out, key=lambda s: s["points"])
 
 
-@app.get("/api/companies/{cid}/explain")
+@app.get("/api/companies/{cid}/explain", response_model=Explanation)
 def explain(cid: str, month: str | None = None):
     """Δnota del mes descompuesto por feature. Las contribuciones suman el delta, exacto."""
     _company_row(cid)

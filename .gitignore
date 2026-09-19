@@ -16,3 +16,4 @@ backend/__pycache__/
 
 # Machine-local Claude permissions and authentication preferences.
 .claude/settings.local.json
+.playwright-mcp/

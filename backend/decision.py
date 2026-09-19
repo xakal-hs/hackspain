@@ -161,6 +161,9 @@ def decide_panel(scored: pd.DataFrame, panel: pd.DataFrame) -> pd.DataFrame:
     m["vetos"] = [",".join(o["vetos"]) for o in out]
     m["avisos"] = [",".join(o.get("avisos", [])) for o in out]
     m["n_vetos"] = [len(o["vetos"]) for o in out]
+    # la primera razón es la que manda (el veto bloqueante, o la banda): es la frase que
+    # se enseña como acción, para que la interfaz no tenga que inventarse el motivo
+    m["razon"] = [o["razones"][0]["texto"] if o.get("razones") else "" for o in out]
     return m
 
 
