@@ -29,9 +29,9 @@ Sigue **íntegro** `.devin/workflows/autoresearch/fase1_prestamista.md`. Usa sub
 
 **Puerta 1 (breve).** Muestra al usuario un resumen de 10 líneas: el comprador, los 3 criterios de decisión y el nº de premisas candidatas. En modo piloto, pregunta si sigue o si quiere ajustar la política antes del consejo; si no responde o dice «sigue», continúa.
 
-## Fase 2 · Consejo (data-lead)
+## Fase 2 · Consejo (data-lead, debate adversarial)
 
-Sigue **íntegro** `.devin/workflows/autoresearch/fase2_consejo.md`. Lanza los seis consejeros (`prestamista`, `cfo`, `auditor-datos`, `riesgo-modelo`, `abogado-diablo`, `cobrador`) con `run_subagent`, ronda 1 en paralelo (`is_background: true`) —cada uno lee la base de evidencia y corre sus propias consultas—, sintetiza, ronda 2 de refutación, y **delega la consolidación final** en un subagente `consolidador` (GPT-5.6 Sol, otra familia que tú) para no sesgar la síntesis. Producto: `salida/premisas.jsonl` con **>100 premisas**, **todas con `evidencia`**.
+Sigue **íntegro** `.devin/workflows/autoresearch/fase2_consejo.md`. Lanza los seis consejeros (`prestamista`, `cfo`, `auditor-datos`, `riesgo-modelo`, `abogado-diablo`, `cobrador`) con `run_subagent`, ronda 1 en paralelo (`is_background: true`) —cada uno lee la base de evidencia y corre sus propias consultas—, sintetiza, y después **ronda 2 de interpelación cara a cara (no anónima)**: cada consejero interpela por su nombre a otros dos con preguntas falsables y **no acepta ninguna afirmación ajena sin una medición**. La ronda 3 resuelve cada disputa con un número. **La postura por defecto es la duda; el consenso cómodo es un fallo.** Después el consejo **debate las preguntas abiertas de `DEBATE.md`** (¿son correctas las anclas E1-E4? ¿la etiqueta de tensión es circular? ¿tres de las cuatro no existen para empresas nuevas? ¿una nota única diluye los eventos? ¿la parada es laxa?) y escribe `salida/consejo/debate_veredicto.md`. **Delega la consolidación final** en un subagente `consolidador` (GPT-5.6 Sol, otra familia que tú); no puede descartar un remedio accionable. Producto: `salida/premisas.jsonl` con **>100 premisas**, **todas con `evidencia`**.
 
 Después, **primero congela umbrales** (solo formato, sin evaluar) y luego evalúa:
 
@@ -51,7 +51,7 @@ Corrige las premisas mal formadas (estado `error`) hasta que no quede ninguna, y
 
 Sigue **íntegro** `.devin/workflows/autoresearch/fase3_autoresearch.md`. Crea la rama `autoresearch/<fecha>`, captura la línea base y ejecuta el bucle hasta cumplir los criterios de parada (o `iteraciones_max`). Un cambio por iteración, con su diagnóstico y su registro en `salida/iteraciones/`. Usa subagentes `implementer` para el cambio y `reviewer` para revisarlo.
 
-No aceptes ningún cambio que baje el AUC del nivel, rompa los tests o deje de cuadrar la explicación aditiva. El forecaster LGBM queda fuera.
+**El objetivo es por evento, no el promedio.** La PM (media de cuatro eventos) se reporta pero **no decide**: diluye cada evento (R10). Acepta un cambio si mejora la nota del **evento objetivo** y **ningún evento empeora por encima de un error típico** (±0,012-0,025). Un evento que empeora dentro del error no bloquea. La meseta son **cuatro** iteraciones seguidas sin mejora, no dos. No aceptes ningún cambio que rompa los tests o deje de cuadrar la explicación aditiva. El forecaster LGBM queda fuera.
 
 ## Fase 4 · Sala de situaciones (solo modo completo)
 

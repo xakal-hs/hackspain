@@ -30,9 +30,10 @@ Para cada premisa que falla, decide **de quién es la culpa** y escríbelo en `s
 
 ### 3 · Proponer un cambio mínimo
 Un solo cambio por iteración, el más pequeño que pueda hacer pasar la premisa. Fuentes de cambio, en orden de preferencia:
+0. **Actuar sobre `salida/consejo/debate_veredicto.md`**: si el consejo aprobó un remedio (arreglar una etiqueta circular, poner `tension_6m = null` en `group_funded`, separar la nota de expansión), esa es la primera candidata, porque ataca la base.
 1. Corregir la **dirección o el signo** de una feature (si los datos la contradicen, el peso debería ser 0, D12).
 2. Añadir una **feature del brainstorming** con señal ya medida (`payee_concentration`, `lost_accel`, `payroll_cv`, `hhi_ap_6m`, `oper_persistence_6m`; R07).
-3. Ajustar una **definición de evento** (`src/targets.py`) si la premisa la delata como mal definida.
+3. Ajustar una **definición de evento** (`src/targets.py`) si la premisa la delata como mal definida o circular.
 4. Cambiar un **umbral** (bandas, histéresis R12, criterio de bache R11).
 
 Prohibido: dar más peso a una feature solo porque sí; romper la **explicación aditiva exacta** (`explain()` debe seguir sumando al céntimo); introducir no linealidad por feature (R09: no aporta); meter el apagado en la calibración (R06).
@@ -44,12 +45,15 @@ Implementa el cambio en `src/` (nunca en `data/`). Vuelve a correr, en este orde
 3. `cd research && uv run pytest -q tests` → verde.
 4. `explain()` cuadra (test de explicación exacta).
 
-### 5 · Aceptar o descartar
-La medida única es la **PM** (`puntuacion.py`): la media del AUC del nivel frente a E1-E4. Acepta el cambio solo si **todas** se cumplen:
+### 5 · Aceptar o descartar (objetivo **por evento**, no el promedio)
+El **promedio** de cuatro eventos (PM) **diluye** cada uno (D12/R10): `runway` tiene coeficiente 3,414 para tensión y 0,000 para expansión, así que promediar castiga un cambio que mejora la anticipación porque empeora la expansión. **Se reporta la PM, pero no decide.** El objetivo es **por evento**: la **nota adversa** (tensión + incumplimiento + caída) y, si el debate aprobó separarlas, la **nota de expansión**.
+
+Acepta el cambio solo si **todas** se cumplen:
 - La premisa objetivo pasa.
-- La **PM sube** (o empata) y no empeora ningún evento por sí solo.
+- La **nota del evento objetivo mejora** (AUC fuera de grupo, `score_oof`), no el promedio.
+- **Ningún evento empeora por encima de un error típico** del instrumento (±0,012-0,025 según evento, ±0,006-0,014 en todas las filas). Un evento que empeora **dentro** del error no bloquea; **fuera** del error, sí.
 - Ninguna premisa **central** que pasaba antes deja de pasar.
-- Los **guardarraíles** de `puntuacion.py` no empeoran (deterioro, mejora, `skill_vs_ar1_h3`, cobertura 80 %).
+- Los **guardarraíles** de `puntuacion.py` no empeoran más allá del error típico (deterioro, mejora, `skill_vs_ar1_h3`, cobertura 80 %).
 - La **separación del ranking** no empeora: la tasa de tensión del 20 % mejor por score no sube, y la del 20 % peor no baja.
 - Los tests siguen verdes.
 
@@ -67,7 +71,7 @@ Escribe `salida/iteraciones/iter_NNN/` con: `diagnostico.md`, `cambio.md` (el di
 ## Criterios de parada
 
 - No queda ninguna premisa central en `falla` y las verificables pasan o están justificadas.
-- Dos iteraciones seguidas sin mejora del AUC (meseta): para y documenta el techo.
+- **Cuatro** iteraciones seguidas sin mejora de la **nota del evento objetivo** (meseta real): para y documenta el techo. **Dos no es una meseta**: con el margen de error declarado (±0,012-0,025 por evento), dos iteraciones sin mejora son indistinguibles del ruido. Antes de declarar meseta, comprueba que **no queda ningún cambio candidato sin probar** (features del brainstorming, remedios del `debate_veredicto.md`, umbrales).
 - Presupuesto de iteraciones agotado (por defecto 12).
 
 ## Cierre

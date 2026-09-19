@@ -36,6 +36,20 @@ respeta el **orden canónico** 0→1→2→3→4→5. El fichero `ORQUESTADOR.md
 (`modo: piloto | completo`, `iteraciones_max`) y dos puertas de revisión (la política de préstamo y las
 premisas centrales).
 
+## El debate del consejo (adversarial, no monólogos)
+
+El consejo **no produce premisas: las rompe**. La postura por defecto es la **duda**: ninguna afirmación
+de otro rol se acepta sin una medición (`n`, tasa, lift, AUC, `file:line`). La **ronda 2 es una
+interpelación cara a cara, no anónima**: cada consejero interpela por su nombre a otros dos con preguntas
+falsables y ataca (o acepta con número) al menos tres afirmaciones ajenas. La ronda 3 resuelve cada
+disputa con un dato. El consenso cómodo es un fallo.
+
+`DEBATE.md` recoge las **preguntas abiertas** que el consejo debe debatir por medición —si las anclas
+E1-E4 son las correctas, si la etiqueta de tensión es circular (`targets.py:84-95`), si tres de las
+cuatro no existen para empresas nuevas, si una nota única diluye los eventos (R10), si la regla de parada
+es laxa—. Son **acusaciones a verificar o refutar**, no conclusiones. Producto:
+`salida/consejo/debate_veredicto.md`, y sus remedios accionables pasan a la fase 3.
+
 ## Fases (por si quieres reanudar o inspeccionar)
 
 | Fase | Comando | Qué produce | Toca el repo |
