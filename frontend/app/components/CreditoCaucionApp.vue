@@ -71,12 +71,15 @@ const dias = (v: number | null) =>
 const nClientes = (n: number) => `${n} ${n === 1 ? 'cliente' : 'clientes'}`
 const meses = (v: number) => `${v} ${v === 1 ? 'mes' : 'meses'}`
 
-function pedir(row: ClientRow) {
+/* El botón no contrata: abre el panel con las condiciones o con lo que falta. */
+const panel = ref<ClientRow | null>(null)
+function confirmar(row: ClientRow) {
   solicitados.value = new Set(solicitados.value).add(row.cliente)
 }
 watch(selectedId, () => {
   solicitados.value = new Set()
   detalle.value = null
+  panel.value = null
 })
 </script>
 
@@ -133,7 +136,7 @@ watch(selectedId, () => {
                     class="cc__chip"
                     :class="{ 'is-done': solicitados.has(row.cliente) }"
                     :disabled="solicitados.has(row.cliente)"
-                    @click.stop="pedir(row)"
+                    @click.stop="panel = row"
                   >
                     <BadgeCheck v-if="solicitados.has(row.cliente)" :size="14" aria-hidden="true" />
                     {{
@@ -209,6 +212,16 @@ watch(selectedId, () => {
       </template>
     </section>
 
+
+    <CreditoActionPanel
+      :open="panel !== null"
+      :row="panel"
+      :cover="cover"
+      :snapshot="libro.data.value?.snapshot ?? ''"
+      :hecho="panel !== null && solicitados.has(panel.cliente)"
+      @close="panel = null"
+      @confirm="confirmar"
+    />
 
     <!-- Ficha del cliente: las pruebas que sostienen la decisión. -->
     <dialog v-if="detalle" ref="ficha" class="cc__dialog" open @close="detalle = null">
