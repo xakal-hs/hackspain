@@ -7,7 +7,7 @@ comprador (mira cuentas depositadas, a menudo de año y medio antes) y lo que Em
 
 Con esas pruebas decide, con reglas fijas y explicables:
 
-- preautorizado: al menos 8 facturas ya cobradas, 6 meses de relación, retraso medio ≤ 15 días, nada
+- preautorizado: al menos 8 facturas ya cobradas, 6 meses de relación, retraso medio ≤ 45 días, nada
   vencido a más de 90 días y límite propuesto por debajo de la mayor exposición que ese cliente ya ha
   tenido (o sea, deuda que ya ha devuelto antes).
 - denegado: hay vencido a más de 90 días o paga con más de 60 días de retraso medio.
@@ -37,7 +37,9 @@ YEAR_START = "2025-09-01"
 TOP_CLIENTS = 25          # por empresa, ordenados por ventas del último año
 MIN_PAID = 8              # facturas ya cobradas para poder preautorizar
 MIN_MONTHS = 6            # meses de relación
-MAX_DELAY = 15            # días de retraso medio admitidos en la preautorización
+# El seguro de crédito no indemniza por pagar tarde, sino por impago prolongado, que las pólizas
+# sitúan entre 60 y 90 días de vencimiento. 45 deja margen y no preautoriza a quien ya se acerca.
+MAX_DELAY = 45            # días de retraso medio admitidos en la preautorización
 DECLINE_DELAY = 60        # días de retraso medio que deniegan por sí solos
 PREMIUM_RATE = 0.0035     # hipótesis: 0,35 % sobre ventas aseguradas
 COVER = 0.9               # hipótesis: 90 % de cobertura

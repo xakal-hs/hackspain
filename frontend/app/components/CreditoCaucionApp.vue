@@ -57,9 +57,6 @@ const plegarTodo = () =>
   (abiertos.value = todoAbierto.value ? new Set() : new Set<Estado | 'caucion'>(['preautorizado', 'estudio', 'denegado', 'caucion']))
 
 const preautorizados = computed(() => clientes.value.filter((row) => row.estado === 'preautorizado'))
-const limitePreautorizado = computed(() => preautorizados.value.reduce((acc, row) => acc + row.limite, 0))
-const primaPreautorizada = computed(() => preautorizados.value.reduce((acc, row) => acc + row.prima, 0))
-const expuestoTotal = computed(() => clientes.value.reduce((acc, row) => acc + row.expuesto, 0))
 const caucion = computed(() => libro.data.value?.caucion ?? null)
 const excedente = computed(() => libro.data.value?.excedente ?? null)
 /* Pignorar excedente como contragarantía: la aseguradora exige menos y la prima baja. La capacidad
@@ -87,23 +84,22 @@ watch(selectedId, () => {
   <div class="cc">
     <header class="cc__title">
       <h1>Crédito y caución</h1>
+      <div class="cc__tools">
+        <button
+          type="button"
+          class="cc__icon"
+          :aria-label="todoAbierto ? 'Plegar todo' : 'Desplegar todo'"
+          @click="plegarTodo"
+        >
+          <ChevronsUpDown :size="16" aria-hidden="true" />
+        </button>
+        <label class="cc__search">
+          <Search :size="16" aria-hidden="true" />
+          <input v-model="query" type="search" placeholder="Buscar cliente" aria-label="Buscar cliente" />
+        </label>
+      </div>
     </header>
 
-    <div class="cc__bar">
-      <button
-        type="button"
-        class="cc__icon"
-        :aria-label="todoAbierto ? 'Plegar todo' : 'Desplegar todo'"
-        @click="plegarTodo"
-      >
-        <ChevronsUpDown :size="16" aria-hidden="true" />
-      </button>
-      <span class="cc__grow" />
-      <label class="cc__search">
-        <Search :size="16" aria-hidden="true" />
-        <input v-model="query" type="search" placeholder="Buscar cliente" aria-label="Buscar cliente" />
-      </label>
-    </div>
 
     <section class="cc__sheet" :aria-busy="libro.isPending.value">
       <p v-if="libro.isPending.value" class="cc__state">Cargando clientes…</p>
@@ -213,12 +209,6 @@ watch(selectedId, () => {
       </template>
     </section>
 
-    <footer class="cc__foot">
-      <span><b>{{ clientes.length }}</b> {{ clientes.length === 1 ? 'cliente' : 'clientes' }}</span>
-      <span><b>{{ money(expuestoTotal) }}</b> expuesto hoy</span>
-      <span><b>{{ money(limitePreautorizado) }}</b> preautorizado</span>
-      <span><b>{{ money(primaPreautorizada) }}</b> prima estimada al año</span>
-    </footer>
 
     <!-- Ficha del cliente: las pruebas que sostienen la decisión. -->
     <dialog v-if="detalle" ref="ficha" class="cc__dialog" open @close="detalle = null">
@@ -326,12 +316,10 @@ watch(selectedId, () => {
 
 
 
-.cc__bar {
+.cc__tools {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 24px;
-  border-bottom: 1px solid var(--cc-line);
+  gap: 8px;
 }
 
 .cc__icon {
@@ -355,9 +343,6 @@ watch(selectedId, () => {
 
 
 
-.cc__grow {
-  flex: 1;
-}
 
 .cc__search {
   display: flex;
@@ -566,20 +551,7 @@ td small {
   cursor: default;
 }
 
-.cc__foot {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px 24px;
-  padding: 12px 24px;
-  border-top: 1px solid var(--cc-line);
-  color: var(--cc-muted);
-}
 
-.cc__foot b {
-  color: var(--cc-text);
-  font-weight: 600;
-}
 
 .cc__dialog {
   position: fixed;
@@ -648,19 +620,13 @@ td small {
 }
 
 @media (max-width: 900px) {
-  .cc__title,
-  .cc__bar,
-  .cc__foot {
+  .cc__title {
     padding-inline: 16px;
   }
 
   .cc__sheet {
     padding-inline: 16px;
     overflow-x: auto;
-  }
-
-  .cc__bar {
-    flex-wrap: wrap;
   }
 
   .cc__search input {
