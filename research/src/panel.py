@@ -86,6 +86,8 @@ def _tx_monthly(t: pl.DataFrame) -> pl.DataFrame:
         transfer_in=amt.filter((cat == "transfer") & (amt > 0)).sum(),
         uncat_in=amt.filter((cat == "-") & (amt > 0)).sum(),
         payroll=-amt.filter(cat.is_in(PAYROLL)).sum(),
+        salary=-amt.filter(cat == "salary").sum(),
+        social_security=-amt.filter(cat == "social_security").sum(),
         tax=-amt.filter(cat == "tax").sum(),
         debt_service=-amt.filter(cat.is_in(DEBT)).sum(),
         fees=-amt.filter(cat == "fee").sum(),
@@ -241,7 +243,7 @@ def build_panel() -> pl.DataFrame:
     ccur = comp.select("company_id", pl.col("currency").alias("ccur"))
     p = (p.join(ccur, on="company_id").join(fxm.rename({"currency": "ccur"}), on=["month", "ccur"], how="left")
           .with_columns(to_eur=1.0 / pl.col("per_eur").fill_null(1.0)).drop("per_eur"))
-    flow_cols = ["n_fx_fixed", "uncat_in", "intragroup_flow", "n_tx", "inflow", "outflow", "oper_in", "transfer_in", "payroll", "tax", "debt_service", "fees",
+    flow_cols = ["n_fx_fixed", "uncat_in", "intragroup_flow", "n_tx", "inflow", "outflow", "oper_in", "transfer_in", "payroll", "salary", "social_security", "tax", "debt_service", "fees",
                  "refunds", "foreign_flow", "gross_flow", "internal_flow", "n_sentinel_tx"]
     p = p.with_columns([pl.col(c).fill_null(0) for c in flow_cols])
     # inactividad causal (D07): meses consecutivos sin movimientos hasta m (se reinicia al volver a operar)

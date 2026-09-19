@@ -21,6 +21,19 @@ no es observable.
 
 **v1 (se mantienen para comparar).** Son `churn_6m`, `cash_stress_6m`, `decline_6m`, `adverse_6m` y
 `positive_6m`. El apagado (`churn_6m`) ya no calibra: el 52 % son desconexiones de la plataforma, no cierres.
+
+**v3 (docs/eventos.md, learnings del consejo C1-C3).** Se añaden sin tocar las v2 (comparabilidad):
+- `tension_np_raw_6m`: tensión con la **caja propia** (sin sumar la póliza) y **sin censurar** a las
+  empresas financiadas por su grupo. Quita la circularidad de `lc_util` y el intragrupo (C1/C2).
+- `entrada_estres_2m` / `rompe_caja_2m`: anticipación desde **sana hoy** (caja ≥ 0,5 meses de gasto):
+  entra en tensión persistente / rompe caja (caja < 0) en m+1..m+2 (C1/C3).
+- `impago_{nomina,ss,iva,cuota,ap}_6m`: el impago **por tipo** — nómina, Seguridad Social, IVA, cuota y
+  mora AP estructural (saldo vencido ≥ 25 % del gasto; es estado, no impago puntual) (C2/C3).
+- `cura_3m` / `recaida_6m`: salir del estrés (3 meses limpios) y volver a entrar (C1).
+- `caida_3m_corto` / `expansion_3m`: variantes de **historia corta** (base con 3 meses) para que
+  existan en empresas nuevas (C1/Q3).
+- `tension_grupo_mes` / `tension_grupo_6m`: tensión **agregada del grupo** (caja sumada del grupo),
+  solo como diagnóstico, no sustituye a la entidad (Q12).
 """
 import numpy as np
 import pandas as pd
@@ -73,6 +86,16 @@ def _shift_bool(s: pd.Series, by: pd.Series, k: int) -> pd.Series:
 def add_events_v2(d: pd.DataFrame) -> pd.DataFrame:
     """Requiere las columnas del panel y de features.add_features (out3, out12, month_idx...)."""
     d = d.sort_values(["company_id", "month"]).reset_index(drop=True)
+    # tensión del grupo (Q12, docs/eventos.md): caja agregada del grupo, diagnóstico — no sustituye a la entidad
+    if "group_id" in d.columns:
+        _burn0 = (np.maximum(d.out3 / 3, d.out12 / 12) + 1e-9).values
+        gg = (pd.DataFrame({"group_id": d.group_id.values, "month": d.month.values,
+                             "cash": d.cash_end.values, "burn": _burn0})
+              .groupby(["group_id", "month"], as_index=False).agg(cash_g=("cash", "sum"), burn_g=("burn", "sum")))
+        gg["tension_grupo_mes"] = (gg.cash_g < 0) | (gg.cash_g / (gg.burn_g + 1e-9) < 0.25)
+        d = d.merge(gg[["group_id", "month", "tension_grupo_mes"]], on=["group_id", "month"], how="left")
+        d = d.sort_values(["company_id", "month"]).reset_index(drop=True)
+        d["tension_grupo_mes"] = d["tension_grupo_mes"].fillna(False).astype(bool)
     cid = d.company_id
     g = d.groupby("company_id")
     # observable hasta m+6 y la empresa sigue viva al final de la ventana (censura por apagado)
@@ -140,4 +163,57 @@ def add_events_v2(d: pd.DataFrame) -> pd.DataFrame:
     ok4 = obs6 & base_o.notna() & mean_f.notna() & (d.month_idx >= 5)
     exp = (mean_f > 1.3 * base_o) & (dcash > 0) & self_funded & ~one_off & (d.caida_6m.fillna(0) == 0)
     d["expansion_6m"] = exp.astype(float).where(ok4)
+
+    # ------------------------------------------------ v3 (docs/eventos.md, learnings C1-C3)
+    # --- E1b · tensión no circular: caja propia, sin póliza, sin censura de grupo
+    liq_np = d.cash_end
+    runway_np = liq_np / burn
+    stress_np = (liq_np < 0) | (runway_np < 0.25)
+    healthy_np = (runway_np >= 0.5) & (liq_np >= 0)
+    valid_np = stress_np & ~implausible
+    persist_np = valid_np & (sum(_shift_bool(valid_np, cid, -k).astype(int) for k in (1, 2)) >= 1) & g["month"].shift(-2).notna()
+    d["tension_np_raw_6m"] = _fwd_any(d, persist_np).where(obs6 & g["month"].shift(-(H + 2)).notna())
+
+    # --- anticipación a 2 meses desde sana hoy
+    fut2 = g["months_since_final_tx"].shift(-2)
+    obs2 = fut2.notna() & (fut2 == 0)
+    risk2 = healthy_np & obs2 & ~implausible & g["month"].shift(-2).notna()
+    d["entrada_estres_2m"] = _fwd_any(d, persist_np, h=2).where(risk2)
+    d["rompe_caja_2m"] = _fwd_any(d, d.cash_end < 0, h=2).where(risk2)
+
+    # --- E2b · impago por tipo
+    if "salary" in d.columns:
+        d["impago_nomina_6m"] = _fwd_any(d, missed_twice("salary")).where(obs6 & regular("salary"))
+        d["impago_ss_6m"] = _fwd_any(d, missed_twice("social_security")).where(obs6 & regular("social_security"))
+    d["impago_cuota_6m"] = _fwd_any(d, missed_twice("debt_service")).where(obs6 & regular("debt_service"))
+    d["impago_iva_6m"] = _fwd_any(d, miss_tax).where(obs6 & reg_tax.where(fisc).groupby(cid).ffill().fillna(False).astype(bool))
+    if "overdue_ap" in d.columns:  # mora AP estructural (D1_estricto): estado crónico, no impago puntual
+        mora_ap = d.overdue_ap.fillna(0) >= 0.25 * burn
+        d["impago_ap_6m"] = _fwd_any(d, mora_ap).where(obs6 & d.get("has_erp", pd.Series(False, index=d.index)).fillna(False))
+
+    # --- cura y recaída del estrés (cara positiva de la tensión no circular)
+    clean_np = ~stress_np
+    clean3 = (sum(_shift_bool(clean_np, cid, -k).astype(int) for k in (1, 2, 3)) == 3) & g["month"].shift(-3).notna()
+    d["cura_3m"] = (stress_np & clean3).astype(float).where(g["month"].shift(-3).notna())
+    exited = _shift_bool(stress_np, cid, 1) & clean_np
+    d["recaida_6m"] = _fwd_any(d, stress_np).where(exited & obs6 & g["month"].shift(-H).notna())
+
+    # --- E3b/E4b · variantes de historia corta (existen desde el mes 3)
+    fut3 = g["months_since_final_tx"].shift(-3)
+    obs3 = fut3.notna() & (fut3 == 0)
+    base_c = gi.transform(lambda x: x.rolling(12, min_periods=3).median())
+    F3 = pd.concat([gi.shift(-k) for k in range(1, 4)], axis=1)
+    med_f3 = F3.median(axis=1, skipna=False)
+    d["caida_3m_corto"] = (med_f3 < 0.5 * base_c).astype(float).where(obs3 & base_c.notna() & med_f3.notna())
+    base_o3 = go.transform(lambda x: x.rolling(12, min_periods=3).mean())
+    Fo3 = pd.concat([go.shift(-k) for k in range(1, 4)], axis=1)
+    mean_f3 = Fo3.mean(axis=1, skipna=False)
+    dcash3 = g["cash_end"].shift(-3) - d.cash_end
+    self_funded3 = (g["lc_drawn"].shift(-3) - d.lc_drawn).fillna(0) <= 0.5 * dcash3.clip(lower=0)
+    exp3 = (mean_f3 > 1.3 * base_o3) & (dcash3 > 0) & self_funded3 & (d.caida_3m_corto.fillna(0) == 0)
+    d["expansion_3m"] = exp3.astype(float).where(obs3 & base_o3.notna() & mean_f3.notna() & (d.month_idx >= 2))
+
+    # --- tensión del grupo como etiqueta a 6 m (diagnóstico)
+    if "tension_grupo_mes" in d.columns:
+        d["tension_grupo_6m"] = _fwd_any(d, d.tension_grupo_mes).where(obs6)
     return d

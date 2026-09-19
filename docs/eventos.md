@@ -1,76 +1,31 @@
-# Reglas para definir los eventos
+## Eventos - regla binaria que marca un episodio de estrés; es la diana que el score intenta prever. Muchos de estos eventos son propuestas, hay que hacer modificaciones e implementaciones.
 
-## 1. Qué medimos
+estrés de liquidez - lo definimos como poliza credito + caja. Problema 1) la empresa ya está endeudada y por lo tanto la parte de la poliza hace que le queramos dar más dinero 2) para un 65,6% de los casos no estamos prediciendo nada porque ya estaba estresada la empresa. Solución usamos tension_np_raw : calcular el estrés con la caja propia, sin sumar la póliza y sin marcar automáticamente como sanas a las empresas financiadas por su grupo. Para medir anticipación, usar además  entrada_estres_2m  o  rompe_caja_2m , limitado a empresas sanas  hoy. La tensión agregada del grupo se añade aparte como diagnóstico para la decisión de crédito.
+obligación impagada: una empresa deja de pagar una obligación que pagaba regularmente, como nómina, Seguridad Social, impuesto o cuota. Solo se evalúa cuando existe suficiente historial de pagos y se conoce la periodicidad. El consejo detectó que la etiqueta agregada mezcla  obligaciones distintas y que parte de su señal es mecánica cuando la falta de pago ya ha ocurrido. La solución es separar el impago por  tipo, exigir regularidad, distinguir impago actual de impago futuro y marcar como no verificables los casos sin calendario suficiente. La  ausencia de nómina habitual se mantiene además como veto de decisión, separado del evento usado para calibrar el score:
+   •  impago_nomina_6m  — deja de pagar una nómina habitual.
+   •  impago_ss_6m  — deja de pagar Seguridad Social.
+   •  impago_iva_6m  — deja de pagar IVA u otro impuesto habitual.
+   •  impago_cuota_6m  — deja de pagar una cuota de deuda habitual.
+   •  impago_ap_6m  — mantiene facturas de proveedores vencidas durante el umbral definido.
 
-No hay etiquetas de "salud" en los datos. Definimos salud como **ausencia de un evento futuro de estrés financiero material** y validamos el score contra ese evento. El score es `100 × (1 − P(evento))`.
+cura_3m  — la empresa sale del estrés.
+recaida_6m  — vuelve a entrar en estrés después de recuperarse. Es más una marca de fragilidad que un evento principal.
+caida de cobros - cambiar a caida_3m_corto para tener más empresas
+crecimiento - cambiar a expansion_3m y probar
+añadir `cura_3m` / `recaida_6m`
+balance negativo - meter rompe caja 2m
+- **balance negativo** (`cash_end < 0`) — Balance negativo = estado de alerta y posible evento de liquidez. No es un veto automático. El veto depende de la persistencia, la cobertura de cobros pendientes y la capacidad del grupo para cubrir el desfase.
 
-Tres niveles, que no se mezclan:
+## Vetos — regla que decide hoy, por encima del score: si salta, no se presta.
 
-| Nivel | Qué es | Ejemplo |
-|---|---|---|
-| Métrica | Algo que se calcula de los datos | runway, % vencido |
-| **Evento** | Una regla binaria: un episodio concreto de estrés | saldo negativo 5 días |
-| Evento final | Alguno de los eventos admitidos ocurre en los próximos *h* meses | `estrés_3m` |
+nómina ausente → no prestar hasta ver la siguiente
+póliza agotada con caja corta → no ampliar
+ Son reglas que se aplican hoy, por encima del score:
 
-## 2. Qué es un evento
-
-Una regla que, para una empresa y un mes *t*, responde **sí**, **no** o **no aplicable**.
-
-1. Se calcula **solo con datos hasta el fin del mes *t***. Nunca mira el futuro.
-2. **No aplicable** es una respuesta válida: si la empresa no tiene los datos necesarios (por ejemplo, no tiene facturas), no se evalúa. Nunca se cuenta como "no" ni se imputa.
-3. Cada evento pertenece a una dimensión (pago, liquidez, caja, deuda) y tiene una gravedad (baja, media, alta).
-
-## 3. Filtros de admisión
-
-Un evento entra en el evento final solo si cumple los seis:
-
-| # | Filtro | Pregunta |
-|---|---|---|
-| 1 | Observable | ¿Se ve directamente en los datos, sin interpretar? |
-| 2 | Material | ¿Es un problema real de la empresa, no ruido contable? |
-| 3 | Frecuente pero no común | ¿Ocurre entre un 2 y un 15 % de los casos aplicables? |
-| 4 | Limpio | ¿Se distingue de un fallo de los datos? Si una vez que salta no se apaga nunca (persistencia muy alta), sospechar de un artefacto |
-| 5 | Sin fuga | ¿Usa solo información disponible en ese mes? |
-| 6 | Distinto | ¿Aporta algo que no dice ya otro evento? |
-
-## 4. Cómo se fijan los umbrales
-
-- Con **criterio de dominio** (por ejemplo, 90 días de impago es la convención bancaria) y con la **tasa base** que resulta.
-- **Nunca** por lo bien que el score los prediga. Si se ajusta el evento hasta que la validación salga bien, la validación deja de valer.
-- Cada ajuste se anota con su motivo (qué umbral, qué tasa daba antes y después).
-- Una vez decididos, se **congelan**. Si se cambia algo después, se vuelve a evaluar todo.
-
-## 5. Evento final
-
-- `estrés_h` = **al menos un evento admitido** ocurre en alguno de los meses *t+1 … t+h*. Se usan varios horizontes (1, 3 y 6 meses).
-- Objetivo de tasa base del evento final: entre el **5 y el 20 %** de los casos. Si sale fuera, se revisan los umbrales de los eventos individuales antes de evaluar nada.
-- Se informa siempre de la **tasa de cada evento por separado**, para saber qué lo mueve.
-
-## 6. Recuperación (la otra dirección)
-
-Una empresa se **recupera** cuando estuvo en estrés al menos 2 meses y lleva al menos 3 meses seguidos sin ningún evento. Permite medir si el score detecta la mejora, no solo el deterioro.
-
-## 7. Catálogo de candidatos
-
-| Evento | Dimensión | Gravedad | Regla | Se aplica a |
-|---|---|---|---|---|
-| Obligación regular que falta | pago | alta | Falta la nómina, la seguridad social o el impuesto que se pagaba al menos 5 de los 6 meses anteriores | Empresas con pagos regulares y actividad ese mes |
-| Factura de proveedor vencida | pago | media | Facturas recibidas vencidas entre 90 y 180 días y sin pagar, por un importe de al menos el 25 % de las salidas mensuales | Empresas con facturas |
-| Saldo negativo | liquidez | alta | Saldo de las cuentas de banco negativo durante 5 días o más del mes | Empresas con saldo reconstruible |
-| Caja agotándose | caja | alta | Flujo operativo negativo 3 meses seguidos y saldo que cubre menos de 1 mes de salidas | Empresas con saldo y flujo |
-| Coste financiero disparado | deuda | media | Intereses y comisiones más de 3 veces su mediana de 6 meses y más del 2 % de las salidas | Empresas con 6 meses de historia |
-
-Estado de la decisión de cada uno:
-- **Admitidos por ahora:** obligación regular que falta, coste financiero disparado.
-- **A revisar:** factura de proveedor vencida (sospecha de facturas que el ERP nunca cierra), saldo negativo (puede ser un descubierto real o un error de reconstrucción) y caja agotándose (parece describir una situación normal en muchas pymes, hay que endurecerla o descartarla).
-
-## 8. Decisiones abiertas
-
-1. Umbrales definitivos de los tres eventos a revisar.
-2. Unidad del evento y del score: empresa o grupo (pendiente de confirmar con la organización).
-3. Horizonte principal del evento final.
-
-## 9. Limitaciones que se dicen con honestidad
-
-- El evento lo construimos nosotros con los mismos datos que las variables: un buen resultado demuestra que el score anticipa **estas reglas**, no la salud en general. Al evaluar se excluyen las variables gemelas del evento.
-- Un mes con flujo negativo es normal (la empresa típica lo tiene la mitad del tiempo). Los eventos miran obligaciones incumplidas y episodios sostenidos, no un mal mes.
+veto_caja_negativa 
+veto_nomina_ausente 
+veto_ss_ausente 
+veto_iva_ausente 
+veto_cuota_ausente 
+veto_poliza_agotada 
+veto_grupo_en_estres 
