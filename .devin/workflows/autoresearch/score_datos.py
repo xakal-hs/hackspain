@@ -74,8 +74,9 @@ def md(d: dict) -> str:
         L.append(f"| {b['desde']} | {b['hasta']} | {b['banda']} |")
     L += ["", "## Calibración por evento (logística de signo restringido)", ""]
     for k, v in d["calibracion_por_evento"].items():
-        top = ", ".join(f"`{f}` {c}" for f, c in list(v["coef"].items())[:6])
-        L.append(f"- **{k}** (n={v['n']}, tasa={v['tasa_evento']}, convergió={v['convergio']}): {top}")
+        # los 17 coeficientes (los que valen 0 se omiten): así el peso publicado se puede reconstruir sin el joblib
+        top = ", ".join(f"`{f}` {c}" for f, c in v["coef"].items())
+        L.append(f"- **{k}** (n={v['n']}, tasa={v['tasa_evento']}, convergió={v['convergio']}, Σcoef={round(sum(v['coef'].values()), 4)}): {top}")
     L += ["", "## Probabilidad publicada (score → evento a 6 meses)", ""]
     for k, v in d["probabilidad_por_evento"].items():
         L.append(f"- **{k}**: P = σ({v['intercepto']} + {v['coef_score']} · score/100); tasa base {v['tasa_base']}")

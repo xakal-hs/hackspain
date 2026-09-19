@@ -304,7 +304,8 @@ def fmt_feature(f: str, v) -> str:
     if f == "net_margin_6m":
         return f"{es(100 * v, 0, True)} %"
     if f in ("ap_overdue_ratio", "ar_overdue_90_ratio", "net_vol_6m"):
-        return f"{es(v, 1)}× gasto mensual" if f == "net_vol_6m" else f"{es(v, 1)} meses de pagos" if v < 100 else ">100 meses"
+        unit = "meses de cobros" if f == "ar_overdue_90_ratio" else "meses de pagos"  # AR sobre entradas, AP sobre salidas
+        return f"{es(v, 1)}× gasto mensual" if f == "net_vol_6m" else f"{es(v, 1)} {unit}" if v < 100 else ">100 meses"
     if f == "hhi_ar_6m":
         return f"{es(v, 2)}"
     return es(v, 2)
