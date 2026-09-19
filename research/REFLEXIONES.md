@@ -30,6 +30,7 @@ Estados: **abierta** (sin propuesta), **propuesta** (hay recomendación y falta 
 | R18 | La cohorte larga puntúa ~5 puntos menos a igual caja | diagnosticada (saturación de la ventana de 12 m); remedio medido y descartado | baja |
 | R19 | El suavizado (α) es un dial estabilidad ↔ reacción, no información | decidida (α = 0,5; curva medida) | baja |
 | R20 | Dentro de la nota adversa, liquidez ↔ impago/caída | abierta | media |
+| R21 | Estado del arte: qué hacen bancos, burós y fintech que nosotros no | propuesta | alta |
 
 ---
 
@@ -410,6 +411,31 @@ Con `runway` 0,3-0,7 y dentro del mismo semestre, las empresas con ≥ 13 meses 
 Resuelto el trade-off con la expansión (D33), queda uno más suave dentro de la nota adversa: cada cambio que la hace «más caja» cuesta impago y caída, y al revés. Medido tres veces en la ronda 2: sacar la cuota de E2 (iter_105: incumplimiento +0,017 de modelo, caída +0,020, tensión −0,010, juez no circular −0,018); calibrar con la caja propia (iter_108: tensión +0,018, entrada +0,026, pero incumplimiento −0,016, caída −0,013 y P180 rota); los topes duros de liquidez (iter_107: tensión +0,04, incumplimiento −0,015, caída −0,013, circulares con la etiqueta).
 
 **Lectura.** Una nota que debe cubrir tensión, impago y caída no puede ser solo caja. La liquidez pura ya está en la ficha (`runway`, `mc`), en la regla de banda (D36) y en los vetos C1/C2/C4 (fase 4). **No** se propone una tercera nota: se propone que el prestamista lea nota adversa + vetos, y que la aseguradora / el CFO lean la nota de expansión (que también es la mejor para la caída).
+
+
+## R21 · Estado del arte: qué hacen bancos, burós y fintech que nosotros no
+
+**Estado:** propuesta.
+
+**Pregunta.** ¿Cómo calculan el riesgo de crédito de una empresa los bancos, los burós, las fintech de cash-flow y la literatura, y qué nos falta? Hasta ahora el score salía de la analogía de los 100.000 € y de brainstorms, sin revisar cómo se hace en la práctica.
+
+**Lo encontrado** (`research/estado_del_arte/`, tres informes con fuentes y una síntesis en su `README.md`):
+- **Lo que hacemos bien tiene respaldo:** los eventos coinciden con los indicadores de default de la Circular 4/2017 (anejo 9: 107.f nómina/SS/IVA, 107.c tensión, 94.b caída, 94.o grupo); la cura de 3 meses es el periodo de prueba de la EBA; la logística por evento es un hazard en tiempo discreto (Shumway); el ML añade 0-2,6 pp sobre la logística (Moscatelli 2020), igual que R09; con solo datos de cuenta el techo publicado es AUC ~0,75-0,80.
+- **La señal más documentada la tenemos floja:** uso y excedidos de póliza, días en negativo, mínimo intramensual y amplitud del saldo diario (Norden & Weber 2010: ~12 meses de antelación; Yao et al.: los excedidos son las variables 1-3).
+- **Señales EWS del BCE/EBA que no usamos:** embargos y diligencias AEAT/TGSS (~164 empresas por texto), recibos propios impagados, aplazamientos con Hacienda/SS (~76), intereses de descubierto (~132). Recuentos por regex, sin validar.
+
+**Opciones** (orden de retorno esperado; detalle en la tabla §2 del README):
+1. Señales de texto como vetos o evento grave.
+2. Kit de saldo diario y póliza de Norden & Weber, normalizado por las entradas medias propias.
+3. Retraso (no solo omisión) de las obligaciones recurrentes y cobertura de la próxima obligación (PD "estructural" de Brex, sin etiquetas).
+4. Retraso a proveedores ponderado por importe (PAYDEX) y regla "severamente moroso" de D&B.
+5. Modelo con ERP y sin ERP en vez de imputar 50.
+6. Tendencia de actividad en U (RiskCalc: el crecimiento extremo también es riesgo) y revisar el signo de `ap_early_3`.
+7. Horizontes 3/6/12, histéresis de banda (R12), cambio temporal frente a escalón (R11), escala tipo scorecard (R01/R02).
+
+**Recomendación.** Empezar por 1 y 2: son baratas, tienen la base regulatoria y empírica más fuerte y atacan R11 y la anticipación. Medir cada una con el protocolo de `features.md` (AUC fuera de grupo contra el score actual) y no aceptar mejoras < 1-2 pp sin IC bootstrap por grupo (Stein 2007).
+
+**Siguiente paso.** Validar las regex de texto (signo, categoría, causalidad) y medir su tasa de evento a 6 y 12 meses.
 
 ---
 
