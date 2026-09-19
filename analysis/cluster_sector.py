@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Infiere régimen operativo y producto vs servicio por empresa.
+"""Infiere régimen operativo, conjunto de sectores y mesa de productos.
 
 El dataset no trae NACE/CNAE. Agrupa la huella de tesorería (cuotas de
 categoría, nómina, TPV, ciclo de cobro/pago, albaranes) sin usar caja ni
-runway como features: eso mezclaría salud con sector.
+runway como features: eso mezclaría salud con sector. Los SKUs (Yield,
+FX, factoring, confirming, reserve, seguro) se asignan al conjunto, no
+como un único producto de comisión.
 
 Artefactos:
   analysis/cluster_sector.html
@@ -138,6 +140,49 @@ SECTORS = (
     "energía",
     "holding / tesorería",
 )
+
+# Mesa de opciones del repo (analysis/productos.py, research/src/service.py,
+# context/oportunidades.md) cruzada con la rejilla sector × tenor de Capchase.
+# No es un SKU empujado: 2–4 opciones que encajan. Pooling de grupo va antes.
+SKU_LABELS = {
+    "yield": "Yield · barrido",
+    "fx": "FX Shield",
+    "factoring": "Factoring",
+    "confirming": "Confirming",
+    "reserve": "Reserve · póliza",
+    "credit": "Seguro de cobro",
+}
+SKU_ORDER = ("yield", "fx", "factoring", "confirming", "reserve", "credit")
+MAX_MESA = 4
+
+# sector -> (tenor Capchase, skus en orden de encaje)
+SECTOR_PRODUCTS: dict[str, tuple[str, tuple[str, ...]]] = {
+    "comercio minorista": ("días", ("reserve", "yield", "fx")),
+    "hostelería": ("6 meses", ("reserve", "yield", "fx")),
+    "mayorista / distribución": ("12 meses", ("factoring", "confirming", "reserve", "credit")),
+    "industria": ("12 meses", ("factoring", "confirming", "reserve")),
+    "construcción": ("6 meses", ("factoring", "reserve", "credit")),
+    "servicios profesionales": ("6 meses", ("factoring", "yield", "reserve")),
+    "software / suscripción": ("largo", ("yield", "fx", "reserve")),
+    "transporte / logística": ("días", ("factoring", "reserve", "confirming")),
+    "alquiler / inmobiliario": ("largo", ("yield", "reserve", "credit")),
+    "energía": ("12 meses", ("fx", "factoring", "reserve")),
+    "holding / tesorería": ("largo", ("yield", "fx", "reserve")),
+}
+
+SECTOR_PRODUCT_WHY = {
+    "comercio minorista": "Cobra al contado (DSO de días). El agujero es tesorería inmediata, no un ciclo de factura. Factoring poco: el cobro ya está en el TPV. Yield si el efectivo se queda en corriente.",
+    "hostelería": "TPV más nómina y temporada. Capchase: 6 meses es campaña, no un préstamo a 12. Yield en los meses altos; póliza corta para el valle.",
+    "mayorista / distribución": "El dinero está en la factura a 30–90 días. Factoring adelanta cobros; confirming paga al proveedor. El tenor es un ciclo operativo (12 meses), no días.",
+    "industria": "Circulante de proveedor y cliente. Factoring y confirming; la póliza cubre el ciclo, no el hueco de una semana.",
+    "construcción": "Cobros irregulares y certificaciones. Factoring del AR; póliza a 6 meses para el hueco entre obra y cobro; seguro si el cliente no paga.",
+    "servicios profesionales": "Nómina fija y DSO de un mes. Factoring si hay factura; yield entre proyectos; póliza a 6 meses para no faltar a la nómina.",
+    "software / suscripción": "Cobro recurrente: no vive de adelantar facturas. Yield del excedente y depósito como colateral si pide crédito (Capchase: quien tiene caja también pide).",
+    "transporte / logística": "Combustible y flota. Factoring de albaranes; póliza de días; confirming al taller o al gasóleo. El leasing a menudo ya está.",
+    "alquiler / inmobiliario": "Cuotas recurrentes, horizonte largo. Yield del excedente; deuda larga, no un anticipo de factura.",
+    "energía": "Divisa y commodity. FX Shield primero; factoring del ciclo; póliza a 12 meses.",
+    "holding / tesorería": "Antes que un SKU: si una hermana tiene agujero, se traspasa caja. Luego barrido del excedente, FX y depósito como colateral. El crédito no lidera.",
+}
 
 
 def _cat_sql() -> str:
@@ -432,7 +477,9 @@ def setup_features(connection: duckdb.DuckDBPyConnection) -> None:
             max(CASE WHEN lower(coalesce(b.type, '')) = 'tpv' THEN 1 ELSE 0 END) AS has_tpv,
             max(CASE WHEN lower(coalesce(d.type, '')) = 'confirming' THEN 1 ELSE 0 END) AS has_confirming,
             max(CASE WHEN lower(coalesce(d.type, '')) = 'factoring' THEN 1 ELSE 0 END) AS has_factoring,
-            max(CASE WHEN lower(coalesce(d.type, '')) IN ('leasing', 'renting') THEN 1 ELSE 0 END) AS has_leasing
+            max(CASE WHEN lower(coalesce(d.type, '')) IN ('leasing', 'renting') THEN 1 ELSE 0 END) AS has_leasing,
+            max(CASE WHEN lower(coalesce(b.type, '')) = 'saving' THEN 1 ELSE 0 END) AS has_saving,
+            max(CASE WHEN lower(coalesce(d.type, '')) IN ('lineofcredit', 'lineofcomex') THEN 1 ELSE 0 END) AS has_lineofcredit
         FROM companies c
         LEFT JOIN banking_products b USING (company_id)
         LEFT JOIN debt_products d USING (company_id)
@@ -472,6 +519,8 @@ def setup_features(connection: duckdb.DuckDBPyConnection) -> None:
             coalesce(p.has_confirming, 0) AS has_confirming,
             coalesce(p.has_factoring, 0) AS has_factoring,
             coalesce(p.has_leasing, 0) AS has_leasing,
+            coalesce(p.has_saving, 0) AS has_saving,
+            coalesce(p.has_lineofcredit, 0) AS has_lineofcredit,
             (i.n_invoices IS NOT NULL AND i.n_invoices > 0) AS has_invoices
         FROM companies c
         LEFT JOIN tx_agg t USING (company_id)
@@ -761,6 +810,43 @@ def assign_sector_sets(rows: list[dict]) -> None:
         row["n_sectors"] = len(keep)
 
 
+def assign_product_fit(rows: list[dict]) -> None:
+    """Mesa de 2–4 SKUs del repo por conjunto de sectores, con tenor de Capchase."""
+    for row in rows:
+        sectors = row.get("sectors") or []
+        if not sectors:
+            row["tenor"] = ""
+            row["product_fit"] = ""
+            row["products"] = []
+            continue
+        tenor_votes: Counter = Counter()
+        sku_votes: dict[str, int] = {sku: 0 for sku in SKU_ORDER}
+        for sector in sectors:
+            tenor, skus = SECTOR_PRODUCTS[sector]
+            tenor_votes[tenor] += 1
+            for i, sku in enumerate(skus):
+                sku_votes[sku] += MAX_MESA - i
+        # Runway corto: la mesa se inclina a adelantar o póliza, no a barrer.
+        runway = _finite(row.get("runway_m"))
+        if runway is not None and runway < 1:
+            sku_votes["yield"] = max(0, sku_votes["yield"] - 2)
+            sku_votes["reserve"] += 2
+            if sku_votes["factoring"] > 0:
+                sku_votes["factoring"] += 1
+        elif runway is not None and runway >= 2:
+            sku_votes["yield"] += 2
+        # Sin ERP no hay factoring / confirming / seguro (cobertura, no salud).
+        if not row.get("has_invoices"):
+            sku_votes["factoring"] = 0
+            sku_votes["confirming"] = 0
+            sku_votes["credit"] = 0
+        picked = [sku for sku, votes in sorted(sku_votes.items(), key=lambda item: (-item[1], SKU_ORDER.index(item[0]))) if votes > 0][:MAX_MESA]
+        # Holding: el primer teléfono es el grupo, no un SKU. Se deja yield/fx/reserve.
+        row["tenor"] = tenor_votes.most_common(1)[0][0]
+        row["products"] = picked
+        row["product_fit"] = " | ".join(SKU_LABELS[sku] for sku in picked)
+
+
 def feature_matrix(rows: list[dict]) -> tuple[list[str], list[list[float]]]:
     companies = [row["company_id"] for row in rows]
     raw: list[list[float | None]] = []
@@ -879,6 +965,8 @@ def write_table(rows: list[dict]) -> None:
         "n_sectors",
         "top_sector",
         "top_sector_score",
+        "tenor",
+        "product_fit",
         "kind_score",
         "goods_score",
         "service_score",
@@ -891,6 +979,9 @@ def write_table(rows: list[dict]) -> None:
         "uncat_share",
         "has_tpv",
         "has_confirming",
+        "has_factoring",
+        "has_saving",
+        "has_lineofcredit",
         "payroll_share",
         "pos_cash_share",
         "dso",
@@ -1142,6 +1233,72 @@ def sector_profile_rows(rows: list[dict]) -> list[list]:
     return out
 
 
+def sector_fit_rows(rows: list[dict]) -> list[list]:
+    out = []
+    for sector in SECTORS:
+        tenor, skus = SECTOR_PRODUCTS[sector]
+        subset = [row for row in rows if sector in (row.get("sectors") or [])]
+        if not subset:
+            continue
+        n = len(subset)
+        fact = sum(int(row.get("has_factoring") or 0) for row in subset)
+        conf = sum(int(row.get("has_confirming") or 0) for row in subset)
+        loc = sum(int(row.get("has_lineofcredit") or 0) for row in subset)
+        saving = sum(int(row.get("has_saving") or 0) for row in subset)
+        mesa = " · ".join(SKU_LABELS[sku] for sku in skus)
+        out.append(
+            [
+                html.escape(sector),
+                tenor,
+                html.escape(mesa),
+                fmt(n, 0),
+                f"{fact / n:.0%}".replace(".", ","),
+                f"{conf / n:.0%}".replace(".", ","),
+                f"{loc / n:.0%}".replace(".", ","),
+                f"{saving / n:.0%}".replace(".", ","),
+            ]
+        )
+    return out
+
+
+def product_offer_counts(rows: list[dict]) -> Counter:
+    counts: Counter = Counter()
+    for row in rows:
+        for sku in row.get("products") or []:
+            counts[sku] += 1
+    return counts
+
+
+def product_bar_figure(rows: list[dict]) -> go.Figure:
+    counts = product_offer_counts(rows)
+    ordered = [sku for sku in SKU_ORDER if counts.get(sku)]
+    figure = go.Figure(
+        go.Bar(
+            x=[counts[sku] for sku in ordered],
+            y=[SKU_LABELS[sku] for sku in ordered],
+            orientation="h",
+            marker_color=COLORS["cyan"],
+            text=[fmt(counts[sku], 0) for sku in ordered],
+            textposition="outside",
+            cliponaxis=False,
+            hovertemplate="%{y}: %{x}<extra></extra>",
+        )
+    )
+    figure.update_layout(
+        title="Empresas a las que encaja cada SKU (mesa, no ranking de comisión)",
+        xaxis_title="Empresas",
+        yaxis=dict(autorange="reversed"),
+    )
+    return figure
+
+
+def product_why_rows() -> list[list]:
+    return [
+        [html.escape(sector), tenor, html.escape(SECTOR_PRODUCT_WHY[sector])]
+        for sector, (tenor, _skus) in SECTOR_PRODUCTS.items()
+    ]
+
+
 def payroll_check(rows: list[dict]) -> tuple[int, int]:
     heavy = [
         row
@@ -1183,6 +1340,8 @@ def build_report(rows: list[dict], clustering: dict) -> str:
         [html.escape(name or "sin evidencia"), fmt(n, 0)]
         for name, n in sector_set_counts(rows)
     ]
+    n_mesa = sum(1 for row in rows if row.get("products"))
+    offer_counts = product_offer_counts(rows)
     return f"""<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1201,6 +1360,7 @@ def build_report(rows: list[dict], clustering: dict) -> str:
       <a href="#producto-servicio">Producto o servicio</a>
       <a href="#regimen">Régimen operativo</a>
       <a href="#sectores">Conjunto de sectores</a>
+      <a href="#productos">Productos que encajan</a>
       <a href="#caja">Régimen y caja</a>
       <a href="#limites">Límites</a>
     </nav>
@@ -1210,7 +1370,7 @@ def build_report(rows: list[dict], clustering: dict) -> str:
     <header class="hero">
       <div class="eyebrow">HackSpain 2026 · análisis</div>
       <h1>El dataset no trae sector.<br><em>La tesorería sí deja huella.</em></h1>
-      <p>1.286 empresas, cero etiquetas de industria. Inferimos si vende producto o presta un servicio, el régimen de cobros y pagos, y el <b>conjunto de sectores</b> con el que esa huella es compatible. Caja y runway no entran: no queremos agrupar empresas enfermas.</p>
+      <p>1.286 empresas, cero etiquetas de industria. Inferimos si vende producto o presta un servicio, el régimen de cobros y pagos, el <b>conjunto de sectores</b> compatible con esa huella, y la <b>mesa de productos</b> del repo que encaja en cada uno. Caja y runway no entran al cluster: no queremos agrupar empresas enfermas.</p>
       <div class="hero-meta">
         <span>{fmt(n_fit, 0)} empresas con huella</span>
         <span>{fmt(n_all - n_fit, 0)} sin cobertura</span>
@@ -1228,6 +1388,7 @@ def build_report(rows: list[dict], clustering: dict) -> str:
             <li><b>Producto vs servicio vs mixto</b> — índice explícito, no caja negra. Pagos a proveedor, albaranes, TPV y confirming empujan a producto; nómina, cobros regulares y conceptos de servicio, a servicio.</li>
             <li><b>Régimen operativo</b> — k-means sobre la huella rank-transformada. El nombre son las dos señales que más sobresalen, en lenguaje de prestamista.</li>
             <li><b>Conjunto de sectores</b> — no un CNAE. TPV + caja corta es comercio o hostelería; nómina sin albaranes es servicio profesional o software. Los tokens de factura emitida (hotel, software, transporte) empujan cuando existen.</li>
+            <li><b>Mesa de productos</b> — Yield, FX, factoring, confirming, reserve y seguro, con el tenor de Capchase (días / 6m / 12m / largo). 2–4 opciones, no un SKU de comisión.</li>
           </ul>
         </div>
         <div class="panel narrative"><h3>Qué no entra</h3>
@@ -1328,8 +1489,36 @@ def build_report(rows: list[dict], clustering: dict) -> str:
       </div>
     </section>
 
+    <section class="section" id="productos">
+      <div class="section-head"><span>06</span><div><h2>Qué producto encaja en cada sector</h2><p>Los 5 SKUs de la SPA más confirming, cruzados con la rejilla sector × tenor de Capchase. Mesa de 2–4 opciones, no un SKU empujado por comisión.</p></div></div>
+      <div class="kpis compact-kpis">
+        <div class="kpi"><small>Con mesa</small><strong>{fmt(n_mesa, 0)}</strong><span>empresas con al menos un SKU</span></div>
+        <div class="kpi"><small>Factoring en la mesa</small><strong>{fmt(offer_counts.get("factoring", 0), 0)}</strong><span>adelantar cobros · AR</span></div>
+        <div class="kpi"><small>Yield en la mesa</small><strong>{fmt(offer_counts.get("yield", 0), 0)}</strong><span>barrido de excedente</span></div>
+        <div class="kpi"><small>Reserve en la mesa</small><strong>{fmt(offer_counts.get("reserve", 0), 0)}</strong><span>póliza al tenor del sector</span></div>
+      </div>
+      <div class="callout insight"><b>Fuentes.</b> Yield, FX, factoring, seguro y reserve son los SKUs de <code>analysis/productos.py</code> y <code>research/src/service.py</code>. Confirming entra con factoring cuando hay tensión y facturas (<code>context/oportunidades.md</code>). El plazo no es el mismo préstamo con otro vencimiento: días / 6 meses / 12 meses / largo (<code>context/voz_capchase.md</code>). El upsell es una mesa, no un único producto (<code>context/voz_embat.md</code>).</div>
+      <div class="panel">{chart_html(product_bar_figure(rows), 400)}</div>
+      <div class="panel"><h3>Rejilla sector × tenor × mesa</h3>
+        {table(["Sector", "Tenor", "Mesa", "N", "Ya factoring", "Ya confirming", "Ya póliza", "Ya saving"], sector_fit_rows(rows))}
+        <p class="caption">“Ya” es el producto conectado en el dataset, no la recomendación. Confirming está en 70 empresas; factoring en 19: el libro está sesgado a préstamo/póliza, no a cesión de cobros. Saving casi no existe: el barrido es un producto que hay que crear.</p>
+      </div>
+      <div class="panel"><h3>Por qué ese producto en ese sector</h3>
+        {table(["Sector", "Tenor", "Por qué encaja"], product_why_rows())}
+      </div>
+      <div class="panel narrative">
+        <h3>Reglas de la mesa, por empresa</h3>
+        <ul>
+          <li>Se unen los SKUs de todos los sectores del conjunto, se recortan a {MAX_MESA} y se ordenan por encaje. El orden del repo (yield → FX → factoring → confirming → reserve → seguro) solo desempata.</li>
+          <li>Sin ERP no se ofrece factoring, confirming ni seguro: es cobertura, no salud.</li>
+          <li>Runway &lt; 1 mes: se baja el barrido y se sube póliza y factoring. Runway ≥ 2 meses: se sube yield. Quien tiene caja también pide: el depósito es colateral, no “agujero”.</li>
+          <li>Antes de cualquier SKU, si el grupo tiene excedente y agujero, se traspasa caja. Eso no es un producto de la SPA.</li>
+        </ul>
+      </div>
+    </section>
+
     <section class="section" id="caja">
-      <div class="section-head"><span>06</span><div><h2>El régimen cambia el colchón, no el score</h2><p>Runway mediano por clúster, leído a posteriori desde el panel mensual ya construido.</p></div></div>
+      <div class="section-head"><span>07</span><div><h2>El régimen cambia el colchón, no el score</h2><p>Runway mediano por clúster, leído a posteriori desde el panel mensual ya construido.</p></div></div>
       <div class="callout insight"><b>Para el score, más adelante.</b> Si dos regímenes con el mismo runway no tienen la misma tasa de tensión, el umbral global está mal. Esa prueba (E1/E3) no vive en este informe: primero hace falta la etiqueta, que es lo que se persiste ahora.</div>
       <div class="panel narrative">
         <h3>Cómo leerlo</h3>
@@ -1342,12 +1531,13 @@ def build_report(rows: list[dict], clustering: dict) -> str:
     </section>
 
     <section class="section" id="limites">
-      <div class="section-head"><span>07</span><div><h2>Límites</h2><p>Qué no afirma este clustering.</p></div></div>
+      <div class="section-head"><span>08</span><div><h2>Límites</h2><p>Qué no afirma este clustering.</p></div></div>
       <div class="limitations">
         <article><b>No es NACE</b><p>El conjunto es compatible con la huella, no una etiqueta de registro. Sin token AR, comercio y hostelería se solapan a propósito.</p></article>
         <article><b>Texto anonimizado</b><p>Los tokens de factura emitida cubren pocas empresas (hotel 37, software 24, transporte 32). El resto se juega en tesorería.</p></article>
         <article><b>Sin categorizar</b><p>Una de cada cuatro unidades de volumen no tiene categoría. Eso recorta la huella; no se imputa a cobros o pagos.</p></article>
         <article><b>No es el score</b><p>Esta entrega no cambia umbrales ni el frontend. La tabla está lista para el overlay de runway cuando se mida contra E1/E3.</p></article>
+        <article><b>No es una venta</b><p>La mesa dice qué SKU encaja, no cuál empujar. Antes de cualquier producto, si el grupo tiene excedente y agujero, se traspasa caja.</p></article>
       </div>
     </section>
     <footer>HackSpain 2026 · X-Ray · generado desde <code>analysis/cluster_sector.py</code> · {n_fit} empresas clusterizadas</footer>
@@ -1365,6 +1555,7 @@ def main() -> None:
     rows = assemble_rows(connection)
     classify_kind(rows)
     assign_sector_sets(rows)
+    assign_product_fit(rows)
     clustering = cluster_regimes(rows)
     write_table(rows)
     OUTPUT.write_text(build_report(rows, clustering), encoding="utf-8")
