@@ -6,3 +6,4 @@ output_hackspain_data*.zip
 output/
 backend/artifacts/
 backend/oof.parquet
+backend/__pycache__/

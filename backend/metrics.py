@@ -48,7 +48,8 @@ def _oriented(event: str, score: np.ndarray) -> np.ndarray:
 
 
 # ------------------------------------------------------------------- OOF
-def oof(d: pd.DataFrame, n_splits: int = 5, target: str = "adversa", seed: int = SEED) -> pd.Series:
+def oof(d: pd.DataFrame, n_splits: int = 5, target: str = "adversa", events: list[str] | None = None,
+        seasonal: tuple = ()) -> pd.Series:
     """Nota de cada fila calculada por un scorer que NUNCA vio su grupo empresarial.
 
     Un scorer por fold: percentiles, pesos y escala se reconstruyen solo con los grupos
@@ -61,7 +62,7 @@ def oof(d: pd.DataFrame, n_splits: int = 5, target: str = "adversa", seed: int =
     for tr, va in GroupKFold(n_splits=n_splits).split(ids, groups=cg.values):
         tr_ids, va_ids = set(ids[tr]), set(ids[va])
         train = d[d.company_id.isin(tr_ids)]
-        sc = prd.fit(train, pre.labels(train), target=target)
+        sc = prd.fit(train, pre.labels(train, events=events), target=target, seasonal=seasonal)
         val = d[d.company_id.isin(va_ids)]
         s = prd.score_panel(sc, val).set_index(["company_id", "month"])["score"]
         key = pd.MultiIndex.from_arrays([val["company_id"], val["month"]])

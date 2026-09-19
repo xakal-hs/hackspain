@@ -52,11 +52,21 @@ class Scorer:
     calibration: dict[str, dict] = field(default_factory=dict)                  # diagnóstico del ajuste
     target: str = "adversa"
     alpha: float = ALPHA
+    seasonal: tuple[str, ...] = ()          # features con tabla de percentiles por mes calendario
 
 
 # ---------------------------------------------------------------- 1 · referencia
-def _reference(X: pd.DataFrame) -> tuple[dict, dict]:
+def _reference(X: pd.DataFrame, seasonal: tuple[str, ...] = ()) -> tuple[dict, dict]:
+    """Tabla de percentiles congelada. Con `seasonal`, esas features usan una tabla POR MES
+    CALENDARIO: un septiembre se compara contra septiembres, no contra todos los meses."""
     ref, bounds = {}, {}
+    mes = X["month"].dt.month.to_numpy() if "month" in X else None
+    for f in seasonal:
+        v = pd.to_numeric(X.get(f), errors="coerce").replace([np.inf, -np.inf], np.nan)
+        for m in range(1, 13):
+            vm = v[mes == m].dropna().to_numpy(float)
+            if len(vm) >= 100:
+                ref[(f, m)] = np.sort(vm[vm > 0] if FEATURES[f]["zero_best"] and (vm > 0).any() else vm)
     for f, spec in FEATURES.items():
         v = pd.to_numeric(X.get(f), errors="coerce").replace([np.inf, -np.inf], np.nan).dropna().to_numpy(float)
         if not len(v):
@@ -80,13 +90,23 @@ def subscores(sc: Scorer, X: pd.DataFrame) -> pd.DataFrame:
     el hueco es contributions(), no este paso.
     """
     out = {}
+    mes = X["month"].dt.month.to_numpy() if "month" in X else None
     for f in sc.features:
-        spec, ref = FEATURES[f], sc.ref[f]
+        spec = FEATURES[f]
         x = pd.to_numeric(X.get(f), errors="coerce").replace([np.inf, -np.inf], np.nan).to_numpy(float)
         xx = np.nan_to_num(x)
         # percentil medio entre los empates: los valores redondos y muy repetidos
         # (lc_util = 0,30) no se van todos al borde inferior de su bloque
-        pct = (np.searchsorted(ref, xx, "left") + np.searchsorted(ref, xx, "right")) / 2 / len(ref) * 100
+        def _pct(ref, v):
+            return (np.searchsorted(ref, v, "left") + np.searchsorted(ref, v, "right")) / 2 / len(ref) * 100
+        if f in sc.seasonal and mes is not None:
+            pct = np.empty(len(xx))
+            for m in range(1, 13):
+                sel = mes == m
+                ref = sc.ref.get((f, m), sc.ref[f])
+                pct[sel] = _pct(ref, xx[sel])
+        else:
+            pct = _pct(sc.ref[f], xx)
         s = pct if spec["dir"] > 0 else 100 - pct
         if spec["zero_best"]:
             s = np.where(xx <= 0, 100.0, s)
@@ -149,15 +169,16 @@ def _fit_weights(S: pd.DataFrame, Y: pd.DataFrame, target: str) -> tuple[dict, d
 
 # ---------------------------------------------------------------------- 3 · fit
 def fit(X: pd.DataFrame, y: pd.DataFrame | pd.Series | None = None, target: str = "adversa",
-        alpha: float = ALPHA) -> Scorer:
+        alpha: float = ALPHA, seasonal: tuple[str, ...] = ()) -> Scorer:
     """Ajusta el scorer. `y` son las etiquetas ya enmascaradas (preprocessing.labels).
 
     Las sub-notas se calculan UNA vez y se reutilizan en los tres pasos que las necesitan
     (pesos, escala, probabilidades).
     """
-    ref, bounds = _reference(X)
+    ref, bounds = _reference(X, seasonal)
     feats = [f for f in SCORE_FEATURES if f in ref]
-    sc = Scorer(features=feats, ref=ref, bounds=bounds, weights={}, target=target, alpha=alpha)
+    sc = Scorer(features=feats, ref=ref, bounds=bounds, weights={}, target=target, alpha=alpha,
+                seasonal=tuple(seasonal))
 
     S = subscores(sc, X)                                        # <- una sola vez
 

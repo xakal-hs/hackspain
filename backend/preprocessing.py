@@ -81,12 +81,32 @@ CONTEXT = ["net_margin_6m", "growth_vs_12m", "log_scale", "fx_share", "uncat_sha
 OOD_CONTEXT = ["log_scale", "fx_share", "activity_log"]  # los únicos de contexto con banda OOD
 
 # Eventos que CALIBRAN los pesos (tres adversos + la cara positiva).
-EVENTS = ["tension_6m", "incumplimiento_6m", "caida_6m", "expansion_6m"]
+#
+# El estrés de liquidez se mide con la CAJA PROPIA (`tension_np_raw_6m`), no con caja + póliza
+# (docs/eventos.md:3). Sumar la póliza tenía dos problemas: premiaba estar ya endeudado —
+# cuanto más dispuesto tienes, más «sano» pareces y más te queremos prestar — y dejaba el
+# 65,6 % de los casos sin nada que predecir, porque la empresa ya estaba en tensión.
+# Medido (bootstrap pareado, mismos grupos): juez limpio 0,800 -> 0,833 (+10,3 se),
+# entrada en estrés a 2 meses 0,597 -> 0,621 (+5,0 se), y sube incluso frente a la etiqueta
+# vieja con póliza (0,785 -> 0,803). Antelación mediana 2 -> 4 meses.
+# Precio declarado: incumplimiento −2,2 se, mora AP −2,1 se, y la neutralidad al tamaño
+# empeora (Spearman tamaño-nota −0,132 -> −0,199): con caja propia, las grandes — que tienen
+# diez veces menos meses de caja — salen peor paradas.
+EVENTS = ["tension_np_raw_6m", "incumplimiento_6m", "caida_6m", "expansion_6m"]
 POSITIVE_PREFIX = ("expansion", "cura")
-# Jueces: se miden, nunca calibran. Los tres primeros son los no circulares y los de anticipación.
-JUDGES = ["tension_np_raw_6m", "entrada_estres_2m", "rompe_caja_2m", "tension_entrada_6m",
+# Jueces: se miden, nunca calibran.
+# Medidos y NO adoptados como ancla, con su número, para no volver a discutirlos de memoria:
+#   caida_3m_corto  como ancla: +3,6 se en su propio juez pero −5,3 se en mora AP.
+#   expansion_3m    como ancla: 0,000 sobre la nota adversa (no la calibra) y empate en la
+#                   de expansión (0,631 -> 0,622). Se queda expansion_6m.
+JUDGES = ["tension_6m", "entrada_estres_2m", "rompe_caja_2m", "tension_entrada_6m",
           "impago_nomina_6m", "impago_ss_6m", "impago_iva_6m", "impago_cuota_6m", "impago_ap_6m",
           "cura_3m", "recaida_6m", "caida_3m_corto", "expansion_3m", "tension_grupo_6m"]
+
+# Vetos: hechos de HOY que deciden por encima de la nota (docs/eventos.md:19-31).
+# No predicen nada y no entran en el score; se aplican en decision.py.
+VETOS = ["veto_caja_negativa", "veto_nomina_ausente", "veto_ss_ausente", "veto_iva_ausente",
+         "veto_cuota_ausente", "veto_poliza_agotada", "veto_grupo_en_estres"]
 
 H = 6                 # horizonte de los eventos, en meses
 FISCAL = {1, 4, 7, 10}  # meses de liquidación de IVA
@@ -327,6 +347,25 @@ def add_events(d: pd.DataFrame) -> pd.DataFrame:
     exp3 = (mean_f3 > 1.3 * base_o3) & (dcash3 > 0) & self_funded3 & (d.caida_3m_corto.fillna(0) == 0)
     d["expansion_3m"] = exp3.astype(float).where(obs3 & base_o3.notna() & mean_f3.notna() & (d.month_idx >= 2))
 
+    # ================================================== vetos (docs/eventos.md:19-31)
+    # Hechos de HOY que deciden por encima del score. No son predicciones ni entran en la
+    # nota: son la respuesta a «¿presto este mes?» cuando la respuesta es no, da igual la nota.
+    # Aquí solo se calculan los hechos; el texto y la acción están en decision.py.
+    racha_neg = d.groupby("company_id")["cash_end"].transform(
+        lambda x: (x < 0).groupby((x >= 0).cumsum()).cumsum())
+    d["racha_caja_negativa"] = racha_neg
+    # La caja negativa NO es veto automático (eventos.md:17): el 54 % de las rachas se cura en
+    # un mes. Veta a partir del segundo mes seguido, que ya es un desfase y no un despiste.
+    d["veto_caja_negativa"] = (racha_neg >= 2) & ~implausible
+    # Impagos de obligaciones que SÍ pagaba: la señal llega antes que la caja negativa.
+    for name, col in [("nomina", "payroll"), ("ss", "social_security"), ("cuota", "debt_service")]:
+        if col in d.columns:
+            d[f"veto_{name}_ausente"] = regular(col) & (d[col] <= 0) & feed
+    d["veto_iva_ausente"] = (fisc & reg_tax & (d.tax <= 0) & feed).fillna(False)
+    # Póliza agotada con caja corta: no ampliar (eventos.md:22)
+    lc_util = (d.lc_drawn / d.lc_limit).where(d.lc_limit > 0)
+    d["veto_poliza_agotada"] = (lc_util > 0.9).fillna(False) & (d.cash_end / burn < 0.5)
+
     # --- tensión del grupo: diagnóstico, NO sustituye a la nota de la entidad
     if "group_id" in d.columns:
         gg = (pd.DataFrame({"group_id": d.group_id.values, "month": d.month.values,
@@ -337,6 +376,9 @@ def add_events(d: pd.DataFrame) -> pd.DataFrame:
                .sort_values(["company_id", "month"]).reset_index(drop=True))
         d["tension_grupo_mes"] = d["tension_grupo_mes"].fillna(False).astype(bool)
         d["tension_grupo_6m"] = _fwd_any(d, d.tension_grupo_mes).where(obs6)
+        d["veto_grupo_en_estres"] = d["tension_grupo_mes"]   # el grupo no rescata si también está seco
+    for v in VETOS:
+        d[v] = d[v].fillna(False).astype(bool) if v in d.columns else False
     return d
 
 
