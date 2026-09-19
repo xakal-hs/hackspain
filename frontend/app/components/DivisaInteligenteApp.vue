@@ -152,7 +152,6 @@ const state = computed(() => states[selected.value])
     <TreasuryHead
       v-model="selected"
       :title="`Divisa Inteligente · ${companyName}`"
-      lead="Prevé tus pagos en divisa y cubre al mejor tipo antes de la fecha del cobro o del pago."
       :sync="`ERP: ${selectedCompany?.erp || 'Sin dato'}`"
     />
 

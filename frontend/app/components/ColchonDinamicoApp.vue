@@ -153,7 +153,6 @@ const state = computed(() => {
     <TreasuryHead
       v-model="selected"
       :title="`Colchón Dinámico · ${companyName}`"
-      lead="Divide tu caja en lo que necesitas y lo que no. Coloca el excedente y prevé las devoluciones."
       :sync="`Mes de caja: ${companyLatest?.month || 'sin dato'}`"
     />
 

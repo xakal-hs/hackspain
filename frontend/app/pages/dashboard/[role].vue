@@ -64,9 +64,9 @@ const overrides = (company: Company) => [...(company.vetos || []), ...(company.a
  * encabezado. Embat ve la cartera y, además, las vistas internas, que miran a
  * Embat y no a una empresa: revenue propio, alertas del ecosistema y salud del
  * modelo. Cada perspectiva entra por su primera sección. */
-const treasurySections = ['score', 'colchon', 'divisa']
+const treasurySections = ['flujo', 'score', 'colchon', 'divisa']
 const sectionsByRole: Record<PerspectiveId, string[]> = {
-  empresa: treasurySections,
+  empresa: [...treasurySections, 'ajustes'],
   embat: ['resumen', 'cartera', 'senales', 'ofertas', 'monitor', 'revenue', 'modelo'],
 }
 
@@ -78,6 +78,19 @@ const section = computed(() => {
 
 const isTreasury = computed(() => treasurySections.includes(section.value))
 
+/* En la demo, `?empresa=COMP_0829` deja preparada cada pestaña del navegador con su caso. */
+const selectedCompany = useState<string>('selected-company-id')
+const companyCookie = useCookie<string>('xray-company', { sameSite: 'lax' })
+watch(
+  () => route.query.empresa,
+  (id) => {
+    if (role.value !== 'empresa' || typeof id !== 'string' || !/^COMP_\d{4}$/.test(id)) return
+    selectedCompany.value = id
+    companyCookie.value = id
+  },
+  { immediate: true },
+)
+
 const sectionLabel = computed(
   () =>
     ({
@@ -86,11 +99,13 @@ const sectionLabel = computed(
       senales: 'Señales',
       ofertas: 'Mercado',
       score: 'X-Ray Score',
+      flujo: 'Flujo de caja',
       colchon: 'Colchón Dinámico',
       divisa: 'Divisa Inteligente',
       monitor: 'Monitor operativo',
       revenue: 'Revenue por producto',
       modelo: 'Métricas del modelo',
+      ajustes: 'Ajustes',
     })[section.value]!,
 )
 
@@ -201,7 +216,14 @@ const headline = computed(() =>
     monitor: 'Todo el ecosistema, en una pantalla.',
     revenue: 'De dónde sale el dinero de este mes.',
     modelo: 'Si el modelo sigue acertando, y por cuánto.',
+    ajustes: 'Decide qué empresas quieres recorrer.',
   })[section.value]!,
+)
+
+const sectionDescription = computed(() =>
+  section.value === 'ajustes'
+    ? 'Configura el directorio que usarás al recorrer el panel de empresa.'
+    : profile.value.job,
 )
 
 const leadProduct = computed(
@@ -218,8 +240,9 @@ const connected = activeCompanies.toLocaleString('es-ES')
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
     <WorkspaceSidebar :role="role" :section="section" />
 
-    <div class="wk__body">
-      <header class="wk__top">
+    <!-- Flujo de caja es un clon de la pantalla de Embat: va a sangre, sin la cabecera ni el pie del panel. -->
+    <div class="wk__body" :class="{ 'wk__body--bare': section === 'flujo' }">
+      <header v-if="section !== 'flujo'" class="wk__top">
         <p class="wk__crumb">
           {{ profile.name }}<span aria-hidden="true">/</span>{{ sectionLabel }}
         </p>
@@ -238,11 +261,11 @@ const connected = activeCompanies.toLocaleString('es-ES')
       </header>
 
       <main id="main-content" class="wk__main" tabindex="-1">
-        <CompanyDataContext v-if="role === 'empresa'" :section="section" />
+        <CompanyDataContext v-if="role === 'empresa' && isTreasury && section !== 'flujo'" :section="section" />
         <div :key="`${section}-${role === 'empresa' ? activeCompanyId : 'portfolio'}`" class="wk__pane" :class="{ 'is-live': paneLive }">
         <div v-if="!isTreasury" class="wk__head">
           <h1>{{ headline }}</h1>
-          <p>{{ profile.job }}</p>
+          <p>{{ sectionDescription }}</p>
         </div>
 
         <!-- Resumen -->
@@ -598,8 +621,10 @@ const connected = activeCompanies.toLocaleString('es-ES')
         <!-- Tesorería propia: el mock trae su propio encabezado y su propio
              layout, así que va sin la rejilla del panel. -->
         <XRayScoreApp v-else-if="section === 'score'" />
+        <FlujoCajaApp v-else-if="section === 'flujo'" />
         <ColchonDinamicoApp v-else-if="section === 'colchon'" />
         <DivisaInteligenteApp v-else-if="section === 'divisa'" />
+        <CompanySettings v-else-if="section === 'ajustes'" />
 
         <!-- Monitor operativo: Embat mirándose a sí mismo. -->
         <div v-else-if="section === 'monitor'" class="wk__grid">
@@ -799,7 +824,7 @@ const connected = activeCompanies.toLocaleString('es-ES')
 
         </div>
 
-        <footer class="wk__foot">
+        <footer v-if="section !== 'flujo'" class="wk__foot">
           <template v-if="role === 'embat' && portfolioSource === 'api'">
             Score, decisión, tesorería y flujos vienen del modelo X-Ray sobre las
             1.286 empresas. Nombres, sectores y condiciones de oferta son ficticios.

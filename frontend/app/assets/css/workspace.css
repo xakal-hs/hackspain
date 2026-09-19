@@ -296,6 +296,15 @@
   align-content: start;
 }
 
+/* Flujo de caja va a sangre: la pantalla clonada trae su propia cabecera y su fondo. */
+.wk__body--bare {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.wk__body--bare .wk__main {
+  padding: 0;
+}
+
 .wk__pane {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
