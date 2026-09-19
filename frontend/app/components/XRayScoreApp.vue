@@ -188,11 +188,12 @@ const drivers = computed(() => {
       <p v-if="!drivers.length">Sin explicaciones disponibles para este mes.</p>
       <ul class="xs-drivers">
         <li v-for="d in drivers" :key="d.label">
-          <span>{{ d.label }}</span>
-          <p>
-            <b>{{ d.contribution }}</b><small>{{ d.value }}</small>
-          </p>
-          <i aria-hidden="true"><span :style="{ width: d.weight }"></span></i>
+          <ScoreFieldHelp :label="d.label" :value="d.value">
+            <p>
+              <b>{{ d.contribution }}</b><small>{{ d.value }}</small>
+            </p>
+            <i aria-hidden="true"><span :style="{ width: d.weight }"></span></i>
+          </ScoreFieldHelp>
         </li>
       </ul>
     </section>
