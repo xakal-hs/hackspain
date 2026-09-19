@@ -577,7 +577,7 @@ export const dipVsFall = {
 }
 
 export interface Perspective {
-  id: 'embat' | 'empresa' | 'banco'
+  id: 'embat' | 'empresa'
   name: string
   person: string
   initials: string
@@ -586,14 +586,6 @@ export interface Perspective {
 }
 
 export const perspectives: Perspective[] = [
-  {
-    id: 'banco',
-    name: 'Banco',
-    person: 'Banco Meridiano',
-    initials: 'BM',
-    job: 'Decidir a quién presto los próximos 100.000 €',
-    reads: 'Mira primero el dinero que queda en la cuenta y cuánto dura.',
-  },
   {
     id: 'empresa',
     name: 'Empresa',
@@ -629,8 +621,8 @@ export interface Offer {
 
 export const initialOffers: Offer[] = [
   {
-    id: 'meridiano',
-    bank: 'Banco Meridiano',
+    id: 'norte',
+    bank: 'Financiador Norte',
     amount: 20000,
     rate: '7,1',
     months: 12,

@@ -53,7 +53,6 @@ version error when the runtime is unsupported.
 
 - `/`: public landing, built around the moment a deterioration is detected.
 - `/login`: simulated sign-in without credentials or real authentication.
-- `/dashboard/banco`: decision, portfolio, signals and offers sent.
 - `/dashboard/empresa`: own trajectory, what changed, and offers received.
 - `/dashboard/embat`: both sides, with anticipation as the headline number.
 
@@ -63,6 +62,6 @@ Each dashboard takes `?section=` with `resumen` (default), `cartera` (not for
 
 Switch perspectives or exit using the user panel at the bottom of the desktop sidebar. On mobile, navigation and the user panel move above the content. Dashboard deep links redirect to demo sign-in when no demo-role cookie exists. This cookie is a UI convenience, not an authorization boundary.
 
-The dashboards use explicitly fictional EUR fixtures from `app/data/demo.ts`, independently of `XRAY_API_BASE`. Sending an offer for Distribuciones Ibérica makes it available in Empresa; acceptance changes only demo state. Offers survive client-side navigation and reset on a full page reload. The role cookie survives reloads until logout/browser session expiry.
+The dashboards use explicitly fictional EUR fixtures from `app/data/demo.ts`, independently of `XRAY_API_BASE`. Accepting an offer changes only demo state. Offers survive client-side navigation and reset on a full page reload. The role cookie survives reloads until logout/browser session expiry.
 
-Manual acceptance flow: enter as Banco, search/select a company, send an offer for Distribuciones Ibérica, switch to Empresa and confirm acceptance, then switch to Embat and inspect signals. Also check empty search, disabled financing for Recolectora Sureste, logout, direct-link redirect, and mobile/desktop layouts.
+Manual acceptance flow: enter as Empresa and confirm an offer, then switch to Embat, search/select a company and inspect signals. Also check empty search, logout, direct-link redirect, and mobile/desktop layouts.

@@ -17,7 +17,7 @@ useHead({
 
 const sections = [
   { id: 'deteccion', label: 'La detección' },
-  { id: 'lectura', label: 'Tres lecturas' },
+  { id: 'lectura', label: 'Dos lecturas' },
   { id: 'simetria', label: 'Mejora y caída' },
   { id: 'bache', label: 'Bache o caída' },
   { id: 'producto', label: 'Quién paga' },
@@ -41,14 +41,6 @@ const stripDomain: [number, number] = [34, 96]
 const readings = computed(() => {
   const company = leadCompany
   return [
-    {
-      perspective: perspectives.find((p) => p.id === 'banco')!,
-      figure: `${company.runway.now.toLocaleString('es-ES')}`,
-      unit: 'meses',
-      tone: 'plain',
-      reading: 'lo que dura el dinero que le queda en la cuenta',
-      before: `eran ${company.runway.prev.toLocaleString('es-ES')} meses en marzo`,
-    },
     {
       perspective: perspectives.find((p) => p.id === 'empresa')!,
       figure: '+1,8',
@@ -141,7 +133,7 @@ const readings = computed(() => {
 
       <section id="lectura" class="lp__section">
         <div class="lp__section-head">
-          <h2>La misma caja, tres lecturas.</h2>
+          <h2>La misma caja, dos lecturas.</h2>
           <p>
             Ibérica es una sola empresa con un solo score. Lo que cambia es la
             cifra que cada uno necesita mirar primero, porque no arriesgan lo
@@ -295,7 +287,7 @@ const readings = computed(() => {
             >Abrir la demo</NuxtLink
           >
           <p>
-            {{ companies.length }} empresas, 24 meses de tesorería y las tres
+            {{ companies.length }} empresas, 24 meses de tesorería y las dos
             vistas del producto.
           </p>
         </div>

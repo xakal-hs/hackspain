@@ -32,7 +32,7 @@ const route = useRoute()
 const role = computed(() => route.params.role as PerspectiveId)
 const profile = computed(() => perspectiveById(role.value)!)
 
-/* Las tres pantallas de tesorería propia traen su propio encabezado y solo
+/* Las pantallas de tesorería propia traen su propio encabezado y solo
  * existen para la perspectiva empresa. */
 const treasurySections = ['score', 'colchon', 'divisa']
 const allowed = ['resumen', 'cartera', 'senales', 'ofertas', ...treasurySections]
@@ -69,7 +69,7 @@ watch(section, () => {
 })
 
 /* A company view always has a subject. For the company perspective it is fixed;
- * a lender picks it from the portfolio. */
+ * Embat picks it from the portfolio. */
 const pickedId = useState('wk-picked', () => 'iberica')
 const subject = computed(() =>
   role.value === 'empresa' ? leadCompany : companyById(pickedId.value)!,
@@ -95,29 +95,8 @@ const changed = computed(() =>
 const offers = useState<Offer[]>('wk-offers', () =>
   initialOffers.map((offer) => ({ ...offer })),
 )
-const sent = useState<string[]>('wk-sent', () => [])
 const notice = ref('')
 const confirming = ref<string | null>(null)
-
-function sendOffer(id: string) {
-  const company = companyById(id)!
-  if (sent.value.includes(id)) return
-  sent.value.push(id)
-  if (id === 'iberica')
-    offers.value.push({
-      id: 'meridiano-nueva',
-      bank: 'Banco Meridiano',
-      amount: company.amount,
-      rate: company.rate,
-      months: company.term,
-      note: 'Enviada desde la vista Banco durante esta demo.',
-      accepted: false,
-    })
-  notice.value =
-    id === 'iberica'
-      ? `Oferta enviada a ${company.name}. Cambia a la vista Empresa para verla llegar.`
-      : `Oferta enviada a ${company.name} dentro de la demo.`
-}
 
 function acceptOffer(id: string) {
   const offer = offers.value.find((item) => item.id === id)
@@ -153,9 +132,7 @@ const headline = computed(() =>
     resumen:
       role.value === 'empresa'
         ? 'Esto es lo que ve quien te va a prestar.'
-        : role.value === 'banco'
-          ? 'Prestar, vigilar o no prestar.'
-          : 'Quién se mueve y desde cuándo.',
+        : 'Quién se mueve y desde cuándo.',
     cartera: 'Ocho empresas, ordenadas por lo que puedes perder.',
     senales: 'Qué se movió, cuánto pesó y cuándo lo dijimos.',
     ofertas:
@@ -395,21 +372,6 @@ const headline = computed(() =>
               </div>
             </dl>
             <p class="sheet__action">{{ subject.action }}</p>
-            <button
-              v-if="role === 'banco'"
-              class="btn btn--live"
-              type="button"
-              :disabled="sent.includes(subject.id) || subject.decision === 'no-prestar'"
-              @click="sendOffer(subject.id)"
-            >
-              {{
-                sent.includes(subject.id)
-                  ? 'Oferta enviada'
-                  : subject.decision === 'no-prestar'
-                    ? 'No recomendamos ofertar'
-                    : 'Enviar oferta'
-              }}
-            </button>
           </section>
         </div>
 
@@ -531,9 +493,7 @@ const headline = computed(() =>
           <section v-else class="panel span-12 offers">
             <header class="panel__bar">
               <h2 class="panel__title">Dónde colocar los próximos 100.000 €</h2>
-              <span class="chip chip--neutral"
-                >{{ sent.length }} de {{ companies.length }} contactadas</span
-              >
+              <span class="chip chip--neutral">{{ companies.length }} oportunidades</span>
             </header>
             <p class="lead-line">
               Ordenado por lo que un prestamista gana descontando el riesgo que
@@ -567,21 +527,6 @@ const headline = computed(() =>
                   <dd>{{ decisionLabel[company.decision] }}</dd>
                 </div>
               </dl>
-              <button
-                class="btn"
-                :class="sent.includes(company.id) ? 'btn--quiet' : 'btn--live'"
-                type="button"
-                :disabled="sent.includes(company.id) || company.decision === 'no-prestar'"
-                @click="sendOffer(company.id)"
-              >
-                {{
-                  sent.includes(company.id)
-                    ? 'Enviada'
-                    : company.decision === 'no-prestar'
-                      ? 'Descartada'
-                      : 'Enviar oferta'
-                }}
-              </button>
             </article>
           </section>
         </div>

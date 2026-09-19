@@ -24,12 +24,7 @@ const items = computed(() => {
     { id: 'senales', label: props.role === 'empresa' ? 'Mis señales' : 'Señales', icon: Activity },
     {
       id: 'ofertas',
-      label:
-        props.role === 'empresa'
-          ? 'Mis ofertas'
-          : props.role === 'banco'
-            ? 'Ofertas enviadas'
-            : 'Mercado',
+      label: props.role === 'empresa' ? 'Mis ofertas' : 'Mercado',
       icon: Handshake,
     },
   ]
