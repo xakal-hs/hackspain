@@ -167,24 +167,23 @@ const stateOptions = computed(() =>
         style="display: flex; align-items: center; flex-shrink: 0;"
         :style="chrome
           ? { padding: '16px 32px', background: 'var(--card)', borderBottom: '1px solid var(--border)', justifyContent: 'space-between' }
-          : { padding: '22px 24px 0', justifyContent: 'flex-end' }"
+          : { padding: '0 24px', justifyContent: 'flex-end' }"
       >
         <div v-if="chrome" style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--meta);">
           <span>Tesorería</span><span>›</span>
           <span style="color: var(--text); font-weight: 600;">Divisa Inteligente</span>
         </div>
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-3);">Simular estado</span>
-          <div style="display: flex; background: var(--bg); border-radius: 999px; padding: 3px;">
-            <button
-              v-for="s in stateOptions"
-              :key="s.id"
-              type="button"
-              style="padding: 6px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: var(--font-body); border: none;"
-              :style="{ background: s.bg, color: s.text }"
-              @click="s.pick"
-            >{{ s.label }}</button>
-          </div>
+        <!-- El simulador de estado es una herramienta de demo, no parte del
+             producto: la etiqueta va por title en vez de ocupar ancho fijo. -->
+        <div style="display: flex; background: var(--bg); border-radius: 999px; padding: 1px;" title="Simular estado">
+          <button
+            v-for="s in stateOptions"
+            :key="s.id"
+            type="button"
+            style="padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: var(--font-body); border: none;"
+            :style="{ background: s.bg, color: s.text }"
+            @click="s.pick"
+          >{{ s.label }}</button>
         </div>
       </div>
 
