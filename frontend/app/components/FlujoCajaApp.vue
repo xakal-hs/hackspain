@@ -239,7 +239,10 @@ const span = (from: string, to: string | null) => {
     : `del ${d(from)} de ${monthLong(from)} al ${d(to)} de ${monthLong(to)}`
 }
 
-const rotura = computed(() => flujo.data.value?.forecast?.rotura ?? null)
+const rotura = computed(() => (flujo.data.value?.action === 'financiar' ? flujo.data.value.forecast?.rotura ?? null : null))
+/* El aviso de rotura vive en «Flujo de caja operativo»; con «Cashflow from operating activities»
+ * plegado, sube a esa fila para que no se pierda. */
+const alertRow = computed(() => (open.value.has('op') ? 'flujo' : 'op'))
 
 /* Al cambiar de periodo o de empresa, la tabla se abre por el final. */
 const scroller = ref<HTMLElement | null>(null)
@@ -359,16 +362,27 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
                   :style="{ '--level': row.level }"
                   @click="selectedRow = row.id"
                 >
-                  <button
-                    v-if="parents.has(row.id)"
-                    type="button"
-                    class="eb__toggle"
-                    :aria-expanded="open.has(row.id)"
-                    @click.stop="toggle(row.id)"
-                  >
-                    <ChevronRight :size="16" aria-hidden="true" />{{ row.label }}
-                  </button>
-                  <span v-else>{{ row.label }}</span>
+                  <div class="eb__cell">
+                    <button
+                      v-if="parents.has(row.id)"
+                      type="button"
+                      class="eb__toggle"
+                      :aria-expanded="open.has(row.id)"
+                      @click.stop="toggle(row.id)"
+                    >
+                      <ChevronRight :size="16" aria-hidden="true" />{{ row.label }}
+                    </button>
+                    <span v-else>{{ row.label }}</span>
+                    <button
+                      v-if="alertRow === row.id && rotura"
+                      type="button"
+                      class="eb__alert"
+                      :aria-label="`Vas a romper caja ${span(rotura.from, rotura.to)}: ${money(rotura.low)}. Pedir financiación`"
+                      @click.stop
+                    >
+                      <TriangleAlert :size="15" aria-hidden="true" /><span>Pedir financiación</span>
+                    </button>
+                  </div>
                 </th>
                 <td
                   v-for="c in columns"
@@ -382,16 +396,10 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
             </tbody>
           </table>
         </div>
-        <!-- Abajo a la derecha, pegado a la tesorería final. Qué sale lo decide el baremo del
-             servidor: el aviso si va a romper caja, prestar con excedente y score sano, o nada. -->
-        <div v-if="columns.length && flujo.data.value?.action" class="eb__action">
-          <template v-if="flujo.data.value.action === 'financiar' && rotura">
-            <p>Vas a romper caja {{ span(rotura.from, rotura.to) }}: {{ money(rotura.low) }}</p>
-            <button type="button" class="eb__alert" aria-label="Pedir financiación">
-              <TriangleAlert :size="18" aria-hidden="true" /><span>Pedir financiación</span>
-            </button>
-          </template>
-          <button v-else type="button" class="eb__cta">Gana eficiencia prestando tu caja</button>
+        <!-- Abajo a la derecha, pegado a la tesorería final: prestar la caja, si el baremo del
+             servidor lo permite (excedente y score sano). -->
+        <div v-if="columns.length && flujo.data.value?.action === 'prestar'" class="eb__action">
+          <button type="button" class="eb__cta">Gana eficiencia prestando tu caja</button>
         </div>
       </section>
     </Transition>
@@ -753,7 +761,7 @@ thead .eb__lead {
   box-shadow: inset 0 0 0 1.5px var(--eb-blue);
 }
 
-.eb__lead > span {
+.eb__cell > span {
   display: block;
   padding-left: 23px;
 }
@@ -889,25 +897,27 @@ tbody tr:last-child > * {
   margin-top: 14px;
 }
 
-.eb__action p {
-  margin: 0;
-  font-weight: 500;
-  color: var(--eb-body);
+.eb__cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 /* El aviso es un icono negro; al pasar por encima se abre en un botón normal. */
 .eb__alert {
+  flex: none;
   display: inline-flex;
   align-items: center;
   gap: 0;
-  height: 40px;
-  padding: 0 11px;
+  height: 26px;
+  padding: 0 6px;
   border: 0;
   border-radius: 999px;
   background: #0a0a0c;
   color: #fff;
   font: inherit;
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
   transition:
@@ -928,9 +938,9 @@ tbody tr:last-child > * {
 
 .eb__alert:hover,
 .eb__alert:focus-visible {
-  gap: 8px;
-  padding: 0 18px 0 14px;
-  border-radius: 8px;
+  gap: 6px;
+  padding: 0 12px 0 9px;
+  border-radius: 6px;
 }
 
 .eb__alert:hover span,
