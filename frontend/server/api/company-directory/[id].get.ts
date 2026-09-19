@@ -30,7 +30,7 @@ export default defineEventHandler(async (event): Promise<CompanyDetail> => {
   if (latestHealth) {
     try {
       drivers = await read<CompanyDriver>('company_health_driver_monthly', {
-        ...filter, month: `eq.${latestHealth.month}`, select: 'label,display_value,contribution', order: 'feature.asc', limit: 100,
+        ...filter, month: `eq.${latestHealth.month}`, select: 'feature,label,display_value,contribution', order: 'feature.asc', limit: 100,
       })
     } catch { warnings.push('No se pudieron cargar las explicaciones del score.') }
   }

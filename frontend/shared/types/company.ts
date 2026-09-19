@@ -26,6 +26,7 @@ export interface CompanyHealth {
   score_delta_3m: number | null
 }
 export interface CompanyDriver {
+  feature?: string
   label: string
   display_value: string
   contribution: number
