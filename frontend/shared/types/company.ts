@@ -27,7 +27,15 @@ export interface CompanyDriver {
   display_value: string
   contribution: number
 }
+export interface SectorHealth {
+  month: string
+  top_sector: string
+  n: number
+  score_mean: number | null
+  score_median: number | null
+}
 export interface CompanyDetail {
+  sectorHealth: SectorHealth[]
   drivers: CompanyDriver[]
   panel: CompanyMonth[]
   health: CompanyHealth[]

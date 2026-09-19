@@ -158,12 +158,6 @@ const state = computed(() => {
   }
 })
 const scoreMonths = computed(() => companyHealth.value ? companyDetail.data.value?.health.map(row => row.month.slice(0, 7)) : undefined)
-const sectorTraces = computed(() => [
-  { key: 'company', label: companyName.value, history: state.value.chartHistory, forecast: state.value.chartForecast },
-  { key: 'sector', label: `${companySector.value} · referencia simulada`, tone: 'muted' as const, history: state.value.chartHistory.map(() => 65), forecast: [] },
-])
-
-
 const arrow = computed(
   () => ({ up: ArrowUp, flat: ArrowRight, down: ArrowDown, alert: ArrowDown })[state.value.direction],
 )
@@ -235,15 +229,7 @@ const drivers = computed(() => {
       </div>
     </section>
 
-    <section class="tz-card">
-      <header class="tz-card__bar">
-        <div>
-          <h2>Frente al sector</h2>
-          <p>{{ companySector }} · referencia sectorial simulada, pendiente del score del sector</p>
-        </div>
-      </header>
-      <ScoreBandChart :traces="sectorTraces" :month-labels="scoreMonths" note="Referencia sectorial simulada" :caption="`Comparativa de ${companyName} frente a ${companySector}. Referencia sectorial simulada.`" />
-    </section>
+    <SectorHealthCompare />
 
     <div class="tz-split">
       <section class="tz-card">

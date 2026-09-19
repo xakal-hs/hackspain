@@ -130,12 +130,15 @@ salud del sector y no se utiliza como tal.
 - X-Ray Score: `company_health_monthly` aporta nota, banda, trayectoria y cambio
   a tres meses; `company_health_driver_monthly` aporta contribuciones. Las
   fechas de los gráficos corresponden a los meses recibidos.
+- Frente al sector: `sector_health_monthly`, filtrado por `top_sector`. El selector
+  Media / Mediana usa `score_mean` / `score_median` y conserva la elección al
+  cambiar de empresa. Compara meses coincidentes con el score real, indica el
+  último mes común y el número de empresas (`n`), sin sustituir ausencias por mocks.
 - Colchón: caja reconstruida y meses de pagos desde `panel_monthly`, en la
   moneda de la compañía; se avisa cuando `saldo_inconsistente` está marcado.
 - Divisa: moneda de la empresa y monedas de `banking_products`.
 
-**Pendiente / demo:** referencia sectorial (línea explícitamente simulada de 65),
-previsiones, recomendaciones del agente, colchón objetivo, excedentes,
+**Pendiente / demo:** previsiones, recomendaciones del agente, colchón objetivo, excedentes,
 depósitos, rentabilidad, operaciones, exposición FX, cotizaciones, pagos
 previstos, coberturas y ahorros. Si no hay score se mantiene el
 escenario demo rotulado; un dato de caja ausente se muestra como «Sin dato».

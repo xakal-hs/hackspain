@@ -2,7 +2,7 @@
 const props = defineProps<{ section: string }>()
 const { company, name, sector, detail, latest } = useSelectedCompany()
 const simulated = computed(() => props.section === 'score'
-  ? 'Comparativa del sector, previsión y recomendaciones del agente: simuladas. El score y su historia usan Supabase cuando están disponibles.'
+  ? 'Previsión y recomendaciones del agente: simuladas. El score, su historia y la media o mediana del sector proceden de Supabase cuando están disponibles.'
   : props.section === 'colchon'
     ? 'Excedente colocable, previsión, depósitos, rentabilidad y operaciones: simulados. La caja disponible se lee del panel mensual.'
     : props.section === 'divisa'
