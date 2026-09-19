@@ -42,7 +42,7 @@ with curated (display_order, company_id, display_name, selection_reason) as (
     (6, 'COMP_0055', 'Linde Urbana Patrimonios', 'Caso inmobiliario de riesgo con caída pronunciada y varias señales de tensión operativa.'),
     (7, 'COMP_0654', 'Mercado Lumen', 'Deterioro claro en comercio minorista asociado a retrasos de cobro.'),
     (8, 'COMP_0673', 'Casa del Olivo', 'Hostelería en vigilancia: baja caja y retrasos simultáneos de cobro y pago.'),
-    (9, 'COMP_0865', 'Forja Norte', 'Industria con descenso notable y presión combinada de caja, cobros y proveedores.'),
+    (9, 'COMP_0829', 'Fábrica Brava', 'Industria en vigilancia pero estable: caja escasa y retrasos operativos visibles que justifican monitorización.'),
     (10, 'COMP_0232', 'Río Mayor Distribución', 'Distribuidor en riesgo por caja escasa y cobros tardíos; ilustra una necesidad de circulante.'),
     (11, 'COMP_0522', 'Ruta Ágil Logística', 'Logística en deterioro por caja escasa y cobros tardíos; caso apto para factoring.'),
     (12, 'COMP_0326', 'Solaria Técnica', 'Energía en vigilancia con descenso reciente; permite comparar riesgo sectorial de medio plazo.'),
@@ -52,7 +52,7 @@ with curated (display_order, company_id, display_name, selection_reason) as (
     (16, 'COMP_0396', 'Puente Fiscal', 'Servicios profesionales en recuperación; el retraso de proveedores explica por qué sigue monitorizada.'),
     (17, 'COMP_0588', 'Nube Prisma', 'Software saludable y en mejora, sin alertas activas; contrapeso de oportunidad y crecimiento.'),
     (18, 'COMP_0682', 'Energía Horizonte', 'Energía saludable en mejora, con plazos operativos aún observables.'),
-    (19, 'COMP_0743', 'Órbita Cloud', 'Software en mejora sostenida y sin alertas; ejemplo de empresa preparada para productos de tesorería.'),
+    (19, 'COMP_0835', 'Mirador del Mar', 'Hostelería saludable y en mejora; el retraso de cobro mantiene una oportunidad concreta de seguimiento.'),
     (20, 'COMP_0531', 'Talento Norte', 'Servicios profesionales sanos y en recuperación, con alertas de plazos que justifican seguimiento.')
 ),
 latest_health as (
