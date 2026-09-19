@@ -7,6 +7,7 @@ import {
   LogOut,
   PiggyBank,
   ScanLine,
+  Settings,
   Wallet,
   Check,
 } from '@lucide/vue'
@@ -23,6 +24,7 @@ const items = computed(() => {
     { id: 'score', label: 'X-Ray Score', icon: ScanLine },
     { id: 'colchon', label: 'Colchón Dinámico', icon: PiggyBank },
     { id: 'divisa', label: 'Divisa Inteligente', icon: CircleDollarSign },
+    { id: 'ajustes', label: 'Ajustes', icon: Settings },
   ]
   const ops = [
     { id: 'caja', label: 'Caja', icon: Wallet },

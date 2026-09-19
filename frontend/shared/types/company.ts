@@ -1,11 +1,14 @@
 export interface CompanyIdentity {
   company_id: string
+  display_name?: string | null
   group_id: string | null
   country: string | null
   currency: string | null
   erp: string | null
   top_sector: string | null
 }
+
+export type CompanyDirectorySource = 'companies' | 'featured_companies'
 export interface CompanyMonth {
   month: string
   cash_end: number | null

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { demoCases } from '../../shared/demoCases'
-const { selectedId, directory, companies } = useSelectedCompany()
+import { demoCases } from '#shared/demoCases'
+const { selectedId, source, directory, companies } = useSelectedCompany()
 const id = useId()
 /* Los casos reales de la demo van arriba: se cambia de uno a otro sin buscar entre 1.286. */
 const demo = computed(() => companies.value.filter(company => company.company_id in demoCases))
@@ -12,12 +12,12 @@ const demo = computed(() => companies.value.filter(company => company.company_id
       <option v-if="!companies.length" :value="selectedId">{{ directory.isPending.value ? 'Cargando empresas…' : 'Empresas no disponibles' }}</option>
       <optgroup v-if="demo.length" label="Casos de la demo">
         <option v-for="company in demo" :key="`demo-${company.company_id}`" :value="company.company_id">
-          {{ company.company_id }} · {{ demoCases[company.company_id]!.label }}
+          {{ company.display_name || company.company_id }} · {{ demoCases[company.company_id]!.label }}
         </option>
       </optgroup>
-      <optgroup :label="demo.length ? 'Todas las empresas' : undefined">
+      <optgroup :label="source === 'featured_companies' ? 'Empresas destacadas' : demo.length ? 'Todas las empresas' : undefined">
         <option v-for="company in companies" :key="company.company_id" :value="company.company_id">
-          {{ company.company_id }} · {{ company.top_sector || 'Sin sector' }}
+          {{ company.display_name || company.company_id }} · {{ company.top_sector || 'Sin sector' }}
         </option>
       </optgroup>
     </select>

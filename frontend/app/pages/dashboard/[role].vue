@@ -18,7 +18,7 @@ const profile = computed(() => perspectiveById(role.value)!)
 
 const treasurySections = ['flujo', 'score', 'colchon', 'divisa']
 const sectionsByRole: Record<PerspectiveId, string[]> = {
-  empresa: treasurySections,
+  empresa: [...treasurySections, 'ajustes'],
   embat: ['caja', 'crm'],
 }
 
@@ -52,6 +52,7 @@ const sectionLabel = computed(
       flujo: 'Flujo de caja',
       colchon: 'Colchón Dinámico',
       divisa: 'Divisa Inteligente',
+      ajustes: 'Ajustes',
     })[section.value]!,
 )
 
@@ -67,7 +68,14 @@ const headline = computed(
     ({
       caja: 'Quién está corto de caja y quién puede colocarla.',
       crm: 'Quien pide financiación, con su asesor.',
+      ajustes: 'Decide qué empresas quieres recorrer.',
     })[section.value] || '',
+)
+
+const sectionDescription = computed(() =>
+  section.value === 'ajustes'
+    ? 'Configura el directorio que usarás al recorrer el panel de empresa.'
+    : profile.value.job,
 )
 </script>
 
@@ -88,7 +96,7 @@ const headline = computed(
       </header>
 
       <main id="main-content" class="wk__main" tabindex="-1">
-        <CompanyDataContext v-if="role === 'empresa' && section !== 'flujo'" :section="section" />
+        <CompanyDataContext v-if="role === 'empresa' && isTreasury && section !== 'flujo'" :section="section" />
         <div
           :key="`${section}-${role === 'empresa' ? activeCompanyId : 'portfolio'}`"
           class="wk__pane"
@@ -96,7 +104,7 @@ const headline = computed(
         >
           <div v-if="!isTreasury" class="wk__head">
             <h1>{{ headline }}</h1>
-            <p>{{ profile.job }}</p>
+            <p>{{ sectionDescription }}</p>
           </div>
 
           <EmbatCajaBoard v-if="section === 'caja'" />
@@ -105,6 +113,7 @@ const headline = computed(
           <FlujoCajaApp v-else-if="section === 'flujo'" />
           <ColchonDinamicoApp v-else-if="section === 'colchon'" />
           <DivisaInteligenteApp v-else-if="section === 'divisa'" />
+          <CompanySettings v-else-if="section === 'ajustes'" />
         </div>
 
         <footer v-if="section !== 'flujo'" class="wk__foot">

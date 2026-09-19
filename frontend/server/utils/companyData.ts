@@ -41,11 +41,11 @@ export async function companyDataWrite<T>(
 }
 
 // PostgREST caps responses. Keep paging, including when the last page is full.
-export async function companyDataPages<T>(table: string, select: string) {
+export async function companyDataPages<T>(table: string, select: string, order = 'company_id.asc') {
   const read = companyDataReader()
   const rows: T[] = []
   for (let offset = 0; ; offset += 500) {
-    const page = await read<T>(table, { select, order: 'company_id.asc', offset, limit: 500 })
+    const page = await read<T>(table, { select, order, offset, limit: 500 })
     rows.push(...page)
     if (page.length < 500) return rows
   }

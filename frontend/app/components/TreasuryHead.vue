@@ -1,7 +1,9 @@
 <script setup lang="ts">
 export type TreasuryState = 'bien' | 'normal' | 'mal'
 
-defineProps<{ title: string; lead?: string; sync: string }>()
+withDefaults(defineProps<{ title: string; lead?: string; sync: string; simulate?: boolean }>(), {
+  simulate: true,
+})
 const state = defineModel<TreasuryState>({ required: true })
 
 const options: { id: TreasuryState; label: string }[] = [
@@ -19,7 +21,7 @@ const options: { id: TreasuryState; label: string }[] = [
     </div>
     <div class="tz__meta">
       <!-- El simulador es una herramienta de demo, no parte del producto. -->
-      <div class="tz-sim" role="group" aria-label="Simular estado">
+      <div v-if="simulate" class="tz-sim" role="group" aria-label="Simular estado">
         <button
           v-for="option in options"
           :key="option.id"
