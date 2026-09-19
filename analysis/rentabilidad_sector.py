@@ -6,9 +6,13 @@ El take de Embat solo se imputa si (1) el SKU está en la mesa sectorial,
 antes. La persistencia se cuenta en meses con esa necesidad, no se inventa
 un LTV. Confirming no tiene take publicado en el repo: no se fabrica.
 
-Artefactos:
+Artefactos (una sola corrida de este script):
   analysis/rentabilidad_sector.html
   data/processed/rentabilidad_sku.csv
+  data/processed/empresa_sector.csv
+  data/processed/company_sector.csv
+
+El mapa sectorial se regenera aquí, no se lee una tabla vieja.
 """
 
 from __future__ import annotations
@@ -26,17 +30,26 @@ from plotly.offline.offline import get_plotlyjs
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "analysis" / "rentabilidad_sector.html"
 BOOK = ROOT / "data" / "processed" / "rentabilidad_sku.csv"
-SECTOR_TABLE = ROOT / "data" / "processed" / "company_sector.csv"
+SECTOR_REQUIRED = (
+    "company_id",
+    "sector",
+    "tipo",
+    "tenor",
+    "product_fit",
+    "top_sector_score",
+    "confidence",
+)
 ANALYSIS = Path(__file__).resolve().parent
 for _p in (str(ANALYSIS), str(ROOT / "src")):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
 from cluster_sector import (  # noqa: E402
-    SECTOR_COLORS,
+    MAP as SECTOR_MAP,
     SECTOR_SHORT,
     SKU_LABELS,
     SKU_ORDER,
+    infer_sectors,
 )
 from generate_report import (  # noqa: E402
     COLORS,
@@ -70,6 +83,15 @@ from productos import (  # noqa: E402
 HORIZON = 3
 ADOPT = ADOPTION["central"]
 WINDOW_MONTHS = 24
+LATE_WARN = 0.80
+
+
+def _missing_sector_columns(path: Path) -> list[str]:
+    if not path.exists():
+        return list(SECTOR_REQUIRED)
+    with path.open(newline="", encoding="utf-8") as handle:
+        header = next(csv.reader(handle))
+    return [name for name in SECTOR_REQUIRED if name not in header]
 
 # Confirming no tiene bps en productos.py / monetizacion.md. No se inventa.
 SKU_BPS = {
@@ -139,18 +161,26 @@ def retained_take(year1: float, persist: float, sku: str, horizon: int = HORIZON
 
 
 def setup_sector_book(connection) -> None:
-    path = SECTOR_TABLE.as_posix().replace("'", "''")
+    path = SECTOR_MAP.as_posix().replace("'", "''")
+    missing = _missing_sector_columns(SECTOR_MAP)
+    if missing:
+        raise SystemExit(
+            f"{SECTOR_MAP.name} no tiene {', '.join(missing)}. "
+            "Este script debe regenerar el mapa antes de leerlo."
+        )
     connection.execute(
         f"""
         CREATE OR REPLACE TEMP TABLE sector_co AS
         SELECT
             company_id,
             group_id,
-            business_kind AS tipo,
-            coalesce(top_sector, '') AS sector,
+            coalesce(tipo, '') AS tipo,
+            coalesce(sector, '') AS sector,
             coalesce(sector_set, '') AS sector_set,
             coalesce(tenor, '') AS tenor,
             coalesce(product_fit, '') AS product_fit,
+            try_cast(top_sector_score AS DOUBLE) AS top_sector_score,
+            try_cast(confidence AS DOUBLE) AS confidence,
             product_fit ILIKE '%Yield%' AS mesa_yield,
             product_fit ILIKE '%FX Shield%' AS mesa_fx,
             product_fit ILIKE '%Factoring%' AS mesa_factoring,
@@ -330,41 +360,49 @@ def price_book(rows: list[dict]) -> list[dict]:
             row.get("months_obs"),
             calendar=bool(row.get("calendar_persist")),
         )
-        in_book = bool(row.get("in_book")) and bool(row.get("on_mesa"))
-        if bps is None or not in_book:
-            take_100 = 0.0
-            take_35 = 0.0
-            take_kept = 0.0
-        else:
+        eligible = bool(row.get("in_book"))
+        on_mesa = bool(row.get("on_mesa"))
+        in_book = eligible and on_mesa
+        take_open = 0.0
+        take_100 = 0.0
+        take_35 = 0.0
+        take_kept = 0.0
+        if bps is not None and eligible:
+            take_open = notional * bps * ADOPT
+        if bps is not None and in_book:
             take_100 = notional * bps
             take_35 = take_100 * ADOPT
             take_kept = retained_take(take_35, persist, sku)
         priced.append(
             {
                 **row,
+                "eligible": eligible,
+                "on_mesa": on_mesa,
                 "in_book": in_book,
-                "notional": notional if in_book else 0.0,
+                "notional": notional if eligible else 0.0,
                 "bps": bps,
                 "persist": persist,
+                "take_open_35": take_open,
                 "take_y1_100": take_100,
                 "take_y1_35": take_35,
-                "take_y1_25": take_100 * ADOPTION["conservador"] if bps is not None and in_book else 0.0,
-                "take_y1_45": take_100 * ADOPTION["agresivo"] if bps is not None and in_book else 0.0,
+                "take_y1_25": take_100 * ADOPTION["conservador"] if take_100 else 0.0,
+                "take_y1_45": take_100 * ADOPTION["agresivo"] if take_100 else 0.0,
                 "take_3y_35": take_kept,
             }
         )
     return priced
 
 
-def sku_rollup(book: list[dict]) -> list[dict]:
+def sku_rollup(book: list[dict], flag: str = "in_book") -> list[dict]:
     out = []
     for sku in SKU_ORDER:
         subset = [row for row in book if row["sku"] == sku]
-        booked = [row for row in subset if row["in_book"]]
+        booked = [row for row in subset if row.get(flag)]
         n = len(booked)
         notionals = [row["notional"] for row in booked]
-        takes = [row["take_y1_35"] for row in booked]
-        kept = [row["take_3y_35"] for row in booked]
+        take_key = "take_open_35" if flag == "eligible" else "take_y1_35"
+        takes = [row[take_key] for row in booked]
+        kept = [row["take_3y_35"] if flag == "in_book" else 0.0 for row in booked]
         persists = [row["persist"] for row in booked]
         takes_sorted = sorted(takes, reverse=True)
         top10 = sum(takes_sorted[:10])
@@ -377,7 +415,9 @@ def sku_rollup(book: list[dict]) -> list[dict]:
                 "bps": SKU_BPS[sku],
                 "n": n,
                 "n_mesa": sum(1 for row in subset if row["on_mesa"]),
-                "n_eligible_off_mesa": sum(1 for row in subset if row["in_book"] is False and row.get("on_mesa") is False),
+                "n_eligible_off_mesa": sum(
+                    1 for row in subset if row.get("eligible") and not row.get("on_mesa")
+                ),
                 "notional": sum(notionals),
                 "median_notional": sorted(notionals)[len(notionals) // 2] if notionals else 0.0,
                 "take_y1_25": sum(row["take_y1_25"] for row in booked),
@@ -648,6 +688,56 @@ def sku_table(roll: list[dict]) -> list[list]:
     return out
 
 
+def filter_compare_table(open_roll: list[dict], mesa_roll: list[dict]) -> list[list]:
+    by_open = {row["sku"]: row for row in open_roll}
+    out = []
+    for row in mesa_roll:
+        if row["bps"] is None:
+            continue
+        other = by_open[row["sku"]]
+        out.append(
+            [
+                html.escape(row["label"]),
+                fmt(other["n"], 0),
+                f"{other['take_y1_35']/1e6:.2f}".replace(".", ","),
+                fmt(row["n"], 0),
+                f"{row['take_y1_35']/1e6:.2f}".replace(".", ","),
+                fmt(other["n"] - row["n"], 0),
+            ]
+        )
+    return out
+
+
+def factoring_degen(connection, book: list[dict]) -> dict:
+    booked = [row for row in book if row["sku"] == "factoring" and row["in_book"]]
+    ids = tuple(row["company_id"] for row in booked) or ("__none__",)
+    quoted = ",".join("'" + cid.replace("'", "''") + "'" for cid in ids)
+    stats = connection.execute(
+        f"""
+        SELECT
+            count(*) AS n,
+            median(late_share_ar) AS late_med,
+            quantile_cont(late_share_ar, 0.9) AS late_p90,
+            count(*) FILTER (WHERE late_share_ar >= {LATE_WARN}) AS n_hot,
+            median(overdue_ar_eur) AS ar_med,
+            quantile_cont(overdue_ar_eur, 0.9) AS ar_p90,
+            sum(overdue_ar_eur) AS ar_sum
+        FROM need
+        WHERE company_id IN ({quoted})
+        """
+    ).fetchone()
+    keys = ("n", "late_med", "late_p90", "n_hot", "ar_med", "ar_p90", "ar_sum")
+    out = dict(zip(keys, stats))
+    p90 = _finite(out["ar_p90"]) or 0.0
+    capped = 0.0
+    for row in booked:
+        notional = min(row["notional"], p90) if p90 else row["notional"]
+        capped += notional * FACTORING_BPS * ADOPT
+    out["take_cap_p90"] = capped
+    out["take_raw"] = sum(row["take_y1_35"] for row in booked)
+    return out
+
+
 def tipo_table(rows: list[dict]) -> list[list]:
     return [
         [
@@ -670,10 +760,19 @@ def build_report(book: list[dict], roll: list[dict], extras: dict) -> str:
     fx_row = next(item for item in roll if item["sku"] == "fx")
     fac_row = next(item for item in roll if item["sku"] == "factoring")
     res_row = next(item for item in roll if item["sku"] == "reserve")
+    renta = yield_row["take_y1_35"] + fx_row["take_y1_35"]
+    fac_share = (fac_row["take_y1_35"] / y1) if y1 else 0.0
     sectors, skus, z = sector_sku_matrix(book)
     tipos = tipo_rollup(book)
     n_mesa = extras["n_mesa"]
     n_cut = extras["n_elig_not_mesa"]
+    n_cut_co = extras["n_cut_companies"]
+    fac = extras["factoring"]
+    open_y1 = extras["open_y1"]
+    conf_mean = extras["conf_mean"]
+    score_mean = extras["score_mean"]
+    late_med = fac["late_med"] or 0
+    n_hot = fac["n_hot"] or 0
     return f"""<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -688,29 +787,31 @@ def build_report(book: list[dict], roll: list[dict], extras: dict) -> str:
     <div class="brand"><span class="brand-mark">X</span><div><b>X-Ray</b><small>Rentabilidad × sector</small></div></div>
     <nav>
       <a href="#rigor">Rigor</a>
+      <a href="#filtro">Filtro sectorial</a>
+      <a href="#factoring">Morosidad</a>
       <a href="#ranking">Take por SKU</a>
       <a href="#stickiness">Stickiness</a>
       <a href="#sector">Por sector</a>
       <a href="#tipo">Producto o servicio</a>
       <a href="#limites">Límites</a>
     </nav>
-    <p class="side-note">Adopción {ADOPT:.0%} y bps son supuestos. La base y los meses con necesidad están medidos.</p>
+    <p class="side-note">Una corrida: <code>python3 analysis/rentabilidad_sector.py</code> regenera mapa, libro y este HTML.</p>
   </aside>
   <main>
     <header class="hero">
       <div class="eyebrow">HackSpain 2026 · análisis</div>
-      <h1>El sector no cambia el bps.<br><em>Cambia quién entra en el libro.</em></h1>
-      <p>Misma mesa sectorial, mismas bases de <code>productos.py</code>. El ingreso año 1 es notional × bps publicados × adopción 35 %. La stickiness es la fracción de meses en los que esa necesidad estuvo presente, no un LTV.</p>
+      <h1>La renta que se queda es {renta/1e6:.2f} M€.<br><em>El {fac_share:.0%} del total no es renta.</em></h1>
+      <p>Yield + FX @ 35 %: {renta/1e6:.2f} M€ al año, con persistencia medida. El total con mesa ({y1/1e6:.2f} M€) está hinchado por factoring sobre AR vencido de un dataset con morosidad degenerada. Esa cifra no es el pitch.</p>
       <div class="hero-meta">
+        <span>Renta yield+FX · {renta/1e6:.2f} M€</span>
+        <span>Factoring origination · {fac_row['take_y1_35']/1e6:.2f} M€ ({fac_share:.0%})</span>
+        <span>Con mesa {y1/1e6:.2f} M€ · sin filtro {open_y1/1e6:.2f} M€</span>
         <span>{fmt(n_co, 0)} empresas en el libro</span>
-        <span>Año 1 @ 35 % · {y1/1e6:.2f} M€</span>
-        <span>3 años con persistencia · {y3/1e6:.2f} M€</span>
-        <span>Pooling de grupo antes del SKU</span>
       </div>
     </header>
 
     <section class="section" id="rigor">
-      <div class="section-head"><span>01</span><div><h2>Qué cifra es medida y cuál no</h2><p>Una fila de take mezcla tres capas. Solo la primera se ha visto en el dataset.</p></div></div>
+      <div class="section-head"><span>01</span><div><h2>Qué cifra es medida y cuál no</h2><p>Una fila de take mezcla tres capas. Solo la primera se ha visto en el dataset. Esta página y los CSV salen de la misma corrida.</p></div></div>
       <div class="grid three">
         <div class="panel narrative"><h3>Medido</h3>
           <ul>
@@ -735,11 +836,37 @@ def build_report(book: list[dict], roll: list[dict], extras: dict) -> str:
           </ul>
         </div>
       </div>
-      <div class="callout insight"><b>El sector recorta el TAM, no lo inventa.</b> {fmt(n_mesa, 0)} empresas tienen mesa. {fmt(n_cut, 0)} serían elegibles por tesorería y el sector no las pone en ese SKU (comercio con AR no recibe factoring; holding no lidera crédito). Eso es el filtro, no un multiplicador.</div>
+      <div class="callout insight"><b>Reproducible.</b> <code>python3 analysis/rentabilidad_sector.py</code> infiere la mesa, escribe <code>empresa_sector.csv</code> (con tipo, tenor, product_fit, score y confidence) y <code>company_sector.csv</code> alineados, y luego el libro. No hay que arrastrar un CSV de otra corrida.</div>
+    </section>
+
+    <section class="section" id="filtro">
+      <div class="section-head"><span>02</span><div><h2>El filtro sectorial recorta, no multiplica</h2><p>La mesa es un corte conservador sobre el TAM de tesorería. La confianza 0,18 es del k-means de régimen, no del score de sector.</p></div></div>
+      <div class="kpis compact-kpis">
+        <div class="kpi"><small>TAM tesorería @ 35 %</small><strong>{open_y1/1e6:.2f} M€</strong><span>elegible por caja/ERP, sin mesa</span></div>
+        <div class="kpi"><small>TAM con mesa</small><strong>{y1/1e6:.2f} M€</strong><span>el número que había en cabecera</span></div>
+        <div class="kpi"><small>Empresas recortadas</small><strong>{fmt(n_cut_co, 0)}</strong><span>{fmt(n_cut, 0)} pares empresa×SKU fuera de mesa</span></div>
+        <div class="kpi"><small>Score de sector</small><strong>{score_mean:.2f}</strong><span>k-means confidence {conf_mean:.2f} — otro objeto</span></div>
+      </div>
+      <div class="panel"><h3>Sin filtro vs con mesa</h3>
+        {table(["SKU", "N tesorería", "Take abierto M€", "N mesa", "Take mesa M€", "Empresas fuera"], filter_compare_table(extras["open_roll"], roll))}
+        <p class="caption">El score de sector (mediana ~0,65) es la compatibilidad de la huella con un perfil. La confidence 0,18 es 1 − d1/d2 al centroide del régimen operativo. No se usa como umbral del TAM. El mapa con ambas columnas está en <code>data/processed/empresa_sector.csv</code>.</p>
+      </div>
+      <div class="callout"><b>{fmt(n_mesa, 0)} empresas tienen mesa.</b> {fmt(n_cut_co, 0)} tienen tesorería elegible para un SKU que el sector no pone en la mesa (comercio con AR no adelanta cobros de TPV; holding no lidera crédito). El corte se enseña; no se esconde dentro de {y1/1e6:.2f} M€.</div>
+    </section>
+
+    <section class="section" id="factoring">
+      <div class="section-head"><span>03</span><div><h2>El {fac_share:.0%} del año 1 es factoring sobre morosidad degenerada</h2><p>Hay cap de 100 M€ por factura. No hay cap de cartera. En este dataset demasiadas empresas tienen casi todo el AR vencido.</p></div></div>
+      <div class="kpis compact-kpis">
+        <div class="kpi"><small>Cuota factoring</small><strong>{fac_share:.0%}</strong><span>de {y1/1e6:.2f} M€ con mesa</span></div>
+        <div class="kpi"><small>Morosidad mediana</small><strong>{late_med:.0%}</strong><span>facturas vencidas / facturas a cobro</span></div>
+        <div class="kpi"><small>Casi todo vencido</small><strong>{fmt(n_hot, 0)}</strong><span>empresas con late share ≥ {LATE_WARN:.0%}</span></div>
+        <div class="kpi"><small>Take si se capea al p90</small><strong>{(fac['take_cap_p90'] or 0)/1e6:.2f} M€</strong><span>frente a {fac_row['take_y1_35']/1e6:.2f} M€ crudos</span></div>
+      </div>
+      <div class="callout warning"><b>No usar {y1/1e6:.2f} M€ como cifra de pitch.</b> El generador deja AR vencido en masa (mediana de morosidad {late_med:.0%}, p90 { (fac['late_p90'] or 0):.0%}). El 1,5 % sobre ese stock es origination, no una renta. La cifra defendible es yield + FX: {renta/1e6:.2f} M€/año. El factoring se enseña como techo de anticipo, con cap y con esta advertencia, o no se enseña.</div>
     </section>
 
     <section class="section" id="ranking">
-      <div class="section-head"><span>02</span><div><h2>Take por producto, con el sector aplicado</h2><p>Año 1 es el escenario comercial. La barra a 3 años solo alarga lo que la persistencia medida sostiene.</p></div></div>
+      <div class="section-head"><span>04</span><div><h2>Take por producto, con el sector aplicado</h2><p>Año 1 es el escenario comercial. La barra a 3 años solo alarga lo que la persistencia medida sostiene.</p></div></div>
       <div class="kpis compact-kpis">
         <div class="kpi"><small>Yield año 1</small><strong>{yield_row['take_y1_35']/1e6:.2f} M€</strong><span>{fmt(yield_row['n'], 0)} empresas · persistencia {yield_row['persist_med']:.0%}</span></div>
         <div class="kpi"><small>FX año 1</small><strong>{fx_row['take_y1_35']/1e6:.2f} M€</strong><span>{fmt(fx_row['n'], 0)} empresas · persistencia {fx_row['persist_med']:.0%}</span></div>
@@ -755,7 +882,7 @@ def build_report(book: list[dict], roll: list[dict], extras: dict) -> str:
     </section>
 
     <section class="section" id="stickiness">
-      <div class="section-head"><span>03</span><div><h2>Stickiness medida, no un LTV</h2><p>Capchase pide retención. Aquí retención = la necesidad estuvo presente qué fracción del histórico de 24 meses.</p></div></div>
+      <div class="section-head"><span>05</span><div><h2>Stickiness medida, no un LTV</h2><p>Capchase pide retención. Aquí retención = la necesidad estuvo presente qué fracción del histórico de 24 meses.</p></div></div>
       <div class="grid two">
         <div class="panel">{chart_html(persist_bar(roll), 380, margin=dict(l=140, r=36, t=48, b=48))}</div>
         <div class="panel">{chart_html(quadrant(book, roll), 380)}</div>
@@ -772,7 +899,7 @@ def build_report(book: list[dict], roll: list[dict], extras: dict) -> str:
     </section>
 
     <section class="section" id="sector">
-      <div class="section-head"><span>04</span><div><h2>Dónde el sector mueve el P&amp;L</h2><p>Misma comisión. Distinta mesa. Un mayorista financia el ciclo; un comercio de TPV no adelanta cobros que ya tiene en caja.</p></div></div>
+      <div class="section-head"><span>06</span><div><h2>Dónde el sector mueve el P&amp;L</h2><p>Misma comisión. Distinta mesa. Un mayorista financia el ciclo; un comercio de TPV no adelanta cobros que ya tiene en caja.</p></div></div>
       <div class="panel">{chart_html(heatmap(sectors, skus, z), 520, margin=dict(l=88, r=48, t=96, b=36))}</div>
       <div class="panel"><h3>Sector, take y pegamento</h3>
         {table(["Sector", "Empresas", "Año 1 M€", "3 años M€", "SKU que más paga", "Stickiness mediana"], sector_table(book))}
@@ -780,7 +907,7 @@ def build_report(book: list[dict], roll: list[dict], extras: dict) -> str:
     </section>
 
     <section class="section" id="tipo">
-      <div class="section-head"><span>05</span><div><h2>Producto, servicio o mixto</h2><p>El corte producto/servicio no es un CNAE. Cambia el mix de SKU que el libro puede cobrar.</p></div></div>
+      <div class="section-head"><span>07</span><div><h2>Producto, servicio o mixto</h2><p>El corte producto/servicio no es un CNAE. Cambia el mix de SKU que el libro puede cobrar.</p></div></div>
       <div class="panel">
         {table(["Tipo", "Empresas en el libro", "Año 1 M€", "3 años M€", "SKU líder"], tipo_table(tipos))}
         <p class="caption">Una empresa cuenta en todos los SKUs de su mesa que pasan el filtro. El líder es el de más take año 1 dentro de ese tipo.</p>
@@ -788,12 +915,12 @@ def build_report(book: list[dict], roll: list[dict], extras: dict) -> str:
     </section>
 
     <section class="section" id="limites">
-      <div class="section-head"><span>06</span><div><h2>Límites</h2><p>Qué no afirma esta cuenta.</p></div></div>
+      <div class="section-head"><span>08</span><div><h2>Límites</h2><p>Qué no afirma esta cuenta.</p></div></div>
       <div class="limitations">
         <article><b>No es P&amp;L de Embat</b><p>Adopción, bps y que el pasado se repita 3 años son supuestos. El pitch de suscripción (350 €/mes) vive en monetización, no aquí.</p></article>
-        <article><b>Cola del generador</b><p>La columna top 10 avisa. Un notional de AR o FX en cuatro empresas no se presenta como cartera.</p></article>
+        <article><b>Factoring degenerado</b><p>El 1,5 % sobre AR vencido asume morosidad real. Aquí la mediana está inflada por el generador. No es el número de cabecera.</p></article>
         <article><b>Confirming sin precio</b><p>Cabe en la mesa de mayorista e industria. Sin bps publicado no hay ingreso. Fabricarlo sería lo contrario de rigor.</p></article>
-        <article><b>El sector es un conjunto</b><p>Se usa el sector principal de la huella. Un comercio|hostelería hereda la mesa unida, no un CNAE único.</p></article>
+        <article><b>K-means ≠ sector</b><p>Confidence 0,18 es distancia al centroide del régimen. El score de sector (~0,65) es otra cosa y está en el CSV.</p></article>
       </div>
     </section>
     <footer>HackSpain 2026 · X-Ray · generado desde <code>analysis/rentabilidad_sector.py</code> · escenario central {ADOPT:.0%}</footer>
@@ -803,29 +930,50 @@ def build_report(book: list[dict], roll: list[dict], extras: dict) -> str:
 
 
 def main() -> None:
-    if not SECTOR_TABLE.exists():
-        raise SystemExit(f"Falta {SECTOR_TABLE}. Corre antes analysis/cluster_sector.py")
     print("Connecting and building need…", flush=True)
     connection = connect()
     setup_need(connection)
+    infer_sectors(connection, write_html=True)
     setup_sector_book(connection)
     raw = records(connection, "SELECT * FROM book_raw")
     book = price_book(raw)
-    roll = sku_rollup(book)
+    roll = sku_rollup(book, "in_book")
+    open_roll = sku_rollup(book, "eligible")
+    fac = factoring_degen(connection, book)
+    n_cut_pairs = sum(
+        1
+        for row in book
+        if row.get("eligible") and not row.get("on_mesa") and row["sku"] != "confirming"
+    )
+    n_cut_co = len(
+        {
+            row["company_id"]
+            for row in book
+            if row.get("eligible") and not row.get("on_mesa") and row["sku"] != "confirming"
+        }
+    )
+    conf = connection.execute(
+        "SELECT avg(confidence), avg(top_sector_score) FROM sector_co WHERE confidence IS NOT NULL"
+    ).fetchone()
     extras = {
         "n_mesa": connection.execute(
             "SELECT count(*) FROM sector_co WHERE product_fit IS NOT NULL AND product_fit <> ''"
         ).fetchone()[0],
-        "n_elig_not_mesa": sum(
-            1
-            for row in raw
-            if row["in_book"] and not row["on_mesa"] and row["sku"] != "confirming"
-        ),
+        "n_elig_not_mesa": n_cut_pairs,
+        "n_cut_companies": n_cut_co,
+        "factoring": fac,
+        "open_y1": sum(row["take_open_35"] for row in book if row.get("eligible")),
+        "open_roll": open_roll,
+        "conf_mean": conf[0] or 0.0,
+        "score_mean": conf[1] or 0.0,
     }
     write_book(book)
     OUTPUT.write_text(build_report(book, roll, extras), encoding="utf-8")
     y1 = sum(row["take_y1_35"] for row in book if row["in_book"])
     y3 = sum(row["take_3y_35"] for row in book if row["in_book"])
+    renta = sum(
+        row["take_y1_35"] for row in book if row["in_book"] and row["sku"] in {"yield", "fx"}
+    )
     print(
         " | ".join(
             f"{row['sku']} n={row['n']} y1={row['take_y1_35']/1e6:.2f}M p={row['persist_med']:.2f}"
@@ -835,8 +983,9 @@ def main() -> None:
         flush=True,
     )
     print(
-        f"total y1@35% {y1/1e6:.2f} M€ · 3y {y3/1e6:.2f} M€ · wrote {OUTPUT} "
-        f"({OUTPUT.stat().st_size/1_000:.0f} KB) and {BOOK}",
+        f"mesa y1@35% {y1/1e6:.2f} M€ (renta {renta/1e6:.2f} · factoring {fac['take_raw']/1e6:.2f}) "
+        f"· open {extras['open_y1']/1e6:.2f} M€ · 3y {y3/1e6:.2f} M€ "
+        f"· wrote {OUTPUT} ({OUTPUT.stat().st_size/1_000:.0f} KB) and {BOOK}",
         flush=True,
     )
 
