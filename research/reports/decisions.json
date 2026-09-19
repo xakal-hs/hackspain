@@ -1199,6 +1199,18 @@
    "chart": null,
    "alternatives": "",
    "evidence": ""
+  },
+  {
+   "id": "D29",
+   "category": "producto",
+   "title": "Voz de Capchase: partner con licencia, sector × tenor y depósito como colateral",
+   "question": "¿Hace falta ser banco para mover el dinero, y cómo se diseña el préstamo?",
+   "decision": "No hace falta licencia bancaria propia: se apalanca la de un banco partner. El préstamo vive en una rejilla sector × tenor (días / 6 meses / 12 meses / largo); inmediato, corto y medio son productos distintos. El objetivo es retener. Quien tiene caja también pide: aparcar el depósito en el partner es colateral, baja el interés y pega al cliente. Deterioro es deuda nueva mientras la caja se evapora, no el alta de deuda sola.",
+   "why": "Testimonio de un cofundador de Capchase (19-09-2026). Complementa la voz de Embat: aquella enseña el coste al CFO; esta dice cómo se ejecuta el riel y cómo se parte el crédito. Fuente: context/voz_capchase.md.",
+   "status": "decidido",
+   "chart": null,
+   "alternatives": "",
+   "evidence": ""
   }
  ]
 }

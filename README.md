@@ -26,13 +26,15 @@ diseña como un prestamista con 100.000 € que decidir. La criticidad no es uni
 evapora pesa mucho más que un DSO que se mueve un poco, y la liquidez no pesa igual en todos los
 sectores), y el resultado no es solo un número: para cada empresa y mes hay nivel, trayectoria,
 explicación en lenguaje llano, bache frente a caída, el coste de no hacer nada y una mesa de
-opciones. Cómo lo enseña Embat está en [`context/voz_embat.md`](context/voz_embat.md).
+opciones. Cómo lo enseña Embat está en [`context/voz_embat.md`](context/voz_embat.md). Cómo se mueve
+el dinero sin licencia propia y cómo se parte el préstamo por plazo está en
+[`context/voz_capchase.md`](context/voz_capchase.md).
 
 ## Estructura
 
 | Ruta | Qué contiene |
 |---|---|
-| [`context/`](context) | Enunciado, marco de scoring, monetización, oportunidades, voz de producto de Embat y auditoría comercial para el jurado, con versiones HTML autocontenidas |
+| [`context/`](context) | Enunciado, marco de scoring, monetización, oportunidades, voz de producto de Embat, voz de crédito de Capchase y auditoría comercial para el jurado, con versiones HTML autocontenidas |
 | [`data/`](data) | Los CSV originales del reto y su diccionario. **No se modifican nunca.** `invoices.csv` y `transactions.csv` van por Git LFS |
 | [`src/mapping/`](src/mapping) | Capa de mapeo: vistas DuckDB que corrigen la suciedad al leer (países no ISO, ERP en dos vocabularios, deuda con signo invertido, saldos absurdos…). El inventario de fallos y su regla está en [`ISSUES.md`](src/mapping/ISSUES.md) |
 | [`analysis/`](analysis) | Exploración del dataset. Informes autocontenidos que se abren sin servidor (`report.html`, `features_analisis_automatico.html`, `features_challenge.html`), la reconstrucción del histórico de caja (`cash_history.py`) y un explorador interactivo de esa caja en Streamlit (`app.py`) |
@@ -134,8 +136,9 @@ La verdad comercial está en [`context/monetizacion.md`](context/monetizacion.md
 convertidos y caja reconstruida, el escenario central es **4,2 M€/año** (rango 3,0–5,4), sobre
 **344 M€ de excedente en 370 empresas**. Son escenarios sobre datos sintéticos, no una previsión de
 ventas ni evidencia de disposición a pagar. Cómo se enseña el coste (dinero parado, divisa) y cómo
-se ofrece deuda está en [`context/voz_embat.md`](context/voz_embat.md). La tesis y los puntos ciegos
-priorizados para el jurado están en [`context/auditoria_comercial.md`](context/auditoria_comercial.md).
+se ofrece deuda está en [`context/voz_embat.md`](context/voz_embat.md). Licencia de partner, rejilla
+de plazos y retención están en [`context/voz_capchase.md`](context/voz_capchase.md). La tesis y los
+puntos ciegos priorizados para el jurado están en [`context/auditoria_comercial.md`](context/auditoria_comercial.md).
 
 La tabla completa, las referencias y las limitaciones están en el
 [README de `research/`](research/README.md) y en [`research/METRICS.md`](research/METRICS.md).

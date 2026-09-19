@@ -83,7 +83,8 @@ cuánto tiempo se cubre) y montar un mix de plazos, no un único instrumento.
 - Seguir sin rankear la demo por comisión de la SPA.
 - Observabilidad (ERP, conciliación, mes truncado) no se imputa como salud.
 - Hoy no somos banco; un partner puede ejecutar. Eso no convierte la intermediación en
-  el producto que se vende.
+  el producto que se vende. Cómo se apalanca esa licencia, cómo se parte el préstamo por
+  tenor y cómo se retiene al cliente con el depósito como colateral: [voz de Capchase](voz_capchase.md).
 
 ## Cómo usarlo al construir
 

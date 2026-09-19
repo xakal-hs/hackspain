@@ -446,6 +446,12 @@ def build():
         decision="Idle cash y FX son costes ocultos: hay que mostrarlos en la app, no en un agente (el agente no se usa). El módulo se vende como suscripción; intermediar rieles cuando Embed One no cubre es un parche. El upsell es una mesa de opciones que encajan. La deuda, un mix corto/medio/largo según el tiempo de devolución. La criticidad de la liquidez cambia con el sector. La solvencia sale de previsión y colchón, no de conciliación perfecta.",
         why="Testimonio de una PM de Embat (19-09-2026). El CFO no toma el dinero parado como problema real y la operativa de divisa le parece compleja. Empujar un SKU por comisión o un agente de FX contradice cómo venden ellos. Fuente: context/voz_embat.md.",
         status="decidido")
+
+    add(category="producto", title="Voz de Capchase: partner con licencia, sector × tenor y depósito como colateral",
+        question="¿Hace falta ser banco para mover el dinero, y cómo se diseña el préstamo?",
+        decision="No hace falta licencia bancaria propia: se apalanca la de un banco partner. El préstamo vive en una rejilla sector × tenor (días / 6 meses / 12 meses / largo); inmediato, corto y medio son productos distintos. El objetivo es retener. Quien tiene caja también pide: aparcar el depósito en el partner es colateral, baja el interés y pega al cliente. Deterioro es deuda nueva mientras la caja se evapora, no el alta de deuda sola.",
+        why="Testimonio de un cofundador de Capchase (19-09-2026). Complementa la voz de Embat: aquella enseña el coste al CFO; esta dice cómo se ejecuta el riel y cómo se parte el crédito. Fuente: context/voz_capchase.md.",
+        status="decidido")
     return D, its
 
 

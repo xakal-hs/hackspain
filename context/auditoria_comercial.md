@@ -66,6 +66,8 @@ Fuentes consultadas el 19-09-2026:
 | El CFO pagará 350 €/mes | Hipótesis | Sin entrevistas ni contratos | No afirmarlo como hecho |
 | Más de 500 equipos usan Embat | Externa | Web pública de Embat | Contexto; no escalar ingresos |
 | El exceso y el FX son costes ocultos; el agente no se usa | Testimonio | PM de Embat, 19-09-2026 (`voz_embat.md`) | Condiciona la UI, no el P&L |
+| Mover dinero no exige licencia propia; partner bancario basta | Testimonio | Cofundador de Capchase, 19-09-2026 (`voz_capchase.md`) | Condiciona el riel, no el P&L |
+| Deuda = sector × tenor; quien tiene caja también pide | Testimonio | Mismo (`voz_capchase.md`) | Condiciona productos y score |
 
 ## Puntos ciegos priorizados
 
@@ -83,7 +85,7 @@ Fuentes consultadas el 19-09-2026:
 | **P1** | Score relativo al train y casos OOD | `REFLEXIONES.md` R01/R14 | Interpretar 70 como riesgo absoluto | Mostrar probabilidad de evento y confianza junto al score |
 | **P1** | Dos cajas, eventos/features duplicados y dos apps | `research/ESTADO.md` | Reproducibilidad y mantenimiento | Congelar hoy; consolidar la semana siguiente |
 | **P2** | Pricing y adopción no validados | 25/35/45 %, 350 €, 100/15 pb son supuestos | Caso de negocio presentado como venta segura | Preparar discovery y piloto, no añadir decimales |
-| **P2** | Ejecución y regulación no definidas | Necesidad de banco/bróker/BaaS | Prometer mover dinero sin capacidad | X-Ray recomienda; un partner regulado ejecuta |
+| **P2** | Partner bancario no nombrado | Licencia propia no hace falta; falta el partner concreto | Prometer riel sin quién lo ejecuta | X-Ray recomienda; un banco partner con licencia existente ejecuta |
 
 ## Qué demo usar
 
@@ -144,6 +146,11 @@ presenta como tal. La integración de una empresa completa es el objetivo de la 
 Justo: el CFO no lo siente. Por eso la ficha enseña el coste oculto antes del SKU. La divisa
 igual —la operación asusta y el agente no se usa—. Fuente: [voz de producto](voz_embat.md).
 
+### “¿Hace falta que Embat sea banco para mover el dinero?”
+
+No. Se apalanca la licencia de un banco partner. La suscripción sigue siendo el producto; el riel
+no espera a que Embat tenga ficha bancaria. Fuente: [voz de Capchase](voz_capchase.md).
+
 ### “¿Distingue un bache de una caída?”
 
 Todavía no con suficiente discriminación: AUC 0,53. Lo mostramos como un punto ciego y evitamos una
@@ -184,4 +191,5 @@ El jurado debe poder repetir tres frases sin mirar una slide:
 3. **344 M€ están medidos; 4,2 M€ es un escenario explícito; 12,1 M€ fue descartado.**
 
 Y, si preguntan por producto: el módulo es **suscripción**; el upsell es una **mesa de opciones**;
-la deuda, un **mix de plazos**. El dinero parado y la divisa se enseñan como coste oculto.
+la deuda, una **rejilla sector × tenor**. El riel lo ejecuta un partner con licencia; no hace falta
+que Embat sea banco. El dinero parado y la divisa se enseñan como coste oculto.

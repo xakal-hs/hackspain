@@ -176,6 +176,7 @@ El enunciado pide un número y un producto. Cómo pesar las señales y qué devo
 - La métrica cambia según la oferta (circulante, póliza, marketplace…) y según quién mira el score, porque los objetivos no son los mismos.
 - Quién paga y cuánto vale sobre esta cartera: [Monetización](monetizacion.md).
 - Cómo enseña Embat el coste oculto, el upsell y la deuda: [Voz de producto](voz_embat.md).
+- Cómo se mueve el dinero sin licencia propia y cómo se parte el préstamo por plazo: [Voz de Capchase](voz_capchase.md).
 
 ---
 
