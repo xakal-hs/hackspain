@@ -75,7 +75,11 @@ order, and the header chip says which one is live:
    months of cash, DSO, overdue invoices, margin and monthly flows. Names, sectors, the
    three-month forecast and the offer terms are still fixtures.
 2. **Supabase** (`source: 'supabase'`) — treasury facts for the five featured companies,
-   with mocked scores.
+   with mocked scores. Two caveats in `data/processed/panel_monthly.csv`: `pct_vencido` is
+   overdue stock over three-month sales (a ratio clipped to `[0, 5]`, not the share of
+   pending invoices past 60 days that the backend sends), and `runway_m` is unsanitised —
+   it ranges from −812,870 to 35,208,424 months because sentinel cash balances are not
+   removed. The backend path drops runway for those companies instead of scoring them.
 3. **Fixtures** (`source: 'demo'`) — when neither is configured.
 
 Missing values arrive as `null` and stay missing: a company without enough invoices shows
