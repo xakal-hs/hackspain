@@ -26,15 +26,17 @@ excedente en 370 empresas**. Adopción, pricing y disposición a pagar siguen si
 |---|---|---|
 | Comprador e integrador | Embat | Aumentar valor y expansión sobre cuentas conectadas |
 | Usuario | CFO / tesorería | Saber qué cambió, cuánto importa y qué hacer ahora |
-| Ejecutor opcional | Banco, bróker o BaaS | Ejecutar financiación, colocación o divisa |
+| Ejecutor opcional | Banco, bróker o BaaS | Ejecutar cuando Embed One no cubre el riel. Intermediar no es lo ideal; la suscripción sí |
 
 ### La experiencia mínima
 
 1. **Detectar antes:** la cartera se ordena por cambio esperado, criticidad y confianza.
 2. **Explicar:** el CFO ve la señal, el momento y los puntos que movieron la nota.
 3. **Calcular:** la caja se separa entre colchón necesario y exceso o déficit accionable.
-4. **Recomendar:** vigilar, acelerar cobros, conservar caja, colocar excedente o preparar financiación.
-5. **Cuantificar:** se muestra el importe afectado y, cuando exista, el resultado posterior.
+4. **Recomendar:** vigilar, acelerar cobros, conservar caja, colocar excedente o preparar un
+   **mix de financiación**. Varias opciones en la mesa, no un SKU único.
+5. **Cuantificar:** se muestra el **coste de no hacer nada** (dinero parado, divisa sin convertir)
+   y, cuando exista, el resultado posterior.
 
 ### Diferencia frente a Embat hoy
 
@@ -63,6 +65,7 @@ Fuentes consultadas el 19-09-2026:
 | 12,1 M€/año | Descartada | Brief antiguo sin FX limpio | Solo para explicar la corrección |
 | El CFO pagará 350 €/mes | Hipótesis | Sin entrevistas ni contratos | No afirmarlo como hecho |
 | Más de 500 equipos usan Embat | Externa | Web pública de Embat | Contexto; no escalar ingresos |
+| El exceso y el FX son costes ocultos; el agente no se usa | Testimonio | PM de Embat, 19-09-2026 (`voz_embat.md`) | Condiciona la UI, no el P&L |
 
 ## Puntos ciegos priorizados
 
@@ -136,6 +139,11 @@ los conectores y el dato. El banco puede ser canal o ejecutor cuando una recomen
 La SPA FastAPI sí usa el motor de investigación. El frontend Nuxt es un prototipo con fixtures y se
 presenta como tal. La integración de una empresa completa es el objetivo de la próxima semana.
 
+### “El dinero parado no es un problema”
+
+Justo: el CFO no lo siente. Por eso la ficha enseña el coste oculto antes del SKU. La divisa
+igual —la operación asusta y el agente no se usa—. Fuente: [voz de producto](voz_embat.md).
+
 ### “¿Distingue un bache de una caída?”
 
 Todavía no con suficiente discriminación: AUC 0,53. Lo mostramos como un punto ciego y evitamos una
@@ -174,3 +182,6 @@ El jurado debe poder repetir tres frases sin mirar una slide:
 1. **Embat compra; el CFO usa.**
 2. **X-Ray prioriza y explica la siguiente decisión, no duplica el forecast.**
 3. **344 M€ están medidos; 4,2 M€ es un escenario explícito; 12,1 M€ fue descartado.**
+
+Y, si preguntan por producto: el módulo es **suscripción**; el upsell es una **mesa de opciones**;
+la deuda, un **mix de plazos**. El dinero parado y la divisa se enseñan como coste oculto.
