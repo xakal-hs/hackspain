@@ -21,7 +21,7 @@ Otros comandos:
 
 ```bash
 uv run pytest -q tests                              # 9 tests: API sklearn, OOD, escala, monotonía, explicación exacta, escenarios
-cd src && uv run python evaluate.py v6 --small      # validación GroupKFold × 3 cortes (~5 min)
+cd src && uv run python evaluate.py v7 --small      # validación GroupKFold × 3 cortes (~5 min)
 cd src && uv run python anticipation.py             # antelación, bache frente a caída y alertas out-of-fold (~20 min; --from-cache reutiliza las alertas)
 uv run python src/predict_submission.py --csv-dir <carpeta_test> --out submission   # empresas nuevas
 ```
@@ -32,7 +32,7 @@ uv run python src/predict_submission.py --csv-dir <carpeta_test> --out submissio
 | --- | --- | --- |
 | Datos | `src/panel.py`, `src/fx.py` | Panel mensual con estas transformaciones: FX validado contra el BCE y currency-api; transferencias internas e intragrupo excluidas; caja y pólizas reconstruidas hacia atrás; facturas impagadas según `pending_amount`; dinámica de clientes; inactividad causal |
 | Features | `src/features.py` | 17 ratios adimensionales con suelo relativo a la escala de la empresa (invariantes de ×1e-6 a ×1e6) |
-| Eventos ancla | `src/targets.py` | Apagado, tensión de caja, declive (con medianas) y crecimiento a 6 meses. Solo se usan para calibrar y validar |
+| Eventos ancla | `src/targets.py` | Tensión de liquidez, incumplimiento estricto, caída estructural de cobros y expansión autofinanciada a 6 meses. Son proxies observables para calibrar y validar; apagado ya no calibra |
 | **API sklearn** | `src/xray.py` | `HealthScorer.fit(X, y)/transform/score_panel` y `TrajectoryForecaster.fit/predict` (mlforecast + LightGBM cuantílico q10/q50/q90 + CQR), más `explain`, `alerts_for` y `fmt_feature` |
 | Servicio | `src/service.py`, `app/server.py` | Modelo en memoria, simulador de escenarios (`apply_scenario`) y API FastAPI según `app/API_CONTRACT.md` |
 | SPA | `app/static/index.html` | Cartera, ficha de empresa con abanico de previsión, tesorería por empresa (flujo de caja, liquidez, deuda y facturas), «por qué cambió», simulador de escenarios, monitor, métricas y decisiones. Lenguaje visual (tokens, superficies, elevación): `app/DESIGN.md` |
@@ -45,21 +45,23 @@ uv run python src/predict_submission.py --csv-dir <carpeta_test> --out submissio
 3. **Monitor**: alerta de deterioro o mejora si la mediana prevista a 3 meses se mueve ≥ 10 puntos. La severidad depende del intervalo y de si la empresa aún parece sana. Bache frente a caída tras una caída mensual ≥ 10. Inactividad inmediata.
 4. **Escenarios**: se modifican los drivers brutos (cobros, pagos, caja, nóminas, deuda, retrasos, vencidos, actividad…) en los últimos N meses. Los cambios de flujo se acumulan en la caja y se recalculan features, score, previsión y alertas.
 
-## Resultados (v6, validación out-of-group, escala publicada 0-100)
+## Resultados (v7, validación out-of-group, escala publicada 0-100)
 
 | Pregunta del reto | Métrica | Modelo | AR(1) |
 | --- | --- | --- | --- |
-| Quién empieza a torcerse | AUC de caída ≥ 15 a 3 meses | **0,742** | 0,703 |
-| … aunque aún parezca sana (quintil alto) | AUC en el quintil alto | **0,574** | 0,493 |
-| Quién mejora | AUC de subida ≥ 15 a 3 meses | **0,715** | 0,683 |
-| … desde abajo (quintil bajo) | AUC en el quintil bajo | **0,635** | 0,542 |
-| Dónde actuar | Precisión en el 5 % con mayor caída / subida prevista | **47 % / 41 %** | 30 % / 25 % |
-| Trayectoria | MAE a h1 / h3 | **4,5 / 11,2** | 5,4 / 11,7 |
-| Confianza | Cobertura del intervalo 80 % en h1 / h3 | 84 % / 82 % | — |
-| Nivel con sentido | AUC del score frente a evento adverso / apagado / crecimiento a 6 meses | 0,59 / 0,59 / 0,57 | — |
-| Monitor | Precisión de la alerta de deterioro / mejora (tasa base) | 42 % (16 %) / 45 % (12 %) | — |
+| Quién empieza a torcerse | AUC de caída ≥ 15 a 3 meses | **0,725** | 0,693 |
+| … aunque aún parezca sana (quintil alto) | AUC en el quintil alto | **0,604** | 0,538 |
+| Quién mejora | AUC de subida ≥ 15 a 3 meses | **0,730** | 0,692 |
+| … desde abajo (quintil bajo) | AUC en el quintil bajo | **0,598** | 0,570 |
+| Dónde actuar | Precisión en el 5 % con mayor caída / subida prevista | **40 % / 34 %** | 32 % / 25 % |
+| Trayectoria | MAE a h1 / h3 | **4,48 / 10,85** | 5,22 / 11,07 |
+| Confianza | Cobertura del intervalo 80 % en h1 / h3 | 82 % / 81 % | — |
+| Nivel con sentido | AUC frente a tensión / incumplimiento / caída / expansión a 6 meses | 0,657 / 0,603 / 0,587 / 0,607 | — |
+| Monitor | Precisión / recall de deterioro; precisión / recall de mejora | 38 % / 26 %; 26 % / 5 % | — |
 
-**Anticipación** (`anticipation.py`: origen móvil mensual, 9 cortes, fuera de fold). Detalle en `reports/anticipation_v5.json`:
+**Anticipación** (`anticipation.py`: origen móvil mensual, 9 cortes, fuera de fold). Esta medición
+longitudinal aún corresponde a v5/v6; no debe presentarse como una validación nueva de v7. Detalle
+en `reports/anticipation_v5.json`:
 
 | Pregunta | Resultado |
 | --- | --- |
@@ -72,7 +74,7 @@ uv run python src/predict_submission.py --csv-dir <carpeta_test> --out submissio
 
 Las reflexiones y mejoras abiertas (nota relativa o absoluta, tamaño, eventos, caja que no cuadra…) se van registrando en [`REFLEXIONES.md`](REFLEXIONES.md).
 
-- **La mejora frente al AR(1) es modesta en el promedio** (+3,8 % de MAE a h3; a h1 solo un 2 % sobre el arrastre mecánico del EWMA). La ganancia real está en la cola y en las empresas que aún parecen sanas. Es la clase de señal que el enunciado pide, pero no es espectacular.
+- **La mejora frente al AR(1) es modesta en el promedio** (+2,0 % de MAE a h3). La ganancia más clara está en ordenar la cola y en las empresas que aún parecen sanas. Es la clase de señal que el enunciado pide, pero no es espectacular.
 - **El nivel del score discrimina de forma moderada** (AUC ~0,6). Sin etiquetas, el ancla son eventos observables que son proxies. Hay que confirmar con la organización qué significa «apagarse» (¿cierre o baja de Embat?) y si existen etiquetas.
 - **Agosto de 2026 tiene el doble de caídas** que la media, con un 25 % menos de facturas sincronizadas: puede ser un efecto de borde del dataset.
 - **Bache frente a caída sin poder discriminante** (AUC 0,53). La regla actual acierta el 74 % porque casi todo es caída. Para mejorarla harían falta señales de recuperación: cobros que entran tras el mes malo o la caja mínima intramensual.

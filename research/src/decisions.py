@@ -17,7 +17,7 @@ import evaluate as E
 warnings.filterwarnings("ignore")
 ROOT = Path(__file__).resolve().parents[1]
 REP = ROOT / "reports"
-FINAL = "v6"
+FINAL = "v7"
 
 
 def chart(type_, title, x_label, y_label, labels=None, datasets=(), note=None):
@@ -435,10 +435,10 @@ def build():
         why="El simulador de escenarios necesita recalcular al mover cada slider (con debounce) y superponer base frente a escenario. Una SPA con API es más fluida, se despliega en cualquier sitio y separa el modelo (reutilizable como producto: la API es lo que compraría Embat) de la demo.",
         alternatives="Streamlit: más rápido de montar, pero se re-ejecuta entero en cada interacción y queda acoplado a Python.")
 
-    add(category="producto", title="Producto y comprador: monitor y simulador para Embat y sus socios financieros",
+    add(category="producto", title="Producto y comprador: capa de decisión de Embat para el CFO",
         question="¿Quién paga y por qué?",
-        decision="Comprador: Embat. Integra X-Ray en su plataforma como (1) un monitor de alertas proactivas sobre sus clientes y (2) un simulador de escenarios para tesorería. Con el score y la confianza puede derivar operaciones a financiadores (circulante, factoring o pólizas) con un riesgo medido, y cobrar por origen o por suscripción.",
-        why="Embat ya tiene los datos y la relación con la pyme. El score la convierte en un canal de crédito con información que el banco no tiene: caja diaria, disciplina de facturas y anticipación de 1 a 3 meses.",
+        decision="Comprador e integrador: Embat. Usuario: CFO o equipo de tesorería. X-Ray ordena la cartera, explica qué cambió y propone la siguiente acción con un colchón dinámico. Banco, bróker o BaaS quedan como ejecutores opcionales cuando la recomendación requiere capital o licencia.",
+        why="Embat ya ofrece previsión, alertas, riesgo y pagos. La aportación incremental de X-Ray es comparabilidad, explicación aditiva y priorización transversal: convertir el rastro que Embat ya tiene en una cola de decisiones, no duplicar el forecast.",
         status="a confirmar con la organización")
     return D, its
 
@@ -460,13 +460,14 @@ DESCS = {
     "v5d": "v5a + 6 exógenas + regularización fuerte",
     "v5e": "v5b + sin dato = neutro (sin renormalizar)",
     "v5f": "v5e + escala publicada lineal (P5→15, P95→85) y alertas Δ≥10",
-    "v6": "Final: inactividad causal, intragrupo fuera, FX en facturas, clientes perdidos, calibración 2 caras, EPS relativo",
+    "v6": "Inactividad causal, intragrupo fuera, FX en facturas, clientes perdidos, calibración 2 caras, EPS relativo",
+    "v7": "Eventos v2: tensión, incumplimiento, caída estructural y expansión; probabilidades a 6 meses",
 }
 
 
 def iterations():
     out = []
-    for tag in ["v1", "v2", "v3a", "v3b", *VARIANTS, "v6"]:
+    for tag in ["v1", "v2", "v3a", "v3b", *VARIANTS, "v6", "v7"]:
         m = load_metrics(tag)
         if not m:
             continue

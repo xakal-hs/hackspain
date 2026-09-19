@@ -189,7 +189,7 @@ Esta es la pregunta bonus del reto. Se mide con el forecaster h1-h3 y con la tas
 
 **Fuentes:** `context/challenge.md` (dataset), `features.md` (sección 2), `data/data_dictionary.md` (diccionario), `research/src/panel.py` (panel mensual)
 
-## El modelo actual (v6): lo que funciona
+## El modelo actual (v7): lo que funciona
 
 ### Score 0-100 — Media ponderada de 17 features
 
@@ -233,19 +233,19 @@ LightGBM cuantílico (q10/q50/q90) sobre 6 exógenas: score_raw, runway, activit
 
 | Problema | Tamaño en el dataset | Qué gana Embat | Fuente |
 |---|---|---|---|
-| 2.378 M€ ociosos en cuentas sin remunerar | 375 empresas con excedente > 2 meses de gasto | 5,4 M€/año (100 pb sobre excedente colocado) | `context/monetizacion.md` sección "El espejo de nuestra propia tesis", `analysis/monetizacion.py` |
-| 19.812 M€ expuestos a divisa (7,2% crudo) | Empresas que pagan en USD, GBP, JPY… al tipo del banco | 3,7 M€/año (15 pb sobre flujo en divisa) | `context/monetizacion.md` sección "Por qué la divisa pesa", `analysis/monetizacion.py` (flow_raw_24, fx_month) |
-| Sin visibilidad de su tesorería | 82% sin país en los datos, cobertura desigual | 2,7 M€/año (350 €/mes SaaS) | `context/monetizacion.md` tabla "Qué compra la empresa", `data/data_dictionary.md` (companies.country) |
-| 19,2 M€ de demanda de financiación | 313 empresas que tocan déficit | 0,1 M€/año (0,9% del total — la cola pequeña) | `context/monetizacion.md` "La conversación incómoda" (105 k€), `analysis/monetizacion.py` (hole_now_m no reproducible a 19,2M €) |
+| 344 M€ de excedente sobre dos meses de gasto | 370 empresas | 1,20 M€/año en el escenario central (100 pb y 35% de adopción, ambos supuestos) | `analysis/monetizacion.html`, `context/monetizacion.md` |
+| 2.108 M€ anuales expuestos a otra divisa, convertidos a EUR | 1,6% del flujo limpio | 1,11 M€/año en el escenario central (15 pb y 35% de adopción, ambos supuestos) | `analysis/monetizacion.html` |
+| Capa de decisión para el CFO | 1.286 empresas sintéticas; no equivale a clientes reales | 1,89 M€/año en el escenario central (350 €/mes y 35% de adopción) | `context/monetizacion.md` |
+| 11,38 M€ de caja negativa al corte | 41 empresas | Cola de financiación; no se ha estimado ingreso defendible | `analysis/monetizacion.html` |
 
 ### Los 3 productos que genera revenue
 
 | Producto | Revenue central | % del total | Qué hace | Fuente |
 |---|---:|---:|---|---|
-| **Colocación del excedente** (colchón dinámico) | 5,4 M€ | 45% | Coloca el dinero sobrante en depósito | `context/monetizacion.md` tabla "Ingreso central" |
-| **Ejecución de divisa anticipada** | 3,7 M€ | 31% | Compra divisa antes del pago, ahorra spread | `context/monetizacion.md` "Por qué la divisa pesa" |
-| **Dashboard SaaS** | 2,7 M€ | 22% | 350 €/mes por empresa — la base de todo | `context/monetizacion.md` "Suscripción del módulo" |
-| **Marketplace crédito + seguro + línea pre-aprobada** | 0,1 M€ | 0,9% | La cola pequeña — mención en el roadmap | `context/monetizacion.md` "Originación de financiación" |
+| **Capa de decisión X-Ray** | 1,89 M€ | 45% | Prioriza, explica y propone la siguiente acción | `context/monetizacion.md` |
+| **Colocación del excedente** | 1,20 M€ | 29% | Ejecutada por un partner regulado | `context/monetizacion.md` |
+| **Ejecución de divisa anticipada** | 1,11 M€ | 26% | Ejecutada por un banco o bróker | `context/monetizacion.md` |
+| **Financiación** | No estimado | — | Cola secundaria y roadmap, no titular | `context/auditoria_comercial.md` |
 
 ### El producto estrella: Colchón Dinámico
 
@@ -256,15 +256,17 @@ LightGBM cuantílico (q10/q50/q90) sobre 6 exógenas: score_raw, runway, activit
 - Runway = meses de caja restantes
 - Trayectoria h3 = lo que se prevé en 3 meses
 
-**Una empresa con 120.000 € de excedente gana 2.400–3.600 €/año de rendimiento que hoy no percibe.** Paga ~1.200 € de margen. Neto +1.200 a +2.400 €. El cliente gana dinero comprando el producto: no hay objeción de precio.
+La mediana medida es **108.720 € de excedente**. El rendimiento, el margen y la disposición a pagar
+no están observados: deben presentarse como hipótesis y validarse con CFOs.
 
-**Fuentes:** `context/monetizacion.md` "El producto, en una frase", `context/monetizacion.md` "La unidad económica", `analysis/monetizacion.py` (excess_median 120.658 €), `analysis/cash_history.py` (caja reconstruida, colchón 2 meses)
+**Fuentes:** `context/monetizacion.md`, `analysis/monetizacion.html`, `analysis/cash_history.py`.
 
-### Si Embat quiere ser banco (roadmap futuro)
+### Si una acción requiere mover dinero
 
-El colchón dinámico es el puente: hoy genera 12,1 M€/año como software. Con licencia bancaria, captura depósitos directamente y la financiación pasa de 0,9% a un 30%+ del revenue.
+X-Ray recomienda; un banco, bróker o proveedor BaaS ejecuta. No se presupone que Embat vaya a ser
+banco ni se atribuye ingreso regulado sin partner, contrato y análisis jurídico.
 
-**Fuentes:** `context/monetizacion.md` "Tres avisos" (positicionamiento, "captar saldos lo tensiona"), `context/scoring.md` "El dato que el banco no tiene" (hay que contactar mucho a bancos), `research/DECISIONS.md` D27 (producto y comprador: "monitor y simulador para Embat y sus socios financieros")
+**Fuentes:** `context/monetizacion.md`, `context/auditoria_comercial.md`.
 
 ---
 
