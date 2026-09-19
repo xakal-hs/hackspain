@@ -1,8 +1,8 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cómo pensar el score · X Ray · HackSpain 2026</title><style>
 :root{--ink:#172b3a;--muted:#66788a;--line:#dce5ec;--navy:#0d2b45;--blue:#1265e8;--cyan:#34c3cf;--paper:#fff;--bg:#f4f7fa}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif}header{padding:72px max(24px,calc((100% - 980px)/2));background:radial-gradient(circle at 85% 15%,rgba(52,195,207,.3),transparent 28%),linear-gradient(135deg,#0d2b45,#164f86);color:#fff}header small{color:var(--cyan);font-weight:800;letter-spacing:.15em;text-transform:uppercase}header h1{margin:18px 0 8px;font-size:clamp(40px,7vw,72px);line-height:.95;letter-spacing:-.06em}header p{margin:0;color:#c7d8e6;font-size:18px}.layout{display:grid;grid-template-columns:230px minmax(0,750px);gap:54px;max-width:1060px;margin:auto;padding:44px 24px 80px}nav{position:sticky;top:24px;align-self:start;padding:20px;border:1px solid var(--line);border-radius:14px;background:#fff}nav b{display:block;margin-bottom:10px;color:var(--navy)}nav a{display:block;padding:5px 0;color:var(--muted);text-decoration:none;font-size:12px}nav a:hover{color:var(--blue)}article{min-width:0}article>h1{display:none}h2{margin:54px 0 14px;padding-top:10px;color:var(--navy);font-size:30px;line-height:1.15;letter-spacing:-.035em}h2:first-child{margin-top:0}h3{margin:30px 0 8px;color:#164f86;font-size:19px}p{margin:0 0 16px}strong{color:var(--navy)}table{width:100%;margin:22px 0 30px;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}th,td{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:#eaf2ff;color:#164f86;font-size:12px;text-transform:uppercase;letter-spacing:.06em}tr:last-child td{border-bottom:0}code{padding:2px 6px;border-radius:5px;background:#eaf0f5;color:#234e70}ul,ol{padding-left:22px}li{margin:7px 0}hr{margin:54px 0;border:0;border-top:1px solid var(--line)}blockquote{margin:24px 0;padding:18px 22px;border-left:4px solid var(--cyan);background:#eafcfd}footer{padding:26px;text-align:center;color:var(--muted);font-size:12px}@media(max-width:800px){.layout{display:block}nav{position:static;margin-bottom:30px}header{padding:54px 24px}table{display:block;overflow-x:auto;white-space:normal}h2{font-size:26px}}
-</style></head><body><header><small>HackSpain 2026 · Embat · Interpretación del equipo</small><h1>Cómo pensar el score</h1><p>Si tuvieras 100.000 € para prestar, ¿a quién se los darías?</p></header><div class="layout"><nav><b>Contenido</b><a href="challenge.html">Enunciado</a><a href="monetizacion.html">Monetización</a><a href="#la-prueba-de-los-100000-">Los 100.000 €</a><a href="#criticidad-no-todas-las-senales-pesan-igual">Criticidad</a><a href="#el-output-no-es-solo-un-numero">Más que un número</a><a href="#el-dato-que-el-banco-no-tiene">Dato vs banco</a><a href="#la-metrica-cambia-con-la-oferta-y-con-quien-mira">Métrica por rol</a><a href="#como-usarlo-al-construir">Al construir</a></nav><article>
+</style></head><body><header><small>HackSpain 2026 · Embat · Interpretación del equipo</small><h1>Cómo pensar el score</h1><p>Si tuvieras 100.000 € para prestar, ¿a quién se los darías?</p></header><div class="layout"><nav><b>Contenido</b><a href="challenge.html">Enunciado</a><a href="monetizacion.html">Monetización</a><a href="voz_embat.html">Voz de Embat</a><a href="#la-prueba-de-los-100000-">Los 100.000 €</a><a href="#criticidad-no-todas-las-senales-pesan-igual">Criticidad</a><a href="#la-criticidad-de-la-liquidez-tambien-cambia-entre-empresas">Liquidez por régimen</a><a href="#el-output-no-es-solo-un-numero">Más que un número</a><a href="#el-dato-que-el-banco-no-tiene">Dato vs banco</a><a href="#la-metrica-cambia-con-la-oferta-y-con-quien-mira">Métrica por rol</a><a href="#como-usarlo-al-construir">Al construir</a></nav><article>
 <h1 id="como-pensar-el-score">Cómo pensar el score</h1>
-<p><strong>Interpretación operativa del equipo.</strong> No sustituye el <a href="challenge.html">enunciado</a>: lo traduce a una forma de decidir, con el mismo criterio que usaría alguien que presta su propio dinero.</p>
+<p><strong>Interpretación operativa del equipo.</strong> No sustituye el <a href="challenge.html">enunciado</a>: lo traduce a una forma de decidir, con el mismo criterio que usaría alguien que presta su propio dinero. Cómo lo enseña una PM de Embat está en <a href="voz_embat.html">voz de producto</a>.</p>
 <p>El leaderboard pide un número. El producto no puede acabarse ahí.</p>
 
 <h2 id="la-prueba-de-los-100000-">La prueba de los 100.000 €</h2>
@@ -37,6 +37,12 @@
 </table>
 <p>La trayectoria importa más que la foto: una empresa sana que empieza a vaciar la cuenta es peor apuesta que una mediocre que está recapitalizándose. Eso es el ejemplo Northbrook (45 → 65) frente a Velasco (82 → 68), leído con criticidad y no solo con el último número.</p>
 
+<h2 id="la-criticidad-de-la-liquidez-tambien-cambia-entre-empresas">La criticidad de la liquidez también cambia entre empresas</h2>
+<p>No todas las señales pesan igual. Tampoco todas las empresas viven igual de la caja. Hay sectores que <strong>viven de la liquidez</strong>: si se seca, muere la empresa. En otros, la tesorería no se mira con esa atención. El mismo runway de pocas semanas no significa lo mismo en un mayorista que cobra a 90 días y en un negocio con cobros recurrentes.</p>
+<p>El score no puede tratar un umbral global de caja como criticidad universal. Hay que modular por régimen (sector inferido o huella operativa), no solo por el percentil de <code>runway</code>.</p>
+<p>Fuente: <a href="voz_embat.html">voz de producto de Embat</a>.</p>
+<p>La solvencia, además, es de <strong>planificación y de previsiones</strong>. No hace falta conciliación perfecta para saber si hay colchón, exceso o agujero. La conciliación sigue siendo cobertura, no salud.</p>
+
 <h2 id="el-output-no-es-solo-un-numero">El output no es solo un número</h2>
 <p>Hace falta un número para el leaderboard y para ordenar. Eso no implica que el problema se acabe en un ranking de A contra B. Un prestamista no se queda en “72”: quiere saber <strong>por qué</strong>, <strong>con qué gravedad</strong> y <strong>qué haría</strong>.</p>
 <p>Para cada empresa y mes, el sistema debería poder devolver, además del score:</p>
@@ -46,8 +52,9 @@
 <li><strong>Por qué, en lenguaje llano</strong> — “se le está acabando el dinero de la cuenta”, no solo <code>Δcash_p10</code>.</li>
 <li><strong>Bache o caída</strong> — si el golpe es puntual o estructural.</li>
 <li><strong>Qué haría un prestamista</strong> — prestar / vigilar / no prestar; o, en el producto, avisar / recortar límite / acelerar cobros.</li>
+<li><strong>Coste de no hacer nada</strong> — el dinero parado y la divisa sin convertir son costes ocultos; hay que mostrarlos en la ficha, no asumir que el CFO ya los siente.</li>
 </ol>
-<p>Eso encaja con el enunciado: explicación obligatoria, producto encima del score, y la preferencia de Embat por un modelo sencillo que <strong>sirva para decidir</strong> frente a uno sofisticado que se queda en el número.</p>
+<p>Eso encaja con el enunciado: explicación obligatoria, producto encima del score, y la preferencia de Embat por un modelo sencillo que <strong>sirva para decidir</strong> frente a uno sofisticado que se queda en el número. El exceso de caja y el FX no se “descubren” con un agente: se enseñan en la aplicación porque el cliente no los toma como problema real.</p>
 
 <h2 id="el-dato-que-el-banco-no-tiene">El dato que el banco no tiene</h2>
 <p>Hay que <strong>contactar mucho a bancos</strong>. El valor diferencial de Embat es que ve el rastro de tesorería que el banco no tiene para valorar el crédito: movimientos día a día, facturas del ERP, conciliación, deuda conectada y cómo se mueve la caja <strong>ahora</strong>, no el balance del año pasado.</p>
@@ -69,11 +76,14 @@
 <h2 id="como-usarlo-al-construir">Cómo usarlo al construir</h2>
 <ul>
 <li>Pesar primero la <strong>velocidad de quema de caja disponible</strong>; después cobros, pagos y deuda.</li>
+<li>Modular esa criticidad por régimen: hay empresas que mueren si se seca la liquidez y otras que no la miran igual.</li>
 <li>Explicar cada movimiento con la analogía consumidor → empresa.</li>
-<li>No imputar salud a partir de huecos de observabilidad.</li>
+<li>No imputar salud a partir de huecos de observabilidad, ni esperar conciliación perfecta para emitir colchón o solvencia.</li>
+<li>Enseñar el coste oculto del dinero parado y de la divisa antes de empujar un SKU. El agente no se usa.</li>
+<li>El upsell es una <strong>mesa de opciones</strong> que encajan, no un producto único. La deuda, un mix de plazos según cuándo hay que devolver.</li>
 <li>Diseñar la demo para que alguien con 100.000 € que prestar sepa, en un vistazo, a quién se los daría y por qué no al otro.</li>
 <li>Llevar el pitch a bancos: Embat tiene el rastro que ellos no ven.</li>
 <li>No fijar una sola métrica. Condicionarla a la oferta y al rol de quien mira.</li>
-<li>La fila del CFO — qué se le vende y cuánto vale sobre esta cartera — está en <a href="monetizacion.html">Monetización</a>.</li>
+<li>La fila del CFO — qué se le vende y cuánto vale sobre esta cartera — está en <a href="monetizacion.html">Monetización</a>. Cómo se enseña el coste y la mesa de productos, en <a href="voz_embat.html">voz de Embat</a>.</li>
 </ul>
 </article></div><footer>Reto X Ray · Embat · HackSpain 2026 · Interpretación del equipo</footer></body></html>

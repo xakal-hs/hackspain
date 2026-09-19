@@ -440,6 +440,12 @@ def build():
         decision="Comprador e integrador: Embat. Usuario: CFO o equipo de tesorería. X-Ray ordena la cartera, explica qué cambió y propone la siguiente acción con un colchón dinámico. Banco, bróker o BaaS quedan como ejecutores opcionales cuando la recomendación requiere capital o licencia.",
         why="Embat ya ofrece previsión, alertas, riesgo y pagos. La aportación incremental de X-Ray es comparabilidad, explicación aditiva y priorización transversal: convertir el rastro que Embat ya tiene en una cola de decisiones, no duplicar el forecast.",
         status="a confirmar con la organización")
+
+    add(category="producto", title="Voz de producto Embat: coste oculto, mesa de opciones y mix de plazos",
+        question="¿Cómo enseña Embat el exceso, la divisa y la deuda a un CFO que no los siente como problema?",
+        decision="Idle cash y FX son costes ocultos: hay que mostrarlos en la app, no en un agente (el agente no se usa). El módulo se vende como suscripción; intermediar rieles cuando Embed One no cubre es un parche. El upsell es una mesa de opciones que encajan. La deuda, un mix corto/medio/largo según el tiempo de devolución. La criticidad de la liquidez cambia con el sector. La solvencia sale de previsión y colchón, no de conciliación perfecta.",
+        why="Testimonio de una PM de Embat (19-09-2026). El CFO no toma el dinero parado como problema real y la operativa de divisa le parece compleja. Empujar un SKU por comisión o un agente de FX contradice cómo venden ellos. Fuente: context/voz_embat.md.",
+        status="decidido")
     return D, its
 
 
