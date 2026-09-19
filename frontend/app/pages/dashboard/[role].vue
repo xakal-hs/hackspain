@@ -815,5 +815,6 @@ const connected = activeCompanies.toLocaleString('es-ES')
         </footer>
       </main>
     </div>
+    <AgentChat :role="role" />
   </div>
 </template>
