@@ -57,12 +57,14 @@ version error when the runtime is unsupported.
 
 - `/`: public landing, built around the moment a deterioration is detected.
 - `/login`: simulated sign-in without credentials or real authentication.
-- `/dashboard/empresa`: own trajectory, what changed, and offers received.
+- `/dashboard/empresa`: the company's own treasury — X-Ray Score, Colchón Dinámico and Divisa Inteligente.
 - `/dashboard/embat`: both sides, with anticipation as the headline number.
 
-Each dashboard takes `?section=` with `resumen` (default), `cartera` (not for
-`empresa`), `senales` or `ofertas`. The earlier standalone routes `/cartera`,
-`/monitor`, `/escenarios` and `/empresas/:id` now redirect into these sections.
+Each dashboard takes `?section=`. Empresa has `score` (default), `colchon` and
+`divisa`; Embat has `resumen` (default), `cartera`, `senales`, `ofertas`, `monitor`,
+`revenue` and `modelo`. A section the perspective does not have falls back to its
+default. The earlier standalone routes `/cartera`, `/monitor`, `/escenarios` and
+`/empresas/:id` now redirect into these sections.
 
 Switch perspectives or exit using the user panel at the bottom of the desktop sidebar. On mobile, navigation and the user panel move above the content. Dashboard deep links redirect to demo sign-in when no demo-role cookie exists. This cookie is a UI convenience, not an authorization boundary.
 
@@ -86,11 +88,9 @@ Missing values arrive as `null` and stay missing: a company without enough invoi
 "no hay facturas suficientes", not a borrowed number. Roughly half the portfolio has no
 DSO, so this matters more than it sounds.
 
-Accepting an offer changes only demo state. Offers survive client-side
-navigation and reset on a full page reload. The role cookie survives reloads
-until logout/browser session expiry.
+The role cookie survives reloads until logout/browser session expiry.
 
-Manual acceptance flow: enter as Empresa and confirm an offer, then switch to Embat, search/select a company and inspect signals. Also check empty search, logout, direct-link redirect, and mobile/desktop layouts.
+Manual acceptance flow: enter as Empresa and walk its three treasury screens, then switch to Embat, search/select a company and inspect signals. Also check empty search, logout, direct-link redirect, and mobile/desktop layouts.
 
 ## Supabase configuration
 

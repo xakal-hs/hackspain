@@ -21,15 +21,11 @@ const props = defineProps<{ role: PerspectiveId; section: string }>()
 const profile = computed(() => perspectiveById(props.role)!)
 
 const items = computed(() => {
-  const all = [
+  const portfolio = [
     { id: 'resumen', label: 'Resumen', icon: Gauge },
     { id: 'cartera', label: 'Cartera', icon: Rows3 },
-    { id: 'senales', label: props.role === 'empresa' ? 'Mis señales' : 'Señales', icon: Activity },
-    {
-      id: 'ofertas',
-      label: props.role === 'empresa' ? 'Mis ofertas' : 'Mercado',
-      icon: Handshake,
-    },
+    { id: 'senales', label: 'Señales', icon: Activity },
+    { id: 'ofertas', label: 'Mercado', icon: Handshake },
   ]
   /* Tesorería propia: solo tiene sentido mirándose a uno mismo. */
   const treasury = [
@@ -43,9 +39,7 @@ const items = computed(() => {
     { id: 'revenue', label: 'Revenue por producto', icon: Banknote },
     { id: 'modelo', label: 'Métricas del modelo', icon: Target },
   ]
-  return props.role === 'empresa'
-    ? [...all.filter((i) => i.id !== 'cartera'), ...treasury]
-    : [...all, ...ops]
+  return props.role === 'empresa' ? treasury : [...portfolio, ...ops]
 })
 
 const open = ref(false)
@@ -64,8 +58,9 @@ async function leave() {
   await navigateTo('/')
 }
 
+/* La primera sección es la portada de la perspectiva: vive en la URL limpia. */
 function href(id: string) {
-  return id === 'resumen'
+  return id === items.value[0]?.id
     ? `/dashboard/${props.role}`
     : `/dashboard/${props.role}?section=${id}`
 }
