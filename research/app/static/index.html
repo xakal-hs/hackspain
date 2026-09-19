@@ -241,6 +241,24 @@ footer { max-width: 1320px; margin: 0 auto; padding: 0 24px 32px; color: var(--m
 }
 .tile:hover { border-color: var(--line-strong); }
 .tile[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+/* Eventos */
+.tiles-ev { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.chip-ev { font-weight: 600; }
+.chip-ev-riesgo { color: var(--crit-text); border-color: color-mix(in srgb, var(--crit) 35%, var(--line)); }
+.chip-ev-mejora { color: var(--good-text); border-color: color-mix(in srgb, var(--good) 35%, var(--line)); }
+.chip-ev-ruido { color: var(--muted); border-color: var(--line); }
+.ev-row.ev-riesgo { border-left: 3px solid var(--crit); }
+.ev-row.ev-mejora { border-left: 3px solid var(--good); }
+.ev-row.ev-ruido { border-left: 3px solid var(--line-strong); }
+.ev-why { font-size: 12.5px; color: var(--muted); margin: 4px 0 0; }
+.ev-excl { font-size: 12.5px; color: var(--ink-2); margin: 4px 0 0; font-style: italic; }
+.ev-foot { display: flex; justify-content: center; padding: 12px 0 4px; }
+.ev-cat { margin-top: 16px; }
+.ev-cat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; }
+.ev-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--surface); }
+.ev-card-head { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+.ev-card p { margin: 0 0 6px; font-size: 13px; line-height: 1.5; }
+@media (max-width: 900px) { .tiles-ev { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ev-cat-grid { grid-template-columns: 1fr; } }
 .tile-label { display: flex; gap: 8px; align-items: center; font-size: 12.5px; color: var(--ink-2); font-weight: 500; }
 .tile-value { font-size: 30px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; }
 .tile-sub { font-size: 12px; color: var(--muted); }
@@ -553,6 +571,7 @@ figure.gchart figcaption { font-size: 12.5px; color: var(--muted); margin-top: 8
       <a href="#/tesoreria" data-route="tesoreria">Tesorería</a>
       <a href="#/productos" data-route="productos">Productos</a>
       <a href="#/monitor" data-route="monitor">Monitor <span class="count" id="nav-alerts" hidden></span></a>
+      <a href="#/eventos" data-route="eventos">Eventos</a>
       <a href="#/metricas" data-route="metricas">Métricas</a>
       <a href="#/decisiones" data-route="decisiones">Decisiones</a>
     </nav>
@@ -733,6 +752,8 @@ const getCompany = (id) => cached('company:' + id, () => api('/api/company/' + e
 const getTreasury = (id) => cached('treasury:' + id, () => api('/api/company/' + encodeURIComponent(id) + '/treasury'));
 const getDrivers = () => cached('drivers', () => api('/api/scenario/drivers'));
 const getMonitor = () => cached('monitor', () => api('/api/monitor'));
+const getEvents = () => cached('events', () => api('/api/events'));
+const getEventsFor = (cid) => cached('events:' + cid, () => api('/api/events?company_id=' + encodeURIComponent(cid)));
 const getMetrics = () => cached('metrics', () => api('/api/metrics'));
 const getProducts = () => cached('products', () => api('/api/products/collection'));
 const getProductForCompany = (cid) => api(`/api/products/${cid}`);
@@ -744,6 +765,7 @@ const state = {
   charts: [],
   cartera: { q: '', band: '', trend: '', erp: '', alert: false, sort: 'score', dir: 'desc', limit: 60 },
   monitorType: '',
+  evType: '', evSev: '', evLimit: 80,
   decCat: '', decStatus: '',
   scn: null, // {cid, values, months}
   renderToken: 0,
@@ -854,9 +876,9 @@ async function route() {
   main.replaceChildren(loading());
   const view = parts[0] || 'cartera';
   setActiveNav(view === 'empresa' ? 'cartera' : view);
-  const titles = { cartera: 'Cartera', empresa: parts[1] || 'Empresa', tesoreria: 'Tesorería', productos: 'Productos', monitor: 'Monitor', metricas: 'Métricas', decisiones: 'Decisiones' };
+  const titles = { cartera: 'Cartera', empresa: parts[1] || 'Empresa', tesoreria: 'Tesorería', productos: 'Productos', monitor: 'Monitor', eventos: 'Eventos', metricas: 'Métricas', decisiones: 'Decisiones' };
   document.title = `${titles[view] || 'X-Ray'} · X-Ray`;
-  const views = { cartera: viewCartera, empresa: () => viewEmpresa(parts[1]), tesoreria: (t) => viewTesoreria(parts[1], t), productos: viewProductos, monitor: viewMonitor, metricas: viewMetricas, decisiones: viewDecisiones };
+  const views = { cartera: viewCartera, empresa: () => viewEmpresa(parts[1]), tesoreria: (t) => viewTesoreria(parts[1], t), productos: viewProductos, monitor: viewMonitor, eventos: viewEventos, metricas: viewMetricas, decisiones: viewDecisiones };
   const fn = views[view];
   if (!fn) { main.replaceChildren(errorBox({ message: `No existe la sección «${view}».` })); return; }
   try {
@@ -1097,7 +1119,8 @@ async function viewProductos(token) {
 async function viewEmpresa(id, token) {
   token = state.renderToken;
   if (!id) throw new Error('Falta el identificador de la empresa.');
-  const [d, drv] = await Promise.all([getCompany(id), getDrivers().catch((e) => ({ _error: e }))]);
+  const [d, drv, evs] = await Promise.all([getCompany(id), getDrivers().catch((e) => ({ _error: e })),
+    getEventsFor(id).catch(() => null)]);
   if (!isCurrent(token)) return null;
   const c = d.company || {};
   const hist = d.history || [];
@@ -1117,7 +1140,8 @@ async function viewEmpresa(id, token) {
     h('div', { class: 'hero' },
       h('div', null,
         h('div', { class: 'hero-id' }, h('h1', { id: 'company-title' }, c.company_id || id), bandChip(c.band), trendEl(c.trend),
-          c.dormant ? h('span', { class: 'chip chip-ghost' }, 'Inactiva') : null),
+          c.dormant ? h('span', { class: 'chip chip-ghost' }, 'Inactiva') : null,
+          ...eventChips(evs)),
         h('div', { class: 'hero-meta' },
           h('span', null, 'Grupo ', h('b', null, c.group_id || '—')),
           h('span', null, 'País ', h('b', null, c.country || '—')),
@@ -1760,6 +1784,145 @@ async function viewMonitor(token) {
   draw();
   root.append(h('div', { class: 'filterbar' }, seg), list);
   return root;
+}
+
+/* ═════════════ Vista: Eventos ═════════════ */
+/* Severidades con los tokens de estado, nunca con el violeta de marca: riesgo=--crit,
+   mejora=--good, ruido=--muted. El color dice qué tipo de señal es, no cuánto vale. */
+const EV_SEV = {
+  riesgo: { label: 'Riesgo', color: 'var(--crit)', icon: 'alert' },
+  mejora: { label: 'Mejora', color: 'var(--good)', icon: 'up' },
+  ruido: { label: 'Ruido', color: 'var(--muted)', icon: 'flat' },
+};
+/* Una tasa del 0,11 % no puede quedarse en «0 %»: por debajo del 1 % se muestra con decimal. */
+const fmtRate = (t) => (t >= 1 ? `${NF[0].format(Math.round(t))} %` : `${t.toFixed(2).replace('.', ',')} %`);
+function evSevChip(sev) {
+  const m = EV_SEV[sev] || EV_SEV.ruido;
+  return h('span', { class: `chip chip-ev chip-ev-${sev}` }, icon(m.icon), m.label);
+}
+
+async function viewEventos(token) {
+  const data = await getEvents();
+  if (!isCurrent(token)) return null;
+  const catalog = data.catalog || [];
+  const events = data.events || [];
+  const counts = data.counts || {};
+  const byType = Object.fromEntries(catalog.map((c) => [c.type, c]));
+  const f = state;
+
+  const root = h('div');
+  const nEmp = new Set(events.map((e) => e.company_id)).size;
+  root.append(h('div', { class: 'page-head' }, h('div', null,
+    h('h1', null, `Eventos · ${fmtMonth(data.month, true)}`),
+    h('p', null, `${NF[0].format(events.length)} eventos en ${NF[0].format(nEmp)} empresas. `
+      + `Así se verán en el front las etiquetas con las que se entrenará el modelo. `
+      + `${data.censura || ''}`))));
+
+  /* Tiles por tipo: conteo del mes y tasa histórica, con la severidad como único color. */
+  const tiles = h('div', { class: 'tiles tiles-ev' });
+  const mkTile = (c) => {
+    const n = counts[c.type] || 0;
+    const sev = EV_SEV[c.severity] || EV_SEV.ruido;
+    const rate = (data.rates_6m || {})[c.type];
+    const pressed = f.evType === c.type;
+    return h('button', {
+      class: 'tile', type: 'button', 'aria-pressed': String(pressed),
+      title: c.desc,
+      onclick: () => { f.evType = pressed ? '' : c.type; f.evLimit = 80; draw(); },
+    },
+      h('span', { class: 'tile-label' },
+        h('span', { style: { color: sev.color }, 'aria-hidden': 'true' }, icon(sev.icon)), c.label),
+      h('span', { class: 'tile-value' }, NF[0].format(n)),
+      h('span', { class: 'tile-sub' }, rate ? `${fmtRate(rate.tasa)} histórico · ${c.horizon}` : c.horizon),
+      h('span', { class: 'bar', 'aria-hidden': 'true' },
+        h('i', { style: { width: `${events.length ? (100 * n) / events.length : 0}%`, background: sev.color } })));
+  };
+
+  /* Filtros: tipo (desde los tiles o el selector) y severidad. */
+  const seg = h('div', { class: 'seg', role: 'group', 'aria-label': 'Filtrar por severidad' });
+  const list = h('div', { class: 'mon-list' });
+  const foot = h('div', { class: 'ev-foot' });
+
+  const mkSev = (val, label, n) => h('button', {
+    type: 'button', 'aria-pressed': String(f.evSev === val),
+    onclick: () => { f.evSev = val; f.evLimit = 80; draw(); },
+  }, label, h('span', { class: 'muted' }, NF[0].format(n)));
+
+  function shownEvents() {
+    return events.filter((e) => (!f.evType || e.type === f.evType)
+      && (!f.evSev || (byType[e.type] || {}).severity === f.evSev));
+  }
+
+  function draw() {
+    tiles.replaceChildren(...catalog.map(mkTile));
+    const sevCount = (sev) => events.filter((e) => (byType[e.type] || {}).severity === sev).length;
+    seg.replaceChildren(
+      mkSev('', 'Todas', events.length),
+      ...Object.keys(EV_SEV).map((k) => mkSev(k, EV_SEV[k].label, sevCount(k))));
+
+    const shown = shownEvents();
+    const page = shown.slice(0, f.evLimit);
+    list.replaceChildren(...(page.length ? page.map((e) => {
+      const c = byType[e.type] || {};
+      const sev = c.severity || 'ruido';
+      const href = '#/empresa/' + encodeURIComponent(e.company_id);
+      return h('article', { class: `mon ev-row ev-${sev}` },
+        h('div', null, evSevChip(sev)),
+        h('div', { class: 'mon-main' },
+          h('div', { class: 'top' },
+            h('a', { class: 'cid', href }, e.company_id),
+            h('span', { class: 'chip chip-ghost' }, c.code || e.type, ' · ', c.label || e.type),
+            h('span', { class: 'muted', style: { 'font-size': '12px' } }, e.month_label || fmtMonth(e.month, true))),
+          h('p', { class: 'txt' }, e.text),
+          c.short ? h('p', { class: 'ev-why' }, c.short) : null),
+        h('div', { class: 'mon-figs' },
+          h('a', { class: 'btn btn-sm', href, style: { 'align-self': 'center' }, 'aria-label': `Ver ${e.company_id}` }, 'Ver')));
+    }) : [h('div', { class: 'state' }, 'No hay eventos de este tipo en el mes de referencia.')]));
+
+    foot.replaceChildren(shown.length > page.length
+      ? h('button', { class: 'btn btn-sm', type: 'button', onclick: () => { f.evLimit += 80; draw(); } },
+          `Ver más (${NF[0].format(shown.length - page.length)} restantes)`)
+      : h('span', { class: 'muted', style: { 'font-size': '12px' } },
+          shown.length ? `${NF[0].format(shown.length)} eventos mostrados.` : ''));
+  }
+  draw();
+
+  /* Catálogo divulgativo: qué significa cada evento, en castellano llano. */
+  const cat = h('details', { class: 'tableview ev-cat' },
+    h('summary', null, 'Qué significa cada evento'),
+    h('div', { class: 'ev-cat-grid' }, ...catalog.map((c) => {
+      const sev = EV_SEV[c.severity] || EV_SEV.ruido;
+      const r = (data.rates_6m || {})[c.type];
+      return h('article', { class: 'ev-card' },
+        h('div', { class: 'ev-card-head' },
+          h('span', { style: { color: sev.color }, 'aria-hidden': 'true' }, icon(sev.icon)),
+          h('strong', null, c.label),
+          h('span', { class: 'muted', style: { 'font-size': '12px' } }, c.horizon)),
+        h('p', null, c.desc),
+        h('p', { class: 'ev-why' }, c.why),
+        c.excl ? h('p', { class: 'ev-excl' }, c.excl) : null,
+        r ? h('p', { class: 'muted', style: { 'font-size': '12px' } },
+              `${NF[0].format(r.positivos)} de ${NF[0].format(r.n)} meses etiquetados (${fmtPct(r.tasa / 100)}).`) : null);
+    })));
+
+  root.append(tiles, h('div', { class: 'filterbar' }, seg), list, foot, cat);
+  return root;
+}
+
+/* Chips de eventos activos en la ficha de empresa: un chip por tipo, con su conteo. */
+function eventChips(evs) {
+  if (!evs || !evs.total) return [];
+  const byType = Object.fromEntries((evs.catalog || []).map((c) => [c.type, c]));
+  return (evs.catalog || [])
+    .filter((c) => (evs.counts || {})[c.type] > 0)
+    .map((c) => {
+      const n = evs.counts[c.type];
+      const sev = EV_SEV[c.severity] || EV_SEV.ruido;
+      return h('a', {
+        class: `chip chip-ev chip-ev-${c.severity}`, href: '#/eventos',
+        title: `${c.desc} — ${n} ${n === 1 ? 'mes' : 'meses'} marcados`,
+      }, icon(sev.icon), `${c.label} · ${n}`);
+    });
 }
 
 /* ═════════════ Charts genéricos (métricas y decisiones) */
