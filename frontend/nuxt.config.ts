@@ -38,10 +38,10 @@ export default defineNuxtConfig({
     routeRules: {
       '/api/**': { cors: true },
       // Routes from the earlier structure now live as sections of the cockpit.
-      '/cartera': { redirect: '/dashboard/embat?section=cartera' },
-      '/monitor': { redirect: '/dashboard/embat?section=senales' },
+      '/cartera': { redirect: '/dashboard/embat' },
+      '/monitor': { redirect: '/dashboard/embat' },
       '/escenarios': { redirect: '/dashboard/embat' },
-      '/empresas/**': { redirect: '/dashboard/embat?section=cartera' },
+      '/empresas/**': { redirect: '/dashboard/embat' },
     },
   },
   typescript: {

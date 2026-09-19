@@ -100,18 +100,11 @@ plus an inset sheen, as in the reference.
 Chips are data keys and status, in tracked small capitals with a dot. They are
 never hung above a heading as an eyebrow.
 
-Embat's own perspective carries three internal views — monitor, revenue and
-model metrics — where the subject stops being a company in the portfolio and
-becomes the product itself. They reuse the cockpit language unchanged, because
-the reader is the same person on the same screen; what changes is the noun. Their
-recurring device is the **ruled strip**: three or five readings side by side,
-divided by a hairline rather than boxed into cards, collapsing to ruled rows when
-the column narrows. The model panel is the one surface that keeps the dark
-palette under both themes outside the rail (`.panel--ink`), for the same reason
-the rail does: it re-points the tokens rather than restating colours, so its
-chips, accents and focus ring follow. The accent inks it needs on that navy
-therefore live in the shared `--ink-*` set, which the dark theme now points at,
-so the two cannot drift.
+Embat's own perspective has two views — caja of the featured portfolio and the
+financing CRM — where the subject is the book, not one company looking at itself.
+They reuse the cockpit language unchanged. Caja opens with a **ruled strip** of
+three readings (alerta, oportunidad, vigilancia), divided by a hairline rather
+than boxed into cards, collapsing to ruled rows when the column narrows.
 
 ## Theme
 

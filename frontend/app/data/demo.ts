@@ -34,21 +34,6 @@ export const months = [
   'sep 26',
 ] as const
 
-export const monthNames = [
-  'enero',
-  'febrero',
-  'marzo',
-  'abril',
-  'mayo',
-  'junio',
-  'julio',
-  'agosto',
-  'septiembre',
-  'octubre',
-  'noviembre',
-  'diciembre',
-] as const
-
 export const currentMonth = 'septiembre 2026'
 
 export type Decision = 'prestar' | 'vigilar' | 'no-prestar'
@@ -815,14 +800,6 @@ export const companyById = (id: string) =>
 
 export const leadCompany = companies.find((c) => c.id === 'iberica')!
 
-export const allSectors = [...new Set(companies.map((company) => company.sector))].sort((a, b) =>
-  a.localeCompare(b, 'es'),
-)
-
-export const allGroups = [...new Set(companies.map((company) => company.group))].sort((a, b) =>
-  a.localeCompare(b, 'es'),
-)
-
 export const medianOf = (values: number[]) => {
   if (!values.length) return null
   const ranked = [...values].sort((a, b) => a - b)
@@ -943,8 +920,8 @@ export const perspectives: Perspective[] = [
     name: 'Embat',
     person: 'Equipo Embat',
     initials: 'EM',
-    job: 'Avisar a tiempo a las dos partes',
-    reads: 'Mira primero cuántos meses de ventaja damos sobre el nivel.',
+    job: 'Ver la caja del portfolio y coger quien pide financiación',
+    reads: 'Mira primero quién está en alerta y quién acaba de pedir un puente.',
   },
 ]
 
