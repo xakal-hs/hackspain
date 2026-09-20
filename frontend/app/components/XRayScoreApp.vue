@@ -130,7 +130,6 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month], () 
               :aria-expanded="activePillar === pillar.id" :aria-controls="`${explanationId}-detail`"
               @click="activePillar = activePillar === pillar.id ? null : pillar.id">
               <span class="xs-pillars__name">{{ pillar.name }} <ChevronDown :size="16" aria-hidden="true" /></span>
-              <span class="xs-pillars__question">{{ pillar.question }}</span>
               <span class="xs-pillars__value" :class="{ 'xs-pillars__value--empty': pillar.contribution === null }">
                 {{ formatContribution(pillar.contribution) }}<small v-if="pillar.contribution !== null"> pts</small>
               </span>
@@ -390,6 +389,7 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month], () 
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  margin-bottom: auto;
   gap: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -403,14 +403,6 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month], () 
 
 .xs-pillars button[aria-expanded='true'] svg {
   transform: rotate(180deg);
-}
-
-.xs-pillars__question {
-  display: block;
-  margin-top: 8px;
-  margin-bottom: auto;
-  color: var(--ea-muted);
-  line-height: 1.5;
 }
 
 .xs-pillars__value {
