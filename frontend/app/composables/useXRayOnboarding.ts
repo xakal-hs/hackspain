@@ -51,7 +51,7 @@ const steps: DriveStep[] = [
       align: 'center',
       onNextClick(_element, _step, { driver }) {
         openFirstPillar()
-        window.setTimeout(() => driver.moveNext(), 60)
+        window.setTimeout(() => driver.moveNext(), 80)
       },
     },
   },
@@ -68,10 +68,36 @@ const steps: DriveStep[] = [
   },
 ]
 
+const STEP_MS = 3000
+const MOVE_MS = 600
+
+function advance(tour: Driver) {
+  if (!tour.isActive()) return
+  if (tour.isLastStep()) {
+    tour.destroy()
+    return
+  }
+  if (tour.getActiveIndex() === 3) {
+    openFirstPillar()
+    window.setTimeout(() => {
+      if (tour.isActive()) tour.moveNext()
+    }, 80)
+    return
+  }
+  tour.moveNext()
+}
+
 export function useXRayOnboarding() {
   const instance = shallowRef<Driver | null>(null)
+  let timer: number | undefined
+
+  function clearTimer() {
+    if (timer != null) window.clearTimeout(timer)
+    timer = undefined
+  }
 
   function stop() {
+    clearTimer()
     instance.value?.destroy()
     instance.value = null
   }
@@ -90,15 +116,19 @@ export function useXRayOnboarding() {
       popoverOffset: 12,
       showProgress: true,
       progressText: '{{current}} de {{total}}',
-      nextBtnText: 'Siguiente',
-      prevBtnText: 'Anterior',
-      doneBtnText: 'Listo',
+      showButtons: ['close'],
       animate: !prefersReducedMotion(),
+      duration: MOVE_MS,
       smoothScroll: !prefersReducedMotion(),
       allowKeyboardControl: true,
       disableActiveInteraction: true,
       skipMissingElement: true,
+      onHighlighted() {
+        clearTimer()
+        timer = window.setTimeout(() => advance(tour), STEP_MS)
+      },
       onDestroyed() {
+        clearTimer()
         instance.value = null
       },
     })

@@ -100,11 +100,11 @@ watch([section, activeCompanyId], () => {
           <button
             v-if="section === 'score'"
             type="button"
-            class="btn btn--quiet"
+            class="btn btn--quiet wk__tour"
+            aria-label="Recorrido del X-Ray Score"
             @click="startXRayTour"
           >
             <CircleQuestionMark :size="16" aria-hidden="true" />
-            Recorrido
           </button>
           <span v-if="role === 'embat'" class="chip chip--neutral">Tesorería real · 20 empresas</span>
           <span class="chip chip--neutral">{{ currentMonth }}</span>
