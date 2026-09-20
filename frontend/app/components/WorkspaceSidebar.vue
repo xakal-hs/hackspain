@@ -2,7 +2,6 @@
 import {
   ArrowLeftRight,
   ChevronsUpDown,
-  CircleDollarSign,
   Landmark,
   LogOut,
   Users,
@@ -24,7 +23,7 @@ const items = computed(() => {
     { id: 'flujo', label: 'Flujo de caja', icon: ArrowLeftRight },
     { id: 'score', label: 'X-Ray Score', icon: ScanLine },
     { id: 'credito', label: 'Crédito y caución', icon: ShieldCheck },
-    { id: 'divisa', label: 'Divisa Inteligente', icon: CircleDollarSign },
+    /* Divisa Inteligente queda fuera del menú; la pantalla sigue viva en ?section=divisa. */
     { id: 'ajustes', label: 'Ajustes', icon: Settings },
   ]
   const ops = [
