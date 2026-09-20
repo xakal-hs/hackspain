@@ -99,7 +99,7 @@ const sectionDescription = computed(() =>
 
       <main id="main-content" class="wk__main" tabindex="-1">
         <CompanyDataContext
-          v-if="role === 'empresa' && isTreasury && section !== 'flujo' && section !== 'credito'"
+          v-if="role === 'empresa' && isTreasury && section !== 'flujo' && section !== 'credito' && section !== 'score'"
           :section="section"
         />
         <div

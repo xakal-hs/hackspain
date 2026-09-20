@@ -139,14 +139,6 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
       :sync="`Mes del score: ${companyHealth?.month.slice(0, 7) || 'demo'}`"
     />
 
-    <TreasuryAlert
-      :direction="state.direction"
-      :headline="state.headline"
-      :text="state.subhead"
-      :cta="state.ctaLabel"
-      :cta-filled="state.ctaFilled"
-    />
-
     <!-- El número y su banda conservan el verde/ámbar/rojo: es el único sitio
          de la página, junto a las gráficas, donde el semáforo dice algo. -->
     <section class="tz-card tz-strip xs-reads" aria-label="Lectura del score">
