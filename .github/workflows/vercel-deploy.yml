@@ -28,10 +28,25 @@ jobs:
   verify:
     name: Verify before deploy
     runs-on: ubuntu-latest
+    outputs:
+      vercel-ready: ${{ steps.secrets.outputs.ready }}
     defaults:
       run:
         working-directory: frontend
     steps:
+      # El contexto `env` no existe en el `if:` de un job, así que la comprobación se hace
+      # aquí y viaja como salida. Mirarlo desde el `if` dejaba el workflow sin arrancar.
+      - name: Check whether Vercel is connected
+        id: secrets
+        working-directory: .
+        run: |
+          if [ -n "$VERCEL_TOKEN" ] && [ -n "$VERCEL_ORG_ID" ] && [ -n "$VERCEL_PROJECT_ID" ]; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'Vercel no está conectado todavía: se verifica pero no se despliega.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
@@ -61,13 +76,8 @@ jobs:
     # attempting a deploy, so CI remains useful before Vercel is connected.
     needs: verify
     if: >-
-      ${{
-        needs.verify.result == 'success' &&
-        env.VERCEL_TOKEN != '' &&
-        env.VERCEL_ORG_ID != '' &&
-        env.VERCEL_PROJECT_ID != '' &&
-        (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
-      }}
+      needs.verify.outputs.vercel-ready == 'true' &&
+      (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     environment: ${{ github.event_name == 'push' && 'production' || 'preview' }}
     defaults:
