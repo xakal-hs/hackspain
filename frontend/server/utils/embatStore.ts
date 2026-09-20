@@ -58,18 +58,28 @@ async function writeFileState(state: FileState) {
 
 let supabaseReady: Promise<boolean> | undefined
 
+async function probeSupabase() {
+  try {
+    const read = companyDataReader()
+    await read<{ id: string }>('embat_employees', { select: 'id', limit: 1 })
+    await read<{ id: string }>('embat_leads', { select: 'id', limit: 1 })
+    return true
+  } catch (error) {
+    if (isMissingTable(error)) return false
+    throw error
+  }
+}
+
 async function hasSupabaseTables() {
-  return (supabaseReady ??= (async () => {
-    try {
-      const read = companyDataReader()
-      await read<{ id: string }>('embat_employees', { select: 'id', limit: 1 })
-      await read<{ id: string }>('embat_leads', { select: 'id', limit: 1 })
-      return true
-    } catch (error) {
-      if (isMissingTable(error)) return false
-      throw error
-    }
-  })())
+  const ready = await (supabaseReady ??= probeSupabase())
+  // En desarrollo se vuelve a mirar mientras falten: aplicar el esquema no debe pedir un reinicio.
+  if (!ready && import.meta.dev) supabaseReady = undefined
+  return ready
+}
+
+/** De dónde viene el pipeline ahora mismo, para decirlo en la pantalla sin adivinar. */
+export async function leadsSource(): Promise<'supabase' | 'local'> {
+  return (await hasSupabaseTables()) ? 'supabase' : 'local'
 }
 
 export async function listLeadRows(): Promise<LeadRow[]> {

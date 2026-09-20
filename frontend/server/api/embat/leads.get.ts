@@ -1,6 +1,7 @@
 import type { LeadsResponse } from '../../../shared/types/embat'
-import { listLeads } from '../../utils/embatStore'
+import { leadsSource, listLeads } from '../../utils/embatStore'
 
 export default defineEventHandler(async (): Promise<LeadsResponse> => {
-  return { leads: await listLeads() }
+  const [leads, source] = await Promise.all([listLeads(), leadsSource()])
+  return { leads, source }
 })

@@ -41,6 +41,12 @@ export interface EmbatLead {
   assignee_name: string
   assignee_title: string
   signal: 'financiar'
+  /** Por qué escribe la empresa, tal como se lo contamos al comercial. */
+  reason: string
+  /** El puente que pide, ya formateado, cuando la previsión tiene la rotura. */
+  reason_amount: string | null
+  /** El importe y la fecha del agujero, si la previsión los tiene. */
+  reason_detail: string | null
   email_draft: string
   created_at: string
 }
@@ -62,6 +68,8 @@ export interface EmployeesResponse {
 
 export interface LeadsResponse {
   leads: EmbatLead[]
+  /** De dónde sale el pipeline: Supabase o el fichero de respaldo del demo. */
+  source: 'supabase' | 'local'
 }
 
 export interface LeadMutationResponse {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { X } from '@lucide/vue'
 import type { Cashflow, CashflowAction } from '../../shared/types/company'
+import type { LeadMutationResponse } from '../../shared/types/embat'
 
 /* Mismo panel para los dos casos de tesorería: colocar el excedente (yield) o
  * pedir un puente cuando la caja se rompe. Los números salen de la previsión
@@ -77,6 +78,9 @@ const bandLabel = computed(() => {
 
 const asking = ref(false)
 const asked = ref<'new' | 'open' | 'error' | null>(null)
+/* El aviso queda marcado para que Financiación lo reciba con una entrada visible la primera
+ * vez que el comercial abre la pestaña. La cookie se consume allí. */
+const fresh = useCookie<string | null>('xray-crm-fresh', { sameSite: 'lax', maxAge: 3600 })
 
 watch(
   () => [props.open, props.mode, selectedId.value] as const,
@@ -90,11 +94,12 @@ async function requestFinancing() {
   asking.value = true
   asked.value = null
   try {
-    const result = await $fetch<{ alreadyOpen?: boolean }>('/api/embat/leads', {
+    const result = await $fetch<LeadMutationResponse>('/api/embat/leads', {
       method: 'POST',
       body: { company_id: selectedId.value },
     })
     asked.value = result.alreadyOpen ? 'open' : 'new'
+    fresh.value = result.lead.id
     await refreshNuxtData('embat-leads')
   } catch {
     asked.value = 'error'
