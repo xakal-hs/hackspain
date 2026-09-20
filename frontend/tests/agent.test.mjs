@@ -174,6 +174,17 @@ test('dos búsquedas seguidas dejan una sola tabla: la última', () => {
   assert.equal(charts[0].filters[1].label, 'Mayor mejora primero')
 })
 
+test('con tabla, la tabla es la respuesta: la ficha de paso no cuelga debajo', async () => {
+  const portfolio = { companies: [{ company_id: 'COMP_0001', last_month: '2026-08', score: 30, band: 'riesgo', trend: 'deterioro', delta3_q50: -4, accion_label: 'No prestar', alert: null, confidence: 0.8 }] }
+  const cartera = await run(agentTools(async () => portfolio).buscar_cartera, { orden: 'peor_nota', limite: 8 })
+  const ficha = await run(agentTools(async () => company).ficha_empresa, { company_id: 'COMP_0864' })
+  const charts = chartsFromParts([
+    { type: 'tool-buscar_cartera', toolCallId: 'a', state: 'output-available', output: cartera },
+    { type: 'tool-ficha_empresa', toolCallId: 'b', state: 'output-available', output: ficha },
+  ])
+  assert.deepEqual(charts.map(c => c.kind), ['table'])
+})
+
 test('inline reconoce cursiva, tachado, código y marcado anidado', () => {
   assert.deepEqual(inline('un *bache*, no ~~caída~~ de `runway`'), [
     { text: 'un ' }, { text: 'bache', italic: true }, { text: ', no ' },

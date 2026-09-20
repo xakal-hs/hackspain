@@ -155,7 +155,12 @@ export function chartsFromParts(parts: readonly any[]): ChatChart[] {
   // si el agente busca dos veces, la segunda manda: dos tablas casi iguales no se comparan, se confunden
   const last = new Map<string, ChatChart>()
   for (const c of all) last.set(c.slot ?? c.id, c)
-  return [...last.values()]
+  const charts = [...last.values()]
+  /* La tabla se pinta a sangre y ya llena el panel: si el agente, además de buscar en la cartera,
+     ha mirado de paso la ficha de la empresa abierta, esa ficha cuelga debajo de la tabla y
+     contesta a una pregunta que nadie hizo. Cuando hay tabla, la tabla es la respuesta. */
+  const tables = charts.filter(c => c.kind === 'table')
+  return tables.length ? tables : charts
 }
 
 export interface ChartSection { id: string, question: string, charts: ChatChart[] }
