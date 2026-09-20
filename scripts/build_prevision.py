@@ -13,7 +13,8 @@ midieron peor. Con ese camino marca dos casos:
 
 - rotura: el saldo baja de cero algún día del horizonte. Si un cobro lo devuelve a positivo más tarde, se
   guarda ese cobro: es el hueco de calendario que se cubre con financiación a corto.
-- excedente: sin rotura, lo que sobra por encima de un colchón de tres meses de gasto en el peor día.
+- excedente: sin rotura, lo que sobra por encima de un colchón de un mes de gasto en el peor día del
+  horizonte, y solo si son al menos 25.000 € (por debajo no hay nada que colocar).
 
 Guarda también el desglose por categoría bancaria de los últimos 12 meses, que Supabase no tiene. Solo entran
 facturas en la moneda de la empresa. Escribe frontend/server/assets/prevision.json (asset de Nitro).
@@ -36,7 +37,10 @@ OUT = ROOT / "frontend" / "server" / "assets" / "prevision.json"
 SNAPSHOT = pd.Timestamp("2026-09-01")
 HORIZON = pd.date_range("2026-09-02", "2026-11-30", freq="D")
 MONTHS = ["2026-09", "2026-10", "2026-11"]
-CUSHION_MONTHS = 3
+# El colchón se mide sobre el peor día del trimestre, con todos los pagos previstos ya descontados:
+# un mes de gasto por encima de ese mínimo sigue siendo prudente. El suelo es en la moneda de la empresa.
+CUSHION_MONTHS = 1
+MIN_SURPLUS = 25_000.0
 # Los casos reales de la demo (frontend/shared/demoCases.ts). COMP_0837 tiene excedente pero no score sano.
 DEMO = {"COMP_0790": "excedente", "COMP_0837": "excedente", "COMP_0829": "rotura"}
 
@@ -145,10 +149,11 @@ def main() -> None:
         cushion = CUSHION_MONTHS * spend
         surplus = low - cushion
         excedente = ({"amount": round(surplus, 2), "cushion": round(cushion, 2), "monthly_spend": round(spend, 2)}
-                     if rotura is None and spend > 0 and surplus >= spend else None)
+                     if rotura is None and spend > 0 and surplus >= MIN_SURPLUS else None)
 
         out[cid] = {"currency": comp.currency.get(cid, "EUR"), "categories": by_company.get(cid, {}),
-                    "forecast": {"cash": round(cash0, 2), "months": monthly, "rotura": rotura, "excedente": excedente}}
+                    "forecast": {"cash": round(cash0, 2), "months": monthly, "rotura": rotura, "excedente": excedente,
+                                 "low": round(low, 2), "monthly_spend": round(spend, 2)}}
 
     for cid, case in DEMO.items():
         assert (out.get(cid, {}).get("forecast") or {}).get(case), f"{cid} ya no cumple el caso {case}"

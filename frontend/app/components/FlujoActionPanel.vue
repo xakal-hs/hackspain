@@ -155,15 +155,16 @@ async function requestFinancing() {
               <li>
                 <b>Barre solo lo que sobra</b>
                 <span>
-                  {{ money(excedente.amount) }} está por encima de tres meses de gasto
-                  ({{ money(excedente.monthly_spend) }}/mes). Eso es lo que puede trabajar.
+                  {{ money(excedente.amount) }} sobran por encima de un mes de gasto
+                  ({{ money(excedente.monthly_spend) }}/mes) en el peor día del trimestre.
+                  Eso es lo que puede trabajar.
                 </span>
               </li>
               <li>
                 <b>El colchón no se toca</b>
                 <span>
-                  {{ money(excedente.cushion) }} se quedan en cuenta. El score sigue
-                  sano porque la caja de operar no baja.
+                  {{ money(excedente.cushion) }} se quedan en cuenta. El score no se
+                  resiente porque la caja de operar no baja.
                 </span>
               </li>
               <li>

@@ -23,6 +23,8 @@ export function actionFor(
   health: CompanyHealth | undefined,
 ): CashflowAction {
   if (forecast?.rotura) return 'financiar'
-  if (forecast?.excedente && health?.health_band === 'sano') return 'prestar'
+  // Para colocar caja basta con que sobre de verdad y la empresa no esté en riesgo: el dinero es suyo
+  // y la operación es reversible, así que la banda «vigilar» no es motivo para no ofrecerlo.
+  if (forecast?.excedente && health && health.health_band !== 'riesgo') return 'prestar'
   return null
 }
