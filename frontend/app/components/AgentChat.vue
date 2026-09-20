@@ -22,20 +22,20 @@ function toggle() {
 const chat = new Chat<UIMessage>({
   transport: new DefaultChatTransport({
     api: '/api/chat',
-    body: () => ({ role: props.role, companyId: selectedId.value }),
   }),
 })
 
 const busy = computed(() => chat.status === 'submitted' || chat.status === 'streaming')
 const suggestions = computed(() => props.role === 'embat'
   ? ['¿Qué empresas empeoran más este trimestre?', '¿Cómo se construye la nota?']
-  : ['¿Por qué ha cambiado su nota este mes?', '¿Es un bache o un cambio de fondo?', '¿Por qué esta decisión?'])
+  : ['¿Por qué ha cambiado su nota este mes?', '¿Qué prevé su caja?', '¿Por qué esta decisión?'])
 
 /* Lo que hace el asistente antes de contestar: enseñarlo es lo que permite comprobar de dónde sale cada cifra. */
 const TOOL_LABEL: Record<string, string> = {
   ficha_empresa: 'Leyendo la ficha',
   explicar_mes: 'Descomponiendo el cambio de nota',
   decision_prestamista: 'Consultando la decisión',
+  prevision_tesoreria: 'Leyendo la previsión',
   buscar_cartera: 'Buscando en la cartera',
   como_funciona_el_score: 'Leyendo cómo se calcula la nota',
   catalogo_de_vetos: 'Consultando los vetos',
@@ -143,7 +143,9 @@ function send(text: string) {
   draft.value = ''
   open.value = true
   startedAt = Date.now()
-  chat.sendMessage({ text: value })
+  chat.sendMessage({ text: value }, {
+    body: { role: props.role, companyId: selectedId.value },
+  })
 }
 
 const errorText = computed(() => {
