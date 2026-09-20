@@ -1,7 +1,7 @@
 -- Capa de decisión y catálogo del modelo. Ejecutar después de health_schema.sql.
 --
 -- La nota ordena el riesgo; no decide. Encima van los vetos, que son hechos de HOY y
--- mandan sobre cualquier nota. El cálculo vive en backend/decision.py y se publica con
+-- mandan sobre cualquier nota. El cálculo vive en research/src/decision.py y se publica con
 -- scripts/export_decision_publication.py: PostgreSQL sirve resultados, nunca decide.
 
 create table if not exists public.company_decision_monthly (
