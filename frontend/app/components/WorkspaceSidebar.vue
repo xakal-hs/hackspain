@@ -5,6 +5,7 @@ import {
   CircleDollarSign,
   Landmark,
   LogOut,
+  Users,
   PiggyBank,
   ScanLine,
   Settings,
@@ -29,6 +30,7 @@ const items = computed(() => {
   const ops = [
     { id: 'caja', label: 'Caja', icon: Wallet },
     { id: 'crm', label: 'Financiación', icon: Landmark },
+    { id: 'equipo', label: 'Equipo', icon: Users },
   ]
   return props.role === 'empresa' ? treasury : ops
 })

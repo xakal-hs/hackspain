@@ -58,7 +58,7 @@ async function move(lead: EmbatLead, status: LeadStatus) {
       </header>
       <p class="lead-line">
         Cuando una empresa pulsa «Quiero pedir financiación», el aviso entra aquí y se asigna a un
-        account manager. El correo es genérico: no lleva datos de la empresa.
+        comercial de Equipo. El correo es genérico: no lleva datos de la empresa.
       </p>
       <p v-if="pending" class="empty">Cargando la cola.</p>
       <p v-else-if="error" class="empty">No se pudo leer la cola de avisos.</p>
@@ -78,6 +78,7 @@ async function move(lead: EmbatLead, status: LeadStatus) {
           <button type="button" class="crm__card" :aria-pressed="openId === lead.id" @click="openId = lead.id">
             <b>{{ lead.company_name }}</b>
             <span>{{ lead.assignee_name }}</span>
+            <small v-if="lead.assignee_title">{{ lead.assignee_title }}</small>
             <time>{{ when(lead.created_at) }}</time>
           </button>
         </li>
@@ -89,6 +90,7 @@ async function move(lead: EmbatLead, status: LeadStatus) {
       <header class="panel__bar">
         <h2 class="panel__title">{{ openLead.company_name }}</h2>
         <span class="chip chip--neutral">{{ openLead.assignee_name }}</span>
+        <span v-if="openLead.assignee_title" class="chip chip--neutral">{{ openLead.assignee_title }}</span>
       </header>
       <p class="sheet__why">
         Pidió financiación. El correo de abajo no nombra a la empresa: solo la señal y la llamada.
@@ -134,9 +136,13 @@ async function move(lead: EmbatLead, status: LeadStatus) {
   font-size: 14px;
 }
 .crm__card span,
+.crm__card small,
 .crm__card time {
   color: var(--text-muted);
   font-size: 12.5px;
+}
+.crm__card small {
+  font-weight: 400;
 }
 .crm__draft {
   margin: 16px 0;
