@@ -144,7 +144,19 @@ function pick(company: CajaCompany) {
             <span>{{ grupo.hint }}</span>
             <em>{{ nEmpresas(porEstado(grupo.id).length) }}</em>
           </header>
-          <table v-if="abiertos.has(grupo.id) && porEstado(grupo.id).length" :aria-label="`${grupo.label}: caja operativa y financiera`">
+          <table
+            v-if="abiertos.has(grupo.id) && porEstado(grupo.id).length"
+            class="caja__rows"
+            :aria-label="`${grupo.label}: caja operativa y financiera`"
+          >
+            <!-- Cada estado es su propia tabla: sin estas medidas el importe de caja y el de
+             * deuda caen en una vertical distinta en cada grupo y la columna queda en zigzag. -->
+            <colgroup>
+              <col />
+              <col class="caja__rows-caja" />
+              <col class="caja__rows-deuda" />
+              <col class="caja__rows-estado" />
+            </colgroup>
             <tbody>
               <tr
                 v-for="company in porEstado(grupo.id)"
@@ -220,3 +232,30 @@ function pick(company: CajaCompany) {
     </aside>
   </div>
 </template>
+
+<style scoped>
+/* Las tres tablas comparten rejilla para que caja, deuda y estado caigan en la misma
+ * vertical al saltar de un grupo a otro. Con reparto libre cada tabla se medía sola y el
+ * ancho de la tabla más larga se salía del panel, comiéndose el margen derecho. */
+.caja__rows {
+  table-layout: fixed;
+}
+.caja__rows-caja {
+  width: 21%;
+}
+.caja__rows-deuda {
+  width: 23%;
+}
+.caja__rows-estado {
+  width: 16%;
+}
+
+/* Con la rejilla fija un nombre largo ya no puede empujar los importes: se recorta. */
+.caja__rows th[scope='row'],
+.caja__rows th[scope='row'] small,
+.caja__rows td,
+.caja__rows td small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+</style>
