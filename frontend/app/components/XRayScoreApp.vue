@@ -23,8 +23,6 @@ const states = {
     band: 'Sano',
     delta3: '+20 pts',
     deltaHint: 'Mejora sostenida en 4 meses. Sin señales de reversión.',
-    forecast: '68 · +3',
-    forecastHint: 'sigue mejorando',
     drivers: [
       { label: 'Cobros tardíos de clientes', contribution: '+4,8', value: '38 días vs. 60' },
       { label: 'Tendencia de cobros', contribution: '+3,2', value: '+18 % en 12 meses' },
@@ -44,8 +42,6 @@ const states = {
     band: 'Vigilancia',
     delta3: '±2 pts',
     deltaHint: 'Dentro del margen de ruido esperado.',
-    forecast: '62 · 0',
-    forecastHint: 'trayectoria plana',
     drivers: [
       { label: 'Meses de caja', contribution: '±0', value: '3,4 meses · estable' },
       { label: 'Pagos tardíos a proveedores', contribution: '+0,2', value: 'sin cambio' },
@@ -65,8 +61,6 @@ const states = {
     band: 'Vigilancia',
     delta3: '−14 pts',
     deltaHint: 'Caída sostenida, no un mes suelto.',
-    forecast: '64 · −4',
-    forecastHint: 'sigue bajando',
     drivers: [
       { label: 'Meses de caja', contribution: '−4,2', value: '3,1 vs. 4,2 meses' },
       { label: 'Facturación de clientes perdidos', contribution: '−5,2', value: '22 % vs. 8 %' },
@@ -85,11 +79,10 @@ const state = computed(() => {
     score: health.health_score.toFixed(1), chip: health.health_band.toUpperCase(),
     scoreColor: health.health_band === 'sano' ? 'var(--ok)' : health.health_band === 'riesgo' ? 'var(--bad)' : 'var(--warn)',
     headline: `Score de ${companyName.value}: ${health.health_score.toFixed(1)}`,
-    subhead: `Dato de Supabase · ${health.month.slice(0, 7)}. La previsión a tres meses sigue sin conectar.`,
+    subhead: `Dato de Supabase · ${health.month.slice(0, 7)}.`,
     band: health.health_band,
     delta3: delta == null ? 'Sin dato' : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} pts`,
     deltaHint: 'Variación registrada frente a tres meses antes.',
-    forecast: 'Pendiente', forecastHint: 'sin previsión conectada',
     direction: (health.health_trend === 'improving' ? 'up' : health.health_trend === 'deteriorating' ? 'down' : 'flat') as AlertDirection,
   }
 })
@@ -140,10 +133,10 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
     />
 
     <!-- El arco y la banda conservan el verde/ámbar/rojo: es el único sitio de
-         la página, junto a las gráficas, donde el semáforo dice algo. Las dos
-         lecturas de apoyo quedan en tinta normal. -->
+         la página, junto a las gráficas, donde el semáforo dice algo. El
+         cambio a tres meses queda en tinta normal. -->
     <section class="tz-card xs-reads" aria-label="Lectura del score">
-      <div class="xs-gauge">
+      <div class="xs-gauge" data-tour="xray-gauge">
         <svg viewBox="0 0 300 168" :aria-label="`Score ${state.score} sobre 100 · banda ${state.band}`" role="img">
           <path class="xs-gauge__track" d="M24 152 A126 126 0 0 1 276 152" />
           <path :key="arcOffset" class="xs-gauge__value" d="M24 152 A126 126 0 0 1 276 152"
@@ -156,18 +149,13 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
         <p class="xs-gauge__scale" aria-hidden="true"><span>0</span><span>100</span></p>
       </div>
       <div class="xs-reading">
-        <div class="xs-mini">
+        <div class="xs-mini" data-tour="xray-change">
           <p class="xs-mini__label">
             Cambio en 3 meses
             <component :is="arrow" :size="14" class="xs-arrow" aria-hidden="true" />
           </p>
           <p class="xs-mini__figure">{{ state.delta3 }}</p>
           <p class="xs-mini__hint">{{ state.deltaHint }}</p>
-        </div>
-        <div class="xs-mini">
-          <p class="xs-mini__label">Previsión a 3 meses</p>
-          <p class="xs-mini__figure">{{ state.forecast }}</p>
-          <p class="xs-mini__hint">{{ state.forecastHint }}</p>
         </div>
       </div>
     </section>
@@ -183,7 +171,7 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
       </header>
       <p class="xs-explanation__note">Selecciona un pilar para entender qué mide y ver sus señales. {{ companyHealth ? 'Los puntos son aportaciones al score, no notas sobre 100 ni cambios respecto al mes anterior.' : 'Los puntos de demostración ilustran el escenario; no reconstruyen una nota real.' }}</p>
       <p v-if="!drivers.length" class="xs-explanation__empty">Sin explicaciones disponibles para este mes. Puedes consultar qué mide cada pilar.</p>
-      <ul class="xs-pillars" aria-label="Los cinco pilares del score">
+      <ul class="xs-pillars" aria-label="Los cinco pilares del score" data-tour="xray-pillars">
         <li v-for="pillar in explanation.pillars" :key="pillar.id">
           <button type="button" :id="`${explanationId}-${pillar.id}`"
             :aria-expanded="activePillar === pillar.id" :aria-controls="`${explanationId}-detail`"
@@ -199,6 +187,7 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
         </li>
       </ul>
       <div :id="`${explanationId}-detail`" :hidden="!activeDetail" class="xs-pillar-detail"
+        data-tour="xray-pillar-detail"
         role="region" :aria-labelledby="activePillar ? `${explanationId}-${activePillar}` : undefined">
         <template v-if="activeDetail">
           <div class="xs-pillar-detail__heading">
@@ -240,7 +229,7 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
   gap: 40px;
-  align-items: center;
+  align-items: stretch;
   padding: 26px 28px 24px;
 }
 
@@ -248,6 +237,7 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
    arco solo dice «cuánto» si se sabe dónde empieza y dónde acaba. */
 .xs-gauge {
   position: relative;
+  align-self: center;
   width: 300px;
   max-width: 100%;
 }
@@ -318,17 +308,20 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
 }
 
 .xs-reading {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 14px;
+  display: flex;
   min-width: 0;
+  min-height: 100%;
 }
 
-/* Las dos lecturas de apoyo van en pozo neutro: el color de estado se queda
-   entero en el arco. */
+/* El cambio a tres meses va en un pozo neutro que llena la columna: el color
+   de estado se queda entero en el arco. */
 .xs-mini {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
   min-width: 0;
-  padding: 15px 16px;
+  padding: 22px 24px;
   border-radius: var(--r-lg);
   background: var(--wash);
 }
@@ -351,9 +344,9 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
 .xs-mini__figure {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 26px;
+  font-size: 42px;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.05;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }

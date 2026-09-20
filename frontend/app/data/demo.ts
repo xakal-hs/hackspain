@@ -123,7 +123,7 @@ export interface Company {
   coverage: number
   flows?: MonthFlow[]
   signals?: Signal[]
-  /** Hechos de hoy que mandan sobre la nota. Solo llegan del backend real. */
+  /** Hechos de hoy que mandan sobre la nota. Solo llegan del contrato publicado. */
   vetos?: Veto[]
   avisos?: Veto[]
 }

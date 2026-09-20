@@ -50,19 +50,19 @@ Helmcode mediante `AGENT_BASE_URL`, `AGENT_MODEL` y `AGENT_API_KEY`.
 
 ## Cómo se reparte el trabajo
 
-    datos crudos ─► job reproducible (backend/, research/) ─► Supabase ─► Nitro ─► navegador
+    datos crudos ─► job reproducible (research/) ─► Supabase ─► Nitro ─► navegador
                     calcula la nota y la decisión            publica     consulta
 
 El cálculo pesado ocurre una vez, fuera de la petición. Nitro sólo consulta resultados
 ya publicados y los traduce al idioma del producto. Ninguna ruta de `server/api/`
-puntúa ni decide nada, y **no hay un segundo servidor**: el FastAPI de `backend/` es el
-job que calcula, no una API que levantar.
+puntúa ni decide nada, y **no hay un segundo servidor**: `research/` es el job que calcula,
+no una API que levantar. No existe un `backend/`: se retiró al consolidar el pipeline.
 
 | Tabla / vista en Supabase | Qué publica | Quién la genera |
 | --- | --- | --- |
 | `company_health_monthly` | nota, banda, tendencia, pilares, confianza | `research/src/export_health_publication.py` |
 | `company_health_driver_monthly` | contribución de cada señal a la nota | igual |
-| `company_decision_monthly` | prestar / vigilar / no prestar, vetos, razones | `scripts/export_decision_publication.py` |
+| `company_decision_monthly` | prestar / vigilar / no prestar, vetos, razones | `scripts/export_decision_publication.py` (usa `research/src/decision.py`) |
 | `score_catalog` | pesos, escala, bandas, anclas, catálogo de vetos | igual |
 | `company_portfolio_latest` (vista) | la cartera ya agregada, una fila por empresa | `supabase/decision_schema.sql` |
 | `panel_monthly`, `company_static`, `companies` | hechos de tesorería | `scripts/load_supabase.py` |

@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query'
 import {
-  Atom,
   ChevronRight,
   ChevronsUpDown,
-  ListChecks,
-  RotateCcwClock,
   TriangleAlert,
 } from '@lucide/vue'
 import type { Cashflow, CashflowAction, CashflowMonth } from '../../shared/types/company'
@@ -349,15 +346,6 @@ watch([columns, scroller], () => nextTick(() => scroller.value?.scrollTo({ left:
     />
 
     <!-- La barra flotante de Embat. -->
-    <div class="eb__dock">
-      <nav class="eb__pill" aria-label="Herramientas">
-        <button type="button" aria-label="Asistente"><Atom :size="20" aria-hidden="true" class="eb__atom" /></button>
-        <button type="button" aria-label="Tareas pendientes: 1">
-          <ListChecks :size="17" aria-hidden="true" /><span>1</span>
-        </button>
-        <button type="button" aria-label="Historial"><RotateCcwClock :size="17" aria-hidden="true" /></button>
-      </nav>
-    </div>
   </div>
 </template>
 

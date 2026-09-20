@@ -1,5 +1,5 @@
 /**
- * Los cinco pilares y las señales que los forman. Es el catálogo de `backend/preprocessing.py`
+ * Los cinco pilares y las señales que los forman. Es el catálogo de `research/src/xray.py`
  * (el campo `pilar` de FEATURES), copiado aquí solo para poder descomponer un pilar en pantalla
  * sin pedir nada al servidor. Los VALORES nunca salen de aquí: vienen de las herramientas.
  */

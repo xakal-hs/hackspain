@@ -3,7 +3,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@pinia/nuxt'],
   // Order matters: tokens and shared primitives first, cockpit layer second.
-  css: ['~/assets/css/main.css', '~/assets/css/workspace.css'],
+  css: [
+    '~/assets/css/main.css',
+    '~/assets/css/workspace.css',
+    '~/assets/css/xray-onboarding.css',
+  ],
   app: {
     head: {
       htmlAttrs: { lang: 'es', 'data-theme': 'dark' },

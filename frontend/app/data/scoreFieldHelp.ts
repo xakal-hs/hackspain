@@ -1,5 +1,5 @@
-/** Definiciones contrastadas con backend/preprocessing.py FEATURES/build_features
- * y backend/etl.py (ventanas de facturas). Mantener junto al catálogo del score.
+/** Definiciones contrastadas con research/src/xray.py SPEC, research/src/features.py
+ * y research/src/panel.py (ventanas de facturas). Mantener junto al catálogo del score.
  * Las etiquetas son la clave disponible en el contrato actual de drivers.
  */
 export const scoreFieldHelp: Record<string, { meaning: string; reading: string }> = {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CircleQuestionMark } from '@lucide/vue'
 import { currentMonth, perspectiveById, type PerspectiveId } from '~/data/demo'
 
 definePageMeta({
@@ -76,6 +77,11 @@ const sectionDescription = computed(() =>
     ? 'Configura el directorio que usarás al recorrer el panel de empresa.'
     : '',
 )
+
+const { start: startXRayTour, stop: stopXRayTour } = useXRayOnboarding()
+watch([section, activeCompanyId], () => {
+  stopXRayTour()
+})
 </script>
 
 <template>
@@ -91,6 +97,15 @@ const sectionDescription = computed(() =>
           {{ profile.name }}<span aria-hidden="true">/</span>{{ sectionLabel }}
         </p>
         <div class="wk__source">
+          <button
+            v-if="section === 'score'"
+            type="button"
+            class="btn btn--quiet wk__tour"
+            aria-label="Recorrido del X-Ray Score"
+            @click="startXRayTour"
+          >
+            <CircleQuestionMark :size="16" aria-hidden="true" />
+          </button>
           <span v-if="role === 'embat'" class="chip chip--neutral">Tesorería real · 20 empresas</span>
           <span class="chip chip--neutral">{{ currentMonth }}</span>
         </div>

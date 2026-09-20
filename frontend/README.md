@@ -25,7 +25,7 @@ pnpm dev
 
 Nitro reads the published X-Ray contract from Supabase and serves every product route
 itself: portfolio, company, explanation, lender decision, model and vetoes. The score and
-the decision are computed offline by a reproducible job (`backend/`, `research/`) and
+the decision are computed offline by a reproducible job (`research/`) and
 published with `scripts/`; this project never recomputes them. The response contract lives
 in `app/types/portfolio.ts`.
 
@@ -38,7 +38,7 @@ in `app/types/portfolio.ts`.
 - `app/assets/css/`: `tokens.css` (both themes), `main.css` (base, primitives,
   charts, landing) and `workspace.css` (the cockpit layer), loaded in that order.
 - `app/utils/chart.ts`: scales and path builders shared by every chart.
-- `server/api/`: Nitro server endpoints and backend adapters.
+- `server/api/`: Nitro server endpoints that read the published contract in Supabase.
 - `DESIGN_SYSTEM.md`: the palette, type, structure and motion rules.
 
 ## Checks
@@ -143,6 +143,13 @@ salud del sector y no se utiliza como tal.
   Media / Mediana usa `score_mean` / `score_median` y conserva la elección al
   cambiar de empresa. Compara meses coincidentes con el score real, indica el
   último mes común y el número de empresas (`n`), sin sustituir ausencias por mocks.
+  Ambas líneas se prolongan tres meses en trazo discontinuo: `shared/proyeccion.ts`
+  añade a la EWMA del score su segundo término de Holt —la pendiente, amortiguada—
+  ancladas en el último valor publicado, porque el score ya viene suavizado y volver
+  a suavizar el nivel haría que la previsión arrancase por encima de una caída
+  reciente. Se calcula al servir el detalle y no se guarda: `company_health_monthly`
+  solo contiene meses cerrados, y `decision_schema` / `featured_companies` toman de
+  ella el mes más reciente como el actual.
 - Colchón: caja reconstruida y meses de pagos desde `panel_monthly`, en la
   moneda de la compañía; se avisa cuando `saldo_inconsistente` está marcado.
 - Divisa: moneda de la empresa y monedas de `banking_products`.

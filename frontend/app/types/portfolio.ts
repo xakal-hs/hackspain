@@ -8,7 +8,7 @@ export interface MonthFlow {
   cash: number
 }
 
-/** Espejo de `Veto` en `backend/models.py`. El texto viaja con la regla: la interfaz no
+/** Espejo de `VETOS` en `research/src/decision.py`. El texto viaja con la regla: la interfaz no
  *  sabe qué significa `veto_ss_ausente`, lo lee. */
 export interface Veto {
   codigo: string

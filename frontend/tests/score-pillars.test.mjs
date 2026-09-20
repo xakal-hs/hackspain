@@ -5,11 +5,21 @@ import { scorePillars, groupScoreDrivers, formatContribution } from '../app/util
 
 const row = (feature, contribution, label = feature, display_value = '10 %') => ({ feature, contribution, label, display_value })
 
-test('the five pillars and all feature assignments match the backend catalogue', () => {
-  const source = readFileSync(new URL('../../backend/preprocessing.py', import.meta.url), 'utf8')
-  const pillars = JSON.parse(source.match(/^PILLARS = (\[.*\])/m)[1])
+// La fuente de verdad del catálogo es `research/src/xray.py:SPEC`, que va cifrado en
+// vault/research.enc. Donde no está descifrado (CI limpio) la prueba se salta en vez de
+// fallar: lo que valida es que la interfaz no invente pilares, y eso solo se puede
+// comprobar contra el catálogo real.
+test('the five pillars and all feature assignments match the published catalogue', (t) => {
+  let source
+  try {
+    source = readFileSync(new URL('../../research/src/xray.py', import.meta.url), 'utf8')
+  } catch {
+    return t.skip('research/ sin descifrar: python3 scripts/vault.py decrypt')
+  }
+  const pillars = JSON.parse(source.match(/^PILLARS = (\[.*\])/m)[1].replace(/'/g, '"'))
   assert.deepEqual(scorePillars.map(p => p.id), pillars)
-  const features = [...source.matchAll(/"([a-z0-9_]+)": dict\(pilar="([a-z]+)".*?label="([^"]+)"/g)]
+  // SPEC: "feature": ("pilar", dir, zero_best, "label", "descripción")
+  const features = [...source.matchAll(/^ {4}"([a-z0-9_]+)": \("([a-z]+)", [-+]?\d, (?:True|False), "([^"]+)"/gm)]
   assert.equal(features.length, 18)
   for (const [, feature, pillar, label] of features) {
     const result = groupScoreDrivers([row(feature, 2, label)])

@@ -165,7 +165,7 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
   <div class="agent">
     <nav v-show="!(open && wide)" class="agent__dock" aria-label="Asistente de X-Ray">
       <button type="button" class="agent__bot" :class="{ 'is-on': open }" aria-label="Preguntar a X-Ray" title="Pregunta a X-Ray" @click="toggle">
-        <img :src="raybot" alt="" width="22" height="22">
+        <img :src="raybot" alt="" width="32" height="32">
       </button>
     </nav>
 
@@ -284,16 +284,16 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
 .agent { font-family: var(--font-ui); }
 /* El dock: una pastilla oscura con el bot, siempre visible abajo. */
 .agent__dock {
-  position: fixed; left: 50%; bottom: 16px; z-index: 101; transform: translateX(-50%);
+  position: fixed; left: calc(50% + var(--rail) / 2); bottom: 16px; z-index: 101; transform: translateX(-50%);
   display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 12px;
   background: #121436; border: 1px solid rgba(190, 200, 255, 0.12); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 .agent__dock button {
-  display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border: 0; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 44px; padding: 0 12px; border: 0; border-radius: 8px;
   background: none; color: #eef0fb; cursor: pointer;
 }
 .agent__bot { padding: 0 8px; }
-.agent__bot img { width: 22px; height: 22px; object-fit: contain; }
+.agent__bot img { width: 32px; height: 32px; object-fit: contain; transform: scale(1.5); }
 /* Mientras piensa, el bot flota: es el mismo «sigo aquí» que la barra, sin robar atención. */
 .agent__who { display: flex; align-items: center; gap: 11px; min-width: 0; }
 .agent__who img { flex: none; object-fit: contain; }
@@ -305,15 +305,15 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
 .agent__dock button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 /* Sobre el dock, centrado como el de Embat: sale desde abajo y no tapa la pantalla. */
 .agent__panel {
-  position: fixed; left: 50%; bottom: 72px; z-index: 100; transform: translateX(-50%);
-  width: min(760px, calc(100vw - 32px)); display: flex; flex-direction: column;
+  position: fixed; left: calc(50% + var(--rail) / 2); bottom: 88px; z-index: 100; transform: translateX(-50%);
+  width: min(760px, calc(100vw - var(--rail) - 32px)); display: flex; flex-direction: column;
   background: var(--panel); color: var(--text); border: 1px solid var(--line-strong);
   border-radius: 16px; font-family: var(--font-ui);
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45), var(--sheen); overflow: hidden;
   transition: width 0.25s ease, height 0.25s ease, bottom 0.25s ease, transform 0.28s ease, opacity 0.2s ease;
 }
 .agent__panel.is-wide {
-  bottom: 0; width: min(1660px, calc(100vw - 32px)); height: min(940px, calc(100vh - 24px));
+  left: 50%; bottom: 0; width: min(1660px, calc(100vw - 32px)); height: min(940px, calc(100vh - 24px));
   border-bottom: 0; border-radius: 16px 16px 0 0;
 }
 .agent__scrim { position: fixed; inset: 0; z-index: 99; background: rgba(4, 6, 20, 0.18); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
@@ -439,6 +439,10 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
 .agent__send:disabled { opacity: 0.4; cursor: default; }
 .agent__send:focus-visible, .agent__chip:focus-visible, .agent__tool:focus-visible,
 .agent__ghost:focus-visible, .agent__icon:focus-visible, .agent__more:focus-visible { outline: 2px solid var(--live); outline-offset: 2px; }
+@media (max-width: 900px) {
+  .agent__dock, .agent__panel { left: 50%; }
+  .agent__panel { width: min(760px, calc(100vw - 32px)); }
+}
 @media (max-width: 820px) {
   .agent__body.has-viz { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
   .agent__viz { border-left: 0; border-top: 1px solid var(--line); }
