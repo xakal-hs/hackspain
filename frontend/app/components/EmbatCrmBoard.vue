@@ -203,7 +203,7 @@ async function onDrop(status: LeadStatus) {
        * de una a la siguiente. -->
       <div v-else-if="vista === 'tablero'" class="crm__board">
         <section
-          v-for="(column, i) in COLUMNS"
+          v-for="column in COLUMNS"
           :key="column.id"
           class="crm__col"
           :class="{ 'is-over': overCol === column.id }"
@@ -213,7 +213,6 @@ async function onDrop(status: LeadStatus) {
           @drop.prevent="onDrop(column.id)"
         >
           <header class="crm__col-head">
-            <span class="crm__step" aria-hidden="true">{{ i + 1 }}</span>
             <b>{{ column.label }}</b>
             <em>{{ grouped[column.id]?.length || 0 }}</em>
             <small>{{ column.hint }}</small>
@@ -385,7 +384,7 @@ async function onDrop(status: LeadStatus) {
 
 .crm__col-head {
   display: grid;
-  grid-template-columns: auto auto 1fr auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 0 8px;
   height: 52px;
@@ -395,25 +394,13 @@ async function onDrop(status: LeadStatus) {
   font-size: 14px;
   font-weight: 600;
 }
-/* El número deja leer las cuatro etapas como lo que son: un proceso, de izquierda a derecha. */
-.crm__step {
-  display: grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--ea-fill);
-  color: var(--ea-muted);
-  font-size: 10.5px;
-  font-weight: 600;
-}
 .crm__col-head em {
-  grid-column: 4;
+  grid-column: 2;
   font-style: normal;
   color: var(--ea-muted);
 }
 .crm__col-head small {
-  grid-column: 2 / 4;
+  grid-column: 1;
   margin-top: -2px;
   overflow: hidden;
   color: var(--ea-muted);
@@ -422,7 +409,7 @@ async function onDrop(status: LeadStatus) {
   white-space: nowrap;
 }
 .crm__col-sum {
-  grid-column: 4;
+  grid-column: 2;
   margin-top: -2px;
   color: var(--ea-muted);
   font-size: 11px;
