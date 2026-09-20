@@ -18,12 +18,10 @@ La integración Git de Vercel genera un preview por pull request y despliega
 producción al actualizar `main`. No se mantiene un workflow paralelo de
 GitHub Actions para evitar despliegues duplicados.
 
-La integración requiere que la GitHub App de Vercel tenga acceso a la
-organización `xakal-hs`. Si todavía no está instalada, un owner de la
-organización debe autorizarla en <https://github.com/apps/vercel> y después se
-conecta el repositorio con `vercel git connect`. Hasta entonces, los mismos
-artefactos se pueden publicar manualmente desde el directorio enlazado con
-`vercel deploy` y `vercel deploy --prod`, sin añadir otro pipeline.
+La GitHub App de Vercel tiene acceso a la organización `xakal-hs` y el
+repositorio ya está conectado al proyecto. Los despliegues manuales con
+`vercel deploy` y `vercel deploy --prod` se reservan para recuperación o
+verificación puntual, sin añadir otro pipeline.
 
 ## Variables de entorno
 
