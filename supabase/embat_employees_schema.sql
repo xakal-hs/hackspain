@@ -66,6 +66,9 @@ create table if not exists public.embat_leads (
   updated_at timestamptz not null default now()
 );
 
+comment on table public.embat_leads is
+  'Peticiones de financiación del panel de empresa, asignadas a un comercial de embat_employees.';
+
 create unique index if not exists embat_leads_open_company
   on public.embat_leads (company_id)
   where status in ('nuevo', 'contactado', 'reunion');

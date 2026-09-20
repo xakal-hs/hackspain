@@ -204,8 +204,16 @@ async function move(lead: EmbatLead, status: LeadStatus) {
 <style scoped>
 /* El motivo viaja pegado al nombre: el comercial sabe por qué llaman antes de abrir la ficha. */
 .crm__why {
+  /* Cuelga del nombre en su propia línea, pero el fondo sólo abraza al texto. */
   display: block;
-  margin-top: 3px;
+  width: fit-content;
+  margin: 3px 0 1px;
+  padding: 3px 7px;
+  /* Con el importe dentro la etiqueta cae a dos líneas en las columnas estrechas:
+   * una esquina suave aguanta el salto mejor que la píldora. */
+  border-radius: 9px;
+  line-height: 1.45;
+  background: var(--amber-wash);
   color: var(--amber-ink);
   font-size: 11px;
   font-style: normal;
