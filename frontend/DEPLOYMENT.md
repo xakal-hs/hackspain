@@ -36,9 +36,11 @@ Configurar estas variables en los entornos Preview y Production:
 | `NUXT_SUPABASE_SECRET_KEY` | Sólo servidor, sensible | Lecturas y escrituras desde Nitro |
 | `NUXT_SUPABASE_JWKS_URL` | Sólo servidor | Verificación de JWT |
 
-Los valores viven en Vercel y nunca se versionan. `XRAY_API_BASE` es una
-compatibilidad local con el backend de experimentación y no debe configurarse
-en Vercel: producción consulta los datos publicados en Supabase desde Nitro.
+Los valores viven en Vercel y nunca se versionan. `.vercelignore` impide que
+los archivos locales `.env*` y `.data` entren en el contexto de despliegue.
+`XRAY_API_BASE` es una compatibilidad local con el backend de experimentación
+y no debe configurarse en Vercel: producción consulta los datos publicados en
+Supabase desde Nitro.
 
 ## Validación
 
