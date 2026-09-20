@@ -1,5 +1,5 @@
 import { convertToModelMessages, isStepCount, streamText, type UIMessage } from 'ai'
-import { agentTools, apiFetcher } from '../agent/tools'
+import { agentTools, localFetcher } from '../agent/tools'
 import { resolveModel } from '../agent/model'
 import { systemPrompt, type AgentContext } from '../agent/prompt'
 
@@ -17,9 +17,6 @@ export default defineEventHandler(async (event) => {
   })
   if (!model)
     throw createError({ statusCode: 503, statusMessage: 'Assistant unavailable', message: 'El asistente no está configurado (falta AGENT_BASE_URL con AGENT_MODEL, o AI_GATEWAY_API_KEY)' })
-  if (!config.xrayApiBase)
-    throw createError({ statusCode: 503, statusMessage: 'Assistant unavailable', message: 'El asistente necesita el backend de X-Ray (XRAY_API_BASE)' })
-
   const body = await readBody<ChatBody>(event)
   if (!Array.isArray(body?.messages) || !body.messages.length)
     throw createError({ statusCode: 400, statusMessage: 'Bad request', message: 'Faltan mensajes' })
@@ -28,7 +25,7 @@ export default defineEventHandler(async (event) => {
     model,
     system: systemPrompt({ role: body.role, companyId: body.companyId }),
     messages: await convertToModelMessages(body.messages.slice(-MAX_MESSAGES)),
-    tools: agentTools(apiFetcher(config.xrayApiBase)),
+    tools: agentTools(localFetcher()),
     stopWhen: isStepCount(8),
   })
   return result.toUIMessageStreamResponse()

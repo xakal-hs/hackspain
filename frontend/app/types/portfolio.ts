@@ -40,12 +40,18 @@ export interface CompanySummary {
   history?: number[]
   /** Decisión del prestamista. Los vetos mandan sobre la nota, así que no se deduce del score. */
   accion?: 'prestar' | 'vigilar' | 'no_prestar' | 'sin_nota'
-  /** La razón que manda, ya redactada por el backend. */
+  /** La acción en el idioma del producto: «Prestar», «Vigilar», «No prestar», «Sin nota». */
+  accion_label?: string
+  /** La razón que manda, ya redactada por la capa de decisión. */
   razon?: string
   /** Vetos que bloquean el préstamo, con su explicación. Mandan sobre la nota. */
   vetos?: Veto[]
   /** Señales que no bloquean pero mueven a «vigilar». */
   avisos?: Veto[]
+  /** Importe máximo en meses de gasto. Se recorta por observabilidad, no por salud. */
+  importe_max_meses?: number | null
+  /** Lectura por pilar del último mes. Un pilar sin ninguna señal calculable viaja como null. */
+  pillars?: Record<string, number | null>
   score_expansion?: number
   cash_end?: number | null
   runway_now?: number | null

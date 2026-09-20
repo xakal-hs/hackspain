@@ -1,184 +1,156 @@
-import type { CompanySummary, MonthFlow } from '~/types/portfolio'
+import type { CompanySummary, MonthFlow, PortfolioResponse, Veto } from '~/types/portfolio'
 
-const mockSignals = {
-  COMP_0864: { score: 68, delta3: -8.4, trend: 'deterioro' },
-  COMP_0412: { score: 81, delta3: 5.7, trend: 'mejora' },
-  COMP_1107: { score: 74, delta3: 0.6, trend: 'estable' },
-  COMP_0239: { score: 43, delta3: -6.2, trend: 'deterioro' },
-  COMP_0721: { score: 62, delta3: 2.3, trend: 'mejora' },
-} as const
-
-const featuredIds = Object.keys(mockSignals)
-
-interface CompanyStaticRow {
+/**
+ * La cartera: el último mes de cada empresa, lo peor arriba.
+ *
+ * Una sola consulta a `company_portfolio_latest`, que ya agrega en PostgreSQL la salud,
+ * la decisión, el panel y los doce meses de flujos y notas. Paginar aquí 22.000 filas de
+ * panel en cada petición costaba más que la consulta entera.
+ */
+interface PortfolioRow {
   company_id: string
-  group_id: string
-  currency: string
-  tiene_erp: boolean
-  meses_historia: number
-  saldo_inconsistente: boolean
-  debt_outstanding: number | null
-  debt_util: number | null
-}
-
-interface PanelRow {
-  company_id: string
-  month: string
-  inflow_op: number | null
-  outflow_op: number | null
+  group_id: string | null
+  currency: string | null
+  has_erp: boolean | null
+  n_months: number
+  last_month: string
+  score: number
+  band: string
+  delta3: number | null
+  health_trend: string
+  coverage: number | null
+  confidence: number | null
+  accion: string | null
+  accion_label: string | null
+  razon: string | null
+  vetos: Veto[] | null
+  avisos: Veto[] | null
+  importe_max_meses: number | null
   cash_end: number | null
-  runway_m: number | null
-  dso: number | null
-  pct_vencido: number | null
+  runway_now: number | null
+  runway_prev: number | null
+  dso_now: number | null
+  dso_prev: number | null
+  overdue_share: number | null
   margin_3m: number | null
   debt_service_ratio_3m: number | null
-  n_tx: number
+  n_tx: number | null
+  debt_outstanding: number | null
+  debt_util: number | null
+  flows: MonthFlow[] | null
+  history: number[] | null
+  liquidez_score: number | null
+  rentabilidad_score: number | null
+  solvencia_score: number | null
+  disciplina_score: number | null
+  estabilidad_score: number | null
 }
 
+const BANDS = new Set(['sano', 'vigilar', 'riesgo'])
+
+/* La cartera solo cambia cuando corre el job de publicación, no entre peticiones. Se cachea
+ * la lectura y no el manejador, para que el respaldo de demostración nunca entre en caché. */
+const readPortfolio = defineCachedFunction(
+  (band: string | null) => companyDataPages<PortfolioRow>(
+    'company_portfolio_latest',
+    '*',
+    'score.asc,company_id.asc',
+    band ? { band: `eq.${band}` } : {},
+  ),
+  { maxAge: 300, name: 'portfolio', getKey: (band: string | null) => band ?? 'todas' },
+)
+
+/* Sin Supabase configurado el proyecto sigue arrancando: `pnpm dev` a secas enseña esta
+ * cartera de muestra en vez de una pantalla de error. No es un respaldo de producción. */
 const demoCompanies: CompanySummary[] = [
   {
     company_id: 'COMP_0864', group_id: 'GROUP_0198', currency: 'EUR', has_erp: true,
     n_months: 24, last_month: '2026-09', score: 68, band: 'vigilar',
-    delta3_q10: -13.2, delta3_q50: -8.4, delta3_q90: -2.1, trend: 'deterioro',
+    delta3_q50: -8.4, trend: 'deterioro',
     alert: 'La caja cae durante tres meses consecutivos.', dormant: false, confidence: 0.91,
   },
   {
     company_id: 'COMP_0412', group_id: 'GROUP_0084', currency: 'EUR', has_erp: true,
     n_months: 22, last_month: '2026-09', score: 81, band: 'sano',
-    delta3_q10: 1.8, delta3_q50: 5.7, delta3_q90: 9.4, trend: 'mejora',
-    alert: null, dormant: false, confidence: 0.88,
+    delta3_q50: 5.7, trend: 'mejora', alert: null, dormant: false, confidence: 0.88,
   },
   {
     company_id: 'COMP_1107', group_id: 'GROUP_0231', currency: 'GBP', has_erp: false,
     n_months: 24, last_month: '2026-09', score: 74, band: 'sano',
-    delta3_q10: -3.1, delta3_q50: 0.6, delta3_q90: 4.2, trend: 'estable',
-    alert: null, dormant: false, confidence: 0.73,
+    delta3_q50: 0.6, trend: 'estable', alert: null, dormant: false, confidence: 0.73,
   },
   {
     company_id: 'COMP_0239', group_id: 'GROUP_0056', currency: 'EUR', has_erp: true,
     n_months: 18, last_month: '2026-09', score: 43, band: 'riesgo',
-    delta3_q10: -12.8, delta3_q50: -6.2, delta3_q90: 1.4, trend: 'deterioro',
+    delta3_q50: -6.2, trend: 'deterioro',
     alert: 'Los pagos superan los cobros y la deuda consume la caja.', dormant: false, confidence: 0.86,
   },
   {
     company_id: 'COMP_0721', group_id: 'GROUP_0142', currency: 'USD', has_erp: true,
     n_months: 21, last_month: '2026-09', score: 62, band: 'vigilar',
-    delta3_q10: -4.9, delta3_q50: 2.3, delta3_q90: 8.1, trend: 'mejora',
+    delta3_q50: 2.3, trend: 'mejora',
     alert: 'Recuperación temprana tras un bache de tesorería.', dormant: false, confidence: 0.79,
   },
 ]
 
-function numberOrNull(value: number | null | undefined) {
-  return Number.isFinite(value) ? Number(value) : null
+function toSummary(row: PortfolioRow): CompanySummary {
+  const delta3 = round(row.delta3)
+  const confidence = round(row.confidence, 2)
+  const band = bandOf(row.band)
+  return {
+    company_id: row.company_id,
+    group_id: row.group_id ?? '',
+    currency: row.currency ?? 'EUR',
+    has_erp: Boolean(row.has_erp),
+    n_months: row.n_months,
+    last_month: monthLabel(row.last_month),
+    score: round(row.score) ?? 0,
+    band,
+    delta3_q50: delta3 ?? 0,
+    trend: trendOf(row.health_trend),
+    alert: alertOf({ band, delta3, confidence }),
+    // sin un solo movimiento en el mes no hay empresa que observar, solo un saldo parado
+    dormant: (row.n_tx ?? 0) === 0,
+    confidence: confidence ?? 0,
+    pillars: pillarsOf(row as unknown as Record<string, unknown>),
+    history: row.history ?? undefined,
+    flows: row.flows ?? undefined,
+    accion: (row.accion ?? undefined) as CompanySummary['accion'],
+    accion_label: row.accion_label ?? undefined,
+    razon: row.razon ?? undefined,
+    vetos: row.vetos ?? [],
+    avisos: row.avisos ?? [],
+    importe_max_meses: row.importe_max_meses,
+    cash_end: row.cash_end,
+    runway_now: round(row.runway_now),
+    runway_prev: round(row.runway_prev),
+    dso_now: round(row.dso_now, 0),
+    dso_prev: round(row.dso_prev, 0),
+    overdue_share: round(row.overdue_share),
+    margin_3m: round(row.margin_3m, 4),
+    debt_service_ratio_3m: round(row.debt_service_ratio_3m, 4),
+    debt_outstanding: row.debt_outstanding,
+    debt_util: round(row.debt_util, 4),
+  }
 }
 
-function alertFor(row: PanelRow) {
-  if (row.runway_m != null && row.runway_m < 1)
-    return 'El dinero en la cuenta no cubre un mes de pagos.'
-  if (row.margin_3m != null && row.margin_3m < 0)
-    return 'En los últimos tres meses ha salido más dinero del que ha entrado.'
-  // `pct_vencido` no es un porcentaje: es vencido acumulado / facturación de 3 meses,
-  // una fracción recortada a [0, 5]. El umbral 10 nunca se alcanzaba (0 filas de 10.054).
-  if (row.pct_vencido != null && row.pct_vencido >= 0.25)
-    return 'Una parte relevante de las facturas sigue pendiente de cobro.'
-  return null
-}
+export default defineEventHandler(async (event): Promise<PortfolioResponse> => {
+  const band = getQuery(event).band ? String(getQuery(event).band) : null
+  if (band && !BANDS.has(band))
+    throw createError({ statusCode: 400, statusMessage: 'Banda inválida' })
 
-function toFlows(rows: PanelRow[]): MonthFlow[] {
-  return rows.slice(-8).map((row) => ({
-    month: row.month,
-    in: Number(row.inflow_op || 0),
-    out: Math.abs(Number(row.outflow_op || 0)),
-    cash: Number(row.cash_end || 0),
-  }))
-}
-
-export default defineEventHandler(async () => {
   const config = useRuntimeConfig()
-
-  if (config.xrayApiBase) {
-    const apiBase = config.xrayApiBase.replace(/\/$/, '')
-    const response = await $fetch<{ companies: CompanySummary[] }>(`${apiBase}/api/companies`)
-    return { ...response, source: 'api' as const }
-  }
-
-  const supabaseUrl = String(config.public.supabaseUrl || '').replace(/\/$/, '')
-  const secretKey = String(config.supabaseSecretKey || '')
-  if (!supabaseUrl || !secretKey) {
-    return { companies: demoCompanies, source: 'demo' as const }
-  }
-
-  const headers = {
-    apikey: secretKey,
-    Authorization: `Bearer ${secretKey}`,
-  }
-  const companyFilter = `in.(${featuredIds.join(',')})`
+  if (!config.public.supabaseUrl || !config.supabaseSecretKey)
+    return { companies: demoCompanies, source: 'demo' }
 
   try {
-    const [staticRows, panelRows] = await Promise.all([
-      $fetch<CompanyStaticRow[]>(`${supabaseUrl}/rest/v1/company_static`, {
-        headers,
-        query: { select: '*', company_id: companyFilter, order: 'company_id.asc' },
-      }),
-      $fetch<PanelRow[]>(`${supabaseUrl}/rest/v1/panel_monthly`, {
-        headers,
-        query: {
-          select: 'company_id,month,inflow_op,outflow_op,cash_end,runway_m,dso,pct_vencido,margin_3m,debt_service_ratio_3m,n_tx',
-          company_id: companyFilter,
-          order: 'company_id.asc,month.asc',
-        },
-      }),
-    ])
-
-    const companies = staticRows.map((company): CompanySummary => {
-      const history = panelRows.filter((row) => row.company_id === company.company_id)
-      const latest = history.at(-1)
-      const previous = history.at(-4) || history.at(0)
-      const mock = mockSignals[company.company_id as keyof typeof mockSignals]
-
-      if (!latest || !mock)
-        throw new Error(`Missing portfolio data for ${company.company_id}`)
-
-      return {
-        company_id: company.company_id,
-        group_id: company.group_id,
-        currency: company.currency,
-        has_erp: company.tiene_erp,
-        n_months: company.meses_historia,
-        last_month: latest.month,
-        score: mock.score,
-        band: mock.score >= 70 ? 'sano' : mock.score >= 55 ? 'vigilar' : 'riesgo',
-        delta3_q10: mock.delta3 - 4,
-        delta3_q50: mock.delta3,
-        delta3_q90: mock.delta3 + 4,
-        trend: mock.trend,
-        alert: alertFor(latest),
-        dormant: latest.n_tx === 0,
-        confidence: company.saldo_inconsistente
-          ? 0.55
-          : Math.min(0.98, company.meses_historia / 24),
-        cash_end: numberOrNull(latest.cash_end),
-        runway_now: numberOrNull(latest.runway_m),
-        runway_prev: numberOrNull(previous?.runway_m),
-        dso_now: numberOrNull(latest.dso),
-        dso_prev: numberOrNull(previous?.dso),
-        // a porcentaje: la interfaz lo escribe con un «%» detrás, y la fracción hacía
-        // que un 43 % de vencido se leyera como «0,43 %»
-        overdue_share: latest.pct_vencido == null ? null : numberOrNull(latest.pct_vencido * 100),
-        margin_3m: numberOrNull(latest.margin_3m),
-        debt_service_ratio_3m: numberOrNull(latest.debt_service_ratio_3m),
-        debt_outstanding: numberOrNull(company.debt_outstanding),
-        debt_util: numberOrNull(company.debt_util),
-        flows: toFlows(history),
-      }
-    })
-
-    return { companies, source: 'supabase' as const }
+    const rows = await readPortfolio(band)
+    return { companies: rows.map(toSummary), source: 'supabase' }
   } catch (error) {
     console.error('Supabase portfolio read failed', error instanceof Error ? error.message : error)
     return {
       companies: demoCompanies,
-      source: 'demo' as const,
+      source: 'demo',
       warning: 'No se pudo leer Supabase; se muestran los datos de demostración.',
     }
   }

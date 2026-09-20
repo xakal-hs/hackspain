@@ -103,9 +103,10 @@ score, así que se ejecuta desde el entorno de `research/`:
 cd research && uv run python ../analysis/challenge_features.py   # -> analysis/features_challenge.html
 ```
 
-El frontend moderno se ejecuta por separado. Sus dashboards son una narrativa de producto con
-fixtures ficticios; `XRAY_API_BASE` solo conecta actualmente el adaptador de `/api/companies` y no
-convierte el resto de la experiencia en un flujo real de backend:
+El frontend es el único servicio que se despliega: Nitro sirve el producto entero leyendo de
+Supabase lo que el job de publicación ya calculó. La cartera, la ficha, la explicación, la
+decisión y el agente son reales; los nombres, los sectores y las condiciones de las ofertas
+siguen siendo fixtures de producto:
 
 ```bash
 cd frontend

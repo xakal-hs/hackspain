@@ -45,6 +45,13 @@ const TOOL_LABEL: Record<string, string> = {
   catalogo_de_vetos: 'Consultando los vetos',
 }
 
+/* El botón dice lo que se abre: con tabla no hay «gráficos» que ver, hay una tabla. */
+function vizLabel(message: UIMessage) {
+  const charts = chartsFromParts(message.parts)
+  if (charts[0]?.kind === 'table') return 'Ver la tabla'
+  return charts.length === 1 ? 'Ver el gráfico' : `Ver ${charts.length} gráficos`
+}
+
 function toolChips(message: UIMessage) {
   return message.parts.filter(isToolUIPart).map(part => ({
     key: part.toolCallId,
@@ -58,8 +65,9 @@ const sections = computed(() => chartSections(chat.messages))
 /* En compacto el panel crece con la conversación, pero toca techo pronto:
    un panel que sigue creciendo acaba tapando la pantalla que se está explicando. */
 const compactHeight = computed(() => {
+  // el arranque tiene que caber entero: cabecera, la frase, las tres sugerencias y la caja
   const turns = chat.messages.length
-  return `min(${Math.min(460, 260 + turns * 55)}px, calc(100vh - 100px))`
+  return `min(${Math.min(540, 420 + turns * 40)}px, calc(100vh - 100px))`
 })
 
 const asked = computed(() => chat.messages.filter(m => m.role === 'user').map(textOf).reverse())
@@ -147,7 +155,7 @@ function send(text: string) {
 
 const errorText = computed(() => {
   if (!chat.error) return ''
-  return /503|configurado|XRAY_API_BASE/.test(chat.error.message)
+  return /503|configurado/.test(chat.error.message)
     ? 'El asistente no está disponible en este entorno.'
     : 'No he podido contestar. Inténtalo de nuevo.'
 })
@@ -183,7 +191,6 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
           <header class="agent__head">
             <div>
               <h2>Pregunta a X-Ray</h2>
-              <p>Explica lo que la pantalla no puede enseñar{{ role !== 'embat' ? ` de ${selectedId}` : '' }}.</p>
             </div>
             <div class="agent__actions">
               <button type="button" class="agent__ghost" :aria-pressed="wide" @click="wide = !wide">
@@ -239,7 +246,7 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
                       <p v-else><InlineText :parts="b.inline" /></p>
                     </template>
                     <button v-if="!wide && chartsFromParts(m.parts).length" type="button" class="agent__more" @click="wide = true">
-                      <BarChart3 :size="14" aria-hidden="true" /> Ver {{ chartsFromParts(m.parts).length }} gráficos
+                      <BarChart3 :size="14" aria-hidden="true" /> {{ vizLabel(m) }}
                     </button>
                     <div v-if="textOf(m) && !isWorking(m)" class="agent__acts">
                       <button type="button" :aria-label="copied === m.id ? 'Copiado' : 'Copiar respuesta'" :title="copied === m.id ? 'Copiado' : 'Copiar respuesta'" @click="copy(m)">
@@ -314,13 +321,14 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
 .agent__bot { padding: 0 8px; }
 .agent__bot img { width: 22px; height: 22px; object-fit: contain; }
 /* Mientras piensa, el bot flota: es el mismo «sigo aquí» que la barra, sin robar atención. */
-.agent__who { display: flex; align-items: flex-start; gap: 11px; min-width: 0; }
-.agent__who img { flex: none; margin-top: 1px; object-fit: contain; }
+.agent__who { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.agent__who img { flex: none; object-fit: contain; }
 .agent__who img.is-live { animation: agent-float 2.4s ease-in-out infinite; }
 @keyframes agent-float { 50% { transform: translateY(-3px) rotate(-4deg); } }
 @media (prefers-reduced-motion: reduce) { .agent__who img.is-live { animation: none; } }
 .agent__dock button:hover { background: rgba(190, 200, 255, 0.08); }
 .agent__dock button.is-on { background: linear-gradient(135deg, #8b5cf6, #5b74ff); color: #fff; }
+.agent__dock button.agent__bot.is-on { background: rgba(190, 200, 255, 0.1); }
 .agent__dock b { font: 700 0.8rem var(--font-num); color: #f2b33d; }
 .agent__dock button.is-on b { color: #fff; }
 .agent__sep { width: 1px; height: 22px; background: rgba(190, 200, 255, 0.14); }
@@ -336,16 +344,15 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
   transition: width 0.25s ease, height 0.25s ease, bottom 0.25s ease, transform 0.28s ease, opacity 0.2s ease;
 }
 .agent__panel.is-wide {
-  bottom: 0; width: min(1500px, calc(100vw - 48px)); height: min(860px, calc(100vh - 40px));
+  bottom: 0; width: min(1660px, calc(100vw - 32px)); height: min(940px, calc(100vh - 24px));
   border-bottom: 0; border-radius: 16px 16px 0 0;
 }
 .agent__scrim { position: fixed; inset: 0; z-index: 99; background: rgba(4, 6, 20, 0.18); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
 .agent-fade-enter-active, .agent-fade-leave-active { transition: opacity 0.25s ease; }
 .agent-fade-enter-from, .agent-fade-leave-to { opacity: 0; }
 .agent-up-enter-from, .agent-up-leave-to { transform: translate(-50%, 40px); opacity: 0; }
-.agent__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--line); }
+.agent__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 24px; border-bottom: 1px solid var(--line); }
 .agent__head h2 { margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--live-ink); }
-.agent__head p { margin: 2px 0 0; font-size: 0.78rem; color: var(--text-muted); }
 .agent__actions { display: flex; align-items: center; gap: 6px; }
 .agent__ghost {
   display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; color: var(--text);

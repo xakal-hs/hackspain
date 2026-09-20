@@ -2,17 +2,18 @@ import { tool } from 'ai'
 import { z } from 'zod'
 
 /**
- * Herramientas de solo lectura del agente. Cada una es un envoltorio fino de un endpoint del
- * backend FastAPI (`XRAY_API_BASE`): el agente nunca calcula, solo lee lo que el modelo ya calculó.
- * Los errores vuelven como `{ error }` y no como excepción, para que el modelo pueda decirlo.
+ * Herramientas de solo lectura del agente. Cada una es un envoltorio fino de una ruta de este
+ * mismo servidor, que a su vez sirve lo publicado en Supabase: el agente nunca calcula, solo
+ * lee lo que el modelo ya calculó. Los errores vuelven como `{ error }` y no como excepción,
+ * para que el modelo pueda decirlo en vez de romper la conversación.
  */
 export type Fetcher = <T>(path: string, query?: Record<string, string | number | undefined>) => Promise<T>
 
-export function apiFetcher(base: string): Fetcher {
-  const root = base.replace(/\/$/, '')
-  // Nitro tipa `$fetch` por ruta; con una ruta dinámica se ahoga, y esto no es una ruta de Nitro.
-  const http = $fetch as unknown as (url: string, opts: object) => Promise<any>
-  return (path, query) => http(`${root}${path}`, { query, timeout: 20000 })
+/** Llamada interna a las rutas de Nitro: no sale a la red ni necesita saber la URL pública. */
+export function localFetcher(): Fetcher {
+  // Nitro tipa `$fetch` por ruta literal; estas se construyen con el id de la empresa.
+  const call = $fetch as unknown as (url: string, opts: object) => Promise<any>
+  return (path, query) => call(path, { query, timeout: 20000 })
 }
 
 const round = (n: number | null | undefined, d = 1) =>
@@ -27,7 +28,7 @@ async function safe<T>(run: () => Promise<T>) {
   } catch (error: any) {
     const status = error?.statusCode ?? error?.status
     if (status === 404) return { error: 'No hay datos para esa empresa o ese mes.' }
-    return { error: 'El backend de X-Ray no ha respondido.' }
+    return { error: 'El servicio de datos de X-Ray no ha respondido.' }
   }
 }
 
@@ -47,10 +48,13 @@ export function agentTools(get: Fetcher) {
         const view = (s: Signal) => ({ senal: s.label, pilar: s.pillar, peso: round(s.weight, 3), puntos: round(s.points, 2), valor: s.value_text })
         const series: SeriesPoint[] = c.series ?? []
         return {
-          company_id, grupo: c.group_id,
-          mes: series.at(-1)?.month,
+          company_id,
+          mes: c.month ?? series.at(-1)?.month,
           nota: c.score, banda: c.band, tendencia: c.trend, cambio_3_meses: c.delta3,
-          confianza: c.confidence, cobertura_datos: c.coverage, features_fuera_de_rango: c.ood_features,
+          confianza: c.confidence, cobertura_datos: c.coverage,
+          // fracción del peso con valores fuera del rango de entrenamiento: no cambia la
+          // nota, baja la confianza. Es el «esta empresa no se parece a lo que vi».
+          fuera_de_rango: c.ood_share, avisos_de_riesgo: c.risk_flags,
           decision: {
             accion: c.decision?.accion_label ?? c.decision?.accion,
             vetos: c.decision?.vetos, avisos: c.decision?.avisos,
@@ -67,7 +71,8 @@ export function agentTools(get: Fetcher) {
 
     explicar_mes: tool({
       description:
-        'Por qué cambió la nota de un mes al anterior: el cambio total y cuántos puntos aportó cada señal (suman el cambio exacto). ' +
+        'Por qué cambió la nota de un mes al anterior: el cambio total y cuántos puntos aportó cada señal. ' +
+        'Las aportaciones suman el cambio; lo que no explican las señales aparece como «Reglas y límites de escala». ' +
         'Úsala para "¿por qué bajó en marzo?".',
       inputSchema: z.object({ company_id: companyId, month }),
       execute: ({ company_id, month }) => safe(async () => {
@@ -132,8 +137,8 @@ export function agentTools(get: Fetcher) {
       execute: () => safe(async () => {
         const m = await get<any>('/api/model')
         return {
-          pesos_por_senal: m.weights, bandas: m.bands,
-          escala: m.scale,
+          version: m.score_version, pesos_por_senal: m.weights, bandas: m.bands,
+          escala: m.scale, anclas_de_evento: m.anclas,
           significado_de_las_senales: Object.fromEntries(
             Object.entries(m.features ?? {}).map(([k, v]: [string, any]) => [k, { etiqueta: v.label, pilar: v.pilar, formula: v.formula }]),
           ),
