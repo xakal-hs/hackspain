@@ -26,9 +26,9 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     supabaseSecretKey: process.env.SUPABASE_SECRET_KEY || '',
-    agentModel: process.env.AGENT_MODEL || '',
-    agentBaseUrl: process.env.AGENT_BASE_URL || '',
-    agentApiKey: process.env.AGENT_API_KEY || '',
+    agentModel: '',
+    agentBaseUrl: '',
+    agentApiKey: '',
     supabaseJwksUrl: process.env.SUPABASE_JWKS_URL || '',
     public: {
       supabaseUrl: process.env.SUPABASE_URL || '',

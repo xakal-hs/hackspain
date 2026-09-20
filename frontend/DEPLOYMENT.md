@@ -35,6 +35,9 @@ Configurar estas variables en los entornos Preview y Production:
 | `NUXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Pública | Clave publicable para el navegador |
 | `NUXT_SUPABASE_SECRET_KEY` | Sólo servidor, sensible | Lecturas y escrituras desde Nitro |
 | `NUXT_SUPABASE_JWKS_URL` | Sólo servidor | Verificación de JWT |
+| `AGENT_BASE_URL` | Sólo servidor | Endpoint OpenAI-compatible de Helmcode |
+| `AGENT_MODEL` | Sólo servidor | Modelo usado por el asistente |
+| `AGENT_API_KEY` | Sólo servidor, sensible | Credencial de Helmcode |
 
 Los valores viven en Vercel y nunca se versionan. `.vercelignore` impide que
 los archivos locales `.env*` y `.data` entren en el contexto de despliegue.
@@ -42,6 +45,10 @@ Sin las dos primeras variables la aplicación arranca igual y sirve la cartera d
 demostración. La clave de servicio nunca llega al navegador:
 `company_decision_monthly`, `score_catalog` y `company_portfolio_latest` sólo
 conceden `select` a `service_role`.
+
+El asistente usa esas mismas rutas Nitro y no depende de FastAPI. No se
+configuran `XRAY_API_BASE` ni `AI_GATEWAY_API_KEY`: el proveedor activo es
+Helmcode mediante `AGENT_BASE_URL`, `AGENT_MODEL` y `AGENT_API_KEY`.
 
 ## Cómo se reparte el trabajo
 
@@ -107,11 +114,11 @@ Antes de mergear una PR:
 
 ```bash
 cd frontend
-node --test tests/*.test.mjs
+pnpm test
 pnpm typecheck
 pnpm build
 ```
 
 Después del despliegue se comprueban la portada, `/login`, `/api/companies`,
-`/api/company-directory` y `/api/embat/caja` tanto en preview como en la URL
-de producción.
+`/api/company-directory`, `/api/embat/caja` y una conversación real por
+`/api/chat` tanto en preview como en la URL de producción.

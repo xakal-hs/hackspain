@@ -88,6 +88,27 @@ export function agentTools(get: Fetcher) {
       }),
     }),
 
+    prevision_tesoreria: tool({
+      description:
+        'Previsión de caja publicada y acción de tesorería: colocar excedente, buscar financiación o ninguna. ' +
+        'No es una aprobación de crédito.',
+      inputSchema: z.object({ company_id: companyId }),
+      execute: ({ company_id }) => safe(async () => {
+        const r = await get<any>(`/api/flujo/${company_id}`)
+        return {
+          company_id,
+          corte_de_datos: r.snapshot || null,
+          moneda: r.currency || null,
+          accion_tesoreria: r.action || null,
+          caja_actual: round(r.forecast?.cash, 2),
+          meses_previstos: r.forecast?.months?.slice(0, 6) ?? [],
+          rotura_de_caja: r.forecast?.rotura ?? null,
+          excedente: r.forecast?.excedente ?? null,
+          alcance: 'Acción de tesorería; no es una aprobación de crédito.',
+        }
+      }),
+    }),
+
     decision_prestamista: tool({
       description: 'Decisión de prestar / vigilar / no prestar en un mes concreto, con los vetos y avisos que la motivan.',
       inputSchema: z.object({ company_id: companyId, month }),
@@ -111,16 +132,21 @@ export function agentTools(get: Fetcher) {
         limite: z.number().int().min(1).max(15).default(8),
       }),
       execute: ({ banda, orden, limite }) => safe(async () => {
-        const r = await get<{ companies: any[] }>('/api/companies', { band: banda })
+        const [r, curated] = await Promise.all([
+          get<{ companies: any[] }>('/api/companies', { band: banda }),
+          get<{ companies: any[] }>('/api/embat/caja'),
+        ])
+        const curatedIds = new Set(curated.companies.map(company => company.company_id))
+        const companies = r.companies.filter(company => curatedIds.has(company.company_id))
         const key = {
           peor_nota: (a: any, b: any) => a.score - b.score,
           mayor_caida: (a: any, b: any) => a.delta3_q50 - b.delta3_q50,
           mayor_mejora: (a: any, b: any) => b.delta3_q50 - a.delta3_q50,
         }[orden]
         return {
-          total_en_cartera: r.companies.length,
+          total_en_cartera: companies.length,
           criterio: { banda: banda ?? null, orden, limite },
-          empresas: [...r.companies].sort(key).slice(0, limite).map(c => ({
+          empresas: [...companies].sort(key).slice(0, limite).map(c => ({
             company_id: c.company_id, mes: c.last_month, nota: c.score, banda: c.band, tendencia: c.trend,
             cambio_3_meses: c.delta3_q50, accion: c.accion_label, alerta: c.alert, confianza: c.confidence,
             pilares: c.pillars,
