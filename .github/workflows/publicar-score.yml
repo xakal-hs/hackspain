@@ -1,0 +1,91 @@
+# Pre-entreno antes del despliegue: calcula la nota una vez, fuera de la petición, y la
+# publica en Supabase. Vercel despliega solo el Nuxt, que lee el contrato ya publicado.
+#
+# No se entrena en Vercel a propósito: el ajuste necesita los CSV del reto (472 MB de
+# transacciones en Git LFS) y el entorno científico de research/. Meter eso en el build de
+# una función serverless costaría minutos en cada despliegue para producir siempre lo mismo.
+# Aquí corre cuando cambian los datos o el modelo, y no en cada push.
+name: Publicar el score
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Etiqueta de linaje del score (p. ej. xray-v9)"
+        required: false
+        default: ""
+      solo_generar:
+        description: "Generar los CSV sin publicarlos en Supabase"
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - "vault/research.enc"       # el modelo vive cifrado ahí
+      - "scripts/export_decision_publication.py"
+      - "scripts/load_*_publication.py"
+      - "supabase/*_schema.sql"
+
+concurrency:
+  group: publicar-score          # dos publicaciones a la vez dejarían la tabla a medias
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true              # sin esto, transactions.csv es un puntero de 134 bytes
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Descifrar research/
+        env:
+          DECRYPT_KEY: ${{ secrets.DECRYPT_KEY }}
+        run: |
+          if [ -z "$DECRYPT_KEY" ]; then
+            echo "Falta el secreto DECRYPT_KEY: research/ no se puede descifrar." >&2
+            exit 1
+          fi
+          uv run --with cryptography python scripts/vault.py decrypt
+
+      - name: Reconstruir el panel desde los CSV del reto
+        working-directory: research
+        run: |
+          uv sync --frozen
+          uv run python src/ingest.py
+          uv run python src/panel.py
+
+      - name: Ajustar y exportar la nota
+        working-directory: research
+        run: |
+          uv run python src/export_health_publication.py \
+            --out ../supabase/export \
+            ${{ inputs.version && format('--version {0}', inputs.version) || '' }}
+
+      - name: Exportar la decisión y el catálogo
+        run: research/.venv/bin/python scripts/export_decision_publication.py
+
+      - name: Publicar en Supabase
+        if: ${{ !inputs.solo_generar }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          research/.venv/bin/python -m pip install --quiet requests
+          research/.venv/bin/python scripts/load_health_publication.py \
+            company_health_monthly company_health_driver_monthly
+          research/.venv/bin/python scripts/load_decision_publication.py
+
+      # El contrato publicado es lo que sirve el producto: si algo sale mal, estos CSV son
+      # con lo que se compara y con lo que se vuelve atrás.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: contrato-publicado
+          path: supabase/export/
+          retention-days: 30

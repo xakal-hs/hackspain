@@ -2,11 +2,11 @@
 import { Check, Copy, Landmark } from '@lucide/vue'
 import type { EmbatLead, LeadStatus, LeadsResponse } from '../../shared/types/embat'
 
-const COLUMNS: { id: LeadStatus; label: string; hint: string }[] = [
-  { id: 'nuevo', label: 'Nuevo', hint: 'Acaba de pedir financiación' },
-  { id: 'contactado', label: 'Contactado', hint: 'El comercial ya ha escrito' },
-  { id: 'reunion', label: 'Reunión', hint: 'Hay una llamada en el calendario' },
-  { id: 'cerrado', label: 'Cerrado', hint: 'La petición ya no está abierta' },
+const COLUMNS: { id: LeadStatus; label: string }[] = [
+  { id: 'nuevo', label: 'Nuevo' },
+  { id: 'contactado', label: 'Contactado' },
+  { id: 'reunion', label: 'Reunión' },
+  { id: 'cerrado', label: 'Cerrado' },
 ]
 
 const { data, refresh, error, pending } = await useAsyncData('embat-leads', () =>
@@ -157,15 +157,13 @@ async function onDrop(status: LeadStatus) {
           :key="column.id"
           class="crm__col"
           :class="{ 'is-over': overCol === column.id }"
-          :aria-label="`${column.label}: ${column.hint}`"
+          :aria-label="column.label"
           @dragover.prevent="onDragOver(column.id, $event)"
           @dragleave="onDragLeave(column.id, $event)"
           @drop.prevent="onDrop(column.id)"
         >
           <header class="crm__col-head">
-            <b>{{ column.label }}</b>
-            <em>{{ grouped[column.id]?.length || 0 }}</em>
-            <small>{{ column.hint }}</small>
+            <b>{{ column.label }} <em>({{ grouped[column.id]?.length || 0 }})</em></b>
             <span v-if="suma(column.id)" class="crm__col-sum">{{ suma(column.id) }}</span>
           </header>
 
@@ -284,37 +282,33 @@ async function onDrop(status: LeadStatus) {
   background: color-mix(in srgb, var(--ea-blue) 5%, transparent);
 }
 
+/* Una sola línea: la etapa con su recuento a la izquierda y lo que suma a la derecha.
+ * Los dos datos pesan igual, así que comparten cuerpo de letra. */
 .crm__col-head {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
   align-items: center;
-  gap: 0 8px;
+  justify-content: space-between;
+  gap: 10px;
   height: 52px;
   border-bottom: 1px solid var(--ea-line);
 }
 .crm__col-head b {
+  overflow: hidden;
   font-size: 14px;
   font-weight: 600;
-}
-.crm__col-head em {
-  grid-column: 2;
-  font-style: normal;
-  color: var(--ea-muted);
-}
-.crm__col-head small {
-  grid-column: 1;
-  margin-top: -2px;
-  overflow: hidden;
-  color: var(--ea-muted);
-  font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.crm__col-sum {
-  grid-column: 2;
-  margin-top: -2px;
+.crm__col-head em {
   color: var(--ea-muted);
-  font-size: 11px;
+  font-style: normal;
+  font-weight: 500;
+}
+.crm__col-sum {
+  flex: none;
+  color: var(--ea-text);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .crm__stack {
