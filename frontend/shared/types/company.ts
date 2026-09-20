@@ -130,6 +130,13 @@ export interface SuretyLine {
   afianzado: number
   productos: number
 }
+/** Excedente de caja ofrecido como contragarantía de la línea de caución. */
+export interface SuretyPledge {
+  excedente: number
+  capacidad: number
+  linea: number
+  ampliacion: boolean
+}
 export interface ClientBook {
   ventas_12m: number
   clientes: ClientRow[]

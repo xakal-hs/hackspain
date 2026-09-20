@@ -7,7 +7,7 @@ import {
   EllipsisVertical,
   Search,
 } from '@lucide/vue'
-import type { ClientBookResponse, ClientRow } from '../../shared/types/company'
+import type { ClientBookResponse, ClientRow, SuretyPledge } from '../../shared/types/company'
 
 /* Crédito y caución, con la lista agrupada de «Conexiones bancarias» de Embat: cada fila es un
  * cliente del ERP con lo que se sabe de cómo paga, y la acción al final. Va siempre en claro. */
@@ -56,8 +56,11 @@ const preautorizados = computed(() => clientes.value.filter((row) => row.estado 
 const caucion = computed(() => libro.data.value?.caucion ?? null)
 const excedente = computed(() => libro.data.value?.excedente ?? null)
 /* Pignorar excedente como contragarantía: la aseguradora exige menos y la prima baja. La capacidad
- * de 4× el colateral y el ahorro del 30 % son hipótesis de producto, no precio de nadie. */
-const caucionPropuesta = computed(() => (excedente.value && excedente.value > 0 ? excedente.value * 4 : null))
+ * de 4× el colateral es una hipótesis de producto, no el precio de nadie. */
+const CAPACIDAD = 4
+const caucionPropuesta = computed(() =>
+  excedente.value && excedente.value > 0 ? excedente.value * CAPACIDAD : null,
+)
 
 const nf = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0, useGrouping: 'always' } as Intl.NumberFormatOptions)
 const money = (v: number) => `${nf.format(v)} €`
@@ -66,15 +69,33 @@ const dias = (v: number | null) =>
 const nClientes = (n: number) => `${n} ${n === 1 ? 'cliente' : 'clientes'}`
 const meses = (v: number) => `${v} ${v === 1 ? 'mes' : 'meses'}`
 
-/* El botón no contrata: abre el panel con las condiciones o con lo que falta. */
+/* El botón no contrata: abre el panel con las condiciones o con lo que falta. El mismo panel sirve
+ * para pignorar el excedente, que es la contragarantía de la línea de caución. */
 const panel = ref<ClientRow | null>(null)
-function confirmar(row: ClientRow) {
-  solicitados.value = new Set(solicitados.value).add(row.cliente)
+const pignoraAbierta = ref(false)
+const pignorado = ref(false)
+const pignora = computed<SuretyPledge | null>(() => {
+  const linea = caucionPropuesta.value
+  if (!pignoraAbierta.value || !linea || !excedente.value) return null
+  return { excedente: excedente.value, capacidad: CAPACIDAD, linea, ampliacion: caucion.value !== null }
+})
+const panelAbierto = computed(() => panel.value !== null || pignoraAbierta.value)
+const panelHecho = computed(() =>
+  pignoraAbierta.value ? pignorado.value : panel.value !== null && solicitados.value.has(panel.value.cliente),
+)
+function confirmar() {
+  if (pignoraAbierta.value) pignorado.value = true
+  else if (panel.value) solicitados.value = new Set(solicitados.value).add(panel.value.cliente)
+}
+function cerrarPanel() {
+  panel.value = null
+  pignoraAbierta.value = false
 }
 watch(selectedId, () => {
   solicitados.value = new Set()
   detalle.value = null
-  panel.value = null
+  pignorado.value = false
+  cerrarPanel()
 })
 </script>
 
@@ -184,7 +205,16 @@ watch(selectedId, () => {
               <tr v-if="caucionPropuesta">
                 <th scope="row">{{ caucion ? 'Ampliación con tu excedente' : 'Línea con tu excedente' }}</th>
                 <td class="cc__do">
-                  <button type="button" class="cc__chip">Pignorar excedente</button>
+                  <button
+                    type="button"
+                    class="cc__chip"
+                    :class="{ 'is-done': pignorado }"
+                    :disabled="pignorado"
+                    @click="pignoraAbierta = true"
+                  >
+                    <BadgeCheck v-if="pignorado" :size="14" aria-hidden="true" />
+                    {{ pignorado ? 'Excedente pignorado' : 'Pignorar excedente' }}
+                  </button>
                 </td>
                 <td class="cc__meta">Sin consumir CIRBE</td>
                 <td class="cc__meta"></td>
@@ -209,11 +239,12 @@ watch(selectedId, () => {
 
 
     <CreditoActionPanel
-      :open="panel !== null"
+      :open="panelAbierto"
       :row="panel"
+      :pignora="pignora"
       :snapshot="libro.data.value?.snapshot ?? ''"
-      :hecho="panel !== null && solicitados.has(panel.cliente)"
-      @close="panel = null"
+      :hecho="panelHecho"
+      @close="cerrarPanel"
       @confirm="confirmar"
     />
 

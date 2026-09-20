@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { X } from '@lucide/vue'
-import type { ClientRow } from '../../shared/types/company'
+import type { ClientRow, SuretyPledge } from '../../shared/types/company'
 
 /* Panel lateral de Crédito y caución, con la misma forma que el de Flujo de caja.
  * Preautorizado: condiciones y activar, sin pedir un solo dato.
- * En estudio: lo que sale del ERP y lo que la aseguradora todavía necesita. */
+ * En estudio: lo que sale del ERP y lo que la aseguradora todavía necesita.
+ * Pignoración: el excedente de caja como contragarantía de la línea de caución. */
 
 const props = defineProps<{
   open: boolean
   row: ClientRow | null
+  pignora: SuretyPledge | null
   snapshot: string
   hecho: boolean
 }>()
-const emit = defineEmits<{ close: []; confirm: [ClientRow] }>()
+const emit = defineEmits<{ close: []; confirm: [] }>()
 
 const { selectedId } = useSelectedCompany()
 const dialog = ref<HTMLDialogElement | null>(null)
@@ -39,16 +41,16 @@ const money = (v: number) => `${nf.format(v)} €`
 const dias = (v: number | null) =>
   v == null ? 'sin dato' : v === 0 ? 'en fecha' : v < 0 ? `${nf.format(-v)} días antes` : `${nf.format(v)} días tarde`
 
-const preautorizado = computed(() => props.row?.estado === 'preautorizado')
+const preautorizado = computed(() => !props.pignora && props.row?.estado === 'preautorizado')
 /* Con el expediente completo se cotiza sin pasar por la aseguradora. */
-const cotizable = computed(() => props.row?.estado === 'estudio' && props.row.expediente === 'completo')
-const conQuote = computed(() => preautorizado.value || cotizable.value)
+const cotizable = computed(() => !props.pignora && props.row?.estado === 'estudio' && props.row.expediente === 'completo')
+const conQuote = computed(() => preautorizado.value || cotizable.value || props.pignora !== null)
 
 /* La cotización entra sola: un instante de cálculo y aparece. */
 const quote = ref(false)
 let timer: ReturnType<typeof setTimeout> | undefined
 watch(
-  () => [props.open, props.row?.cliente] as const,
+  () => [props.open, props.pignora !== null, props.row?.cliente] as const,
   ([open]) => {
     clearTimeout(timer)
     quote.value = false
@@ -95,6 +97,8 @@ const plazo = 90
 const franquicia = 10
 const avisoImpago = 60
 const carencia = 90
+/* Comisión del aval: hipótesis de producto, no la tarifa de nadie. */
+const comisionAval = '0,60'
 </script>
 
 <template>
@@ -108,7 +112,104 @@ const carencia = 90
       @click.self="dialog?.close()"
     >
       <div class="sheet__scrim" @click="dialog?.close()" />
-      <aside v-if="row" class="sheet__panel">
+
+      <!-- Pignorar el excedente: la contragarantía de la línea de caución. -->
+      <aside v-if="pignora" class="sheet__panel">
+        <header class="sheet__head">
+          <div>
+            <h2 :id="titleId">
+              {{ pignora.ampliacion ? 'Ampliar la línea con tu excedente' : 'Abrir la línea con tu excedente' }}
+            </h2>
+            <p class="sheet__who">Caución · {{ selectedId }}</p>
+          </div>
+          <button type="button" class="sheet__close" aria-label="Cerrar" @click="dialog?.close()">
+            <X :size="18" aria-hidden="true" />
+          </button>
+        </header>
+
+        <div class="sheet__body">
+          <p :id="leadId" class="sheet__lead">
+            La aseguradora necesita una contragarantía para emitir avales. En vez de ocupar una línea del
+            banco, se pignora la caja que ya tienes parada: Embat la ve conciliada hasta el
+            {{ snapshot }}, así que no hay que certificar nada.
+          </p>
+
+          <p v-if="!quote" class="sheet__calc" role="status">Calculando la línea…</p>
+          <dl v-else class="sheet__read is-in">
+            <div>
+              <dt>Excedente a pignorar</dt>
+              <dd>{{ money(pignora.excedente) }}</dd>
+            </div>
+            <div>
+              <dt>Capacidad</dt>
+              <dd>{{ pignora.capacidad }}×</dd>
+            </div>
+            <div>
+              <dt>{{ pignora.ampliacion ? 'Ampliación' : 'Línea' }}</dt>
+              <dd>{{ money(pignora.linea) }}</dd>
+            </div>
+          </dl>
+
+          <h3 v-if="quote">Condiciones</h3>
+          <ul v-if="quote" class="sheet__terms">
+            <li>
+              <b>Qué se bloquea</b>
+              <span>
+                {{ money(pignora.excedente) }} en la cuenta que ya está conectada. El dinero sigue siendo
+                tuyo y remunerado; queda inmovilizado mientras haya avales vivos.
+              </span>
+            </li>
+            <li>
+              <b>Qué te da</b>
+              <span>
+                Hasta {{ money(pignora.linea) }} en avales, que se emiten uno a uno contra la línea.
+              </span>
+            </li>
+            <li>
+              <b>No consume CIRBE</b>
+              <span>El riesgo lo asume la aseguradora, no el banco: tu línea de circulante queda libre.</span>
+            </li>
+            <li>
+              <b>Coste</b>
+              <span>
+                Comisión del {{ comisionAval }} % anual sobre el aval vigente, no sobre la línea. Lo que no
+                usas no cuesta.
+              </span>
+            </li>
+            <li>
+              <b>Liberación</b>
+              <span>
+                Cuando el beneficiario cancela el aval, el tramo pignorado se libera en la siguiente
+                conciliación.
+              </span>
+            </li>
+            <li>
+              <b>Colateral vigilado</b>
+              <span>
+                Embat comprueba el saldo a diario. Si bajas del mínimo, te avisa antes de que lo haga la
+                aseguradora.
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <footer class="sheet__foot">
+          <p>
+            {{
+              hecho
+                ? 'Excedente pignorado. La línea queda disponible para emitir avales.'
+                : quote
+                  ? `Al pignorar, bloqueas ${money(pignora.excedente)} y abres hasta ${money(pignora.linea)}.`
+                  : 'Calculando la línea.'
+            }}
+          </p>
+          <button class="sheet__ask" type="button" :disabled="hecho || !quote" @click="emit('confirm')">
+            {{ hecho ? 'Excedente pignorado' : 'Pignorar y abrir la línea' }}
+          </button>
+        </footer>
+      </aside>
+
+      <aside v-else-if="row" class="sheet__panel">
         <header class="sheet__head">
           <div>
             <h2 :id="titleId">
@@ -240,7 +341,7 @@ const carencia = 90
             class="sheet__ask"
             type="button"
             :disabled="hecho || (conQuote && !quote)"
-            @click="emit('confirm', row)"
+            @click="emit('confirm')"
           >
             {{
               hecho
