@@ -1,4 +1,5 @@
 import type { CompanyDetail, CompanyDriver, CompanyHealth, CompanyMonth, SectorHealth } from '../../../shared/types/company'
+import { HORIZON, projectScore } from '../../../shared/proyeccion'
 
 export default defineEventHandler(async (event): Promise<CompanyDetail> => {
   const id = getRouterParam(event, 'id') || ''
@@ -35,5 +36,15 @@ export default defineEventHandler(async (event): Promise<CompanyDetail> => {
       })
     } catch { warnings.push('No se pudieron cargar las explicaciones del score.') }
   }
-  return { panel, health, drivers, sectorHealth, currencies: [...new Set(products.flatMap(row => row.currency ? [row.currency] : []))].sort(), warnings }
+  /* La previsión se calcula aquí, al servir el detalle, y no se publica: prolonga la EWMA del
+   * score ya publicado, así que nunca puede discrepar del número que se muestra. */
+  const projection = {
+    horizon: HORIZON,
+    company: projectScore(health.map(row => ({ month: row.month, value: row.health_score }))),
+    sector: {
+      score_mean: projectScore(sectorHealth.map(row => ({ month: row.month, value: row.score_mean }))),
+      score_median: projectScore(sectorHealth.map(row => ({ month: row.month, value: row.score_median }))),
+    },
+  }
+  return { panel, health, drivers, sectorHealth, projection, currencies: [...new Set(products.flatMap(row => row.currency ? [row.currency] : []))].sort(), warnings }
 })

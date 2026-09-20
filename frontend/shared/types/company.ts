@@ -38,7 +38,19 @@ export interface SectorHealth {
   score_mean: number | null
   score_median: number | null
 }
+/** Un mes futuro del score, prolongado desde la serie publicada. No es un dato cerrado. */
+export interface ProjectedPoint {
+  month: string
+  value: number
+}
+/** Previsión a `horizon` meses de la empresa y de su sector, por estadístico. */
+export interface ScoreProjection {
+  horizon: number
+  company: ProjectedPoint[]
+  sector: Record<'score_mean' | 'score_median', ProjectedPoint[]>
+}
 export interface CompanyDetail {
+  projection: ScoreProjection
   sectorHealth: SectorHealth[]
   drivers: CompanyDriver[]
   panel: CompanyMonth[]
