@@ -2,8 +2,9 @@ import { useQuery } from '@tanstack/vue-query'
 import type { CompanyDirectorySource, CompanyIdentity, CompanyDetail } from '../../shared/types/company'
 
 export function useSelectedCompany() {
-  // Sin elección previa, la demo abre en el caso del excedente de caja (shared/demoCases.ts).
-  const cookie = useCookie<string>('xray-company', { default: () => 'COMP_0835', sameSite: 'lax' })
+  // Sin elección previa, la demo abre en el caso de excedente de caja y clientes
+  // preautorizados (shared/demoCases.ts).
+  const cookie = useCookie<string>('xray-company', { default: () => 'COMP_0790', sameSite: 'lax' })
   const selectedId = useState<string>('selected-company-id', () => cookie.value)
   watch(selectedId, value => { cookie.value = value })
   const sourceCookie = useCookie<CompanyDirectorySource>('xray-company-source', {

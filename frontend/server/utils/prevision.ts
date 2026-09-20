@@ -11,8 +11,12 @@ interface Prevision {
 
 let loaded: Promise<Prevision | null> | undefined
 
-export const loadPrevision = () =>
-  (loaded ??= useStorage('assets:server').getItem<Prevision>('prevision.json'))
+export const loadPrevision = () => {
+  const assets = useStorage('assets:server')
+  // En desarrollo se lee siempre: si no, regenerar el JSON obliga a reiniciar el servidor.
+  if (import.meta.dev) return assets.getItem<Prevision>('prevision.json')
+  return (loaded ??= assets.getItem<Prevision>('prevision.json'))
+}
 
 export function actionFor(
   forecast: CashForecast | null,

@@ -20,6 +20,8 @@ const flujo = useQuery({
   queryFn: () => $fetch<Cashflow>(`/api/flujo/${encodeURIComponent(selectedId.value)}`),
   staleTime: 60 * 1000,
 })
+/* Sin esperar la consulta, el servidor pinta la tabla vacía y el cliente llega con los datos. */
+onServerPrefetch(() => flujo.suspense())
 
 type Period = '3M' | '6M' | 'YTD'
 const period = ref<Period>('3M')
