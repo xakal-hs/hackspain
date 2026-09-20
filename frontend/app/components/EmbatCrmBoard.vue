@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Check, ChevronRight, ChevronsUpDown, Copy, Landmark } from '@lucide/vue'
+import { Check, Copy, Landmark } from '@lucide/vue'
 import type { EmbatLead, LeadStatus, LeadsResponse } from '../../shared/types/embat'
 
 const COLUMNS: { id: LeadStatus; label: string; hint: string }[] = [
@@ -15,11 +15,6 @@ const { data, refresh, error, pending } = await useAsyncData('embat-leads', () =
 const { patch } = useEmbatLeads()
 const openId = ref<string | null>(null)
 const copied = ref(false)
-const abiertos = ref(new Set<LeadStatus>(COLUMNS.map((column) => column.id)))
-
-/* El tablero manda: el comercial ve el proceso de venta entero de izquierda a derecha.
- * La lista sigue disponible para repasar la cola en vertical, y la elección se recuerda. */
-const vista = useCookie<'tablero' | 'lista'>('xray-crm-vista', { sameSite: 'lax', default: () => 'tablero' })
 
 /* El aviso que la empresa acaba de pedir entra marcado: se anuncia una vez, en la primera
  * apertura de la pestaña, y la cookie se consume ahí mismo para no repetir la entrada. */
@@ -45,18 +40,6 @@ const grouped = computed(() => {
 
 const landedLead = computed(() => data.value?.leads.find((lead) => lead.id === landed.value) || null)
 const openLead = computed(() => data.value?.leads.find((lead) => lead.id === openId.value) || null)
-const todoAbierto = computed(() => COLUMNS.every((column) => abiertos.value.has(column.id)))
-
-function plegar(id: LeadStatus) {
-  const next = new Set(abiertos.value)
-  if (next.has(id)) next.delete(id)
-  else next.add(id)
-  abiertos.value = next
-}
-
-function plegarTodo() {
-  abiertos.value = todoAbierto.value ? new Set() : new Set<LeadStatus>(COLUMNS.map((column) => column.id))
-}
 
 function when(iso: string) {
   return new Intl.DateTimeFormat('es-ES', {
@@ -65,10 +48,6 @@ function when(iso: string) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(iso))
-}
-
-function nAvisos(n: number) {
-  return `${n} ${n === 1 ? 'aviso' : 'avisos'}`
 }
 
 /* El importe llega ya escrito en es-ES («62.231 €»). Para sumar la etapa hay que deshacer el
@@ -149,35 +128,6 @@ async function onDrop(status: LeadStatus) {
   <div class="embat-app">
     <header class="embat-app__title">
       <h1>Financiación</h1>
-      <div class="embat-app__tools">
-        <div class="embat-app__seg" role="radiogroup" aria-label="Forma de ver la cola">
-          <button
-            type="button"
-            role="radio"
-            :aria-checked="vista === 'tablero'"
-            @click="vista = 'tablero'"
-          >
-            Tablero
-          </button>
-          <button
-            type="button"
-            role="radio"
-            :aria-checked="vista === 'lista'"
-            @click="vista = 'lista'"
-          >
-            Lista
-          </button>
-        </div>
-        <button
-          v-if="vista === 'lista'"
-          type="button"
-          class="embat-app__icon"
-          :aria-label="todoAbierto ? 'Plegar todo' : 'Desplegar todo'"
-          @click="plegarTodo"
-        >
-          <ChevronsUpDown :size="16" aria-hidden="true" />
-        </button>
-      </div>
     </header>
 
     <p v-if="landedLead" class="crm__landed" role="status">
@@ -188,7 +138,7 @@ async function onDrop(status: LeadStatus) {
       >
     </p>
 
-    <section class="embat-app__sheet" :class="{ 'crm__sheet': vista === 'tablero' }" :aria-busy="pending">
+    <section class="embat-app__sheet crm__sheet" :aria-busy="pending">
       <p v-if="pending" class="embat-app__state">Cargando la cola.</p>
       <p v-else-if="error" class="embat-app__state" role="alert">
         No se pudo leer la cola de avisos.
@@ -201,7 +151,7 @@ async function onDrop(status: LeadStatus) {
 
       <!-- Tablero: las cuatro etapas del proceso de venta, en orden, y la tarjeta se arrastra
        * de una a la siguiente. -->
-      <div v-else-if="vista === 'tablero'" class="crm__board">
+      <div v-else class="crm__board">
         <section
           v-for="column in COLUMNS"
           :key="column.id"
@@ -249,54 +199,6 @@ async function onDrop(status: LeadStatus) {
           </p>
         </section>
       </div>
-
-      <!-- Lista: la misma cola en vertical, agrupada por etapa. -->
-      <template v-else>
-        <article v-for="column in COLUMNS" :key="column.id" class="embat-app__group">
-          <header>
-            <button type="button" :aria-expanded="abiertos.has(column.id)" @click="plegar(column.id)">
-              <ChevronRight :size="16" aria-hidden="true" />
-            </button>
-            <b>{{ column.label }}</b>
-            <span>{{ column.hint }}</span>
-            <em>{{ nAvisos(grouped[column.id]?.length || 0) }}</em>
-          </header>
-          <table
-            v-if="abiertos.has(column.id) && grouped[column.id]?.length"
-            class="crm__rows"
-            :aria-label="`Peticiones ${column.label.toLowerCase()}`"
-          >
-            <!-- Cada estado es su propia tabla: sin estas medidas cada grupo colocaría el
-             * responsable y la fecha en un sitio distinto y la columna quedaría en zigzag. -->
-            <colgroup>
-              <col />
-              <col class="crm__rows-quien" />
-              <col class="crm__rows-cuando" />
-            </colgroup>
-            <tbody>
-              <tr
-                v-for="lead in grouped[column.id]"
-                :key="lead.id"
-                :class="{ 'is-on': openId === lead.id, 'is-landing': landed === lead.id }"
-                @click="openId = lead.id"
-              >
-                <th scope="row">
-                  {{ lead.company_name }}
-                  <em class="crm__why"
-                    >{{ lead.reason }}<i v-if="lead.reason_amount"> · {{ lead.reason_amount }}</i></em
-                  >
-                </th>
-                <td class="embat-app__meta crm__quien">
-                  {{ lead.assignee_name }}
-                  <small v-if="lead.assignee_title">{{ lead.assignee_title }}</small>
-                </td>
-                <td class="embat-app__meta crm__cuando">{{ when(lead.created_at) }}</td>
-              </tr>
-            </tbody>
-          </table>
-          <p v-else-if="abiertos.has(column.id)" class="embat-app__empty">Ningún aviso en este estado.</p>
-        </article>
-      </template>
     </section>
 
     <aside
@@ -484,35 +386,6 @@ async function onDrop(status: LeadStatus) {
   color: var(--ea-blue);
 }
 
-/* ── Lista ───────────────────────────────────────────────────────────────── */
-
-/* Las cuatro tablas comparten rejilla para que la columna del responsable y la de la fecha
- * caigan en la misma vertical al saltar de un estado a otro. */
-.crm__rows {
-  table-layout: fixed;
-}
-.crm__rows-quien {
-  width: 300px;
-}
-.crm__rows-cuando {
-  width: 132px;
-}
-
-/* Con la rejilla fija el cargo largo ya no puede empujar la columna: se recorta. */
-.crm__quien {
-  text-align: left;
-}
-.crm__quien,
-.crm__cuando,
-.crm__rows th[scope='row'] {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.crm__quien small {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 /* ── Común ───────────────────────────────────────────────────────────────── */
 
 /* El chrome de Embat es siempre claro, así que estos colores salen de sus propios tokens:
@@ -570,7 +443,6 @@ async function onDrop(status: LeadStatus) {
 
 /* El aviso recién pedido aterriza una vez: entra desde arriba y el borde late dos veces.
  * Pasados cuatro segundos vuelve a ser una fila más. */
-tr.is-landing,
 .crm__card.is-landing {
   animation: crm-land 0.42s ease both, crm-ring 1.1s ease 0.24s 2;
 }
