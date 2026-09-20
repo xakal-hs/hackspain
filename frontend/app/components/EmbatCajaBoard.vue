@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ChevronRight, ChevronsUpDown } from '@lucide/vue'
 import type { CajaResponse, CajaCompany, CashStatus } from '../../shared/types/embat'
 
 const STATUS: Record<CashStatus, string> = {
@@ -7,27 +8,50 @@ const STATUS: Record<CashStatus, string> = {
   vigilancia: 'En vigilancia',
 }
 
-const { data: caja, pending, error } = await useAsyncData('embat-caja', () => $fetch<CajaResponse>('/api/embat/caja'))
-const filter = ref<CashStatus | 'todas'>('todas')
-const pickedId = ref('')
+const GROUPS: { id: CashStatus; label: string; hint: string }[] = [
+  { id: 'alerta', label: 'Alerta', hint: 'La caja operativa no cubre lo que sale' },
+  { id: 'oportunidad', label: 'Oportunidad', hint: 'Hay excedente que se puede colocar' },
+  { id: 'vigilancia', label: 'En vigilancia', hint: 'Ni rotura ni excedente claro' },
+]
 
-watch(
-  () => caja.value?.companies,
-  (rows) => {
-    if (!rows?.length) return
-    if (!rows.some((row) => row.company_id === pickedId.value))
-      pickedId.value = rows.find((row) => row.status === 'alerta')?.company_id || rows[0]!.company_id
-  },
-  { immediate: true },
+const { data: caja, pending, error, refresh } = await useAsyncData('embat-caja', () =>
+  $fetch<CajaResponse>('/api/embat/caja'),
 )
+const filter = ref<CashStatus | 'todas'>('todas')
+const detalle = ref<CajaCompany | null>(null)
+const abiertos = ref(new Set<CashStatus>(['alerta', 'oportunidad', 'vigilancia']))
 
 const visible = computed(() => {
   const rows = caja.value?.companies || []
   return filter.value === 'todas' ? rows : rows.filter((row) => row.status === filter.value)
 })
-const subject = computed(
-  () => visible.value.find((row) => row.company_id === pickedId.value) || visible.value[0] || null,
+const gruposVisibles = computed(() =>
+  filter.value === 'todas' ? GROUPS : GROUPS.filter((grupo) => grupo.id === filter.value),
 )
+const todoAbierto = computed(() => gruposVisibles.value.every((grupo) => abiertos.value.has(grupo.id)))
+watch(filter, (id) => {
+  if (id === 'todas') return
+  const next = new Set(abiertos.value)
+  next.add(id)
+  abiertos.value = next
+})
+
+function plegar(id: CashStatus) {
+  const next = new Set(abiertos.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  abiertos.value = next
+}
+
+function plegarTodo() {
+  abiertos.value = todoAbierto.value
+    ? new Set()
+    : new Set<CashStatus>(gruposVisibles.value.map((grupo) => grupo.id))
+}
+
+function porEstado(estado: CashStatus) {
+  return visible.value.filter((row) => row.status === estado)
+}
 
 function money(value: number | null | undefined, currency: string) {
   if (value == null) return '—'
@@ -48,179 +72,151 @@ function ratio(value: number | null | undefined) {
   return `${(value * 100).toLocaleString('es-ES', { maximumFractionDigits: 0 })} %`
 }
 
-function pick(row: CajaCompany) {
-  pickedId.value = row.company_id
+function nEmpresas(n: number) {
+  return `${n} ${n === 1 ? 'empresa' : 'empresas'}`
+}
+
+function pick(company: CajaCompany) {
+  detalle.value = company
 }
 </script>
 
 <template>
-  <div class="wk__grid caja">
-    <section class="panel span-12">
-      <header class="panel__bar">
-        <h2 class="panel__title">Caja del portfolio</h2>
-        <span class="chip chip--neutral">20 empresas</span>
-      </header>
-      <p class="lead-line">
-        Operativa es el dinero que deja el negocio. Financiera es lo que se debe
-        y lo que se paga de deuda. Alerta y oportunidad salen de la caja, no del score.
-      </p>
-      <dl v-if="caja" class="caja__pulse">
-        <div data-tone="crimson">
-          <dt>En alerta</dt>
-          <dd>{{ caja.counts.alerta }}</dd>
-        </div>
-        <div data-tone="mint">
-          <dt>Oportunidad</dt>
-          <dd>{{ caja.counts.oportunidad }}</dd>
-        </div>
-        <div data-tone="amber">
-          <dt>En vigilancia</dt>
-          <dd>{{ caja.counts.vigilancia }}</dd>
-        </div>
-      </dl>
-      <p v-else-if="pending" class="empty">Leyendo la tesorería.</p>
-      <p v-else-if="error" class="empty">No se pudo leer Supabase.</p>
-    </section>
-
-    <section class="panel span-8 list">
-      <header class="panel__bar">
-        <h2 class="panel__title">Empresas</h2>
-        <div class="seg" role="radiogroup" aria-label="Filtrar por estado de caja">
+  <div class="embat-app">
+    <header class="embat-app__title">
+      <h1>Caja</h1>
+      <div class="embat-app__tools">
+        <button
+          type="button"
+          class="embat-app__icon"
+          :aria-label="todoAbierto ? 'Plegar todo' : 'Desplegar todo'"
+          @click="plegarTodo"
+        >
+          <ChevronsUpDown :size="16" aria-hidden="true" />
+        </button>
+        <div class="embat-app__seg" role="radiogroup" aria-label="Filtrar por estado de caja">
           <button
             v-for="option in (['todas', 'alerta', 'oportunidad', 'vigilancia'] as const)"
             :key="option"
             type="button"
             role="radio"
             :aria-checked="filter === option"
-            :class="{ 'is-on': filter === option }"
             @click="filter = option"
           >
             {{ option === 'todas' ? 'Todas' : STATUS[option] }}
           </button>
         </div>
-      </header>
-      <div class="ctable">
-        <table>
-          <caption class="sr-only">Estado de caja operativa y financiera del portfolio</caption>
-          <thead>
-            <tr>
-              <th scope="col">Empresa</th>
-              <th scope="col" class="num">Operativa</th>
-              <th scope="col" class="num">Financiera</th>
-              <th scope="col">Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="company in visible"
-              :key="company.company_id"
-              :class="{ 'is-selected': company.company_id === subject?.company_id }"
-            >
-              <th scope="row">
-                <button type="button" :aria-pressed="company.company_id === subject?.company_id" @click="pick(company)">
-                  <b>{{ company.name }}</b>
-                  <small>{{ company.sector }}</small>
-                </button>
-              </th>
-              <td class="num">
-                {{ money(company.operativa.cash_end, company.currency) }}
-                <small class="caja__sub">{{ months(company.operativa.runway_m) }}</small>
-              </td>
-              <td class="num">
-                {{ money(company.financiera.debt_outstanding, company.currency) }}
-                <small class="caja__sub">cuota {{ money(company.financiera.debt_service, company.currency) }}</small>
-              </td>
-              <td>
-                <span class="chip" :class="`chip--${company.status === 'alerta' ? 'crimson' : company.status === 'oportunidad' ? 'mint' : 'amber'}`">
-                  {{ STATUS[company.status] }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
-      <p v-if="caja && !visible.length" class="empty">Ninguna empresa en este estado.</p>
+    </header>
+
+    <dl v-if="caja" class="embat-app__pulse">
+      <div data-tone="alerta">
+        <dt>En alerta</dt>
+        <dd>{{ caja.counts.alerta }}</dd>
+      </div>
+      <div data-tone="oportunidad">
+        <dt>Oportunidad</dt>
+        <dd>{{ caja.counts.oportunidad }}</dd>
+      </div>
+      <div data-tone="vigilancia">
+        <dt>En vigilancia</dt>
+        <dd>{{ caja.counts.vigilancia }}</dd>
+      </div>
+    </dl>
+
+    <section class="embat-app__sheet" :aria-busy="pending">
+      <p v-if="pending" class="embat-app__state">Leyendo la tesorería.</p>
+      <p v-else-if="error" class="embat-app__state" role="alert">
+        No se pudo leer la tesorería.
+        <button type="button" @click="refresh()">Reintentar</button>
+      </p>
+      <p v-else-if="!caja?.companies.length" class="embat-app__state">
+        No hay empresas en el portfolio de caja.
+      </p>
+
+      <template v-else>
+        <article v-for="grupo in gruposVisibles" :key="grupo.id" class="embat-app__group">
+          <header>
+            <button type="button" :aria-expanded="abiertos.has(grupo.id)" @click="plegar(grupo.id)">
+              <ChevronRight :size="16" aria-hidden="true" />
+            </button>
+            <b>{{ grupo.label }}</b>
+            <span>{{ grupo.hint }}</span>
+            <em>{{ nEmpresas(porEstado(grupo.id).length) }}</em>
+          </header>
+          <table v-if="abiertos.has(grupo.id) && porEstado(grupo.id).length" :aria-label="`${grupo.label}: caja operativa y financiera`">
+            <tbody>
+              <tr
+                v-for="company in porEstado(grupo.id)"
+                :key="company.company_id"
+                :class="{ 'is-on': detalle?.company_id === company.company_id }"
+                @click="pick(company)"
+              >
+                <th scope="row">
+                  {{ company.name }}
+                  <small>{{ company.sector }}</small>
+                </th>
+                <td class="embat-app__amount">
+                  {{ money(company.operativa.cash_end, company.currency) }}
+                  <small>{{ months(company.operativa.runway_m) }}</small>
+                </td>
+                <td>
+                  {{ money(company.financiera.debt_outstanding, company.currency) }}
+                  <small>cuota {{ money(company.financiera.debt_service, company.currency) }}</small>
+                </td>
+                <td class="embat-app__meta">{{ STATUS[company.status] }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p v-else-if="abiertos.has(grupo.id)" class="embat-app__empty">Ninguna empresa en este estado.</p>
+        </article>
+      </template>
     </section>
 
-    <section v-if="subject" class="panel span-4 sheet">
-      <header class="panel__bar">
-        <h2 class="panel__title">{{ subject.name }}</h2>
-        <span class="chip" :class="`chip--${subject.status === 'alerta' ? 'crimson' : subject.status === 'oportunidad' ? 'mint' : 'amber'}`">
-          {{ STATUS[subject.status] }}
-        </span>
+    <aside
+      v-if="detalle"
+      class="embat-app__dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="caja-ficha-title"
+    >
+      <header>
+        <div>
+          <h2 id="caja-ficha-title">{{ detalle.name }}</h2>
+          <p>{{ detalle.why }}</p>
+        </div>
+        <button type="button" @click="detalle = null">Cerrar</button>
       </header>
-      <p class="sheet__why">{{ subject.why }}</p>
-      <dl class="sheet__terms">
+      <dl>
         <div>
           <dt>Dinero en la cuenta</dt>
-          <dd>{{ money(subject.operativa.cash_end, subject.currency) }}</dd>
+          <dd>{{ money(detalle.operativa.cash_end, detalle.currency) }}</dd>
         </div>
         <div>
           <dt>Meses cubiertos</dt>
-          <dd>{{ months(subject.operativa.runway_m) }}</dd>
+          <dd>{{ months(detalle.operativa.runway_m) }}</dd>
         </div>
         <div>
           <dt>Entra frente a sale</dt>
-          <dd>{{ money(subject.operativa.net_op, subject.currency) }}</dd>
+          <dd>{{ money(detalle.operativa.net_op, detalle.currency) }}</dd>
         </div>
         <div>
           <dt>Deuda viva</dt>
-          <dd>{{ money(subject.financiera.debt_outstanding, subject.currency) }}</dd>
+          <dd>{{ money(detalle.financiera.debt_outstanding, detalle.currency) }}</dd>
         </div>
         <div>
           <dt>Cuota del mes</dt>
-          <dd>{{ money(subject.financiera.debt_service, subject.currency) }}</dd>
+          <dd>{{ money(detalle.financiera.debt_service, detalle.currency) }}</dd>
         </div>
         <div>
           <dt>Póliza dispuesta</dt>
-          <dd>{{ ratio(subject.financiera.debt_util) }}</dd>
+          <dd>{{ ratio(detalle.financiera.debt_util) }}</dd>
         </div>
       </dl>
-    </section>
+      <p class="embat-app__note">
+        Operativa es el dinero que deja el negocio. Financiera es lo que se debe y lo que se paga de
+        deuda. Alerta y oportunidad salen de la caja, no del score.
+      </p>
+    </aside>
   </div>
 </template>
-
-<style scoped>
-.caja__pulse {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
-  margin: 0 0 4px;
-}
-.caja__pulse > div {
-  padding: 12px 18px 4px 0;
-  border-right: 1px solid var(--line);
-}
-.caja__pulse > div:last-child { border-right: 0; padding-right: 0; }
-.caja__pulse dt {
-  margin: 0 0 4px;
-  color: var(--text-muted);
-  font-size: 12.5px;
-}
-.caja__pulse dd {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 32px;
-  font-weight: 400;
-  letter-spacing: -0.05em;
-  font-variant-numeric: tabular-nums;
-}
-.caja__pulse > div[data-tone='crimson'] dd { color: var(--crimson-ink); }
-.caja__pulse > div[data-tone='mint'] dd { color: var(--mint-ink); }
-.caja__pulse > div[data-tone='amber'] dd { color: var(--amber-ink); }
-.caja__sub {
-  display: block;
-  margin-top: 2px;
-  color: var(--text-muted);
-  font-weight: 400;
-}
-@media (max-width: 720px) {
-  .caja__pulse { grid-template-columns: 1fr; }
-  .caja__pulse > div {
-    border-right: 0;
-    border-top: 1px solid var(--line);
-    padding: 12px 0 0;
-  }
-  .caja__pulse > div:first-child { border-top: 0; padding-top: 0; }
-}
-</style>

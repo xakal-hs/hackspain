@@ -30,6 +30,9 @@ const section = computed(() => {
 })
 
 const isTreasury = computed(() => treasurySections.includes(section.value))
+const isBare = computed(() =>
+  ['flujo', 'credito', 'caja', 'crm', 'equipo'].includes(section.value),
+)
 
 const selectedCompany = useState<string>('selected-company-id')
 const companyCookie = useCookie<string>('xray-company', { sameSite: 'lax' })
@@ -80,10 +83,10 @@ const sectionDescription = computed(() =>
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
     <WorkspaceSidebar :role="role" :section="section" />
 
-    <!-- Flujo de caja y Crédito y caución son pantallas al estilo de Embat: van a sangre, sin la
+    <!-- Flujo, Crédito y Equipo Embat clonan el producto: van a sangre, sin la
          cabecera ni el pie del panel. -->
-    <div class="wk__body" :class="{ 'wk__body--bare': section === 'flujo' || section === 'credito' }">
-      <header v-if="section !== 'flujo' && section !== 'credito'" class="wk__top">
+    <div class="wk__body" :class="{ 'wk__body--bare': isBare }">
+      <header v-if="!isBare" class="wk__top">
         <p class="wk__crumb">
           {{ profile.name }}<span aria-hidden="true">/</span>{{ sectionLabel }}
         </p>
@@ -118,7 +121,7 @@ const sectionDescription = computed(() =>
           <CompanySettings v-else-if="section === 'ajustes'" />
         </div>
 
-        <footer v-if="section !== 'flujo' && section !== 'credito'" class="wk__foot">
+        <footer v-if="!isBare" class="wk__foot">
           <template v-if="role === 'embat'">
             Caja operativa y financiera desde Supabase. El CRM se llena cuando una empresa pide financiación y se asigna a un comercial de Equipo.
           </template>
