@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { companies, leadCompany, leadMonths, perspectives, type PerspectiveId } from '~/data/demo'
+import { leadCompany, leadMonths, perspectives, type PerspectiveId } from '~/data/demo'
 
 useHead({ title: 'Entrar · X-Ray' })
 
@@ -13,7 +13,7 @@ function enterAs(id: PerspectiveId) {
 }
 
 const stats = [
-  { figure: `${companies.length}`, label: 'Empresas en la demo' },
+  { figure: '+1200', label: 'Empresas en la demo' },
   { figure: '24', label: 'Meses de histórico por empresa' },
   { figure: `${leadMonths(leadCompany)}`, label: 'Meses de ventaja sobre la caída' },
 ]
