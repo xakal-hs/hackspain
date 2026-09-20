@@ -25,7 +25,7 @@ pnpm dev
 
 Nitro reads the published X-Ray contract from Supabase and serves every product route
 itself: portfolio, company, explanation, lender decision, model and vetoes. The score and
-the decision are computed offline by a reproducible job (`backend/`, `research/`) and
+the decision are computed offline by a reproducible job (`research/`) and
 published with `scripts/`; this project never recomputes them. The response contract lives
 in `app/types/portfolio.ts`.
 
@@ -38,7 +38,7 @@ in `app/types/portfolio.ts`.
 - `app/assets/css/`: `tokens.css` (both themes), `main.css` (base, primitives,
   charts, landing) and `workspace.css` (the cockpit layer), loaded in that order.
 - `app/utils/chart.ts`: scales and path builders shared by every chart.
-- `server/api/`: Nitro server endpoints and backend adapters.
+- `server/api/`: Nitro server endpoints that read the published contract in Supabase.
 - `DESIGN_SYSTEM.md`: the palette, type, structure and motion rules.
 
 ## Checks

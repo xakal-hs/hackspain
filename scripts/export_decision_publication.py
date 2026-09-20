@@ -2,7 +2,7 @@
 
 La nota ya está publicada (``supabase/export/company_health_monthly.csv``, linaje
 ``xray-v7``). Este script **no la recalcula**: la lee y le pone encima la decisión del
-prestamista de ``backend/decision.py``, que solo necesita nota, banda y confianza más
+prestamista de ``research/src/decision.py``, que solo necesita nota, banda y confianza más
 los hechos de hoy del panel (vetos y observabilidad). Así la acción que se enseña no
 puede divergir de la nota que se enseña.
 
