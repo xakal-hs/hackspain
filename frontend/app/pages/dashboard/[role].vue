@@ -128,5 +128,6 @@ const sectionDescription = computed(() =>
         </footer>
       </main>
     </div>
+    <AgentChat :role="role" />
   </div>
 </template>

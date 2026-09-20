@@ -25,8 +25,10 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
-    xrayApiBase: process.env.XRAY_API_BASE || '',
     supabaseSecretKey: process.env.SUPABASE_SECRET_KEY || '',
+    agentModel: process.env.AGENT_MODEL || '',
+    agentBaseUrl: process.env.AGENT_BASE_URL || '',
+    agentApiKey: process.env.AGENT_API_KEY || '',
     supabaseJwksUrl: process.env.SUPABASE_JWKS_URL || '',
     public: {
       supabaseUrl: process.env.SUPABASE_URL || '',

@@ -41,12 +41,21 @@ export async function companyDataWrite<T>(
 }
 
 // PostgREST caps responses. Keep paging, including when the last page is full.
-export async function companyDataPages<T>(table: string, select: string, order = 'company_id.asc') {
+// `order` debe desempatar de forma estable (p. ej. `score.asc,company_id.asc`): con un
+// orden ambiguo, dos páginas consecutivas pueden repetir u omitir filas.
+export async function companyDataPages<T>(
+  table: string,
+  select: string,
+  order = 'company_id.asc',
+  filters: Record<string, string | number> = {},
+) {
   const read = companyDataReader()
   const rows: T[] = []
-  for (let offset = 0; ; offset += 500) {
-    const page = await read<T>(table, { select, order, offset, limit: 500 })
+  // 1.000 es el techo de PostgREST (`db-max-rows`): pedir menos solo añade viajes.
+  const size = 1000
+  for (let offset = 0; ; offset += size) {
+    const page = await read<T>(table, { ...filters, select, order, offset, limit: size })
     rows.push(...page)
-    if (page.length < 500) return rows
+    if (page.length < size) return rows
   }
 }
