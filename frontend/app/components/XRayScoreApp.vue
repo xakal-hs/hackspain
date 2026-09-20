@@ -21,9 +21,6 @@ const states = {
     ctaFilled: true,
     score: '65',
     band: 'Sano',
-    bandTitle: 'Trayectoria ascendente confirmada',
-    bandDesc:
-      'Salta al tramo preferente del marketplace. Score consolidado por 3 meses seguidos.',
     delta3: '+20 pts',
     deltaHint: 'Mejora sostenida en 4 meses. Sin señales de reversión.',
     forecast: '68 · +3',
@@ -45,9 +42,6 @@ const states = {
     ctaFilled: false,
     score: '62',
     band: 'Vigilancia',
-    bandTitle: 'Estable en zona intermedia',
-    bandDesc:
-      'El cambio a tres meses está dentro de ±5 puntos. Ni oportunidad clara, ni riesgo activo. Seguimos observando.',
     delta3: '±2 pts',
     deltaHint: 'Dentro del margen de ruido esperado.',
     forecast: '62 · 0',
@@ -69,9 +63,6 @@ const states = {
     ctaFilled: true,
     score: '68',
     band: 'Vigilancia',
-    bandTitle: 'Trayectoria descendente detectada',
-    bandDesc:
-      'Bajaste desde la banda sana (≥ 65) en 3 meses. La previsión a tres meses apunta a más caída si no actúas.',
     delta3: '−14 pts',
     deltaHint: 'Caída sostenida, no un mes suelto.',
     forecast: '64 · −4',
@@ -95,8 +86,7 @@ const state = computed(() => {
     scoreColor: health.health_band === 'sano' ? 'var(--ok)' : health.health_band === 'riesgo' ? 'var(--bad)' : 'var(--warn)',
     headline: `Score de ${companyName.value}: ${health.health_score.toFixed(1)}`,
     subhead: `Dato de Supabase · ${health.month.slice(0, 7)}. La previsión a tres meses sigue sin conectar.`,
-    band: health.health_band, bandTitle: 'Clasificación registrada en Supabase',
-    bandDesc: 'La banda y la nota proceden del mismo mes.',
+    band: health.health_band,
     delta3: delta == null ? 'Sin dato' : `${delta > 0 ? '+' : ''}${delta.toFixed(1)} pts`,
     deltaHint: 'Variación registrada frente a tres meses antes.',
     forecast: 'Pendiente', forecastHint: 'sin previsión conectada',
@@ -106,6 +96,27 @@ const state = computed(() => {
 const arrow = computed(
   () => ({ up: ArrowUp, flat: ArrowRight, down: ArrowDown, alert: ArrowDown })[state.value.direction],
 )
+
+/* El arco del medidor es medio círculo de radio 126 en el viewBox del SVG: la
+ * nota se dibuja tapando el tramo que le sobra. El arco arranca vacío y se
+ * llena en el primer frame del cliente —el servidor no puede animar nada—, y
+ * la misma transición vuelve a correr cuando cambia la empresa o el mes. */
+const ARC_LENGTH = Number((Math.PI * 126).toFixed(1))
+const arcDrawn = ref(false)
+const arcOffset = computed(() => {
+  if (!arcDrawn.value) return ARC_LENGTH
+  const score = Math.min(100, Math.max(0, Number.parseFloat(state.value.score) || 0))
+  return Number((ARC_LENGTH * (1 - score / 100)).toFixed(1))
+})
+
+/* Dos frames: el primero pinta el arco vacío y el segundo lo suelta, que es lo
+ * que la transición necesita para tener dos estados que interpolar. */
+function drawArc() {
+  arcDrawn.value = false
+  nextTick(() => requestAnimationFrame(() => requestAnimationFrame(() => { arcDrawn.value = true })))
+}
+onMounted(drawArc)
+watch(() => [companyDetail.isPending.value, state.value.score], drawArc)
 
 /* '−4,2' → 4.2. El guion es un signo menos tipográfico (U+2212), no un ASCII
  * '-', y el decimal va con coma: ninguno de los dos los entiende parseFloat. */
@@ -139,36 +150,36 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
       :sync="`Mes del score: ${companyHealth?.month.slice(0, 7) || 'demo'}`"
     />
 
-    <!-- El número y su banda conservan el verde/ámbar/rojo: es el único sitio
-         de la página, junto a las gráficas, donde el semáforo dice algo. -->
-    <section class="tz-card tz-strip xs-reads" aria-label="Lectura del score">
-      <div class="xs-score">
-        <p class="xs-score__tile" :style="{ color: state.scoreColor }">
+    <!-- El arco y la banda conservan el verde/ámbar/rojo: es el único sitio de
+         la página, junto a las gráficas, donde el semáforo dice algo. Las dos
+         lecturas de apoyo quedan en tinta normal. -->
+    <section class="tz-card xs-reads" aria-label="Lectura del score">
+      <div class="xs-gauge">
+        <svg viewBox="0 0 300 168" :aria-label="`Score ${state.score} sobre 100 · banda ${state.band}`" role="img">
+          <path class="xs-gauge__track" d="M24 152 A126 126 0 0 1 276 152" />
+          <path class="xs-gauge__value" d="M24 152 A126 126 0 0 1 276 152"
+            :stroke="state.scoreColor" :stroke-dasharray="ARC_LENGTH" :stroke-dashoffset="arcOffset" />
+        </svg>
+        <p class="xs-gauge__figure" aria-hidden="true">
           <b>{{ state.score }}</b>
-          <span>{{ state.band }}</span>
+          <span :style="{ color: state.scoreColor }">{{ state.band }}</span>
         </p>
-        <div>
-          <h2>{{ state.bandTitle }}</h2>
-          <p>{{ state.bandDesc }}</p>
+        <p class="xs-gauge__scale" aria-hidden="true"><span>0</span><span>100</span></p>
+      </div>
+      <div class="xs-reading">
+        <div class="xs-mini">
+          <p class="xs-mini__label">
+            Cambio en 3 meses
+            <component :is="arrow" :size="14" class="xs-arrow" aria-hidden="true" />
+          </p>
+          <p class="xs-mini__figure">{{ state.delta3 }}</p>
+          <p class="xs-mini__hint">{{ state.deltaHint }}</p>
         </div>
-      </div>
-      <!-- Las dos lecturas de apoyo van en tinta normal: la dirección la lleva
-           la flecha, no un número teñido. -->
-      <div>
-        <p class="tz-read__label">
-          Cambio en 3 meses
-          <component :is="arrow" :size="14" class="xs-arrow" aria-hidden="true" />
-        </p>
-        <p class="tz-read__figure">{{ state.delta3 }}</p>
-        <p class="tz-read__hint">{{ state.deltaHint }}</p>
-      </div>
-      <div>
-        <p class="tz-read__label">
-          Previsión a 3 meses
-          <component :is="arrow" :size="14" class="xs-arrow" aria-hidden="true" />
-        </p>
-        <p class="tz-read__figure">{{ state.forecast }}</p>
-        <p class="tz-read__hint">{{ state.forecastHint }}</p>
+        <div class="xs-mini">
+          <p class="xs-mini__label">Previsión a 3 meses</p>
+          <p class="xs-mini__figure">{{ state.forecast }}</p>
+          <p class="xs-mini__hint">{{ state.forecastHint }}</p>
+        </div>
       </div>
     </section>
 
@@ -237,55 +248,123 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
 
 <style scoped>
 .xs-reads {
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr);
-}
-
-.xs-score {
-  display: flex;
-  align-items: center;
-  gap: 22px;
-}
-
-.xs-score__tile {
   display: grid;
-  place-items: center;
-  align-content: center;
-  flex: none;
-  width: 120px;
-  height: 120px;
-  margin: 0;
-  border: 1px solid var(--border);
-  border-radius: 22px;
-  background: var(--wash);
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 40px;
+  align-items: center;
+  padding: 26px 28px 24px;
 }
 
-.xs-score__tile b {
+/* Medidor: medio arco con la nota dentro. La escala 0–100 va debajo porque el
+   arco solo dice «cuánto» si se sabe dónde empieza y dónde acaba. */
+.xs-gauge {
+  position: relative;
+  width: 300px;
+  max-width: 100%;
+}
+
+.xs-gauge svg {
+  display: block;
+  width: 100%;
+}
+
+.xs-gauge__track,
+.xs-gauge__value {
+  fill: none;
+  stroke-width: 20;
+  stroke-linecap: round;
+}
+
+.xs-gauge__track {
+  stroke: var(--wash);
+}
+
+.xs-gauge__value {
+  transition: stroke-dashoffset 1.1s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.xs-gauge__figure {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0;
+  padding-bottom: 14px;
+}
+
+.xs-gauge__figure b {
   font-family: var(--font-display);
-  font-size: 50px;
+  font-size: 58px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
 }
 
-.xs-score__tile span {
-  margin-top: 6px;
+.xs-gauge__figure span {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.xs-gauge__scale {
+  display: flex;
+  justify-content: space-between;
+  margin: -4px 0 0;
   font-size: 12px;
-  font-weight: 600;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
 }
 
-.xs-score h2 {
-  margin: 0 0 6px;
-  font-family: var(--font-display);
-  font-size: 19px;
-  font-weight: 600;
-  line-height: 1.25;
-  text-wrap: balance;
+.xs-reading {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  min-width: 0;
 }
 
-.xs-score p {
+/* Las dos lecturas de apoyo van en pozo neutro: el color de estado se queda
+   entero en el arco. */
+.xs-mini {
+  min-width: 0;
+  padding: 15px 16px;
+  border-radius: var(--r-lg);
+  background: var(--wash);
+}
+
+/* La flecha va pegada a la etiqueta, no al otro extremo del pozo: dice hacia
+   dónde va la cifra que viene justo debajo. */
+.xs-mini__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 7px;
+  font-size: 12.5px;
+  color: var(--meta);
+}
+
+.xs-mini__label svg {
+  flex: none;
+}
+
+.xs-mini__figure {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.xs-mini__hint {
+  margin: 7px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
   color: var(--text-2);
 }
 
@@ -346,7 +425,7 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .xs-pillars button, .xs-pillars svg { transition: none; }
+  .xs-pillars button, .xs-pillars svg, .xs-gauge__value { transition: none; }
 }
 
 /* Tira con filetes: cuatro señales, ordenadas por lo que pesan. */
@@ -415,21 +494,7 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
 
 @container (max-width: 960px) {
   .xs-reads {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-
-  .xs-reads > .xs-score {
-    grid-column: 1 / -1;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .xs-reads > div + div {
-    border-top: 0;
-    border-left: 1px solid var(--border);
-  }
-
-  .xs-reads > .xs-score + div {
-    border-left: 0;
+    gap: 28px;
   }
 
   .xs-drivers {
@@ -443,25 +508,21 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
   }
 }
 
-@container (max-width: 480px) {
+/* El arco y las dos lecturas dejan de convivir por debajo de ~620px: la
+   columna de texto se quedaría sin medida. */
+@container (max-width: 620px) {
   .xs-reads {
     grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    padding: 22px;
   }
 
-  .xs-reads > div + div {
-    border-left: 0;
-    border-top: 1px solid var(--border);
+  .xs-reading {
+    width: 100%;
   }
+}
 
-  .xs-reads > .xs-score {
-    border-bottom: 0;
-  }
-
-  .xs-score {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
+@container (max-width: 480px) {
   .xs-drivers {
     grid-template-columns: minmax(0, 1fr);
   }
