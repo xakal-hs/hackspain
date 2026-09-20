@@ -1,13 +1,23 @@
 import { useQuery } from '@tanstack/vue-query'
-import type { CompanyIdentity, CompanyDetail } from '../../shared/types/company'
+import type { CompanyDirectorySource, CompanyIdentity, CompanyDetail } from '../../shared/types/company'
 
 export function useSelectedCompany() {
-  const cookie = useCookie<string>('xray-company', { default: () => 'COMP_0864', sameSite: 'lax' })
+  // Sin elección previa, la demo abre en el caso de excedente de caja y clientes
+  // preautorizados (shared/demoCases.ts).
+  const cookie = useCookie<string>('xray-company', { default: () => 'COMP_0790', sameSite: 'lax' })
   const selectedId = useState<string>('selected-company-id', () => cookie.value)
   watch(selectedId, value => { cookie.value = value })
+  const sourceCookie = useCookie<CompanyDirectorySource>('xray-company-source', {
+    default: () => 'companies',
+    sameSite: 'lax',
+  })
+  const source = computed<CompanyDirectorySource>({
+    get: () => sourceCookie.value === 'featured_companies' ? 'featured_companies' : 'companies',
+    set: value => { sourceCookie.value = value },
+  })
   const directory = useQuery({
-    queryKey: ['company-directory'],
-    queryFn: () => $fetch<CompanyIdentity[]>('/api/company-directory'),
+    queryKey: computed(() => ['company-directory', source.value]),
+    queryFn: () => $fetch<CompanyIdentity[]>('/api/company-directory', { query: { source: source.value } }),
     staleTime: 5 * 60 * 1000,
   })
   const companies = computed(() => directory.data.value ?? [])
@@ -23,7 +33,7 @@ export function useSelectedCompany() {
   })
   const latest = computed(() => detail.data.value?.panel.at(-1))
   const health = computed(() => detail.data.value?.health.at(-1))
-  const name = computed(() => company.value?.company_id ?? selectedId.value)
+  const name = computed(() => company.value?.display_name || company.value?.company_id || selectedId.value)
   const sector = computed(() => company.value?.top_sector || 'Sector sin clasificar')
-  return { selectedId, directory, companies, company, detail, latest, health, name, sector }
+  return { selectedId, source, directory, companies, company, detail, latest, health, name, sector }
 }

@@ -15,17 +15,19 @@ pnpm install
 pnpm dev
 ```
 
-The app works with a small Nitro-hosted development portfolio out of the box. To score the
-real portfolio, start the X-Ray backend (see `backend/README.md`) and point the app at it:
+The app works with a small Nitro-hosted development portfolio out of the box. To serve the
+real portfolio, give it Supabase credentials — there is no second server to start:
 
 ```bash
-cd ../backend && uv sync && uv run uvicorn main:app --port 8080             # one terminal
-cd ../frontend && XRAY_API_BASE=http://localhost:8080 pnpm dev               # another
+cp .env.example .env    # fill NUXT_PUBLIC_SUPABASE_URL and NUXT_SUPABASE_SECRET_KEY
+pnpm dev
 ```
 
-Nitro then forwards `/api/companies` to the backend, keeping the browser on a same-origin API.
-The contract lives in two mirrored files: `backend/models.py` (FastAPI validates every
-response against it) and `app/types/portfolio.ts`. Change a field in one, change it in both.
+Nitro reads the published X-Ray contract from Supabase and serves every product route
+itself: portfolio, company, explanation, lender decision, model and vetoes. The score and
+the decision are computed offline by a reproducible job (`backend/`, `research/`) and
+published with `scripts/`; this project never recomputes them. The response contract lives
+in `app/types/portfolio.ts`.
 
 ## Structure
 
@@ -58,39 +60,46 @@ version error when the runtime is unsupported.
 - `/`: public landing, built around the moment a deterioration is detected.
 - `/login`: simulated sign-in without credentials or real authentication.
 - `/dashboard/empresa`: the company's own treasury — X-Ray Score, Colchón Dinámico and Divisa Inteligente.
-- `/dashboard/embat`: both sides, with anticipation as the headline number.
+- `/dashboard/embat`: Equipo Embat — caja del portfolio and the financing CRM.
 
-Each dashboard takes `?section=`. Empresa has `score` (default), `colchon` and
-`divisa`; Embat has `resumen` (default), `cartera`, `senales`, `ofertas`, `monitor`,
-`revenue` and `modelo`. A section the perspective does not have falls back to its
-default. The earlier standalone routes `/cartera`, `/monitor`, `/escenarios` and
-`/empresas/:id` now redirect into these sections.
+Each dashboard takes `?section=`. Empresa has `flujo` (default), `score`, `colchon` and
+`divisa`; Embat has `caja` (default), `crm` and `equipo`. A section the perspective does not have
+falls back to its default. The earlier standalone routes `/cartera`, `/monitor`,
+`/escenarios` and `/empresas/:id` now redirect into Equipo Embat.
 
 Switch perspectives or exit using the user panel at the bottom of the desktop sidebar. On mobile, navigation and the user panel move above the content. Dashboard deep links redirect to demo sign-in when no demo-role cookie exists. This cookie is a UI convenience, not an authorization boundary.
 
 The Empresa perspective and all product-only fields use explicit fixtures from
-`app/data/demo.ts`. In the Embat perspective, `/api/companies` resolves three sources in
-order, and the header chip says which one is live:
+`app/data/demo.ts`. In the Embat perspective, `/api/companies` resolves two sources, and
+the header chip says which one is live:
 
-1. **`XRAY_API_BASE`** (`source: 'api'`) — the X-Ray backend. Real for all 1,286 companies:
-   score, band, 3-month change, confidence, lender decision with its written reason, cash,
-   months of cash, DSO, overdue invoices, margin and monthly flows. Names, sectors, the
+1. **Supabase** (`source: 'supabase'`) — the published X-Ray contract, real for all 1,286
+   companies: score, band, 3-month change, confidence, lender decision with its written
+   reason and its vetoes, cash, months of cash, DSO, overdue invoices, margin and monthly
+   flows. It reads `company_portfolio_latest`, a view that aggregates health, decision and
+   panel in PostgreSQL so one request serves the whole portfolio. Names, sectors, the
    three-month forecast and the offer terms are still fixtures.
-2. **Supabase** (`source: 'supabase'`) — treasury facts for the five featured companies,
-   with mocked scores. Two caveats in `data/processed/panel_monthly.csv`: `pct_vencido` is
-   overdue stock over three-month sales (a ratio clipped to `[0, 5]`, not the share of
-   pending invoices past 60 days that the backend sends), and `runway_m` is unsanitised —
-   it ranges from −812,870 to 35,208,424 months because sentinel cash balances are not
-   removed. The backend path drops runway for those companies instead of scoring them.
-3. **Fixtures** (`source: 'demo'`) — when neither is configured.
+2. **Fixtures** (`source: 'demo'`) — when Supabase is not configured, or when reading it
+   fails. Five companies, so `pnpm dev` works with no environment at all.
 
 Missing values arrive as `null` and stay missing: a company without enough invoices shows
 "no hay facturas suficientes", not a borrowed number. Roughly half the portfolio has no
 DSO, so this matters more than it sounds.
 
+There is no separate API server. Every product route is a Nitro route in this project and
+reads results that a reproducible job already published; see `DEPLOYMENT.md`.
+
+Empresa treasury screens read Supabase (`company-directory`, `flujo`). Equipo Embat:
+
+1. **Caja** (`GET /api/embat/caja`) — the 20 `featured_companies`, with operational cash (`cash_end`, `net_op`, runway) and financial cash (debt service, outstanding, utilisation) from `panel_monthly` / `company_static`. Alert vs opportunity comes from the same rotura/excedente forecast Flujo de caja uses.
+2. **Financiación** (`GET/POST /api/embat/leads`) — CRM pipeline. When the company clicks **Quiero pedir financiación**, a lead is assigned to a commercial from `embat_employees` with a generic email draft (no company data, fake Calendly).
+3. **Equipo** (`GET /api/embat/employees`) — AM + customer success from `data/embat_am.csv` and `data/embat_cs.csv`, merged into `embat_employees`. Apply `supabase/embat_employees_schema.sql` on the frontend project (`frontend/.env`) so leads persist in Postgres; until then the server keeps a local file under `frontend/.data/` and serves the same employee list from `frontend/server/data/embat-employees.json`.
+
+Reload employees with `python3 scripts/push_embat_employees.py` (uses `frontend/.env`, never the X-Ray source project).
+
 The role cookie survives reloads until logout/browser session expiry.
 
-Manual acceptance flow: enter as Empresa and walk its three treasury screens, then switch to Embat, search/select a company and inspect signals. Also check empty search, logout, direct-link redirect, and mobile/desktop layouts.
+Manual acceptance flow: enter as Empresa, open Flujo de caja, request financing; switch to Embat and find the lead in Financiación. Walk Caja filters (alerta / oportunidad). Also check logout, direct-link redirect, and mobile/desktop layouts.
 
 ## Supabase configuration
 

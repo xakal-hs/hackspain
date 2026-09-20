@@ -19,14 +19,16 @@ export default defineNuxtConfig({
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Chivo+Mono:wght@300;400&family=Space+Grotesk:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap',
+          href: 'https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Chivo+Mono:wght@300;400&family=Space+Grotesk:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap',
         },
       ],
     },
   },
   runtimeConfig: {
-    xrayApiBase: process.env.XRAY_API_BASE || '',
     supabaseSecretKey: process.env.SUPABASE_SECRET_KEY || '',
+    agentModel: process.env.AGENT_MODEL || '',
+    agentBaseUrl: process.env.AGENT_BASE_URL || '',
+    agentApiKey: process.env.AGENT_API_KEY || '',
     supabaseJwksUrl: process.env.SUPABASE_JWKS_URL || '',
     public: {
       supabaseUrl: process.env.SUPABASE_URL || '',
@@ -38,10 +40,10 @@ export default defineNuxtConfig({
     routeRules: {
       '/api/**': { cors: true },
       // Routes from the earlier structure now live as sections of the cockpit.
-      '/cartera': { redirect: '/dashboard/embat?section=cartera' },
-      '/monitor': { redirect: '/dashboard/embat?section=senales' },
+      '/cartera': { redirect: '/dashboard/embat' },
+      '/monitor': { redirect: '/dashboard/embat' },
       '/escenarios': { redirect: '/dashboard/embat' },
-      '/empresas/**': { redirect: '/dashboard/embat?section=cartera' },
+      '/empresas/**': { redirect: '/dashboard/embat' },
     },
   },
   typescript: {
