@@ -102,9 +102,16 @@ const zones = computed(() =>
 const ticks = computed(() => {
   const today = Math.max(0, measured.value - 1)
   if (props.monthLabels?.length) {
-    return [...new Set([0, Math.round(today / 2), today])].map(at => ({
-      label: props.monthLabels![at]!, at, align: at === 0 ? 'start' : at === today ? 'end' : 'center',
-      style: { left: `${scales.value.x(at)}%` },
+    /* El último mes previsto también se nombra: si no, el eje se corta en la línea de hoy y el
+       tramo discontinuo queda sin fecha. */
+    const at = [...new Set([0, Math.round(today / 2), today, span.value - 1])]
+      .filter(index => props.monthLabels![index] != null)
+      .sort((a, b) => a - b)
+    const end = at[at.length - 1]
+    return at.map(index => ({
+      label: props.monthLabels![index]!, at: index,
+      align: index === 0 ? 'start' : index === end ? 'end' : 'center',
+      style: { left: `${scales.value.x(index)}%` },
     }))
   }
   return [
@@ -137,7 +144,10 @@ const { plot, active, track, clear, keys } = useChartHover(span, (index) =>
 /** El mes que nombra el índice: los reales por su nombre, los previstos por
  *  su distancia a hoy. */
 const monthAt = (index: number) => {
-  if (index >= measured.value) return `+${index - measured.value + 1} m · previsión`
+  if (index >= measured.value) {
+    const named = props.monthLabels?.[index]
+    return named ? `${named} · previsión` : `+${index - measured.value + 1} m · previsión`
+  }
   if (props.monthLabels?.[index]) return props.monthLabels[index]!
   const offset = months.length - measured.value
   return months[offset + index] ?? `mes ${index + 1}`
