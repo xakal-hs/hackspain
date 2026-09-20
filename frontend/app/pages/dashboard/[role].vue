@@ -32,7 +32,7 @@ const section = computed(() => {
 
 const isTreasury = computed(() => treasurySections.includes(section.value))
 const isBare = computed(() =>
-  ['flujo', 'credito', 'caja', 'crm', 'equipo'].includes(section.value),
+  ['score', 'flujo', 'credito', 'caja', 'crm', 'equipo'].includes(section.value),
 )
 
 const selectedCompany = useState<string>('selected-company-id')
@@ -89,8 +89,8 @@ watch([section, activeCompanyId], () => {
     <a class="skip-link" href="#main-content">Saltar al contenido</a>
     <WorkspaceSidebar :role="role" :section="section" />
 
-    <!-- Flujo, Crédito y Equipo Embat clonan el producto: van a sangre, sin la
-         cabecera ni el pie del panel. -->
+    <!-- Score, Flujo, Crédito y Equipo Embat clonan el producto: van a sangre,
+         sin la cabecera ni el pie del panel. -->
     <div class="wk__body" :class="{ 'wk__body--bare': isBare }">
       <header v-if="!isBare" class="wk__top">
         <p class="wk__crumb">
