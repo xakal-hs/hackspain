@@ -1,5 +1,5 @@
 import type { CashForecast, CompanyHealth } from '../../../shared/types/company'
-import type { CajaCompany, CajaResponse, CashStatus } from '../../../shared/types/embat'
+import type { CajaCompany, CajaResponse, CashStatus, ScorePoint } from '../../../shared/types/embat'
 import { actionFor, loadPrevision } from '../../utils/prevision'
 
 interface FeaturedRow {
@@ -52,6 +52,20 @@ function latestByCompany<T extends { company_id: string; month: string }>(rows: 
   return map
 }
 
+/** Por encima de esto lo que sobra merece colocarse (mismo umbral que build_prevision.py). */
+const MIN_SURPLUS = 25_000
+
+function impactoOf(forecast: CashForecast | null) {
+  if (!forecast || !Number.isFinite(forecast.low) || !Number.isFinite(forecast.monthly_spend)) return null
+  return Math.round(forecast.low - forecast.monthly_spend)
+}
+
+function diasOf(forecast: CashForecast | null, snapshot: string | undefined) {
+  if (!forecast?.low_date || !snapshot) return null
+  const days = (Date.parse(forecast.low_date) - Date.parse(snapshot)) / 86_400_000
+  return Number.isFinite(days) ? Math.round(days) : null
+}
+
 function statusOf(opts: {
   rotura: boolean
   excedente: boolean
@@ -97,7 +111,7 @@ export default defineEventHandler(async (): Promise<CajaResponse> => {
     limit: 20,
   })
   if (!featured.length) {
-    throw createError({ statusCode: 503, statusMessage: 'No hay empresas curadas en Supabase' })
+    throw createError({ statusCode: 503, message: 'No hay empresas curadas en Supabase' })
   }
 
   const filter = `in.(${featured.map((row) => row.company_id).join(',')})`
@@ -128,12 +142,30 @@ export default defineEventHandler(async (): Promise<CajaResponse> => {
   const latestHealth = latestByCompany(health.filter((row) => ids.has(row.company_id)))
   const staticById = new Map(staticRows.map((row) => [row.company_id, row]))
 
+  const seriesByCompany = new Map<string, ScorePoint[]>()
+  const scoresByMonth = new Map<string, number[]>()
+  for (const row of health) {
+    const score = finite(row.health_score)
+    if (!ids.has(row.company_id) || score == null) continue
+    const month = row.month.slice(0, 7)
+    const series = seriesByCompany.get(row.company_id)
+    if (series) series.push({ month, score })
+    else seriesByCompany.set(row.company_id, [{ month, score }])
+    const bucket = scoresByMonth.get(month)
+    if (bucket) bucket.push(score)
+    else scoresByMonth.set(month, [score])
+  }
+  for (const series of seriesByCompany.values()) {
+    series.sort((a, b) => a.month.localeCompare(b.month))
+  }
+
   const companies: CajaCompany[] = featured.map((row) => {
     const month = latestPanel.get(row.company_id)
     const note = latestHealth.get(row.company_id)
     const facts = staticById.get(row.company_id)
     const forecast: CashForecast | null = forecasts?.companies[row.company_id]?.forecast ?? null
     const action = actionFor(forecast, note)
+    const impacto = impactoOf(forecast)
     const runway = runwayOf(month?.runway_m)
     const netOp = finite(month?.net_op)
     const { status, why } = statusOf({
@@ -164,13 +196,37 @@ export default defineEventHandler(async (): Promise<CajaResponse> => {
         debt_outstanding: cashOf(facts?.debt_outstanding),
         debt_util: finite(facts?.debt_util),
       },
+      health_score: finite(note?.health_score),
       health_band: note?.health_band ?? null,
+      health_trend: note?.health_trend ?? null,
+      score_delta_3m: finite(note?.score_delta_3m),
+      score_series: seriesByCompany.get(row.company_id) ?? [],
       action,
+      impacto,
+      urgencia_dias: diasOf(forecast, forecasts?.snapshot),
+      sugerencia:
+        impacto == null ? 'seguir'
+        : impacto < 0 ? 'financiar'
+        : impacto >= MIN_SURPLUS && note?.health_band !== 'riesgo' ? 'colocar'
+        : 'seguir',
     }
   })
 
   const counts: CajaResponse['counts'] = { alerta: 0, oportunidad: 0, vigilancia: 0 }
   for (const company of companies) counts[company.status] += 1
 
-  return { companies, counts }
+  const score_history = [...scoresByMonth.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, scores]) => {
+      const sorted = [...scores].sort((a, b) => a - b)
+      const mid = Math.floor(sorted.length / 2)
+      return {
+        month,
+        mean: scores.reduce((sum, v) => sum + v, 0) / scores.length,
+        median: sorted.length % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2,
+        n: scores.length,
+      }
+    })
+
+  return { companies, counts, score_history }
 })

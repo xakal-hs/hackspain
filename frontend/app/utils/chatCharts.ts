@@ -9,8 +9,10 @@ export interface TableColumn {
   key: string
   label: string
   /** Cómo se pinta la celda: número alineado, pastilla de banda, tendencia con flecha. */
-  kind?: 'text' | 'num' | 'band' | 'trend' | 'action' | 'pillar' | 'score'
+  kind?: 'text' | 'num' | 'band' | 'trend' | 'action' | 'pillar' | 'score' | 'chip'
   unit?: string
+  /** Segunda línea de la celda de texto: la clave de la fila que la trae. */
+  sub?: string
   signed?: boolean
   /** Ancho relativo en la rejilla de la tabla. */
   grow?: number

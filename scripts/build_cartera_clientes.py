@@ -34,7 +34,7 @@ import duckdb
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "backend" / "data"
+DATA = ROOT / "research" / "data"
 OUT = ROOT / "frontend" / "server" / "assets" / "clientes.json"
 
 SNAPSHOT = "2026-09-01"

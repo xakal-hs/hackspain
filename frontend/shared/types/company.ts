@@ -89,6 +89,11 @@ export interface CashForecast {
   months: ForecastMonth[]
   rotura: CashBreak | null
   excedente: CashSurplus | null
+  /** Punto más bajo de la caja proyectada a 3 meses y el día en que ocurre; existe aunque no haya rotura ni excedente. */
+  low: number
+  low_date: string
+  /** Gasto mensual típico (mediana de 6 meses): el colchón contra el que se mide `low`. */
+  monthly_spend: number
 }
 /** Mes → categoría bancaria → importe neto; cada mes suma el net_bank de panel_monthly. */
 export type CashflowCategories = Record<string, Record<string, number>>

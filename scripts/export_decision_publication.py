@@ -23,23 +23,26 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "backend"))
 sys.path.insert(0, str(ROOT / "research" / "src"))
 
 import joblib  # noqa: E402
 import pandas as pd  # noqa: E402
 
-import decision as dcs  # noqa: E402  (backend/decision.py)
-import preprocessing as pre  # noqa: E402  (backend/preprocessing.py)
+import polars as pl  # noqa: E402
+
+import decision as dcs  # noqa: E402  (research/src/decision.py)
+import targets  # noqa: E402  (research/src/targets.py: los hechos que veta decide())
+from features import add_features  # noqa: E402
+from targets import add_events  # noqa: E402
 
 EXPORT = ROOT / "supabase" / "export"
 HEALTH_CSV = EXPORT / "company_health_monthly.csv"
-PANEL = ROOT / "backend" / "data" / "panel.parquet"
+PANEL = ROOT / "research" / "data" / "panel.parquet"
 ARTIFACT = ROOT / "research" / "artifacts" / "xray.joblib"
 
 # Columnas del panel que mira `decide()`: los vetos, más lo que dice si se ve la empresa.
 DECIDE_COLUMNS = [
-    *pre.VETOS,
+    *targets.VETOS,
     "n_tx", "has_erp", "uncat_share", "month_idx",
     "dq_cash_sentinel", "dq_cash_implausible", "has_drift", "months_since_last_tx",
 ]
@@ -61,7 +64,8 @@ def published_health() -> pd.DataFrame:
 
 def decisions(health: pd.DataFrame) -> pd.DataFrame:
     """Una decisión por empresa-mes. El panel aporta los hechos; la nota, el orden."""
-    panel = pre.build(PANEL)
+    panel = (add_events(add_features(pl.read_parquet(PANEL)))
+             .to_pandas().sort_values(["company_id", "month"]).reset_index(drop=True))
     facts = panel[[c for c in ["company_id", "month", *DECIDE_COLUMNS] if c in panel.columns]]
     rows = health.merge(facts, on=["company_id", "month"], how="left", indicator=True)
 

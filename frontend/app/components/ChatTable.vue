@@ -4,7 +4,7 @@ import type { ChartTone, ChatChart, TableColumn } from '~/utils/chatCharts'
 import { PILLAR_ASKS, PILLAR_FEATURES, PILLAR_LABEL, type Pillar } from '~/utils/pillars'
 
 /* `flush` = a sangre: sin tarjeta, llenando el panel. Es como se lee una tabla larga. */
-const props = defineProps<{ chart: ChatChart, flush?: boolean }>()
+const props = defineProps<{ chart: ChatChart, flush?: boolean, /** Sin cabecera ni recuento de columnas: el título lo pone quien la usa, fuera del marco. */ plain?: boolean }>()
 
 const TONE: Record<ChartTone, string> = { live: 'var(--live-ink)', mint: 'var(--mint-ink)', crimson: 'var(--crimson-ink)', amber: 'var(--amber-ink)' }
 const BAND: Record<string, ChartTone> = { sano: 'mint', vigilar: 'amber', riesgo: 'crimson' }
@@ -34,11 +34,11 @@ const rows = computed(() => {
   })
 })
 
-const fmt = (v: unknown, c: TableColumn) => {
+const fmt = (v: unknown, c: TableColumn, r?: Record<string, unknown>) => {
   if (v == null) return '—'
   if (c.kind !== 'num') return String(v)
   const n = Number(v)
-  return (c.signed && n > 0 ? '+' : '') + n.toLocaleString('es-ES', { maximumFractionDigits: 1 }) + (c.unit === '%' ? '%' : '')
+  return (c.signed && n > 0 ? '+' : '') + n.toLocaleString('es-ES', { maximumFractionDigits: 1 }) + String(r?.[`${c.key}_unit`] ?? c.unit ?? '')
 }
 const numTone = (v: unknown, c: TableColumn): string =>
   c.signed && typeof v === 'number' ? TONE[v < 0 ? 'crimson' : 'mint'] : 'inherit'
@@ -100,7 +100,7 @@ const actionTone = (v: unknown): ChartTone =>
 
 <template>
   <figure class="ct" :class="{ 'is-flush': flush }">
-    <div class="ct__head">
+    <div v-if="!plain" class="ct__head">
       <div class="ct__weave" aria-hidden="true" />
       <figcaption>
         <div class="ct__title">
@@ -174,7 +174,9 @@ const actionTone = (v: unknown): ChartTone =>
                 <component :is="trendOf(r[c.key])" :size="12" aria-hidden="true" />{{ r[c.key] ?? '—' }}
               </span>
               <span v-else-if="c.kind === 'action'" class="ct__pill is-ghost" :style="{ color: TONE[actionTone(r[c.key])] }">{{ r[c.key] ?? '—' }}</span>
-              <span v-else :style="{ color: numTone(r[c.key], c) }">{{ fmt(r[c.key], c) }}</span>
+              <span v-else-if="c.kind === 'chip'" class="ct__pill" :class="`is-${r[`${c.key}_tone`] ?? 'neutral'}`">{{ r[c.key] ?? '—' }}</span>
+              <span v-else-if="c.sub" class="ct__two"><b>{{ r[c.key] ?? '—' }}</b><small>{{ r[c.sub] ?? '' }}</small></span>
+              <span v-else :style="{ color: numTone(r[c.key], c) }">{{ fmt(r[c.key], c, r) }}</span>
             </td>
           </tr>
           </template>
@@ -223,7 +225,7 @@ const actionTone = (v: unknown): ChartTone =>
     </aside>
     </div>
 
-    <footer>{{ rows.length }} {{ rows.length === 1 ? 'empresa' : 'empresas' }} · {{ cols.length }} columnas</footer>
+    <footer>{{ rows.length }} {{ rows.length === 1 ? 'empresa' : 'empresas' }}<template v-if="!plain"> · {{ cols.length }} columnas</template></footer>
   </figure>
 </template>
 
@@ -261,6 +263,10 @@ const actionTone = (v: unknown): ChartTone =>
 .ct__pill.is-amber { color: var(--amber-ink); background: var(--amber-wash); }
 .ct__pill.is-crimson { color: var(--crimson-ink); background: var(--crimson-wash); }
 .ct__pill.is-live { color: var(--live-ink); background: var(--live-wash); }
+.ct__pill.is-neutral { color: var(--text-muted); background: var(--neutral-wash); }
+.ct__two { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.ct__two b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+.ct__two small { color: var(--text-muted); font-size: 0.7rem; overflow: hidden; text-overflow: ellipsis; }
 .ct__pill.is-ghost { background: none; padding: 0; }
 .ct__trend { display: inline-flex; align-items: center; gap: 5px; text-transform: capitalize; color: var(--text-muted); }
 .ct__trend.is-mejora { color: var(--mint-ink); }

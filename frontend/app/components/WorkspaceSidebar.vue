@@ -20,8 +20,8 @@ const profile = computed(() => perspectiveById(props.role)!)
 
 const items = computed(() => {
   const treasury = [
-    { id: 'flujo', label: 'Flujo de caja', icon: ArrowLeftRight },
     { id: 'score', label: 'X-Ray Score', icon: ScanLine },
+    { id: 'flujo', label: 'Flujo de caja', icon: ArrowLeftRight },
     { id: 'credito', label: 'Crédito y caución', icon: ShieldCheck },
     /* Divisa Inteligente queda fuera del menú; la pantalla sigue viva en ?section=divisa. */
   ]

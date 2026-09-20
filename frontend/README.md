@@ -62,7 +62,7 @@ version error when the runtime is unsupported.
 - `/dashboard/empresa`: the company's own treasury — X-Ray Score, Colchón Dinámico and Divisa Inteligente.
 - `/dashboard/embat`: Equipo Embat — caja del portfolio and the financing CRM.
 
-Each dashboard takes `?section=`. Empresa has `flujo` (default), `score`, `colchon` and
+Each dashboard takes `?section=`. Empresa has `score` (default), `flujo`, `credito` and
 `divisa`; Embat has `caja` (default), `crm` and `equipo`. A section the perspective does not have
 falls back to its default. The earlier standalone routes `/cartera`, `/monitor`,
 `/escenarios` and `/empresas/:id` now redirect into Equipo Embat.

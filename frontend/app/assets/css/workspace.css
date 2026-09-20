@@ -438,9 +438,16 @@
   border-bottom: 1px solid var(--ea-line);
 }
 
+/* El aire va a los dos lados de la línea: sin el margen izquierdo la cifra del segundo y del
+ * tercer bloque arrancaba pegada al separador. El primero no lo lleva para que «En alerta»
+ * caiga en la misma vertical que el título y que el nombre de las empresas. */
 .embat-app__pulse > div {
-  padding: 14px 18px 14px 0;
+  padding: 14px 18px;
   border-right: 1px solid var(--ea-line);
+}
+
+.embat-app__pulse > div:first-child {
+  padding-left: 0;
 }
 
 .embat-app__pulse > div:last-child {
@@ -647,6 +654,10 @@
   inset: auto 24px 24px auto;
   z-index: 5;
   width: min(440px, calc(100vw - 48px));
+  /* Red de seguridad para ventanas bajas: la ficha se queda dentro de la pantalla
+   * y hace scroll por dentro en lugar de salirse por abajo. */
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
   margin: 0;
   padding: 18px 20px 20px;
   border: 1px solid var(--ea-line);
@@ -779,8 +790,13 @@
   min-width: 0;
 }
 
+/* «backwards» y no «both»: con el relleno hacia delante la animación se queda
+ * viva sobre la transformación y el panel pasa a ser el bloque contenedor de
+ * todo lo que lleve position: fixed dentro (la ficha de empresa aparecía anclada
+ * al final del contenido, cortada por abajo). Al terminar, el panel ya está en
+ * opacidad 1 y sin transformar, así que no se nota. */
 .wk__pane.is-live {
-  animation: pane-in 0.32s var(--sw-ease) both;
+  animation: pane-in 0.32s var(--sw-ease) backwards;
 }
 
 @keyframes pane-in {

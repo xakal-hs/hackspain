@@ -61,9 +61,10 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: `Empresa sin nota publicada: ${id}` })
 
   const current = health.at(-1)!
+  const version = await publishedVersion()
   const [drivers, decisions, catalog] = await Promise.all([
     read<DriverRow>('company_health_driver_monthly', {
-      ...filter, month: `eq.${current.month}`,
+      ...filter, month: `eq.${current.month}`, score_version: `eq.${version}`,
       select: 'feature,pillar,label,raw_value,display_value,contribution',
       order: 'contribution.asc', limit: 100,
     }),

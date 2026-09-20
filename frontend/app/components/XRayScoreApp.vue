@@ -98,25 +98,14 @@ const arrow = computed(
 )
 
 /* El arco del medidor es medio círculo de radio 126 en el viewBox del SVG: la
- * nota se dibuja tapando el tramo que le sobra. El arco arranca vacío y se
- * llena en el primer frame del cliente —el servidor no puede animar nada—, y
- * la misma transición vuelve a correr cuando cambia la empresa o el mes. */
+ * nota se dibuja tapando con el desfase el tramo que le sobra. El llenado es
+ * una animación CSS que parte del arco vacío, y el `key` del trazo la vuelve a
+ * lanzar cuando cambia la nota —al cambiar de empresa o de mes. */
 const ARC_LENGTH = Number((Math.PI * 126).toFixed(1))
-const arcDrawn = ref(false)
 const arcOffset = computed(() => {
-  if (!arcDrawn.value) return ARC_LENGTH
   const score = Math.min(100, Math.max(0, Number.parseFloat(state.value.score) || 0))
   return Number((ARC_LENGTH * (1 - score / 100)).toFixed(1))
 })
-
-/* Dos frames: el primero pinta el arco vacío y el segundo lo suelta, que es lo
- * que la transición necesita para tener dos estados que interpolar. */
-function drawArc() {
-  arcDrawn.value = false
-  nextTick(() => requestAnimationFrame(() => requestAnimationFrame(() => { arcDrawn.value = true })))
-}
-onMounted(drawArc)
-watch(() => [companyDetail.isPending.value, state.value.score], drawArc)
 
 /* '−4,2' → 4.2. El guion es un signo menos tipográfico (U+2212), no un ASCII
  * '-', y el decimal va con coma: ninguno de los dos los entiende parseFloat. */
@@ -157,7 +146,7 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
       <div class="xs-gauge">
         <svg viewBox="0 0 300 168" :aria-label="`Score ${state.score} sobre 100 · banda ${state.band}`" role="img">
           <path class="xs-gauge__track" d="M24 152 A126 126 0 0 1 276 152" />
-          <path class="xs-gauge__value" d="M24 152 A126 126 0 0 1 276 152"
+          <path :key="arcOffset" class="xs-gauge__value" d="M24 152 A126 126 0 0 1 276 152"
             :stroke="state.scoreColor" :stroke-dasharray="ARC_LENGTH" :stroke-dashoffset="arcOffset" />
         </svg>
         <p class="xs-gauge__figure" aria-hidden="true">
@@ -279,8 +268,16 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
   stroke: var(--wash);
 }
 
+/* El arco se llena al entrar. Va como animación y no como transición porque el
+   valor final ya viene del servidor: el fotograma de partida es el vacío. */
 .xs-gauge__value {
-  transition: stroke-dashoffset 1.1s cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation: xs-gauge-fill 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@keyframes xs-gauge-fill {
+  from {
+    stroke-dashoffset: 395.8px;
+  }
 }
 
 .xs-gauge__figure {
@@ -425,7 +422,8 @@ watch(() => [selectedCompany.value?.company_id, companyHealth.value?.month, sele
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .xs-pillars button, .xs-pillars svg, .xs-gauge__value { transition: none; }
+  .xs-pillars button, .xs-pillars svg { transition: none; }
+  .xs-gauge__value { animation: none; }
 }
 
 /* Tira con filetes: cuatro señales, ordenadas por lo que pesan. */

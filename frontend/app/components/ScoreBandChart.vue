@@ -208,6 +208,17 @@ const description = computed(() => {
   return `${props.caption} ${series}.`
 })
 
+/* La gráfica se dibuja de izquierda a derecha al entrar, una sola vez. La clase
+ * se retira cuando termina para que volver a pintar los puntos —al salir el
+ * puntero del plot— no relance nada. Va por reloj y no por `animationend`
+ * porque el barrido puede no llegar a correr si la pestaña está en segundo
+ * plano, y entonces la clase se quedaría puesta. */
+const entering = ref(true)
+onMounted(() => {
+  const done = setTimeout(() => { entering.value = false }, 1700)
+  onScopeDispose(() => clearTimeout(done))
+})
+
 /** La misma lectura del globo, en texto, para lectores de pantalla. */
 const spoken = computed(() =>
   cursor.value
@@ -219,7 +230,7 @@ const spoken = computed(() =>
 </script>
 
 <template>
-  <figure class="bench">
+  <figure class="bench" :class="{ 'bench--entering': entering }">
     <figcaption class="bench__key">
       <span
         v-for="trace in traces"
@@ -357,3 +368,39 @@ const spoken = computed(() =>
     <p class="sr-only" role="status">{{ spoken }}</p>
   </figure>
 </template>
+
+<style scoped>
+/* Las bandas y el eje se quedan quietos: lo que entra es el trazo, barrido de
+   izquierda a derecha —del mes más viejo al último— y los puntos de cierre
+   detrás, cuando la línea ya ha llegado. */
+.bench--entering .bench__svg {
+  animation: bench-wipe 1.15s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.bench--entering .bench__dot {
+  animation: bench-dot 0.35s ease-out 1s both;
+}
+
+@keyframes bench-wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes bench-dot {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bench--entering .bench__svg,
+  .bench--entering .bench__dot {
+    animation: none;
+  }
+}
+</style>

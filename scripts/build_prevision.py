@@ -30,7 +30,7 @@ import duckdb
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "backend" / "data"
+DATA = ROOT / "research" / "data"
 PANEL = ROOT / "data" / "processed" / "panel_monthly.csv"
 OUT = ROOT / "frontend" / "server" / "assets" / "prevision.json"
 

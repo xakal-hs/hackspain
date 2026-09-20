@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Check, ChevronRight, ChevronsUpDown, Copy, Landmark } from '@lucide/vue'
+import { Check, Copy, Landmark } from '@lucide/vue'
 import type { EmbatLead, LeadStatus, LeadsResponse } from '../../shared/types/embat'
 
 const COLUMNS: { id: LeadStatus; label: string; hint: string }[] = [
@@ -15,7 +15,6 @@ const { data, refresh, error, pending } = await useAsyncData('embat-leads', () =
 const { patch } = useEmbatLeads()
 const openId = ref<string | null>(null)
 const copied = ref(false)
-const abiertos = ref(new Set<LeadStatus>(COLUMNS.map((column) => column.id)))
 
 /* El aviso que la empresa acaba de pedir entra marcado: se anuncia una vez, en la primera
  * apertura de la pestaña, y la cookie se consume ahí mismo para no repetir la entrada. */
@@ -41,18 +40,6 @@ const grouped = computed(() => {
 
 const landedLead = computed(() => data.value?.leads.find((lead) => lead.id === landed.value) || null)
 const openLead = computed(() => data.value?.leads.find((lead) => lead.id === openId.value) || null)
-const todoAbierto = computed(() => COLUMNS.every((column) => abiertos.value.has(column.id)))
-
-function plegar(id: LeadStatus) {
-  const next = new Set(abiertos.value)
-  if (next.has(id)) next.delete(id)
-  else next.add(id)
-  abiertos.value = next
-}
-
-function plegarTodo() {
-  abiertos.value = todoAbierto.value ? new Set() : new Set<LeadStatus>(COLUMNS.map((column) => column.id))
-}
 
 function when(iso: string) {
   return new Intl.DateTimeFormat('es-ES', {
@@ -63,8 +50,18 @@ function when(iso: string) {
   }).format(new Date(iso))
 }
 
-function nAvisos(n: number) {
-  return `${n} ${n === 1 ? 'aviso' : 'avisos'}`
+/* El importe llega ya escrito en es-ES («62.231 €»). Para sumar la etapa hay que deshacer el
+ * formato: fuera el símbolo, el punto es el millar y la coma el decimal. */
+function importe(lead: EmbatLead) {
+  if (!lead.reason_amount) return 0
+  const n = Number(lead.reason_amount.replace(/[^\d.,]/g, '').replace(/\./g, '').replace(',', '.'))
+  return Number.isFinite(n) ? n : 0
+}
+
+function suma(id: LeadStatus) {
+  const total = (grouped.value[id] || []).reduce((acc, lead) => acc + importe(lead), 0)
+  if (!total) return null
+  return `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(total)} €`
 }
 
 async function copyDraft(text: string) {
@@ -77,8 +74,53 @@ async function copyDraft(text: string) {
 
 async function move(lead: EmbatLead, status: LeadStatus) {
   if (status === lead.status) return
-  await patch({ id: lead.id, status })
-  await refresh()
+  const previo = lead.status
+  /* La tarjeta cambia de columna en el momento del gesto; si el PATCH falla, vuelve a su sitio. */
+  lead.status = status
+  try {
+    await patch({ id: lead.id, status })
+    await refresh()
+  } catch {
+    lead.status = previo
+  }
+}
+
+/* Arrastrar y soltar entre etapas: el estado vive aquí para pintar la columna de destino
+ * mientras la tarjeta está en el aire. */
+const dragId = ref<string | null>(null)
+const overCol = ref<LeadStatus | null>(null)
+
+function onDragStart(lead: EmbatLead, event: DragEvent) {
+  dragId.value = lead.id
+  if (!event.dataTransfer) return
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData('text/plain', lead.id)
+}
+
+function onDragEnd() {
+  dragId.value = null
+  overCol.value = null
+}
+
+function onDragOver(id: LeadStatus, event: DragEvent) {
+  if (!dragId.value) return
+  if (event.dataTransfer) event.dataTransfer.dropEffect = 'move'
+  overCol.value = id
+}
+
+function onDragLeave(id: LeadStatus, event: DragEvent) {
+  /* dragleave también salta al pasar de la columna a una tarjeta suya: si el puntero sigue
+   * dentro, la columna no se apaga. */
+  const from = event.currentTarget as Node | null
+  const to = event.relatedTarget as Node | null
+  if (from && to && from.contains(to)) return
+  if (overCol.value === id) overCol.value = null
+}
+
+async function onDrop(status: LeadStatus) {
+  const lead = data.value?.leads.find((item) => item.id === dragId.value) || null
+  onDragEnd()
+  if (lead) await move(lead, status)
 }
 </script>
 
@@ -86,16 +128,6 @@ async function move(lead: EmbatLead, status: LeadStatus) {
   <div class="embat-app">
     <header class="embat-app__title">
       <h1>Financiación</h1>
-      <div class="embat-app__tools">
-        <button
-          type="button"
-          class="embat-app__icon"
-          :aria-label="todoAbierto ? 'Plegar todo' : 'Desplegar todo'"
-          @click="plegarTodo"
-        >
-          <ChevronsUpDown :size="16" aria-hidden="true" />
-        </button>
-      </div>
     </header>
 
     <p v-if="landedLead" class="crm__landed" role="status">
@@ -106,7 +138,7 @@ async function move(lead: EmbatLead, status: LeadStatus) {
       >
     </p>
 
-    <section class="embat-app__sheet" :aria-busy="pending">
+    <section class="embat-app__sheet crm__sheet" :aria-busy="pending">
       <p v-if="pending" class="embat-app__state">Cargando la cola.</p>
       <p v-else-if="error" class="embat-app__state" role="alert">
         No se pudo leer la cola de avisos.
@@ -117,41 +149,56 @@ async function move(lead: EmbatLead, status: LeadStatus) {
         pedir financiación».
       </p>
 
-      <template v-else>
-        <article v-for="column in COLUMNS" :key="column.id" class="embat-app__group">
-          <header>
-            <button type="button" :aria-expanded="abiertos.has(column.id)" @click="plegar(column.id)">
-              <ChevronRight :size="16" aria-hidden="true" />
-            </button>
+      <!-- Tablero: las cuatro etapas del proceso de venta, en orden, y la tarjeta se arrastra
+       * de una a la siguiente. -->
+      <div v-else class="crm__board">
+        <section
+          v-for="column in COLUMNS"
+          :key="column.id"
+          class="crm__col"
+          :class="{ 'is-over': overCol === column.id }"
+          :aria-label="`${column.label}: ${column.hint}`"
+          @dragover.prevent="onDragOver(column.id, $event)"
+          @dragleave="onDragLeave(column.id, $event)"
+          @drop.prevent="onDrop(column.id)"
+        >
+          <header class="crm__col-head">
             <b>{{ column.label }}</b>
-            <span>{{ column.hint }}</span>
-            <em>{{ nAvisos(grouped[column.id]?.length || 0) }}</em>
+            <em>{{ grouped[column.id]?.length || 0 }}</em>
+            <small>{{ column.hint }}</small>
+            <span v-if="suma(column.id)" class="crm__col-sum">{{ suma(column.id) }}</span>
           </header>
-          <table v-if="abiertos.has(column.id) && grouped[column.id]?.length" :aria-label="`Peticiones ${column.label.toLowerCase()}`">
-            <tbody>
-              <tr
-                v-for="lead in grouped[column.id]"
-                :key="lead.id"
-                :class="{ 'is-on': openId === lead.id, 'is-landing': landed === lead.id }"
+
+          <ol class="crm__stack">
+            <li v-for="lead in grouped[column.id]" :key="lead.id">
+              <button
+                type="button"
+                class="crm__card"
+                draggable="true"
+                :class="{ 'is-on': openId === lead.id, 'is-landing': landed === lead.id, 'is-dragging': dragId === lead.id }"
+                :aria-pressed="openId === lead.id"
                 @click="openId = lead.id"
+                @dragstart="onDragStart(lead, $event)"
+                @dragend="onDragEnd"
               >
-                <th scope="row">
-                  {{ lead.company_name }}
-                  <em class="crm__why"
-                    >{{ lead.reason }}<i v-if="lead.reason_amount"> · {{ lead.reason_amount }}</i></em
-                  >
-                </th>
-                <td class="embat-app__meta">
+                <b>{{ lead.company_name }}</b>
+                <em class="crm__why"
+                  >{{ lead.reason }}<i v-if="lead.reason_amount"> · {{ lead.reason_amount }}</i></em
+                >
+                <span class="crm__card-quien">
                   {{ lead.assignee_name }}
                   <small v-if="lead.assignee_title">{{ lead.assignee_title }}</small>
-                </td>
-                <td class="embat-app__meta">{{ when(lead.created_at) }}</td>
-              </tr>
-            </tbody>
-          </table>
-          <p v-else-if="abiertos.has(column.id)" class="embat-app__empty">Ningún aviso en este estado.</p>
-        </article>
-      </template>
+                </span>
+                <time :datetime="lead.created_at">{{ when(lead.created_at) }}</time>
+              </button>
+            </li>
+          </ol>
+
+          <p v-if="!grouped[column.id]?.length" class="crm__col-empty">
+            {{ overCol === column.id ? 'Suelta aquí' : 'Ningún aviso' }}
+          </p>
+        </section>
+      </div>
     </section>
 
     <aside
@@ -202,6 +249,149 @@ async function move(lead: EmbatLead, status: LeadStatus) {
 </template>
 
 <style scoped>
+/* ── Tablero ─────────────────────────────────────────────────────────────── */
+
+/* El tablero ocupa el alto que queda: las columnas llegan abajo y hay sitio de sobra
+ * donde soltar la tarjeta. */
+.crm__sheet {
+  display: flex;
+  min-height: 0;
+  padding-bottom: 0;
+}
+.crm__board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  flex: 1;
+  min-width: 0;
+}
+.crm__col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0 14px 18px;
+  border-left: 1px solid var(--ea-line);
+  transition: background 0.14s ease;
+}
+.crm__col:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.crm__col:last-child {
+  padding-right: 0;
+}
+/* Mientras la tarjeta está en el aire, la columna de destino se enciende. */
+.crm__col.is-over {
+  background: color-mix(in srgb, var(--ea-blue) 5%, transparent);
+}
+
+.crm__col-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0 8px;
+  height: 52px;
+  border-bottom: 1px solid var(--ea-line);
+}
+.crm__col-head b {
+  font-size: 14px;
+  font-weight: 600;
+}
+.crm__col-head em {
+  grid-column: 2;
+  font-style: normal;
+  color: var(--ea-muted);
+}
+.crm__col-head small {
+  grid-column: 1;
+  margin-top: -2px;
+  overflow: hidden;
+  color: var(--ea-muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.crm__col-sum {
+  grid-column: 2;
+  margin-top: -2px;
+  color: var(--ea-muted);
+  font-size: 11px;
+}
+
+.crm__stack {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 0 0;
+  list-style: none;
+}
+
+.crm__card {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid var(--ea-line);
+  border-radius: 8px;
+  background: var(--ea-bg);
+  color: var(--ea-body);
+  font: inherit;
+  text-align: left;
+  cursor: grab;
+  transition: border-color 0.14s ease, background 0.14s ease;
+}
+.crm__card:hover {
+  background: var(--ea-hover);
+}
+.crm__card.is-on {
+  border-color: color-mix(in srgb, var(--ea-blue) 45%, var(--ea-line));
+  background: var(--ea-hover);
+}
+.crm__card:active {
+  cursor: grabbing;
+}
+/* La tarjeta que viaja se queda en su hueco, apagada, para no perder el sitio de origen. */
+.crm__card.is-dragging {
+  opacity: 0.4;
+}
+.crm__card b {
+  color: var(--ea-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.crm__card-quien {
+  margin-top: 4px;
+  color: var(--ea-body);
+}
+.crm__card-quien small,
+.crm__card time {
+  display: block;
+  color: var(--ea-muted);
+  font-size: 11px;
+}
+.crm__card time {
+  margin-top: 3px;
+}
+
+.crm__col-empty {
+  margin: 12px 0 0;
+  padding: 14px 0;
+  border: 1px dashed var(--ea-line);
+  border-radius: 8px;
+  color: var(--ea-muted);
+  text-align: center;
+}
+.crm__col.is-over .crm__col-empty {
+  border-color: color-mix(in srgb, var(--ea-blue) 40%, var(--ea-line));
+  color: var(--ea-blue);
+}
+
+/* ── Común ───────────────────────────────────────────────────────────────── */
+
+/* El chrome de Embat es siempre claro, así que estos colores salen de sus propios tokens:
+ * con los del tema global el ámbar caía a 1.7:1 y el motivo quedaba blanco sobre blanco
+ * en cuanto el usuario ponía X-Ray en oscuro. */
+
 /* El motivo viaja pegado al nombre: el comercial sabe por qué llaman antes de abrir la ficha. */
 .crm__why {
   /* Cuelga del nombre en su propia línea, pero el fondo sólo abraza al texto. */
@@ -213,8 +403,8 @@ async function move(lead: EmbatLead, status: LeadStatus) {
    * una esquina suave aguanta el salto mejor que la píldora. */
   border-radius: 9px;
   line-height: 1.45;
-  background: var(--amber-wash);
-  color: var(--amber-ink);
+  background: color-mix(in srgb, var(--ea-amber) 11%, transparent);
+  color: var(--ea-amber);
   font-size: 11px;
   font-style: normal;
   font-weight: 600;
@@ -226,26 +416,26 @@ async function move(lead: EmbatLead, status: LeadStatus) {
 }
 .crm__motivo {
   margin: 0 0 14px;
-  color: var(--text-muted);
+  color: var(--ea-body);
   font-size: 13.5px;
   line-height: 1.55;
 }
 .crm__motivo b {
-  color: var(--text);
+  color: var(--ea-text);
 }
 
 .crm__landed {
   display: flex;
   align-items: center;
   gap: 9px;
-  margin: 0 0 12px;
+  margin: 12px 24px 0;
   padding: 10px 14px;
-  border: 1px solid color-mix(in srgb, var(--live) 32%, var(--line));
-  border-radius: var(--r-inner);
-  background: var(--live-wash);
-  color: var(--live-ink);
+  border: 1px solid color-mix(in srgb, var(--ea-blue) 30%, var(--ea-line));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ea-blue) 7%, transparent);
+  color: var(--ea-blue);
   font-size: 13.5px;
-  animation: crm-land 0.42s var(--ease) both;
+  animation: crm-land 0.42s ease both;
 }
 .crm__landed svg {
   flex: none;
@@ -253,8 +443,8 @@ async function move(lead: EmbatLead, status: LeadStatus) {
 
 /* El aviso recién pedido aterriza una vez: entra desde arriba y el borde late dos veces.
  * Pasados cuatro segundos vuelve a ser una fila más. */
-tr.is-landing {
-  animation: crm-land 0.42s var(--ease) both, crm-ring 1.1s var(--ease) 0.24s 2;
+.crm__card.is-landing {
+  animation: crm-land 0.42s ease both, crm-ring 1.1s ease 0.24s 2;
 }
 @keyframes crm-land {
   from {
@@ -268,10 +458,17 @@ tr.is-landing {
 }
 @keyframes crm-ring {
   from {
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--live) 55%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ea-blue) 55%, transparent);
   }
   to {
     box-shadow: inset 0 0 0 1px transparent;
+  }
+}
+
+@media (max-width: 900px) {
+  /* En pantalla estrecha el tablero se recorre de lado, con las columnas a un ancho legible. */
+  .crm__board {
+    grid-template-columns: repeat(4, minmax(230px, 1fr));
   }
 }
 </style>

@@ -1,5 +1,11 @@
 export type CashStatus = 'alerta' | 'oportunidad' | 'vigilancia'
 
+/** Punto de nota mensual para el gráfico de Caja. */
+export interface ScorePoint {
+  month: string
+  score: number
+}
+
 export interface CajaCompany {
   company_id: string
   name: string
@@ -21,13 +27,25 @@ export interface CajaCompany {
     debt_outstanding: number | null
     debt_util: number | null
   }
+  health_score: number | null
   health_band: string | null
+  health_trend: string | null
+  score_delta_3m: number | null
+  /** Nota mes a mes para filtrar el gráfico por sector o comparar dos empresas. */
+  score_series: ScorePoint[]
   action: 'prestar' | 'financiar' | null
+  /** low − monthly_spend: negativo = € que faltan, positivo = € colocables. Null sin previsión. */
+  impacto: number | null
+  /** Días entre la foto de la previsión y el punto más bajo de caja. */
+  urgencia_dias: number | null
+  sugerencia: 'financiar' | 'colocar' | 'seguir'
 }
 
 export interface CajaResponse {
   companies: CajaCompany[]
   counts: Record<CashStatus, number>
+  /** Nota de la cartera mes a mes: media y mediana de las empresas que tienen nota ese mes. */
+  score_history: { month: string; mean: number; median: number; n: number }[]
 }
 
 export type LeadStatus = 'nuevo' | 'contactado' | 'reunion' | 'cerrado'

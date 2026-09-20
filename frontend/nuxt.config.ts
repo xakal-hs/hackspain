@@ -15,6 +15,7 @@ export default defineNuxtConfig({
         },
       ],
       link: [
+        { rel: 'icon', href: '/favicon.ico', type: 'image/x-icon' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {
@@ -26,9 +27,9 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     supabaseSecretKey: process.env.SUPABASE_SECRET_KEY || '',
-    agentModel: process.env.AGENT_MODEL || '',
-    agentBaseUrl: process.env.AGENT_BASE_URL || '',
-    agentApiKey: process.env.AGENT_API_KEY || '',
+    agentModel: '',
+    agentBaseUrl: '',
+    agentApiKey: '',
     supabaseJwksUrl: process.env.SUPABASE_JWKS_URL || '',
     public: {
       supabaseUrl: process.env.SUPABASE_URL || '',
@@ -39,6 +40,8 @@ export default defineNuxtConfig({
   nitro: {
     routeRules: {
       '/api/**': { cors: true },
+      // Old service-worker probes hit Vue Router otherwise.
+      '/sw.js': { headers: { 'cache-control': 'no-store' } },
       // Routes from the earlier structure now live as sections of the cockpit.
       '/cartera': { redirect: '/dashboard/embat' },
       '/monitor': { redirect: '/dashboard/embat' },

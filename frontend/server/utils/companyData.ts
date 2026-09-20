@@ -3,7 +3,7 @@ export function supabaseRest() {
   const config = useRuntimeConfig()
   const url = String(config.public.supabaseUrl || '').replace(/\/$/, '')
   const key = String(config.supabaseSecretKey || '')
-  if (!url || !key) throw createError({ statusCode: 503, statusMessage: 'Supabase no está configurado' })
+  if (!url || !key) throw createError({ statusCode: 503, message: 'Supabase no está configurado' })
   return {
     url,
     headers: {
