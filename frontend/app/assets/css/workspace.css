@@ -438,9 +438,16 @@
   border-bottom: 1px solid var(--ea-line);
 }
 
+/* El aire va a los dos lados de la línea: sin el margen izquierdo la cifra del segundo y del
+ * tercer bloque arrancaba pegada al separador. El primero no lo lleva para que «En alerta»
+ * caiga en la misma vertical que el título y que el nombre de las empresas. */
 .embat-app__pulse > div {
-  padding: 14px 18px 14px 0;
+  padding: 14px 18px;
   border-right: 1px solid var(--ea-line);
+}
+
+.embat-app__pulse > div:first-child {
+  padding-left: 0;
 }
 
 .embat-app__pulse > div:last-child {
