@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import { Copy, Check } from '@lucide/vue'
+import { Check, ChevronRight, ChevronsUpDown, Copy } from '@lucide/vue'
 import type { EmbatLead, LeadStatus, LeadsResponse } from '../../shared/types/embat'
 
-const COLUMNS: { id: LeadStatus; label: string }[] = [
-  { id: 'nuevo', label: 'Nuevo' },
-  { id: 'contactado', label: 'Contactado' },
-  { id: 'reunion', label: 'Reunión' },
-  { id: 'cerrado', label: 'Cerrado' },
+const COLUMNS: { id: LeadStatus; label: string; hint: string }[] = [
+  { id: 'nuevo', label: 'Nuevo', hint: 'Acaba de pedir financiación' },
+  { id: 'contactado', label: 'Contactado', hint: 'El comercial ya ha escrito' },
+  { id: 'reunion', label: 'Reunión', hint: 'Hay una llamada en el calendario' },
+  { id: 'cerrado', label: 'Cerrado', hint: 'La petición ya no está abierta' },
 ]
 
-const { data, refresh, error, pending } = await useAsyncData('embat-leads', () => $fetch<LeadsResponse>('/api/embat/leads'))
+const { data, refresh, error, pending } = await useAsyncData('embat-leads', () =>
+  $fetch<LeadsResponse>('/api/embat/leads'),
+)
 const { patch } = useEmbatLeads()
 const openId = ref<string | null>(null)
 const copied = ref(false)
+const abiertos = ref(new Set<LeadStatus>(COLUMNS.map((column) => column.id)))
 
 const grouped = computed(() => {
   const leads = data.value?.leads || []
@@ -21,9 +24,19 @@ const grouped = computed(() => {
   ) as Record<LeadStatus, EmbatLead[]>
 })
 
-const openLead = computed(
-  () => data.value?.leads.find((lead) => lead.id === openId.value) || null,
-)
+const openLead = computed(() => data.value?.leads.find((lead) => lead.id === openId.value) || null)
+const todoAbierto = computed(() => COLUMNS.every((column) => abiertos.value.has(column.id)))
+
+function plegar(id: LeadStatus) {
+  const next = new Set(abiertos.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  abiertos.value = next
+}
+
+function plegarTodo() {
+  abiertos.value = todoAbierto.value ? new Set() : new Set<LeadStatus>(COLUMNS.map((column) => column.id))
+}
 
 function when(iso: string) {
   return new Intl.DateTimeFormat('es-ES', {
@@ -32,6 +45,10 @@ function when(iso: string) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(iso))
+}
+
+function nAvisos(n: number) {
+  return `${n} ${n === 1 ? 'aviso' : 'avisos'}`
 }
 
 async function copyDraft(text: string) {
@@ -50,117 +67,102 @@ async function move(lead: EmbatLead, status: LeadStatus) {
 </script>
 
 <template>
-  <div class="wk__grid crm">
-    <section class="panel span-12">
-      <header class="panel__bar">
-        <h2 class="panel__title">Peticiones de financiación</h2>
-        <span class="chip chip--neutral">{{ data?.leads.length || 0 }} avisos</span>
-      </header>
-      <p class="lead-line">
-        Cuando una empresa pulsa «Quiero pedir financiación», el aviso entra aquí y se asigna a un
-        comercial de Equipo. El correo es genérico: no lleva datos de la empresa.
+  <div class="embat-app">
+    <header class="embat-app__title">
+      <h1>Financiación</h1>
+      <div class="embat-app__tools">
+        <button
+          type="button"
+          class="embat-app__icon"
+          :aria-label="todoAbierto ? 'Plegar todo' : 'Desplegar todo'"
+          @click="plegarTodo"
+        >
+          <ChevronsUpDown :size="16" aria-hidden="true" />
+        </button>
+      </div>
+    </header>
+
+    <section class="embat-app__sheet" :aria-busy="pending">
+      <p v-if="pending" class="embat-app__state">Cargando la cola.</p>
+      <p v-else-if="error" class="embat-app__state" role="alert">
+        No se pudo leer la cola de avisos.
+        <button type="button" @click="refresh()">Reintentar</button>
       </p>
-      <p v-if="pending" class="empty">Cargando la cola.</p>
-      <p v-else-if="error" class="empty">No se pudo leer la cola de avisos.</p>
+      <p v-else-if="!data?.leads.length" class="embat-app__state">
+        Nadie ha pedido financiación todavía. El aviso entra aquí cuando una empresa pulsa «Quiero
+        pedir financiación».
+      </p>
+
+      <template v-else>
+        <article v-for="column in COLUMNS" :key="column.id" class="embat-app__group">
+          <header>
+            <button type="button" :aria-expanded="abiertos.has(column.id)" @click="plegar(column.id)">
+              <ChevronRight :size="16" aria-hidden="true" />
+            </button>
+            <b>{{ column.label }}</b>
+            <span>{{ column.hint }}</span>
+            <em>{{ nAvisos(grouped[column.id]?.length || 0) }}</em>
+          </header>
+          <table v-if="abiertos.has(column.id) && grouped[column.id]?.length" :aria-label="`Peticiones ${column.label.toLowerCase()}`">
+            <tbody>
+              <tr
+                v-for="lead in grouped[column.id]"
+                :key="lead.id"
+                :class="{ 'is-on': openId === lead.id }"
+                @click="openId = lead.id"
+              >
+                <th scope="row">{{ lead.company_name }}</th>
+                <td class="embat-app__meta">
+                  {{ lead.assignee_name }}
+                  <small v-if="lead.assignee_title">{{ lead.assignee_title }}</small>
+                </td>
+                <td class="embat-app__meta">{{ when(lead.created_at) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p v-else-if="abiertos.has(column.id)" class="embat-app__empty">Ningún aviso en este estado.</p>
+        </article>
+      </template>
     </section>
 
-    <section
-      v-for="column in COLUMNS"
-      :key="column.id"
-      class="panel span-3 crm__col"
+    <aside
+      v-if="openLead"
+      class="embat-app__dialog embat-app__dialog--wide"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="crm-ficha-title"
     >
-      <header class="panel__bar">
-        <h2 class="panel__title">{{ column.label }}</h2>
-        <span class="chip chip--neutral">{{ grouped[column.id]?.length || 0 }}</span>
+      <header>
+        <div>
+          <h2 id="crm-ficha-title">{{ openLead.company_name }}</h2>
+          <p>
+            Asignada a {{ openLead.assignee_name
+            }}<template v-if="openLead.assignee_title">, {{ openLead.assignee_title }}</template>. El
+            correo no nombra a la empresa.
+          </p>
+        </div>
+        <button type="button" @click="openId = null">Cerrar</button>
       </header>
-      <ol class="crm__list">
-        <li v-for="lead in grouped[column.id]" :key="lead.id">
-          <button type="button" class="crm__card" :aria-pressed="openId === lead.id" @click="openId = lead.id">
-            <b>{{ lead.company_name }}</b>
-            <span>{{ lead.assignee_name }}</span>
-            <small v-if="lead.assignee_title">{{ lead.assignee_title }}</small>
-            <time>{{ when(lead.created_at) }}</time>
-          </button>
-        </li>
-      </ol>
-      <p v-if="!grouped[column.id]?.length" class="empty">Vacío.</p>
-    </section>
-
-    <section v-if="openLead" class="panel span-12 sheet">
-      <header class="panel__bar">
-        <h2 class="panel__title">{{ openLead.company_name }}</h2>
-        <span class="chip chip--neutral">{{ openLead.assignee_name }}</span>
-        <span v-if="openLead.assignee_title" class="chip chip--neutral">{{ openLead.assignee_title }}</span>
-      </header>
-      <p class="sheet__why">
-        Pidió financiación. El correo de abajo no nombra a la empresa: solo la señal y la llamada.
-      </p>
-      <label class="filters__field">
-        Estado
-        <select :value="openLead.status" aria-label="Cambiar estado" @change="move(openLead, ($event.target as HTMLSelectElement).value as LeadStatus)">
-          <option v-for="column in COLUMNS" :key="column.id" :value="column.id">{{ column.label }}</option>
-        </select>
-      </label>
-      <pre class="crm__draft">{{ openLead.email_draft }}</pre>
-      <button class="btn btn--live" type="button" @click="copyDraft(openLead.email_draft)">
-        <Check v-if="copied" :size="15" aria-hidden="true" />
-        <Copy v-else :size="15" aria-hidden="true" />
-        {{ copied ? 'Copiado' : 'Copiar el draft' }}
-      </button>
-    </section>
+      <div class="embat-app__chips" role="group" aria-label="Cambiar estado">
+        <button
+          v-for="column in COLUMNS"
+          :key="column.id"
+          type="button"
+          class="embat-app__chip"
+          :class="{ 'is-on': openLead.status === column.id }"
+          @click="move(openLead, column.id)"
+        >
+          {{ column.label }}
+        </button>
+      </div>
+      <pre class="embat-app__draft">{{ openLead.email_draft }}</pre>
+      <div class="embat-app__chips">
+        <button type="button" class="embat-app__chip" @click="copyDraft(openLead.email_draft)">
+          <Check v-if="copied" :size="14" aria-hidden="true" />
+          <Copy v-else :size="14" aria-hidden="true" />
+          {{ copied ? 'Copiado' : 'Copiar el draft' }}
+        </button>
+      </div>
+    </aside>
   </div>
 </template>
-
-<style scoped>
-.crm__list {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.crm__card {
-  display: grid;
-  gap: 2px;
-  width: 100%;
-  padding: 12px 12px 10px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-inner);
-  background: var(--panel-raised);
-  text-align: left;
-}
-.crm__card[aria-pressed='true'] {
-  border-color: var(--live);
-}
-.crm__card b {
-  font-size: 14px;
-}
-.crm__card span,
-.crm__card small,
-.crm__card time {
-  color: var(--text-muted);
-  font-size: 12.5px;
-}
-.crm__card small {
-  font-weight: 400;
-}
-.crm__draft {
-  margin: 16px 0;
-  padding: 16px 18px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-inner);
-  background: var(--panel-raised);
-  white-space: pre-wrap;
-  font-family: inherit;
-  font-size: 14px;
-  line-height: 1.55;
-}
-.sheet .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-@media (max-width: 900px) {
-  .crm__col { grid-column: span 12; }
-}
-</style>

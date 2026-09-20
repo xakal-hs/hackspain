@@ -312,13 +312,464 @@
   align-content: start;
 }
 
-/* Flujo de caja va a sangre: la pantalla clonada trae su propia cabecera y su fondo. */
+/* Flujo, Crédito y las tres vistas de Equipo Embat van a sangre: cada pantalla
+   clona el chrome de Embat y trae su propia cabecera. */
 .wk__body--bare {
   grid-template-rows: minmax(0, 1fr);
 }
 
 .wk__body--bare .wk__main {
   padding: 0;
+}
+
+/* Chrome compartido de las pantallas Embat (siempre en claro, Inter 13px). */
+.embat-app {
+  --ea-bg: #ffffff;
+  --ea-line: #e8eaee;
+  --ea-soft: #eff1f4;
+  --ea-text: #1b1f2a;
+  --ea-body: #3a4050;
+  --ea-muted: #737a8a;
+  --ea-fill: #e8e8ed;
+  --ea-hover: #f7f8fa;
+  --ea-blue: #3b77f6;
+  --ea-green: #1d8a5c;
+  --ea-red: #c0352b;
+  --ea-amber: #a15c12;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+  background: var(--ea-bg);
+  color: var(--ea-text);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-feature-settings: 'tnum' 1;
+  color-scheme: light;
+}
+
+.embat-app ::selection {
+  background: #dbe5ff;
+}
+
+.embat-app__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  min-height: 56px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--ea-line);
+}
+
+.embat-app__title h1 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.embat-app__tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.embat-app__icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: var(--ea-body);
+  cursor: pointer;
+}
+
+.embat-app__icon:hover {
+  background: var(--ea-hover);
+}
+
+.embat-app__seg {
+  display: flex;
+  height: 30px;
+  padding: 2px;
+  border: 1px solid #dfe2e7;
+  border-radius: 5px;
+  background: #fff;
+}
+
+.embat-app__seg button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ea-text);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.embat-app__seg button[aria-checked='true'] {
+  background: var(--ea-fill);
+}
+
+.embat-app__seg button:not([aria-checked='true']):hover {
+  background: var(--ea-hover);
+}
+
+.embat-app button:focus-visible,
+.embat-app input:focus-visible {
+  outline: 2px solid var(--ea-blue);
+  outline-offset: 2px;
+}
+
+.embat-app__pulse {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--ea-line);
+}
+
+.embat-app__pulse > div {
+  padding: 14px 18px 14px 0;
+  border-right: 1px solid var(--ea-line);
+}
+
+.embat-app__pulse > div:last-child {
+  border-right: 0;
+  padding-right: 0;
+}
+
+.embat-app__pulse dt {
+  margin: 0;
+  color: var(--ea-muted);
+  font-weight: 400;
+}
+
+.embat-app__pulse dd {
+  margin: 4px 0 0;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.embat-app__pulse > div[data-tone='alerta'] dd {
+  color: var(--ea-red);
+}
+
+.embat-app__pulse > div[data-tone='oportunidad'] dd {
+  color: var(--ea-green);
+}
+
+.embat-app__pulse > div[data-tone='vigilancia'] dd {
+  color: var(--ea-amber);
+}
+
+.embat-app__sheet {
+  flex: 1;
+  min-width: 0;
+  padding: 0 24px 24px;
+}
+
+.embat-app__state {
+  margin: 0;
+  padding: 24px 0;
+  color: var(--ea-muted);
+}
+
+.embat-app__state button {
+  margin-left: 6px;
+  border: 0;
+  background: none;
+  color: var(--ea-blue);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.embat-app__empty {
+  margin: 0;
+  padding: 14px 0 14px 36px;
+  border-bottom: 1px solid var(--ea-soft);
+  color: var(--ea-muted);
+}
+
+.embat-app__group header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  border-bottom: 1px solid var(--ea-line);
+}
+
+.embat-app__group header button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: var(--ea-body);
+  cursor: pointer;
+}
+
+.embat-app__group header button svg {
+  transition: transform 0.16s ease;
+}
+
+.embat-app__group header button[aria-expanded='true'] svg {
+  transform: rotate(90deg);
+}
+
+.embat-app__group header b {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.embat-app__group header span {
+  color: var(--ea-muted);
+}
+
+.embat-app__group header em {
+  margin-left: auto;
+  font-style: normal;
+  color: var(--ea-muted);
+}
+
+.embat-app table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.embat-app tbody tr {
+  cursor: pointer;
+}
+
+.embat-app tbody tr.is-static {
+  cursor: default;
+}
+
+.embat-app tbody tr:hover > *,
+.embat-app tbody tr.is-on > * {
+  background: var(--ea-hover);
+}
+
+.embat-app tbody tr.is-static:hover > * {
+  background: transparent;
+}
+
+.embat-app th,
+.embat-app td {
+  height: 40px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--ea-soft);
+  text-align: right;
+  white-space: nowrap;
+  color: var(--ea-body);
+}
+
+.embat-app th[scope='row'] {
+  padding-left: 36px;
+  font-weight: 500;
+  text-align: left;
+  color: var(--ea-text);
+}
+
+.embat-app td small,
+.embat-app th[scope='row'] small {
+  display: block;
+  margin-top: -2px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ea-muted);
+}
+
+.embat-app__meta {
+  text-align: left;
+  color: var(--ea-muted);
+}
+
+.embat-app__amount {
+  font-weight: 600;
+  color: var(--ea-text);
+}
+
+.embat-app__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--ea-fill);
+  color: var(--ea-body);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.embat-app__chip:hover:not(:disabled):not(.is-off) {
+  background: #dbe4fb;
+  color: var(--ea-blue);
+}
+
+.embat-app__chip.is-on {
+  background: #dbe4fb;
+  color: var(--ea-blue);
+}
+
+.embat-app__chip.is-off {
+  background: transparent;
+  color: var(--ea-muted);
+  cursor: default;
+}
+
+.embat-app__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 16px 0 0;
+}
+
+.embat-app__dialog {
+  position: fixed;
+  inset: auto 24px 24px auto;
+  z-index: 5;
+  width: min(440px, calc(100vw - 48px));
+  margin: 0;
+  padding: 18px 20px 20px;
+  border: 1px solid var(--ea-line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ea-text);
+  box-shadow: 0 18px 44px -20px rgb(16 20 40 / 0.45);
+}
+
+.embat-app__dialog--wide {
+  width: min(520px, calc(100vw - 48px));
+}
+
+.embat-app__dialog header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.embat-app__dialog h2 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.embat-app__dialog header p {
+  margin: 0;
+  color: var(--ea-muted);
+  line-height: 1.45;
+}
+
+.embat-app__dialog header button {
+  border: 0;
+  background: none;
+  color: var(--ea-blue);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.embat-app__dialog dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 18px;
+  margin: 16px 0 0;
+}
+
+.embat-app__dialog dt {
+  color: var(--ea-muted);
+}
+
+.embat-app__dialog dd {
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+.embat-app__note {
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--ea-soft);
+  color: var(--ea-muted);
+  line-height: 1.5;
+}
+
+.embat-app__draft {
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--ea-soft);
+  white-space: pre-wrap;
+  font: inherit;
+  line-height: 1.5;
+  color: var(--ea-body);
+}
+
+@media (max-width: 900px) {
+  .embat-app__title,
+  .embat-app__pulse,
+  .embat-app__sheet {
+    padding-inline: 16px;
+  }
+
+  .embat-app__pulse {
+    grid-template-columns: 1fr;
+  }
+
+  .embat-app__pulse > div {
+    border-right: 0;
+    border-top: 1px solid var(--ea-line);
+    padding: 12px 0;
+  }
+
+  .embat-app__pulse > div:first-child {
+    border-top: 0;
+    padding-top: 14px;
+  }
+
+  .embat-app__group header span {
+    display: none;
+  }
+
+  .embat-app__group header em {
+    white-space: nowrap;
+  }
+
+  .embat-app table {
+    min-width: 640px;
+  }
+
+  .embat-app__sheet {
+    overflow-x: auto;
+  }
+
+  .embat-app__dialog {
+    inset: auto 12px 12px 12px;
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .embat-app__group header button svg {
+    transition: none;
+  }
 }
 
 .wk__pane {

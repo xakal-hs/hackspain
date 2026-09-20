@@ -100,11 +100,13 @@ plus an inset sheen, as in the reference.
 Chips are data keys and status, in tracked small capitals with a dot. They are
 never hung above a heading as an eyebrow.
 
-Embat's own perspective has two views — caja of the featured portfolio and the
-financing CRM — where the subject is the book, not one company looking at itself.
-They reuse the cockpit language unchanged. Caja opens with a **ruled strip** of
-three readings (alerta, oportunidad, vigilancia), divided by a hairline rather
-than boxed into cards, collapsing to ruled rows when the column narrows.
+Embat's own perspective has three views — caja of the featured portfolio, the
+financing CRM and the team — where the subject is the book, not one company
+looking at itself. They use the same always-light Embat product chrome as Flujo
+and Crédito: a 17px title bar, grouped hairline tables, no cockpit crumb. Caja
+opens with a **ruled strip** of three readings (alerta, oportunidad, vigilancia),
+divided by a hairline rather than boxed into cards, collapsing to ruled rows when
+the column narrows.
 
 ## Theme
 
