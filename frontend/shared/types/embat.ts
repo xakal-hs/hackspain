@@ -39,9 +39,25 @@ export interface EmbatLead {
   status: LeadStatus
   assigned_to: string
   assignee_name: string
+  assignee_title: string
   signal: 'financiar'
   email_draft: string
   created_at: string
+}
+
+export type EmployeeTeam = 'account_management' | 'customer_success'
+
+export interface EmbatEmployee {
+  id: string
+  name: string
+  job_title: string
+  team: EmployeeTeam
+  standardized_role: string
+}
+
+export interface EmployeesResponse {
+  employees: EmbatEmployee[]
+  counts: Record<EmployeeTeam, number>
 }
 
 export interface LeadsResponse {

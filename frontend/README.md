@@ -61,7 +61,7 @@ version error when the runtime is unsupported.
 - `/dashboard/embat`: Equipo Embat — caja del portfolio and the financing CRM.
 
 Each dashboard takes `?section=`. Empresa has `flujo` (default), `score`, `colchon` and
-`divisa`; Embat has `caja` (default) and `crm`. A section the perspective does not have
+`divisa`; Embat has `caja` (default), `crm` and `equipo`. A section the perspective does not have
 falls back to its default. The earlier standalone routes `/cartera`, `/monitor`,
 `/escenarios` and `/empresas/:id` now redirect into Equipo Embat.
 
@@ -70,7 +70,10 @@ Switch perspectives or exit using the user panel at the bottom of the desktop si
 Empresa treasury screens read Supabase (`company-directory`, `flujo`). Equipo Embat:
 
 1. **Caja** (`GET /api/embat/caja`) — the 20 `featured_companies`, with operational cash (`cash_end`, `net_op`, runway) and financial cash (debt service, outstanding, utilisation) from `panel_monthly` / `company_static`. Alert vs opportunity comes from the same rotura/excedente forecast Flujo de caja uses.
-2. **Financiación** (`GET/POST /api/embat/leads`) — CRM pipeline. When the company clicks **Quiero pedir financiación**, a lead is assigned to an account manager with a generic email draft (no company data, fake Calendly). Apply `supabase/embat_crm_schema.sql` on the frontend project so leads persist in Postgres; until then the server keeps a local file under `frontend/.data/`.
+2. **Financiación** (`GET/POST /api/embat/leads`) — CRM pipeline. When the company clicks **Quiero pedir financiación**, a lead is assigned to a commercial from `embat_employees` with a generic email draft (no company data, fake Calendly).
+3. **Equipo** (`GET /api/embat/employees`) — AM + customer success from `data/embat_am.csv` and `data/embat_cs.csv`, merged into `embat_employees`. Apply `supabase/embat_employees_schema.sql` on the frontend project (`frontend/.env`) so leads persist in Postgres; until then the server keeps a local file under `frontend/.data/` and serves the same employee list from `frontend/server/data/embat-employees.json`.
+
+Reload employees with `python3 scripts/push_embat_employees.py` (uses `frontend/.env`, never the X-Ray source project).
 
 The role cookie survives reloads until logout/browser session expiry.
 

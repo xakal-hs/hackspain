@@ -19,7 +19,7 @@ const profile = computed(() => perspectiveById(role.value)!)
 const treasurySections = ['flujo', 'score', 'credito', 'divisa']
 const sectionsByRole: Record<PerspectiveId, string[]> = {
   empresa: [...treasurySections, 'ajustes'],
-  embat: ['caja', 'crm'],
+  embat: ['caja', 'crm', 'equipo'],
 }
 
 const section = computed(() => {
@@ -48,6 +48,7 @@ const sectionLabel = computed(
     ({
       caja: 'Caja',
       crm: 'Financiación',
+      equipo: 'Equipo',
       score: 'X-Ray Score',
       flujo: 'Flujo de caja',
       credito: 'Crédito y caución',
@@ -63,19 +64,14 @@ watch(section, () => {
   paneLive.value = true
 })
 
-const headline = computed(
-  () =>
-    ({
-      caja: 'Quién está corto de caja y quién puede colocarla.',
-      crm: 'Quien pide financiación, con su asesor.',
-      ajustes: 'Decide qué empresas quieres recorrer.',
-    })[section.value] || '',
+const headline = computed(() =>
+  section.value === 'ajustes' ? 'Decide qué empresas quieres recorrer.' : '',
 )
 
 const sectionDescription = computed(() =>
   section.value === 'ajustes'
     ? 'Configura el directorio que usarás al recorrer el panel de empresa.'
-    : profile.value.job,
+    : '',
 )
 </script>
 
@@ -107,13 +103,14 @@ const sectionDescription = computed(() =>
           class="wk__pane"
           :class="{ 'is-live': paneLive }"
         >
-          <div v-if="!isTreasury" class="wk__head">
+          <div v-if="section === 'ajustes'" class="wk__head">
             <h1>{{ headline }}</h1>
             <p>{{ sectionDescription }}</p>
           </div>
 
           <EmbatCajaBoard v-if="section === 'caja'" />
           <EmbatCrmBoard v-else-if="section === 'crm'" />
+          <EmbatEquipoBoard v-else-if="section === 'equipo'" />
           <XRayScoreApp v-else-if="section === 'score'" />
           <FlujoCajaApp v-else-if="section === 'flujo'" />
           <CreditoCaucionApp v-else-if="section === 'credito'" />
@@ -123,7 +120,7 @@ const sectionDescription = computed(() =>
 
         <footer v-if="section !== 'flujo' && section !== 'credito'" class="wk__foot">
           <template v-if="role === 'embat'">
-            Caja operativa y financiera desde Supabase. El CRM se llena cuando una empresa pide financiación.
+            Caja operativa y financiera desde Supabase. El CRM se llena cuando una empresa pide financiación y se asigna a un comercial de Equipo.
           </template>
           <template v-else>
             Tesorería de esta empresa. Lo que hagas aquí solo afecta a esta sesión.
