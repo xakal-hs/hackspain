@@ -61,6 +61,29 @@ test('buscar_cartera ordena por mayor caída y respeta el límite', async () => 
   assert.equal(r.total_en_cartera, 3)
 })
 
+test('buscar_cartera limita la respuesta a las empresas curadas por Embat', async () => {
+  const rows = [
+    { company_id: 'COMP_0001', score: 20, delta3_q50: -8 },
+    { company_id: 'COMP_0002', score: 80, delta3_q50: 2 },
+  ]
+  const tools = agentTools(async path => path === '/api/embat/caja'
+    ? { companies: [{ company_id: 'COMP_0002' }] }
+    : { companies: rows })
+  const r = await run(tools.buscar_cartera, { orden: 'peor_nota', limite: 8 })
+  assert.deepEqual(r.empresas.map(e => e.company_id), ['COMP_0002'])
+  assert.equal(r.total_en_cartera, 1)
+})
+
+test('prevision_tesoreria conserva la acción publicada y su alcance', async () => {
+  const tools = agentTools(async path => {
+    assert.equal(path, '/api/flujo/COMP_0864')
+    return { snapshot: '2026-08', currency: 'EUR', action: 'financiar', forecast: { cash: 1200, months: [{ month: '2026-09', cash: 900 }], rotura: { month: '2026-10' }, excedente: null } }
+  })
+  const r = await run(tools.prevision_tesoreria, { company_id: 'COMP_0864' })
+  assert.equal(r.accion_tesoreria, 'financiar')
+  assert.match(r.alcance, /no es una aprobación de crédito/)
+})
+
 test('los identificadores se validan antes de tocar el backend', () => {
   const tools = agentTools(async () => ({}))
   assert.equal(tools.ficha_empresa.inputSchema.safeParse({ company_id: '../etc/passwd' }).success, false)
@@ -70,6 +93,7 @@ test('los identificadores se validan antes de tocar el backend', () => {
 test('el prompt lleva la empresa abierta y la regla de no inventar cifras', () => {
   const p = systemPrompt({ role: 'banco', companyId: 'COMP_0864' })
   assert.match(p, /COMP_0864/)
+  assert.match(p, /No vuelvas a preguntar cuál es/)
   assert.match(p, /sale de una herramienta/)
   assert.match(p, /No decides préstamos/)
 })
@@ -80,19 +104,16 @@ test('resolveModel: sin nada configurado no hay modelo', () => {
   assert.equal(resolveModel({}), null)
 })
 
-test('resolveModel: AGENT_BASE_URL manda sobre el Gateway y no exige clave (Ollama)', () => {
-  const m = resolveModel({ agentBaseUrl: 'http://localhost:11434/v1/', agentModel: 'qwen3:8b', gatewayKey: 'x' })
+test('resolveModel: Helmcode exige URL válida, modelo y clave server-side', () => {
+  assert.equal(resolveModel({ agentBaseUrl: '[url](url)', agentModel: 'm', agentApiKey: 'k' }), null)
+  assert.equal(resolveModel({ agentBaseUrl: 'https://api.helmcode.com/v1', agentModel: 'deepseek-v4-flash' }), null)
+  const m = resolveModel({ agentBaseUrl: 'https://api.helmcode.com/v1/', agentModel: 'deepseek-v4-flash', agentApiKey: 'secret' })
   assert.equal(typeof m, 'object')
-  assert.equal(m.modelId, 'qwen3:8b')
+  assert.equal(m.modelId, 'deepseek-v4-flash')
 })
 
 test('resolveModel: AGENT_BASE_URL sin AGENT_MODEL cuenta como no configurado', () => {
   assert.equal(resolveModel({ agentBaseUrl: 'http://localhost:11434/v1' }), null)
-})
-
-test('resolveModel: con clave del Gateway usa un id proveedor/modelo', () => {
-  assert.equal(resolveModel({ gatewayKey: 'k' }), 'anthropic/claude-opus-5')
-  assert.equal(resolveModel({ oidcToken: 't', agentModel: 'zai/glm-5.3' }), 'zai/glm-5.3')
 })
 
 import { chartsFromParts } from '../app/utils/chatCharts.ts'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Chat } from '@ai-sdk/vue'
 import { DefaultChatTransport, getToolName, isToolUIPart, type UIMessage } from 'ai'
-import { ArrowUp, BarChart3, Check, Copy, History, ListChecks, Maximize2, Mic, Minimize2, Plus, Sparkles, Square, X } from '@lucide/vue'
+import { ArrowUp, BarChart3, Check, Copy, Maximize2, Mic, Minimize2, Plus, Sparkles, Square, X } from '@lucide/vue'
 import raybot from '~/assets/images/raybot.png'
 import { blocks } from '~/utils/chatText'
 import { chartSections, chartsFromParts } from '~/utils/chatCharts'
@@ -15,31 +15,27 @@ const log = ref<HTMLElement | null>(null)
 const wide = ref(false)
 const field = ref<HTMLTextAreaElement | null>(null)
 const listening = ref(false)
-/* Los tres modos del dock: conversación, preguntas sugeridas e historial de esta sesión. */
-const view = ref<'chat' | 'suggestions' | 'history'>('chat')
-function show(v: typeof view.value) {
-  if (open.value && view.value === v) { open.value = false; return }
-  view.value = v
-  open.value = true
+function toggle() {
+  open.value = !open.value
 }
 
 const chat = new Chat<UIMessage>({
   transport: new DefaultChatTransport({
     api: '/api/chat',
-    body: () => ({ role: props.role, companyId: selectedId.value }),
   }),
 })
 
 const busy = computed(() => chat.status === 'submitted' || chat.status === 'streaming')
 const suggestions = computed(() => props.role === 'embat'
   ? ['¿Qué empresas empeoran más este trimestre?', '¿Cómo se construye la nota?']
-  : ['¿Por qué ha cambiado su nota este mes?', '¿Es un bache o un cambio de fondo?', '¿Por qué esta decisión?'])
+  : ['¿Por qué ha cambiado su nota este mes?', '¿Qué prevé su caja?', '¿Por qué esta decisión?'])
 
 /* Lo que hace el asistente antes de contestar: enseñarlo es lo que permite comprobar de dónde sale cada cifra. */
 const TOOL_LABEL: Record<string, string> = {
   ficha_empresa: 'Leyendo la ficha',
   explicar_mes: 'Descomponiendo el cambio de nota',
   decision_prestamista: 'Consultando la decisión',
+  prevision_tesoreria: 'Leyendo la previsión',
   buscar_cartera: 'Buscando en la cartera',
   como_funciona_el_score: 'Leyendo cómo se calcula la nota',
   catalogo_de_vetos: 'Consultando los vetos',
@@ -70,7 +66,6 @@ const compactHeight = computed(() => {
   return `min(${Math.min(540, 420 + turns * 40)}px, calc(100vh - 100px))`
 })
 
-const asked = computed(() => chat.messages.filter(m => m.role === 'user').map(textOf).reverse())
 const chartCount = computed(() => sections.value.reduce((n, sec) => n + sec.charts.length, 0))
 /* Mientras el asistente consulta datos y aún no hay gráfico de esta pregunta, se enseñan esqueletos. */
 const pending = computed(() => busy.value && !chartsFromParts(chat.messages.at(-1)?.role === 'assistant' ? chat.messages.at(-1)!.parts : []).length)
@@ -92,7 +87,7 @@ function grow() {
   el.style.overflowY = el.scrollHeight > 200 ? 'auto' : 'hidden'
 }
 watch(draft, () => nextTick(grow))
-watch([view, open], () => nextTick(() => { if (view.value === 'chat') field.value?.focus() }))
+watch(open, (isOpen) => nextTick(() => { if (isOpen) field.value?.focus() }))
 function onEnter(e: KeyboardEvent) {
   if (e.isComposing || e.shiftKey) return
   e.preventDefault()
@@ -101,7 +96,6 @@ function onEnter(e: KeyboardEvent) {
 function newChat() {
   chat.stop()
   chat.messages = []
-  view.value = 'chat'
   nextTick(() => field.value?.focus())
 }
 
@@ -147,10 +141,11 @@ function send(text: string) {
   const value = text.trim()
   if (!value || busy.value) return
   draft.value = ''
-  view.value = 'chat'
   open.value = true
   startedAt = Date.now()
-  chat.sendMessage({ text: value })
+  chat.sendMessage({ text: value }, {
+    body: { role: props.role, companyId: selectedId.value },
+  })
 }
 
 const errorText = computed(() => {
@@ -169,16 +164,8 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
 <template>
   <div class="agent">
     <nav v-show="!(open && wide)" class="agent__dock" aria-label="Asistente de X-Ray">
-      <button type="button" class="agent__bot" :class="{ 'is-on': open && view === 'chat' }" aria-label="Preguntar a X-Ray" title="Pregunta a X-Ray" @click="show('chat')">
+      <button type="button" class="agent__bot" :class="{ 'is-on': open }" aria-label="Preguntar a X-Ray" title="Pregunta a X-Ray" @click="toggle">
         <img :src="raybot" alt="" width="22" height="22">
-      </button>
-      <span class="agent__sep" aria-hidden="true" />
-      <button type="button" class="agent__count" :class="{ 'is-on': open && view === 'suggestions' }" :aria-label="`${suggestions.length} preguntas sugeridas`" title="Preguntas sugeridas" @click="show('suggestions')">
-        <ListChecks :size="18" aria-hidden="true" /><b>{{ suggestions.length }}</b>
-      </button>
-      <span class="agent__sep" aria-hidden="true" />
-      <button type="button" :class="{ 'is-on': open && view === 'history' }" aria-label="Historial de preguntas" title="Historial" @click="show('history')">
-        <History :size="18" aria-hidden="true" />
       </button>
     </nav>
 
@@ -205,20 +192,7 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
 
           <div class="agent__body" :class="{ 'has-viz': showViz }">
             <div class="agent__chat">
-              <div v-if="view === 'suggestions'" class="agent__log">
-                <p class="agent__hint">Preguntas para empezar. Cada cifra sale de los datos de X-Ray y va con su mes.</p>
-                <button v-for="s in suggestions" :key="s" type="button" class="agent__chip" @click="send(s)">{{ s }}</button>
-              </div>
-
-              <div v-else-if="view === 'history'" class="agent__log">
-                <p v-if="!asked.length" class="agent__hint">Aún no has preguntado nada en esta sesión.</p>
-                <template v-else>
-                  <p class="agent__hint">Vuelve a lanzar una pregunta anterior.</p>
-                  <button v-for="(q, i) in asked" :key="i" type="button" class="agent__chip" @click="send(q)">{{ q }}</button>
-                </template>
-              </div>
-
-              <div v-else ref="log" class="agent__log" aria-live="polite">
+              <div ref="log" class="agent__log" aria-live="polite">
                 <div v-if="!chat.messages.length" class="agent__empty">
                   <p>Pregúntame por una nota, un cambio de mes o una decisión. Cuando haya datos que ver, los dibujo a la derecha.</p>
                   <button v-for="s in suggestions" :key="s" type="button" class="agent__chip" @click="send(s)">{{ s }}</button>
@@ -308,7 +282,7 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
 
 <style scoped>
 .agent { font-family: var(--font-ui); }
-/* El dock de Embat: una pastilla oscura con tres modos, siempre visible abajo. */
+/* El dock: una pastilla oscura con el bot, siempre visible abajo. */
 .agent__dock {
   position: fixed; left: 50%; bottom: 16px; z-index: 101; transform: translateX(-50%);
   display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 12px;
@@ -327,13 +301,8 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
 @keyframes agent-float { 50% { transform: translateY(-3px) rotate(-4deg); } }
 @media (prefers-reduced-motion: reduce) { .agent__who img.is-live { animation: none; } }
 .agent__dock button:hover { background: rgba(190, 200, 255, 0.08); }
-.agent__dock button.is-on { background: linear-gradient(135deg, #8b5cf6, #5b74ff); color: #fff; }
-.agent__dock button.agent__bot.is-on { background: rgba(190, 200, 255, 0.1); }
-.agent__dock b { font: 700 0.8rem var(--font-num); color: #f2b33d; }
-.agent__dock button.is-on b { color: #fff; }
-.agent__sep { width: 1px; height: 22px; background: rgba(190, 200, 255, 0.14); }
+.agent__dock button.is-on { background: rgba(190, 200, 255, 0.1); }
 .agent__dock button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.agent__hint { margin: 0 0 8px; font-size: 0.82rem; line-height: 1.62; color: var(--text-muted); }
 /* Sobre el dock, centrado como el de Embat: sale desde abajo y no tapa la pantalla. */
 .agent__panel {
   position: fixed; left: 50%; bottom: 72px; z-index: 100; transform: translateX(-50%);

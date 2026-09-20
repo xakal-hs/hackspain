@@ -10,16 +10,24 @@ interface ChatBody extends AgentContext {
 const MAX_MESSAGES = 30
 
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig()
-  const model = resolveModel({
-    agentBaseUrl: config.agentBaseUrl, agentApiKey: config.agentApiKey, agentModel: config.agentModel,
-    gatewayKey: process.env.AI_GATEWAY_API_KEY, oidcToken: process.env.VERCEL_OIDC_TOKEN,
-  })
-  if (!model)
-    throw createError({ statusCode: 503, statusMessage: 'Assistant unavailable', message: 'El asistente no está configurado (falta AGENT_BASE_URL con AGENT_MODEL, o AI_GATEWAY_API_KEY)' })
   const body = await readBody<ChatBody>(event)
   if (!Array.isArray(body?.messages) || !body.messages.length)
-    throw createError({ statusCode: 400, statusMessage: 'Bad request', message: 'Faltan mensajes' })
+    throw createError({ statusCode: 400, statusMessage: 'Faltan mensajes' })
+  if (!['empresa', 'embat'].includes(body.role ?? ''))
+    throw createError({ statusCode: 400, statusMessage: 'Rol inválido' })
+  if (body.companyId && !/^COMP_\d{4}$/.test(body.companyId))
+    throw createError({ statusCode: 400, statusMessage: 'Empresa inválida' })
+  if (body.role === 'empresa' && !body.companyId)
+    throw createError({ statusCode: 400, statusMessage: 'Falta la empresa seleccionada' })
+
+  const config = useRuntimeConfig()
+  const model = resolveModel({
+    agentBaseUrl: process.env.AGENT_BASE_URL || config.agentBaseUrl,
+    agentApiKey: process.env.AGENT_API_KEY || config.agentApiKey,
+    agentModel: process.env.AGENT_MODEL || config.agentModel,
+  })
+  if (!model)
+    throw createError({ statusCode: 503, statusMessage: 'Asistente no disponible', message: 'El proveedor del asistente no está configurado.' })
 
   const result = streamText({
     model,
@@ -27,6 +35,7 @@ export default defineEventHandler(async (event) => {
     messages: await convertToModelMessages(body.messages.slice(-MAX_MESSAGES)),
     tools: agentTools(localFetcher()),
     stopWhen: isStepCount(8),
+    timeout: { totalMs: 120_000 },
   })
   return result.toUIMessageStreamResponse()
 })
