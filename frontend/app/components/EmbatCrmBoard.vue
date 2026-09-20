@@ -127,7 +127,18 @@ async function move(lead: EmbatLead, status: LeadStatus) {
             <span>{{ column.hint }}</span>
             <em>{{ nAvisos(grouped[column.id]?.length || 0) }}</em>
           </header>
-          <table v-if="abiertos.has(column.id) && grouped[column.id]?.length" :aria-label="`Peticiones ${column.label.toLowerCase()}`">
+          <table
+            v-if="abiertos.has(column.id) && grouped[column.id]?.length"
+            class="crm__rows"
+            :aria-label="`Peticiones ${column.label.toLowerCase()}`"
+          >
+            <!-- Cada estado es su propia tabla: sin estas medidas cada grupo colocaría el
+             * responsable y la fecha en un sitio distinto y la columna quedaría en zigzag. -->
+            <colgroup>
+              <col />
+              <col class="crm__rows-quien" />
+              <col class="crm__rows-cuando" />
+            </colgroup>
             <tbody>
               <tr
                 v-for="lead in grouped[column.id]"
@@ -141,11 +152,11 @@ async function move(lead: EmbatLead, status: LeadStatus) {
                     >{{ lead.reason }}<i v-if="lead.reason_amount"> · {{ lead.reason_amount }}</i></em
                   >
                 </th>
-                <td class="embat-app__meta">
+                <td class="embat-app__meta crm__quien">
                   {{ lead.assignee_name }}
                   <small v-if="lead.assignee_title">{{ lead.assignee_title }}</small>
                 </td>
-                <td class="embat-app__meta">{{ when(lead.created_at) }}</td>
+                <td class="embat-app__meta crm__cuando">{{ when(lead.created_at) }}</td>
               </tr>
             </tbody>
           </table>
@@ -202,6 +213,33 @@ async function move(lead: EmbatLead, status: LeadStatus) {
 </template>
 
 <style scoped>
+/* Las cuatro tablas comparten rejilla para que la columna del responsable y la de la fecha
+ * caigan en la misma vertical al saltar de un estado a otro. */
+.crm__rows {
+  table-layout: fixed;
+}
+.crm__rows-quien {
+  width: 300px;
+}
+.crm__rows-cuando {
+  width: 132px;
+}
+
+/* Con la rejilla fija el cargo largo ya no puede empujar la columna: se recorta. */
+.crm__quien {
+  text-align: left;
+}
+.crm__quien,
+.crm__cuando,
+.crm__rows th[scope='row'] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.crm__quien small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* El motivo viaja pegado al nombre: el comercial sabe por qué llaman antes de abrir la ficha. */
 .crm__why {
   /* Cuelga del nombre en su propia línea, pero el fondo sólo abraza al texto. */
