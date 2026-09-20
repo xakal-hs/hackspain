@@ -815,5 +815,11 @@ const connected = activeCompanies.toLocaleString('es-ES')
         </footer>
       </main>
     </div>
+<<<<<<< Updated upstream
+=======
+    <!-- El asistente lee la cartera entera, así que solo sale en Embat: en la vista de empresa
+         contestaría con la caja y la nota de otras empresas, que no son suyas. -->
+    <AgentChat v-if="role === 'embat'" :role="role" />
+>>>>>>> Stashed changes
   </div>
 </template>
