@@ -120,7 +120,7 @@ watch(selectedId, () => {
             <button type="button" :aria-expanded="abiertos.has(grupo.id)" @click="plegar(grupo.id)">
               <ChevronRight :size="16" aria-hidden="true" />
             </button>
-            <component :is="grupo.icon" :size="17" aria-hidden="true" :class="`cc__dot is-${grupo.id}`" />
+            <component :is="grupo.icon" :size="17" aria-hidden="true" class="cc__dot" />
             <b>{{ grupo.label }}</b>
             <span v-if="grupo.hint">{{ grupo.hint }}</span>
             <em>{{ nClientes(porEstado(grupo.id).length) }}</em>
@@ -172,7 +172,7 @@ watch(selectedId, () => {
             <button type="button" :aria-expanded="abiertos.has('caucion')" @click="plegar('caucion')">
               <ChevronRight :size="16" aria-hidden="true" />
             </button>
-            <ShieldCheck :size="17" aria-hidden="true" class="cc__dot is-caucion" />
+            <ShieldCheck :size="17" aria-hidden="true" class="cc__dot" />
             <b>Caución</b>
             <em>{{ caucion ? `${caucion.productos} ${caucion.productos === 1 ? 'línea' : 'líneas'}` : 'sin línea' }}</em>
           </header>
@@ -291,8 +291,6 @@ watch(selectedId, () => {
   --cc-navy: #131736;
   --cc-blue: #3b77f6;
   --cc-green: #1d8a5c;
-  --cc-amber: #b07a12;
-  --cc-red: #c0392f;
 
   display: flex;
   flex-direction: column;
@@ -461,20 +459,9 @@ watch(selectedId, () => {
   color: var(--cc-muted);
 }
 
-.cc__dot.is-preautorizado {
-  color: var(--cc-green);
-}
-
-.cc__dot.is-estudio {
-  color: var(--cc-amber);
-}
-
-.cc__dot.is-denegado {
-  color: var(--cc-red);
-}
-
-.cc__dot.is-caucion {
-  color: var(--cc-blue);
+/* Los iconos de grupo van en el azul oscuro de Embat: el estado lo dice el nombre. */
+.cc__dot {
+  color: var(--cc-navy);
 }
 
 table {
