@@ -4,12 +4,8 @@ import {
   BadgeCheck,
   ChevronRight,
   ChevronsUpDown,
-  CircleAlert,
-  CircleCheck,
-  CircleX,
   EllipsisVertical,
   Search,
-  ShieldCheck,
 } from '@lucide/vue'
 import type { ClientBookResponse, ClientRow } from '../../shared/types/company'
 
@@ -32,10 +28,10 @@ const detalle = ref<ClientRow | null>(null)
 const solicitados = ref(new Set<string>())
 
 type Estado = ClientRow['estado']
-const grupos: { id: Estado; label: string; icon: typeof CircleCheck; hint: string }[] = [
-  { id: 'preautorizado', label: 'Preautorizados', icon: CircleCheck, hint: 'Cobertura inmediata: Embat ya tiene las pruebas de pago' },
-  { id: 'estudio', label: 'En estudio', icon: CircleAlert, hint: '' },
-  { id: 'denegado', label: 'Denegados', icon: CircleX, hint: '' },
+const grupos: { id: Estado; label: string; hint: string }[] = [
+  { id: 'preautorizado', label: 'Preautorizados', hint: 'Cobertura inmediata: Embat ya tiene las pruebas de pago' },
+  { id: 'estudio', label: 'En estudio', hint: '' },
+  { id: 'denegado', label: 'Denegados', hint: '' },
 ]
 
 const clientes = computed(() => libro.data.value?.clientes ?? [])
@@ -63,7 +59,6 @@ const excedente = computed(() => libro.data.value?.excedente ?? null)
  * de 4× el colateral y el ahorro del 30 % son hipótesis de producto, no precio de nadie. */
 const caucionPropuesta = computed(() => (excedente.value && excedente.value > 0 ? excedente.value * 4 : null))
 
-const cover = computed(() => libro.data.value?.cover ?? 0.9)
 const nf = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0, useGrouping: 'always' } as Intl.NumberFormatOptions)
 const money = (v: number) => `${nf.format(v)} €`
 const dias = (v: number | null) =>
@@ -120,7 +115,6 @@ watch(selectedId, () => {
             <button type="button" :aria-expanded="abiertos.has(grupo.id)" @click="plegar(grupo.id)">
               <ChevronRight :size="16" aria-hidden="true" />
             </button>
-            <component :is="grupo.icon" :size="17" aria-hidden="true" class="cc__dot" />
             <b>{{ grupo.label }}</b>
             <span v-if="grupo.hint">{{ grupo.hint }}</span>
             <em>{{ nClientes(porEstado(grupo.id).length) }}</em>
@@ -172,7 +166,6 @@ watch(selectedId, () => {
             <button type="button" :aria-expanded="abiertos.has('caucion')" @click="plegar('caucion')">
               <ChevronRight :size="16" aria-hidden="true" />
             </button>
-            <ShieldCheck :size="17" aria-hidden="true" class="cc__dot" />
             <b>Caución</b>
             <em>{{ caucion ? `${caucion.productos} ${caucion.productos === 1 ? 'línea' : 'líneas'}` : 'sin línea' }}</em>
           </header>
@@ -218,7 +211,6 @@ watch(selectedId, () => {
     <CreditoActionPanel
       :open="panel !== null"
       :row="panel"
-      :cover="cover"
       :snapshot="libro.data.value?.snapshot ?? ''"
       :hecho="panel !== null && solicitados.has(panel.cliente)"
       @close="panel = null"
@@ -261,7 +253,7 @@ watch(selectedId, () => {
         </div>
         <div v-if="detalle.estado !== 'denegado'">
           <dt>Límite y cobertura</dt>
-          <dd>{{ money(detalle.limite) }} al {{ Math.round(cover * 100) }} %</dd>
+          <dd>{{ money(detalle.limite) }} al {{ Math.round(detalle.cover * 100) }} %</dd>
         </div>
         <div v-if="detalle.estado !== 'denegado'">
           <dt>Prima estimada</dt>
@@ -311,7 +303,7 @@ watch(selectedId, () => {
   justify-content: space-between;
   gap: 10px 16px;
   min-height: 56px;
-  padding: 0 24px;
+  padding-inline: 24px;
   border-bottom: 1px solid var(--cc-line);
 }
 
@@ -459,10 +451,6 @@ watch(selectedId, () => {
   color: var(--cc-muted);
 }
 
-/* Los iconos de grupo van en el azul oscuro de Embat: el estado lo dice el nombre. */
-.cc__dot {
-  color: var(--cc-navy);
-}
 
 table {
   width: 100%;

@@ -9,7 +9,6 @@ import type { ClientRow } from '../../shared/types/company'
 const props = defineProps<{
   open: boolean
   row: ClientRow | null
-  cover: number
   snapshot: string
   hecho: boolean
 }>()
@@ -149,7 +148,7 @@ const carencia = 90
               </div>
               <div>
                 <dt>Cobertura</dt>
-                <dd>{{ Math.round(cover * 100) }} %</dd>
+                <dd>{{ Math.round(row.cover * 100) }} %</dd>
               </div>
               <div>
                 <dt>Prima estimada</dt>
@@ -162,7 +161,7 @@ const carencia = 90
               <li>
                 <b>Qué cubre</b>
                 <span>
-                  El {{ Math.round(cover * 100) }} % del impago de este cliente, hasta
+                  El {{ Math.round(row.cover * 100) }} % del impago de este cliente, hasta
                   {{ money(row.limite) }} de saldo vivo. El {{ franquicia }} % restante queda a tu cargo.
                 </span>
               </li>

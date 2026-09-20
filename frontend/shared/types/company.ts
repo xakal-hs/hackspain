@@ -121,6 +121,8 @@ export interface ClientRow {
   estado: 'preautorizado' | 'estudio' | 'denegado'
   /** Si el ERP trae todo lo que hace falta para cotizar en el momento. */
   expediente: 'completo' | 'incompleto'
+  /** Parte del impago que cubriría la póliza para este cliente: entre 0,75 y 0,95. */
+  cover: number
   motivo: string
 }
 export interface SuretyLine {

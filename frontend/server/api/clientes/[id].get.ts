@@ -15,8 +15,12 @@ interface Prevision {
 let clientes: Promise<Clientes | null> | undefined
 let prevision: Promise<Prevision | null> | undefined
 const load = () => {
-  clientes ??= useStorage('assets:server').getItem<Clientes>('clientes.json')
-  prevision ??= useStorage('assets:server').getItem<Prevision>('prevision.json')
+  const assets = useStorage('assets:server')
+  // En desarrollo se leen siempre: si no, regenerar el JSON obliga a reiniciar el servidor.
+  if (import.meta.dev)
+    return Promise.all([assets.getItem<Clientes>('clientes.json'), assets.getItem<Prevision>('prevision.json')])
+  clientes ??= assets.getItem<Clientes>('clientes.json')
+  prevision ??= assets.getItem<Prevision>('prevision.json')
   return Promise.all([clientes, prevision])
 }
 

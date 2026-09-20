@@ -14,8 +14,11 @@ Con esas pruebas decide, con reglas fijas y explicables:
 - estudio: el resto. Ahí el expediente puede estar completo en el ERP, y entonces se cotiza al
   momento, o faltar algo, y entonces va a la aseguradora con lo que hay.
 
-El límite propuesto es la mayor exposición de los últimos doce meses redondeada a la baja; la prima es
-una hipótesis de producto (tasa sobre ventas aseguradas), no un precio de ninguna aseguradora.
+El límite propuesto sale de la mayor exposición de los últimos doce meses, movida entre el 80 % y el
+130 % por cliente, y la cobertura va del 75 % al 95 %, un escalón más arriba si paga puntual y sin
+vencidos. Las dos y el expediente salen de un hash del par empresa-cliente, así que no cambian al
+recargar. La prima es una hipótesis de producto (tasa sobre ventas aseguradas), no un precio de
+ninguna aseguradora.
 
 Escribe frontend/server/assets/clientes.json (asset de Nitro).
 
@@ -44,7 +47,8 @@ MIN_MONTHS = 6            # meses de relación
 MAX_DELAY = 45            # días de retraso medio admitidos en la preautorización
 DECLINE_DELAY = 60        # días de retraso medio que deniegan por sí solos
 PREMIUM_RATE = 0.0035     # hipótesis: 0,35 % sobre ventas aseguradas
-COVER = 0.9               # hipótesis: 90 % de cobertura
+COVERS = (0.75, 0.80, 0.85, 0.90, 0.95)   # tramos de cobertura habituales en el seguro de crédito
+COVER = 0.90              # el del medio, para lo que no lleva cliente delante
 MIN_SALES = 1000          # por debajo no hay nada que asegurar...
 MIN_ROWS = 12             # ...salvo que la empresa se quede con menos clientes que esto
 
@@ -59,6 +63,21 @@ def round_limit(v: float) -> float:
         return 0.0
     step = 500 if v < 5_000 else 1000 if v < 50_000 else 5000 if v < 500_000 else 25_000
     return float(max(int(v // step) * step, step))
+
+
+def unidad(company_id: str, cliente: str, sal: str) -> float:
+    """Un número entre 0 y 1, siempre el mismo para ese cliente: así la oferta no cambia al recargar."""
+    h = hashlib.sha1(f"{company_id}:{cliente}:{sal}".encode()).digest()
+    return int.from_bytes(h[:4], "big") / 2**32
+
+
+def cobertura(company_id: str, cliente: str, row) -> float:
+    """El tramo de cobertura, con un empujón para quien paga puntual y sin vencidos."""
+    i = int(unidad(company_id, cliente, "cover") * len(COVERS))
+    puntual = (row.retraso_medio is None or row.retraso_medio <= 0) and row.vencido_90 == 0
+    if puntual:
+        i += 1
+    return COVERS[min(max(i, 0), len(COVERS) - 1)]
 
 
 def expediente(company_id: str, cliente: str) -> str:
@@ -148,6 +167,9 @@ def main() -> None:
             if estado == "preautorizado" and limite <= 0:
                 estado, motivo = "estudio", "Estudio de la aseguradora: sin exposición previa que sirva de referencia."
             exped = expediente(cid, row.cliente)
+            cover = cobertura(cid, row.cliente, row)
+            # el tope se mueve alrededor de la mayor deuda que ese cliente ya devolvió
+            limite = round_limit(limite * (0.8 + 0.5 * unidad(cid, row.cliente, "limite")))
             # Con el expediente completo se cotiza al momento aunque falte historial para
             # preautorizar: el tope sale de la mayor deuda previa o de dos meses de ventas.
             if estado == "estudio" and exped == "completo" and limite <= 0:
@@ -155,6 +177,7 @@ def main() -> None:
             filas.append({
                 "cliente": row.cliente,
                 "expediente": exped,
+                "cover": cover,
                 "ventas_12m": round(float(row.ventas_12m), 2),
                 "expuesto": round(float(row.expuesto), 2),
                 "vencido": round(float(row.vencido), 2),
@@ -167,7 +190,7 @@ def main() -> None:
                 "pico": round(float(row.pico), 2),
                 "limite": limite,
                 # la prima del seguro de crédito se cobra sobre la facturación asegurada, no sobre el límite
-                "prima": round(float(row.ventas_12m) * COVER * PREMIUM_RATE, 2),
+                "prima": round(float(row.ventas_12m) * cover * PREMIUM_RATE, 2),
                 "estado": estado,
                 "motivo": motivo,
             })
