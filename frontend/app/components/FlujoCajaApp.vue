@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query'
 import {
-  Atom,
   Calendar,
   ChartLine,
   ChevronDown,
@@ -9,16 +8,14 @@ import {
   ChevronsUpDown,
   Ellipsis,
   Eye,
-  ListChecks,
-  RotateCcwClock,
   ScanLine,
   TrendingUp,
   TriangleAlert,
 } from '@lucide/vue'
 import type { Cashflow, CashflowMonth, ForecastMonth } from '../../shared/types/company'
 
-/* Clon de la pantalla «Flujo de caja» de Embat: mismas filas, mismos controles y la misma barra
- * flotante abajo. Va siempre en claro, como el original. */
+/* Clon de la pantalla «Flujo de caja» de Embat: mismas filas y mismos controles. Va siempre en
+ * claro, como el original. La barra de abajo no se replica: la del asistente ya está en pantalla. */
 
 const { selectedId, company, sector } = useSelectedCompany()
 
@@ -403,17 +400,6 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
         </div>
       </section>
     </Transition>
-
-    <!-- La barra flotante de Embat. -->
-    <div class="eb__dock">
-      <nav class="eb__pill" aria-label="Herramientas">
-        <button type="button" aria-label="Asistente"><Atom :size="20" aria-hidden="true" class="eb__atom" /></button>
-        <button type="button" aria-label="Tareas pendientes: 1">
-          <ListChecks :size="17" aria-hidden="true" /><span>1</span>
-        </button>
-        <button type="button" aria-label="Historial"><RotateCcwClock :size="17" aria-hidden="true" /></button>
-      </nav>
-    </div>
   </div>
 </template>
 
@@ -431,7 +417,6 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
   --eb-strong: #fafbfb;
   --eb-navy: #131736;
   --eb-blue: #3b77f6;
-  --eb-violet: #8754c2;
   --eb-ahead: #7a5af0;
 
   position: relative;
@@ -445,6 +430,8 @@ const sectorLabel = computed(() => sector.value.charAt(0).toUpperCase() + sector
   font-size: 13px;
   font-feature-settings: 'tnum' 1;
   color-scheme: light;
+  /* Hueco para la barra del asistente, que va fija abajo y taparía la última fila. */
+  padding-bottom: 80px;
 }
 
 .eb ::selection {
@@ -818,60 +805,6 @@ tbody tr:last-child > * {
   transform: rotate(90deg);
 }
 
-/* La barra de Embat, abajo y centrada. No flota: taparía la acción del caso en pantallas bajas. */
-.eb__dock {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-top: auto;
-  padding: 0 16px 18px;
-}
-
-.eb__pill {
-  display: flex;
-  align-items: center;
-  height: 52px;
-  padding: 0 8px;
-  border-radius: 10px;
-  background: var(--eb-navy);
-  box-shadow: 0 10px 28px -12px rgb(16 20 40 / 0.5);
-}
-
-.eb__pill button {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 7px;
-  background: none;
-  color: #e6e8f0;
-  font: inherit;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.eb__pill button + button::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 8px;
-  bottom: 8px;
-  width: 1px;
-  background: rgb(255 255 255 / 0.14);
-}
-
-.eb__pill button:hover {
-  background: rgb(255 255 255 / 0.08);
-}
-
-.eb__atom {
-  color: var(--eb-violet);
-}
-
 .eb__cta {
   height: 40px;
   padding: 0 18px;
@@ -1006,10 +939,6 @@ tbody tr:last-child > * {
 
   td {
     min-width: 116px;
-  }
-
-  .eb__dock {
-    padding-bottom: 24px;
   }
 
   .eb__action {
