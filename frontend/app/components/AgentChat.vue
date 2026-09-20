@@ -293,7 +293,7 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
   background: none; color: #eef0fb; cursor: pointer;
 }
 .agent__bot { padding: 0 8px; }
-.agent__bot img { width: 32px; height: 32px; object-fit: contain; }
+.agent__bot img { width: 32px; height: 32px; object-fit: contain; transform: scale(1.5); }
 /* Mientras piensa, el bot flota: es el mismo «sigo aquí» que la barra, sin robar atención. */
 .agent__who { display: flex; align-items: center; gap: 11px; min-width: 0; }
 .agent__who img { flex: none; object-fit: contain; }
