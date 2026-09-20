@@ -24,7 +24,6 @@ const items = computed(() => {
     { id: 'score', label: 'X-Ray Score', icon: ScanLine },
     { id: 'credito', label: 'Crédito y caución', icon: ShieldCheck },
     /* Divisa Inteligente queda fuera del menú; la pantalla sigue viva en ?section=divisa. */
-    { id: 'ajustes', label: 'Ajustes', icon: Settings },
   ]
   const ops = [
     { id: 'caja', label: 'Caja', icon: Wallet },
@@ -33,6 +32,9 @@ const items = computed(() => {
   ]
   return props.role === 'empresa' ? treasury : ops
 })
+
+/* Ajustes no es una sección más: baja al pie, pegado al selector de empresa. */
+const ajustes = computed(() => (props.role === 'empresa' ? { id: 'ajustes', label: 'Ajustes', icon: Settings } : null))
 
 const open = ref(false)
 const session = useCookie<PerspectiveId | null>('xray-demo-role', {
@@ -67,7 +69,11 @@ const thumb = reactive({ x: 0, y: 0, w: 0, h: 0 })
 function placeThumb() {
   const nav = navEl.value
   const active = nav?.querySelector<HTMLElement>('a.is-here')
-  if (!nav || !active) return
+  // En Ajustes no hay pestaña activa en el rail: el pulgar se retira en vez de quedarse huérfano.
+  if (!nav || !active) {
+    placed.value = false
+    return
+  }
   thumb.x = active.offsetLeft
   thumb.y = active.offsetTop
   thumb.w = active.offsetWidth
@@ -139,6 +145,16 @@ watch(
     </nav>
 
     <div class="rail__foot">
+      <nav v-if="ajustes" class="rail__nav rail__nav--foot" aria-label="Ajustes">
+        <NuxtLink
+          :to="href(ajustes.id)"
+          :class="{ 'is-here': section === ajustes.id }"
+          :aria-current="section === ajustes.id ? 'page' : undefined"
+        >
+          <component :is="ajustes.icon" :size="17" aria-hidden="true" />{{ ajustes.label }}
+        </NuxtLink>
+      </nav>
+
       <div class="rail__profile" @keydown.esc="open = false">
         <div v-if="open" id="rail-switcher" class="rail__switcher">
           <p>Cambiar de vista</p>
