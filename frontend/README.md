@@ -60,13 +60,12 @@ version error when the runtime is unsupported.
 - `/`: public landing, built around the moment a deterioration is detected.
 - `/login`: simulated sign-in without credentials or real authentication.
 - `/dashboard/empresa`: the company's own treasury — X-Ray Score, Colchón Dinámico and Divisa Inteligente.
-- `/dashboard/embat`: both sides, with anticipation as the headline number.
+- `/dashboard/embat`: Equipo Embat — caja del portfolio and the financing CRM.
 
-Each dashboard takes `?section=`. Empresa has `score` (default), `colchon` and
-`divisa`; Embat has `resumen` (default), `cartera`, `senales`, `ofertas`, `monitor`,
-`revenue` and `modelo`. A section the perspective does not have falls back to its
-default. The earlier standalone routes `/cartera`, `/monitor`, `/escenarios` and
-`/empresas/:id` now redirect into these sections.
+Each dashboard takes `?section=`. Empresa has `flujo` (default), `score`, `colchon` and
+`divisa`; Embat has `caja` (default), `crm` and `equipo`. A section the perspective does not have
+falls back to its default. The earlier standalone routes `/cartera`, `/monitor`,
+`/escenarios` and `/empresas/:id` now redirect into Equipo Embat.
 
 Switch perspectives or exit using the user panel at the bottom of the desktop sidebar. On mobile, navigation and the user panel move above the content. Dashboard deep links redirect to demo sign-in when no demo-role cookie exists. This cookie is a UI convenience, not an authorization boundary.
 
@@ -83,16 +82,24 @@ the header chip says which one is live:
 2. **Fixtures** (`source: 'demo'`) — when Supabase is not configured, or when reading it
    fails. Five companies, so `pnpm dev` works with no environment at all.
 
-There is no separate API server. Every product route is a Nitro route in this project and
-reads results that a reproducible job already published; see `DEPLOYMENT.md`.
-
 Missing values arrive as `null` and stay missing: a company without enough invoices shows
 "no hay facturas suficientes", not a borrowed number. Roughly half the portfolio has no
 DSO, so this matters more than it sounds.
 
+There is no separate API server. Every product route is a Nitro route in this project and
+reads results that a reproducible job already published; see `DEPLOYMENT.md`.
+
+Empresa treasury screens read Supabase (`company-directory`, `flujo`). Equipo Embat:
+
+1. **Caja** (`GET /api/embat/caja`) — the 20 `featured_companies`, with operational cash (`cash_end`, `net_op`, runway) and financial cash (debt service, outstanding, utilisation) from `panel_monthly` / `company_static`. Alert vs opportunity comes from the same rotura/excedente forecast Flujo de caja uses.
+2. **Financiación** (`GET/POST /api/embat/leads`) — CRM pipeline. When the company clicks **Quiero pedir financiación**, a lead is assigned to a commercial from `embat_employees` with a generic email draft (no company data, fake Calendly).
+3. **Equipo** (`GET /api/embat/employees`) — AM + customer success from `data/embat_am.csv` and `data/embat_cs.csv`, merged into `embat_employees`. Apply `supabase/embat_employees_schema.sql` on the frontend project (`frontend/.env`) so leads persist in Postgres; until then the server keeps a local file under `frontend/.data/` and serves the same employee list from `frontend/server/data/embat-employees.json`.
+
+Reload employees with `python3 scripts/push_embat_employees.py` (uses `frontend/.env`, never the X-Ray source project).
+
 The role cookie survives reloads until logout/browser session expiry.
 
-Manual acceptance flow: enter as Empresa and walk its three treasury screens, then switch to Embat, search/select a company and inspect signals. Also check empty search, logout, direct-link redirect, and mobile/desktop layouts.
+Manual acceptance flow: enter as Empresa, open Flujo de caja, request financing; switch to Embat and find the lead in Financiación. Walk Caja filters (alerta / oportunidad). Also check logout, direct-link redirect, and mobile/desktop layouts.
 
 ## Supabase configuration
 

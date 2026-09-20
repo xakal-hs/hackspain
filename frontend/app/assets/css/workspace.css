@@ -34,6 +34,11 @@
   padding: 0 6px;
 }
 
+.rail__brand .brand-mark {
+  width: 28px;
+  height: 28px;
+}
+
 .rail__space {
   display: grid;
   gap: 1px;
@@ -120,6 +125,17 @@
 
 .rail__nav a.is-here svg {
   color: var(--live);
+}
+
+/* Ajustes baja al pie: sin pulgar, así que el estado activo se dibuja en el propio enlace. */
+.rail__nav--foot {
+  width: 100%;
+}
+
+.rail__nav--foot a.is-here {
+  border-color: var(--line);
+  background: var(--panel-raised);
+  box-shadow: var(--sheen);
 }
 
 .rail__foot {
@@ -357,6 +373,9 @@
 }
 .span-5 {
   grid-column: span 5;
+}
+.span-6 {
+  grid-column: span 6;
 }
 .span-7 {
   grid-column: span 7;
@@ -1822,6 +1841,12 @@
     flex: none;
   }
 
+  .rail__nav--foot {
+    width: auto;
+    order: 0;
+    overflow: visible;
+  }
+
   .rail__foot {
     margin: 0 0 0 auto;
     display: flex;
@@ -1846,6 +1871,7 @@
   .span-3,
   .span-4,
   .span-5,
+  .span-6,
   .span-7,
   .span-8,
   .cover {

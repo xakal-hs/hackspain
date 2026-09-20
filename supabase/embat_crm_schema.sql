@@ -1,0 +1,3 @@
+-- El CRM de Equipo Embat vive en embat_employees_schema.sql:
+-- public.embat_employees (comercial + CS) y public.embat_leads
+-- (assigned_to → embat_employees). Aplicar sobre el proyecto del frontend.

@@ -1,14 +1,43 @@
-/** Read-only access for the existing demo. Credentials stay on the server. */
-export function companyDataReader() {
+/** Credentials stay on the server. Never copy the secret key into public config. */
+export function supabaseRest() {
   const config = useRuntimeConfig()
   const url = String(config.public.supabaseUrl || '').replace(/\/$/, '')
   const key = String(config.supabaseSecretKey || '')
   if (!url || !key) throw createError({ statusCode: 503, statusMessage: 'Supabase no está configurado' })
+  return {
+    url,
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      Prefer: 'return=representation',
+    },
+  }
+}
+
+/** Read-only access for the existing demo. */
+export function companyDataReader() {
+  const { url, headers } = supabaseRest()
   return async <T>(table: string, query: Record<string, string | number>): Promise<T[]> =>
     $fetch<T[]>(`${url}/rest/v1/${table}`, {
-      headers: { apikey: key, Authorization: `Bearer ${key}` },
+      headers,
       query, timeout: 15000,
     })
+}
+
+export async function companyDataWrite<T>(
+  method: 'POST' | 'PATCH',
+  table: string,
+  query: Record<string, string | number>,
+  body: Record<string, unknown>,
+): Promise<T[]> {
+  const { url, headers } = supabaseRest()
+  return $fetch<T[]>(`${url}/rest/v1/${table}`, {
+    method,
+    headers,
+    query,
+    body,
+    timeout: 15000,
+  })
 }
 
 // PostgREST caps responses. Keep paging, including when the last page is full.

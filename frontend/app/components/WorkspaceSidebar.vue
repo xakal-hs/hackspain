@@ -1,19 +1,14 @@
 <script setup lang="ts">
 import {
-  Activity,
   ArrowLeftRight,
-  Banknote,
   ChevronsUpDown,
-  CircleDollarSign,
-  Gauge,
-  Handshake,
+  Landmark,
   LogOut,
-  PiggyBank,
-  Radar,
-  Rows3,
+  Users,
   ScanLine,
   Settings,
-  Target,
+  ShieldCheck,
+  Wallet,
   Check,
 } from '@lucide/vue'
 import { perspectives, perspectiveById, type PerspectiveId } from '~/data/demo'
@@ -24,28 +19,22 @@ const { name: companyName } = useSelectedCompany()
 const profile = computed(() => perspectiveById(props.role)!)
 
 const items = computed(() => {
-  const portfolio = [
-    { id: 'resumen', label: 'Resumen', icon: Gauge },
-    { id: 'cartera', label: 'Cartera', icon: Rows3 },
-    { id: 'senales', label: 'Señales', icon: Activity },
-    { id: 'ofertas', label: 'Mercado', icon: Handshake },
-  ]
-  /* Tesorería propia: solo tiene sentido mirándose a uno mismo. */
   const treasury = [
     { id: 'flujo', label: 'Flujo de caja', icon: ArrowLeftRight },
     { id: 'score', label: 'X-Ray Score', icon: ScanLine },
-    { id: 'colchon', label: 'Colchón Dinámico', icon: PiggyBank },
-    { id: 'divisa', label: 'Divisa Inteligente', icon: CircleDollarSign },
-    { id: 'ajustes', label: 'Ajustes', icon: Settings },
+    { id: 'credito', label: 'Crédito y caución', icon: ShieldCheck },
+    /* Divisa Inteligente queda fuera del menú; la pantalla sigue viva en ?section=divisa. */
   ]
-  /* Interno: el sujeto ya no es una empresa de la cartera, sino Embat. */
   const ops = [
-    { id: 'monitor', label: 'Monitor operativo', icon: Radar },
-    { id: 'revenue', label: 'Revenue por producto', icon: Banknote },
-    { id: 'modelo', label: 'Métricas del modelo', icon: Target },
+    { id: 'caja', label: 'Caja', icon: Wallet },
+    { id: 'crm', label: 'Financiación', icon: Landmark },
+    { id: 'equipo', label: 'Equipo', icon: Users },
   ]
-  return props.role === 'empresa' ? treasury : [...portfolio, ...ops]
+  return props.role === 'empresa' ? treasury : ops
 })
+
+/* Ajustes no es una sección más: baja al pie, pegado al selector de empresa. */
+const ajustes = computed(() => (props.role === 'empresa' ? { id: 'ajustes', label: 'Ajustes', icon: Settings } : null))
 
 const open = ref(false)
 const session = useCookie<PerspectiveId | null>('xray-demo-role', {
@@ -80,7 +69,11 @@ const thumb = reactive({ x: 0, y: 0, w: 0, h: 0 })
 function placeThumb() {
   const nav = navEl.value
   const active = nav?.querySelector<HTMLElement>('a.is-here')
-  if (!nav || !active) return
+  // En Ajustes no hay pestaña activa en el rail: el pulgar se retira en vez de quedarse huérfano.
+  if (!nav || !active) {
+    placed.value = false
+    return
+  }
   thumb.x = active.offsetLeft
   thumb.y = active.offsetTop
   thumb.w = active.offsetWidth
@@ -152,6 +145,16 @@ watch(
     </nav>
 
     <div class="rail__foot">
+      <nav v-if="ajustes" class="rail__nav rail__nav--foot" aria-label="Ajustes">
+        <NuxtLink
+          :to="href(ajustes.id)"
+          :class="{ 'is-here': section === ajustes.id }"
+          :aria-current="section === ajustes.id ? 'page' : undefined"
+        >
+          <component :is="ajustes.icon" :size="17" aria-hidden="true" />{{ ajustes.label }}
+        </NuxtLink>
+      </nav>
+
       <div class="rail__profile" @keydown.esc="open = false">
         <div v-if="open" id="rail-switcher" class="rail__switcher">
           <p>Cambiar de vista</p>

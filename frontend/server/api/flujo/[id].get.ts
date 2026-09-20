@@ -1,22 +1,9 @@
-import type { CashForecast, Cashflow, CashflowAction, CashflowCategories, CashflowMonth, CompanyHealth } from '../../../shared/types/company'
+import type { CashForecast, Cashflow, CashflowCategories, CashflowMonth, CompanyHealth } from '../../../shared/types/company'
+import { actionFor, loadPrevision } from '../../utils/prevision'
 
 interface Prevision {
   snapshot: string
   companies: Record<string, { currency: string; categories: CashflowCategories; forecast: CashForecast | null }>
-}
-
-// server/assets/prevision.json lo genera scripts/build_prevision.py: se lee como asset de Nitro
-// para que el typecheck no tenga que inferir un JSON de 2,6 MB.
-let prevision: Promise<Prevision | null> | undefined
-const loadPrevision = () => (prevision ??= useStorage('assets:server').getItem<Prevision>('prevision.json'))
-
-/* Baremo de la acción bajo la tesorería final. Si va a romper caja, manda el aviso de financiación
- * sea cual sea el score. Prestar la caja se ofrece solo con excedente sobre tres meses de gasto y un
- * score de salud en la banda «sano» (≥ 65) de Supabase. Todo lo demás: nada. */
-function actionFor(forecast: CashForecast | null, health: CompanyHealth | undefined): CashflowAction {
-  if (forecast?.rotura) return 'financiar'
-  if (forecast?.excedente && health?.health_band === 'sano') return 'prestar'
-  return null
 }
 
 export default defineEventHandler(async (event): Promise<Cashflow> => {
