@@ -1,8 +1,6 @@
 /* Driver.js popover, retokened to the cockpit. The library ships a white
    card with grey chrome; this overlay keeps the tour on --panel / --live. */
 
-@import 'driver.js/dist/driver.css';
-
 .driver-fade .driver-overlay,
 .driver-fade .driver-popover {
   --driver-animation-duration: 0.6s;

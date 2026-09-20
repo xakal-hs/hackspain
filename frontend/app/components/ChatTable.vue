@@ -100,19 +100,17 @@ const actionTone = (v: unknown): ChartTone =>
 
 <template>
   <figure class="ct" :class="{ 'is-flush': flush }">
-    <div v-if="!plain" class="ct__head">
+    <figcaption v-if="!plain" class="ct__head">
       <div class="ct__weave" aria-hidden="true" />
-      <figcaption>
-        <div class="ct__title">
-          <strong>{{ chart.title }}</strong>
-          <i v-if="chart.subtitle" class="ct__sep" aria-hidden="true" />
-          <span v-if="chart.subtitle">{{ chart.subtitle }}</span>
-        </div>
-        <div v-if="chart.filters?.length" class="ct__filters">
-          <b>Criterio:</b>
-          <span v-for="f in chart.filters" :key="f.label"><Filter :size="10" aria-hidden="true" />{{ f.label }}</span>
-        </div>
-      </figcaption>
+      <div class="ct__title">
+        <strong>{{ chart.title }}</strong>
+        <i v-if="chart.subtitle" class="ct__sep" aria-hidden="true" />
+        <span v-if="chart.subtitle">{{ chart.subtitle }}</span>
+      </div>
+      <div v-if="chart.filters?.length" class="ct__filters">
+        <b>Criterio:</b>
+        <span v-for="f in chart.filters" :key="f.label"><Filter :size="10" aria-hidden="true" />{{ f.label }}</span>
+      </div>
 
       <div class="ct__bar">
         <dl v-if="chart.stats?.length" class="ct__stats">
@@ -130,7 +128,7 @@ const actionTone = (v: unknown): ChartTone =>
           </button>
         </div>
       </div>
-    </div>
+    </figcaption>
 
     <div class="ct__body">
     <div class="ct__scroll">

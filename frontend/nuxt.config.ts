@@ -6,6 +6,7 @@ export default defineNuxtConfig({
   css: [
     '~/assets/css/main.css',
     '~/assets/css/workspace.css',
+    'driver.js/dist/driver.css',
     '~/assets/css/xray-onboarding.css',
   ],
   app: {
