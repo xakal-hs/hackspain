@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Chat } from '@ai-sdk/vue'
 import { DefaultChatTransport, getToolName, isToolUIPart, type UIMessage } from 'ai'
-import { ArrowUp, Atom, BarChart3, Check, Copy, History, ListChecks, Maximize2, Mic, Minimize2, Plus, Sparkles, Square, X } from '@lucide/vue'
+import { ArrowUp, BarChart3, Check, Copy, History, ListChecks, Maximize2, Mic, Minimize2, Plus, Sparkles, Square, X } from '@lucide/vue'
+import raybot from '~/assets/images/raybot.png'
 import { blocks } from '~/utils/chatText'
 import { chartSections, chartsFromParts } from '~/utils/chatCharts'
 
@@ -160,8 +161,8 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
 <template>
   <div class="agent">
     <nav v-show="!(open && wide)" class="agent__dock" aria-label="Asistente de X-Ray">
-      <button type="button" :class="{ 'is-on': open && view === 'chat' }" aria-label="Preguntar a X-Ray" title="Pregunta a X-Ray" @click="show('chat')">
-        <Atom :size="18" aria-hidden="true" />
+      <button type="button" class="agent__bot" :class="{ 'is-on': open && view === 'chat' }" aria-label="Preguntar a X-Ray" title="Pregunta a X-Ray" @click="show('chat')">
+        <img :src="raybot" alt="" width="22" height="22">
       </button>
       <span class="agent__sep" aria-hidden="true" />
       <button type="button" class="agent__count" :class="{ 'is-on': open && view === 'suggestions' }" :aria-label="`${suggestions.length} preguntas sugeridas`" title="Preguntas sugeridas" @click="show('suggestions')">
@@ -310,7 +311,14 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
   display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border: 0; border-radius: 8px;
   background: none; color: #eef0fb; cursor: pointer;
 }
-.agent__dock button:first-child { color: #a56cf0; }
+.agent__bot { padding: 0 8px; }
+.agent__bot img { width: 22px; height: 22px; object-fit: contain; }
+/* Mientras piensa, el bot flota: es el mismo «sigo aquí» que la barra, sin robar atención. */
+.agent__who { display: flex; align-items: flex-start; gap: 11px; min-width: 0; }
+.agent__who img { flex: none; margin-top: 1px; object-fit: contain; }
+.agent__who img.is-live { animation: agent-float 2.4s ease-in-out infinite; }
+@keyframes agent-float { 50% { transform: translateY(-3px) rotate(-4deg); } }
+@media (prefers-reduced-motion: reduce) { .agent__who img.is-live { animation: none; } }
 .agent__dock button:hover { background: rgba(190, 200, 255, 0.08); }
 .agent__dock button.is-on { background: linear-gradient(135deg, #8b5cf6, #5b74ff); color: #fff; }
 .agent__dock b { font: 700 0.8rem var(--font-num); color: #f2b33d; }
