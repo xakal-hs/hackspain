@@ -18,6 +18,7 @@
     "generate": "nuxt generate",
     "postinstall": "nuxt prepare",
     "preview": "nuxt preview",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
