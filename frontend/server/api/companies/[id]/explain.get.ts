@@ -50,6 +50,7 @@ export default defineEventHandler(async (event) => {
   const previous = health[index - 1]!
   const drivers = await read<DriverRow>('company_health_driver_monthly', {
     ...filter,
+    score_version: `eq.${await publishedVersion()}`,
     month: `in.(${previous.month},${current.month})`,
     select: 'month,feature,pillar,label,raw_value,display_value,contribution',
     order: 'feature.asc', limit: 200,

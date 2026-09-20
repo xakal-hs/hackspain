@@ -2,7 +2,7 @@
  * Lectura del contrato X-Ray publicado en Supabase.
  *
  * Todo lo que sirve este servidor son resultados ya calculados: la nota la produce
- * `research/src/export_health_publication.py` y la decisión `backend/decision.py`, ambas
+ * `research/src/export_health_publication.py` y la decisión `research/src/decision.py`, ambas
  * publicadas por `scripts/`. Nitro no puntúa ni decide, solo consulta y traduce.
  */
 import type { H3Event } from 'h3'
@@ -46,7 +46,7 @@ export function es(value: number, digits = 1, sign = false): string {
   return (sign && value >= 0 ? `+${text}` : text).replace('.', ',')
 }
 
-/** Lo que hay que mirar hoy en esta empresa. Mismo baremo que servía el backend. */
+/** Lo que hay que mirar hoy en esta empresa. El mismo baremo que se publica. */
 export function alertOf(row: { band: string; delta3: number | null; confidence: number | null }): string | null {
   if (row.delta3 != null && row.delta3 <= -ALERT_DROP)
     return `Cae ${es(Math.abs(row.delta3), 0)} puntos en 3 meses`
@@ -104,4 +104,11 @@ export function scoreCatalog(): Promise<ScoreCatalog> {
     catalogCache = undefined // un fallo de red no debe dejar la instancia sin catálogo para siempre
     throw error
   }))
+}
+
+/* Los drivers conviven por versión: `company_health_driver_monthly` lleva `score_version` en
+ * su clave, así que publicar un linaje nuevo AÑADE filas en vez de reemplazarlas. Sin este
+ * filtro, una consulta devolvería dos contribuciones por señal y el delta saldría duplicado. */
+export async function publishedVersion(): Promise<string> {
+  return (await scoreCatalog()).score_version
 }
