@@ -16,7 +16,7 @@ const route = useRoute()
 const role = computed(() => route.params.role as PerspectiveId)
 const profile = computed(() => perspectiveById(role.value)!)
 
-const treasurySections = ['flujo', 'score', 'credito', 'divisa']
+const treasurySections = ['score', 'flujo', 'credito', 'divisa']
 const sectionsByRole: Record<PerspectiveId, string[]> = {
   empresa: [...treasurySections, 'ajustes'],
   embat: ['caja', 'crm', 'equipo'],
