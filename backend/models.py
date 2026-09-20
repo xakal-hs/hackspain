@@ -61,6 +61,9 @@ class CompanySummary(BaseModel):
     alert: str | None = None
     dormant: bool = False
     confidence: float
+    #: lectura por pilar (0-100) del último mes. Un pilar sin ninguna feature calculable va a null:
+    #: con poca historia es mejor decir «sin dato» que pintar un 50 que nadie ha medido.
+    pillars: dict[str, float | None] = {}
     #: serie real de la nota, un punto por mes
     history: list[float] = []
     flows: list[MonthFlow] = []

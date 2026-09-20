@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { blocks } from '../app/utils/chatText.ts'
+import { blocks, inline } from '../app/utils/chatText.ts'
 import { agentTools } from '../server/agent/tools.ts'
 import { systemPrompt } from '../server/agent/prompt.ts'
 
@@ -10,7 +10,7 @@ test('blocks separa párrafos, listas y negritas sin generar HTML', () => {
   const out = blocks('La nota es **61**.\n- caja: baja\n\n- cobros: lentos')
   assert.deepEqual(out.map(b => b.kind), ['p', 'li', 'li'])
   assert.deepEqual(out[0].inline, [
-    { text: 'La nota es ', bold: false }, { text: '61', bold: true }, { text: '.', bold: false },
+    { text: 'La nota es ' }, { text: '61', bold: true }, { text: '.' },
   ])
 })
 
@@ -93,4 +93,108 @@ test('resolveModel: AGENT_BASE_URL sin AGENT_MODEL cuenta como no configurado', 
 test('resolveModel: con clave del Gateway usa un id proveedor/modelo', () => {
   assert.equal(resolveModel({ gatewayKey: 'k' }), 'anthropic/claude-opus-5')
   assert.equal(resolveModel({ oidcToken: 't', agentModel: 'zai/glm-5.3' }), 'zai/glm-5.3')
+})
+
+import { chartsFromParts } from '../app/utils/chatCharts.ts'
+
+test('chartsFromParts dibuja solo con datos de herramientas terminadas', () => {
+  const tools = agentTools(async () => company)
+  return run(tools.ficha_empresa, { company_id: 'COMP_0864' }).then((output) => {
+    const parts = [
+      { type: 'text', text: 'hola' },
+      { type: 'tool-ficha_empresa', toolCallId: 'a', state: 'output-available', output },
+      { type: 'tool-ficha_empresa', toolCallId: 'b', state: 'input-available' },
+      { type: 'tool-buscar_cartera', toolCallId: 'c', state: 'output-available', output: { error: 'x' } },
+    ]
+    const charts = chartsFromParts(parts)
+    // cifras y serie: las barras de señales y el radar de pilares se quitaron del panel
+    assert.deepEqual(charts.map(c => c.id), ['a-resumen', 'a-serie'])
+    assert.equal(charts[1].items.length, 12)
+  })
+})
+
+test('blocks reconoce listas numeradas, títulos, citas y separadores', () => {
+  const out = blocks('# Título\n1. uno\n2) dos\n> cita\n---')
+  assert.deepEqual(out.map(b => b.kind), ['h', 'ol', 'ol', 'quote', 'hr'])
+  assert.equal(out[2].n, '2')
+})
+
+test('buscar_cartera produce una tabla ordenable con cifras, sin inventar ninguna', async () => {
+  const portfolio = {
+    companies: Array.from({ length: 12 }, (_, i) => ({
+      company_id: `COMP_00${10 + i}`, last_month: '2026-08', score: 20 + i * 5,
+      band: i < 3 ? 'riesgo' : i < 8 ? 'vigilar' : 'sano', trend: 'deterioro',
+      delta3_q50: -i, accion_label: 'Vigilar', alert: null, confidence: 0.9,
+      pillars: { liquidez: 40 + i, rentabilidad: null, solvencia: 60, disciplina: 70, estabilidad: 55 },
+    })),
+  }
+  const tools = agentTools(async () => portfolio)
+  const out = await run(tools.buscar_cartera, { orden: 'peor_nota', limite: 8 })
+  const charts = chartsFromParts([{ type: 'tool-buscar_cartera', toolCallId: 'x', state: 'output-available', output: out }])
+  // una sola tabla: las barras apiladas debajo solo repetían la columna de 3 meses
+  assert.equal(charts.length, 1)
+  const [tabla] = charts
+
+  assert.equal(tabla.kind, 'table')
+  assert.equal(tabla.rows.length, 8)
+  // empresa, nota, banda y los cinco pilares del score
+  assert.deepEqual(tabla.columns.map(c => c.key), ['company_id', 'nota', 'liquidez', 'rentabilidad', 'solvencia', 'disciplina', 'estabilidad'])
+  assert.equal(tabla.rows[0].liquidez, 40)
+  // un pilar sin dato viaja como null: la celda dice «sin dato», no pinta un cero
+  assert.equal(tabla.rows[0].rentabilidad, null)
+  // la tira de cifras se deriva de las filas, no la escribe el modelo
+  assert.deepEqual(tabla.stats.map(s => s.label), ['Empresas', 'Nota media', 'En riesgo', 'Empeorando'])
+  assert.equal(tabla.stats[0].value, '8')
+  assert.equal(tabla.stats[2].value, '3 (38%)')
+  // la confianza viaja como porcentaje entero, que es como la pinta la celda
+  assert.equal(tabla.rows[0].confianza, 90)
+})
+
+test('la tabla enseña con qué criterio se pidió la lista', async () => {
+  const portfolio = { companies: [{ company_id: 'COMP_0001', last_month: '2026-08', score: 30, band: 'riesgo', trend: 'deterioro', delta3_q50: -4, accion_label: 'No prestar', alert: null, confidence: 0.8 }] }
+  const tools = agentTools(async () => portfolio)
+  const out = await run(tools.buscar_cartera, { banda: 'riesgo', orden: 'mayor_caida', limite: 5 })
+  assert.deepEqual(out.criterio, { banda: 'riesgo', orden: 'mayor_caida', limite: 5 })
+  const [t] = chartsFromParts([{ type: 'tool-buscar_cartera', toolCallId: 'y', state: 'output-available', output: out }])
+  assert.deepEqual(t.filters.map(f => f.label), ['Banda riesgo', 'Mayor caída primero', 'Máximo 5'])
+})
+
+test('dos búsquedas seguidas dejan una sola tabla: la última', () => {
+  const row = (id, score) => ({ company_id: id, last_month: '2026-08', score, band: 'sano', trend: 'mejora', delta3_q50: 1, accion_label: 'Prestar', alert: null, confidence: 0.9, pillars: { liquidez: 50 } })
+  const mk = (id, empresas, orden) => ({
+    type: 'tool-buscar_cartera', toolCallId: id, state: 'output-available',
+    output: { total_en_cartera: 1286, criterio: { banda: null, orden, limite: 15 }, empresas },
+  })
+  const charts = chartsFromParts([
+    mk('a', [{ company_id: 'COMP_0001', mes: '2026-08', nota: 2, banda: 'riesgo', tendencia: 'deterioro', cambio_3_meses: -9, accion: 'No prestar', confianza: 0.9, pilares: {} }], 'peor_nota'),
+    mk('b', [{ company_id: 'COMP_0364', mes: '2026-08', nota: 87, banda: 'sano', tendencia: 'mejora', cambio_3_meses: 31, accion: 'Prestar', confianza: 0.98, pilares: {} }], 'mayor_mejora'),
+  ])
+  assert.equal(charts.length, 1)
+  assert.equal(charts[0].rows[0].company_id, 'COMP_0364')
+  assert.equal(charts[0].filters[1].label, 'Mayor mejora primero')
+})
+
+test('inline reconoce cursiva, tachado, código y marcado anidado', () => {
+  assert.deepEqual(inline('un *bache*, no ~~caída~~ de `runway`'), [
+    { text: 'un ' }, { text: 'bache', italic: true }, { text: ', no ' },
+    { text: 'caída', strike: true }, { text: ' de ' }, { text: 'runway', code: true },
+  ])
+  assert.deepEqual(inline('**muy *claro* hoy**'), [{ text: 'muy ', bold: true }, { text: 'claro', bold: true, italic: true }, { text: ' hoy', bold: true }])
+  // dentro del código no se busca marcado: los asteriscos son literales
+  assert.deepEqual(inline('`a**b`'), [{ text: 'a**b', code: true }])
+})
+
+test('un guion bajo dentro de una palabra no es cursiva', () => {
+  assert.deepEqual(inline('COMP_0364 y ar_late_share'), [{ text: 'COMP_0364 y ar_late_share' }])
+})
+
+test('el marcador a medio escribir no enseña los asteriscos mientras llega el stream', () => {
+  assert.deepEqual(blocks('La nota es **6')[0].inline, [{ text: 'La nota es 6' }])
+  // ya cerrado, se pinta en negrita
+  assert.deepEqual(blocks('La nota es **61**')[0].inline, [{ text: 'La nota es ' }, { text: '61', bold: true }])
+})
+
+test('blocks anida las sublistas y guarda el nivel de los títulos', () => {
+  const out = blocks('# Uno\n## Dos\n- padre\n  - hija\n1. uno\n   2. dos')
+  assert.deepEqual(out.map(b => [b.kind, b.depth]), [['h', 0], ['h', 1], ['li', 0], ['li', 1], ['ol', 0], ['ol', 1]])
 })

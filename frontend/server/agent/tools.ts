@@ -114,9 +114,11 @@ export function agentTools(get: Fetcher) {
         }[orden]
         return {
           total_en_cartera: r.companies.length,
+          criterio: { banda: banda ?? null, orden, limite },
           empresas: [...r.companies].sort(key).slice(0, limite).map(c => ({
             company_id: c.company_id, mes: c.last_month, nota: c.score, banda: c.band, tendencia: c.trend,
             cambio_3_meses: c.delta3_q50, accion: c.accion_label, alerta: c.alert, confianza: c.confidence,
+            pilares: c.pillars,
           })),
         }
       }),
