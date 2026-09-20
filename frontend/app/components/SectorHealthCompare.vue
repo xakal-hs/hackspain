@@ -25,7 +25,7 @@ const difference = computed(() => latest.value ? latest.value.company - latest.v
 </script>
 
 <template>
-  <section class="tz-card" aria-label="Frente al sector">
+  <section class="tz-card" aria-label="Frente al sector" data-tour="xray-sector">
     <header class="tz-card__bar sector-head">
       <div>
         <h2>Frente al sector</h2>
