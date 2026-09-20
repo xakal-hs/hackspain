@@ -10,6 +10,8 @@ const props = defineProps<{ role: string }>()
 
 const { selectedId } = useSelectedCompany()
 const open = ref(false)
+const panel = ref<HTMLElement | null>(null)
+useHead({ htmlAttrs: { 'data-chat-open': () => open.value ? 'true' : undefined } })
 const draft = ref('')
 const log = ref<HTMLElement | null>(null)
 const wide = ref(false)
@@ -87,7 +89,13 @@ function grow() {
   el.style.overflowY = el.scrollHeight > 200 ? 'auto' : 'hidden'
 }
 watch(draft, () => nextTick(grow))
-watch(open, (isOpen) => nextTick(() => { if (isOpen) field.value?.focus() }))
+let returnFocus: HTMLElement | null = null
+watch(open, async (isOpen) => {
+  if (isOpen) returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+  await nextTick()
+  if (isOpen && open.value) field.value?.focus({ preventScroll: true })
+  else if (!open.value && returnFocus?.isConnected) returnFocus.focus({ preventScroll: true })
+})
 function onEnter(e: KeyboardEvent) {
   if (e.isComposing || e.shiftKey) return
   e.preventDefault()
@@ -115,7 +123,20 @@ function toggleVoice() {
 }
 
 const close = () => { open.value = false }
-function onKey(e: KeyboardEvent) { if (e.key === 'Escape' && open.value) close() }
+function onKey(e: KeyboardEvent) {
+  if (!open.value) return
+  if (e.key === 'Escape') { e.preventDefault(); close(); return }
+  if (e.key !== 'Tab' || !panel.value) return
+  const controls = Array.from(panel.value.querySelectorAll<HTMLElement>('button, a[href], input, select, textarea, [tabindex]'))
+    .filter(el => el.tabIndex >= 0 && !el.matches(':disabled') && el.getClientRects().length > 0)
+  const first = controls[0]
+  const last = controls.at(-1)
+  if (!first || !last) { e.preventDefault(); panel.value.focus({ preventScroll: true }); return }
+  if (!panel.value.contains(document.activeElement) || (e.shiftKey ? document.activeElement === first : document.activeElement === last)) {
+    e.preventDefault()
+    ;(e.shiftKey ? last : first).focus({ preventScroll: true })
+  }
+}
 onMounted(() => window.addEventListener('keydown', onKey))
 onBeforeUnmount(() => { window.removeEventListener('keydown', onKey); recognizer?.abort?.() })
 
@@ -174,7 +195,7 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
         <div v-if="open" class="agent__scrim" aria-hidden="true" @mousedown="close" />
       </Transition>
       <Transition name="agent-up">
-        <section v-if="open" class="agent__panel" :class="{ 'is-wide': wide }" :style="wide ? undefined : { height: compactHeight }" role="dialog" aria-label="Asistente de X-Ray">
+        <section v-if="open" ref="panel" class="agent__panel" :class="{ 'is-wide': wide }" :style="wide ? undefined : { height: compactHeight }" role="dialog" aria-modal="true" tabindex="-1" aria-label="Asistente de X-Ray">
           <header class="agent__head">
             <div>
               <h2>Pregunta a X-Ray</h2>
@@ -312,11 +333,17 @@ watch(() => chat.messages.map(m => textOf(m).length).join(','), async () => {
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45), var(--sheen); overflow: hidden;
   transition: width 0.25s ease, height 0.25s ease, bottom 0.25s ease, transform 0.28s ease, opacity 0.2s ease;
 }
+.agent__panel,
+.agent__log,
+.agent__viz-scroll,
+.agent__box textarea,
+.agent__panel :deep(.ct__scroll),
+.agent__panel :deep(.ct__side-body) { overscroll-behavior: none; }
 .agent__panel.is-wide {
   left: 50%; bottom: 0; width: min(1660px, calc(100vw - 32px)); height: min(940px, calc(100vh - 24px));
   border-bottom: 0; border-radius: 16px 16px 0 0;
 }
-.agent__scrim { position: fixed; inset: 0; z-index: 99; background: rgba(4, 6, 20, 0.18); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+.agent__scrim { position: fixed; inset: 0; z-index: 99; touch-action: none; background: rgba(4, 6, 20, 0.18); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
 .agent-fade-enter-active, .agent-fade-leave-active { transition: opacity 0.25s ease; }
 .agent-fade-enter-from, .agent-fade-leave-to { opacity: 0; }
 .agent-up-enter-from, .agent-up-leave-to { transform: translate(-50%, 40px); opacity: 0; }

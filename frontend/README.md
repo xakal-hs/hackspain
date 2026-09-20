@@ -139,9 +139,9 @@ salud del sector y no se utiliza como tal.
 - X-Ray Score: `company_health_monthly` aporta nota, banda, trayectoria y cambio
   a tres meses; `company_health_driver_monthly` aporta contribuciones. Las
   fechas de los gráficos corresponden a los meses recibidos.
-- Frente al sector: `sector_health_monthly`, filtrado por `top_sector`. El selector
-  Media / Mediana usa `score_mean` / `score_median` y conserva la elección al
-  cambiar de empresa. Compara meses coincidentes con el score real, indica el
+- Frente al sector: `sector_health_monthly`, filtrado por `top_sector`. La
+  referencia es siempre la media (`score_mean`): una sola cifra que comparar evita
+  que el lector decida qué estadístico mira. Compara meses coincidentes con el score real, indica el
   último mes común y el número de empresas (`n`), sin sustituir ausencias por mocks.
   Ambas líneas se prolongan tres meses en trazo discontinuo: `shared/proyeccion.ts`
   añade a la EWMA del score su segundo término de Holt —la pendiente, amortiguada—

@@ -343,6 +343,59 @@
   --ea-red: #c0352b;
   --ea-amber: #a15c12;
 
+  /* Las piezas compartidas que se embeben aquí —la gráfica de bandas, el globo
+     que sigue al puntero, la ayuda de campo— se pintan con los tokens de la
+     cabina y de `.centinela`. Se reapuntan a esta paleta, como ya hace el rail
+     con la suya, para que sigan en claro bajo cualquier tema en vez de dejar
+     islas oscuras sobre el blanco. */
+  --canvas: var(--ea-bg);
+  --panel: var(--ea-bg);
+  --panel-raised: var(--ea-hover);
+  --panel-sunken: var(--ea-hover);
+  --line: var(--ea-line);
+  --line-strong: #d3d7de;
+  --text: var(--ea-text);
+  --text-muted: var(--ea-body);
+  --text-dim: var(--ea-muted);
+  --neutral-wash: var(--ea-hover);
+  --live: var(--ea-blue);
+  --live-solid: var(--ea-blue);
+  --live-ink: #2b62db;
+  --live-wash: #dbe4fb;
+  --mint: var(--ea-green);
+  --mint-ink: var(--ea-green);
+  --mint-wash: #e9f4ee;
+  --amber: var(--ea-amber);
+  --amber-ink: var(--ea-amber);
+  --amber-wash: #faf1e3;
+  --crimson: var(--ea-red);
+  --crimson-ink: var(--ea-red);
+  --crimson-wash: #fbeceb;
+  --ahead: #6f5bd0;
+  --ahead-ink: #5844b4;
+  --ahead-wash: #eeeaf9;
+  --grid-line: var(--ea-soft);
+  --sheen: none;
+  --focus-ring: var(--ea-blue);
+  --on-live: #ffffff;
+  /* Un solo tipo en estas pantallas, cifras incluidas. */
+  --font-ui: inherit;
+  --font-num: inherit;
+
+  /* Los mismos nombres en la paleta `.centinela`, que usan la ayuda de campo y
+     el medidor del score. */
+  --card: var(--ea-bg);
+  --border: var(--ea-line);
+  --wash: var(--ea-fill);
+  --grid: var(--ea-soft);
+  --text-2: var(--ea-body);
+  --text-3: var(--ea-muted);
+  --meta: var(--ea-muted);
+  --accent: var(--ea-blue);
+  --ok: var(--ea-green);
+  --warn: var(--ea-amber);
+  --bad: var(--ea-red);
+
   position: relative;
   display: flex;
   flex-direction: column;
